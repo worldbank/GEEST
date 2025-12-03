@@ -7,6 +7,7 @@ import os
 from typing import Optional
 
 from qgis.core import Qgis, QgsProject
+from qgis.gui import QgsMessageBar
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPainter
 from qgis.PyQt.QtWidgets import QDockWidget, QStackedWidget, QVBoxLayout, QWidget
@@ -15,7 +16,6 @@ from geest.core.settings import setting
 from geest.gui.panels import (
     CreateProjectPanel,
     CreditsPanel,
-    GHSLPanel,
     HelpPanel,
     IntroPanel,
     OpenProjectPanel,
@@ -36,9 +36,8 @@ SETUP_PANEL = 2
 OPEN_PROJECT_PANEL = 3
 CREATE_PROJECT_PANEL = 4
 ROAD_NETWORK_PANEL = 5
-GHSL_PANEL = 6
-TREE_PANEL = 7
-HELP_PANEL = 8
+TREE_PANEL = 6
+HELP_PANEL = 7
 
 
 class GeestDock(QDockWidget):
@@ -74,6 +73,10 @@ class GeestDock(QDockWidget):
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for a cleaner look
         layout.setSpacing(0)  # Remove spacing between elements
 
+        # Add a message bar at the top of the dock widget
+        self.message_bar: QgsMessageBar = QgsMessageBar()
+        layout.addWidget(self.message_bar)
+
         # Create a stacked widget
         self.stacked_widget: QStackedWidget = QStackedWidget()
         self.study_area_bbox = None
@@ -84,8 +87,8 @@ class GeestDock(QDockWidget):
         self.setup_widget: SetupPanel = SetupPanel()
         self.open_project_widget: OpenProjectPanel = OpenProjectPanel()
         self.road_network_widget: RoadNetworkPanel = RoadNetworkPanel()
+        self.road_network_widget.set_message_bar(self.message_bar)  # Pass message bar reference
         self.create_project_widget: CreateProjectPanel = CreateProjectPanel()
-        self.ghsl_widget: GHSLPanel = GHSLPanel()
         self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
         help_widget: HelpPanel = HelpPanel()
 
@@ -184,7 +187,6 @@ class GeestDock(QDockWidget):
                     self.road_network_widget.set_working_directory(self.create_project_widget.working_dir),
                     self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer()),
                     self.road_network_widget.set_crs(self.create_project_widget.crs()),
-                    self.ghsl_widget.set_working_directory(self.create_project_widget.working_dir),
                 ][
                     -1
                 ]  # The [-1] ensures the lambda returns the last value
@@ -212,7 +214,7 @@ class GeestDock(QDockWidget):
 
             self.road_network_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(GHSL_PANEL)
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
             # We are only interested in storing the network layer path
             # (and not the cycle path) as it is used for the native
@@ -220,36 +222,11 @@ class GeestDock(QDockWidget):
             self.road_network_widget.road_network_layer_path_changed.connect(
                 lambda: self.tree_widget.set_road_network_layer_path(self.road_network_widget.road_network_layer_path())
             )
-            # GHSL_PANEL = 6
-            # Create and add the "GHSL" panel
-
-            ghsl_panel: QWidget = QWidget()
-            ghsl_layout: QVBoxLayout = QVBoxLayout(ghsl_panel)
-            ghsl_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
-            ghsl_layout.addWidget(self.ghsl_widget)
-            self.stacked_widget.addWidget(ghsl_panel)
-
-            self.ghsl_widget.switch_to_previous_tab.connect(
-                # Switch to the next tab when the button is clicked
-                # 🚩 Note we set the back button and the forward
-                #    button both to the TREE_PANEL so that the
-                #    User can re-invoke the network panel any time
-                lambda: self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL)
-            )
-
-            self.ghsl_widget.switch_to_next_tab.connect(
-                # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
-            )
-
-            # self.ghsl_widget.ghsl_layer_path_changed.connect(
-            #    lambda: self.tree_widget.set_ghsl_layer_path(self.ghsl_widget.ghsl_layer_path())
-            # )
             self.open_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked
                 lambda: self.tree_widget.set_working_directory(self.open_project_widget.working_dir)
             )
-            # TREE_PANEL = 7
+            # TREE_PANEL = 6
             # Create and add the "Tree" panel (TreePanel)
             tree_panel: QWidget = QWidget()
             tree_layout: QVBoxLayout = QVBoxLayout(tree_panel)
@@ -265,13 +242,6 @@ class GeestDock(QDockWidget):
                 # This is also called from the context menu in the tree_panel
                 lambda: [
                     self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
-                ]
-            )
-            self.tree_widget.switch_to_ghsl_tab.connect(
-                # Switch to the road network tab when the button is clicked
-                # This is also called from the context menu in the tree_panel
-                lambda: [
-                    self.stacked_widget.setCurrentIndex(GHSL_PANEL),
                 ]
             )
             self.tree_widget.switch_to_setup_tab.connect(
@@ -366,7 +336,6 @@ class GeestDock(QDockWidget):
                 self.tree_widget.set_working_directory(geest_project)
                 self.stacked_widget.setCurrentIndex(TREE_PANEL)  # Tree tab
                 self.road_network_widget.set_working_directory(geest_project)
-                self.ghsl_widget.set_working_directory(geest_project)
 
     def on_panel_changed(self, index: int) -> None:
         """
@@ -394,11 +363,6 @@ class GeestDock(QDockWidget):
             self.road_network_widget.set_working_directory(working_directory)
             self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer())
             self.road_network_widget.set_crs(self.create_project_widget.crs())
-        elif index == GHSL_PANEL:
-            working_directory = self.tree_widget.working_directory
-            log_message(f"Setting ghsl panel working directory to: {working_directory}")
-            self.ghsl_widget.set_working_directory(working_directory)
-
         elif index == TREE_PANEL:
             log_message("Switched to Tree panel")
             # self.tree_widget.set_working_directory(self.setup_widget.working_dir)

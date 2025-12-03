@@ -107,6 +107,11 @@ class StudyAreaReport(BaseReport):
         ] = """
         The study area creation status is a record of the time taken to process each part of the study area.
         """
+        self.page_descriptions[
+            "ghsl_settlements"
+        ] = """
+        The Global Human Settlement Layer is used to identify settled areas within the study region. Study area polygons are marked with whether they intersect GHSL settlement data, which is used in various analysis workflows.
+        """
 
     def __del__(self):
         """
@@ -118,6 +123,46 @@ class StudyAreaReport(BaseReport):
             if layer:
                 del layer
                 log_message(f"Layer '{layer_name}' deleted.")
+
+    def compute_ghsl_statistics(self):
+        """
+        Compute GHSL intersection statistics from the study_area_polygons layer.
+
+        Returns:
+            dict: A dictionary containing 'total', 'intersects', 'percentage', and 'has_ghsl'.
+                  Returns None if GHSL data is not available.
+        """
+        uri = f"{self.gpkg_path}|layername=study_area_polygons"
+        layer = QgsVectorLayer(uri, "study_area_polygons", "ogr")
+
+        if not layer.isValid():
+            return None
+
+        # Check if intersects_ghsl field exists
+        field_names = [field.name() for field in layer.fields()]
+        if "intersects_ghsl" not in field_names:
+            return None
+
+        total_count = 0
+        intersects_count = 0
+
+        for feat in layer.getFeatures():
+            total_count += 1
+            intersects_ghsl = feat["intersects_ghsl"]
+            if intersects_ghsl == 1:
+                intersects_count += 1
+
+        if total_count == 0:
+            return None
+
+        percentage = (intersects_count / total_count) * 100
+
+        return {
+            "total": total_count,
+            "intersects": intersects_count,
+            "percentage": percentage,
+            "has_ghsl": True,
+        }
 
     def compute_study_area_creation_statistics(self, field_name="geom_total_duration_secs"):
         """
@@ -156,6 +201,32 @@ class StudyAreaReport(BaseReport):
             "sum": sum_val,
             "std_dev": std_dev,
         }
+
+    def add_ghsl_info_to_page(self, current_page):
+        """
+        Add GHSL statistics and acknowledgements to ghsl page.
+
+        Parameters:
+            current_page (int): The page number where the GHSL info should be added.
+        """
+        ghsl_stats = self.compute_ghsl_statistics()
+        if ghsl_stats:
+            info_text = (
+                f"GHSL Statistics:\n"
+                f"Total polygons: {ghsl_stats['total']}\n"
+                f"With settlements: {ghsl_stats['intersects']}\n"
+                f"Percentage: {ghsl_stats['percentage']:.1f}%\n\n"
+                f"Source: Copernicus/EC JRC\n"
+                f"Product: GHS-SMOD R2023A\n"
+                f"License: CC BY 4.0"
+            )
+
+            info_label = QgsLayoutItemLabel(self.layout)
+            info_label.setText(info_text)
+            info_label.setFont(QFont("Arial", 12))
+            info_label.adjustSizeToText()
+            info_label.attemptMove(QgsLayoutPoint(10, 60, QgsUnitTypes.LayoutMillimeters), page=current_page)
+            self.layout.addLayoutItem(info_label)
 
     def create_layout(self):
         """
@@ -220,4 +291,9 @@ class StudyAreaReport(BaseReport):
                     current_page=current_page,
                     crs=crs,
                 )
+
+            # Add GHSL statistics and acknowledgements to the ghsl_settlements page
+            if layer_name == "ghsl_settlements":
+                self.add_ghsl_info_to_page(current_page)
+
             current_page += 1

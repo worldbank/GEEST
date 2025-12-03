@@ -13,7 +13,7 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QSettings, pyqtSignal, pyqtSlot
+from qgis.PyQt.QtCore import Qt, QSettings, pyqtSignal, pyqtSlot
 from qgis.PyQt.QtGui import QFont
 from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox, QWidget
 
@@ -63,6 +63,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.initUI()
         self._reference_layer = None
         self._crs = None
+        self._message_bar = None  # Will be set by parent dock
 
     def show_error_message(self, message, details=None):
         """Show an error message box when workflow queue manager reports an error."""
@@ -108,6 +109,14 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         """
         self._crs = crs
 
+    def set_message_bar(self, message_bar):
+        """⚙️ Set message bar reference.
+
+        Args:
+            message_bar: QgsMessageBar instance from parent dock.
+        """
+        self._message_bar = message_bar
+
     def initUI(self):
         """⚙️ Initui."""
         self.custom_label = CustomBannerLabel(
@@ -124,6 +133,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         # )
         self.road_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
         self.road_layer_combo.currentIndexChanged.connect(self.emit_road_layer_change)
+        self.road_layer_combo.currentIndexChanged.connect(self.update_road_layer_status)
         self.load_road_layer_button.clicked.connect(self.load_road_layer)
         self.download_active_transport_button.clicked.connect(self.download_active_transport_button_clicked)
 
@@ -132,6 +142,57 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
 
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
+
+        self.setup_status_checkbox_style()
+        self.update_road_layer_status()
+
+    def setup_status_checkbox_style(self):
+        """Setup the stylesheet for the status checkbox to show red X / green checkmark."""
+        # Make checkbox non-interactive - block all user clicks
+        self.road_layer_status_checkbox.setFocusPolicy(Qt.NoFocus)
+        self.road_layer_status_checkbox.setAttribute(Qt.WA_TransparentForMouseEvents)
+
+        cross_icon = resources_path("resources", "icons", "cross-red.svg")
+        tick_icon = resources_path("resources", "icons", "tick-green.svg")
+
+        self.road_layer_status_checkbox.setStyleSheet(
+            f"""
+            QCheckBox::indicator {{
+                width: 24px;
+                height: 24px;
+                border: 2px solid #ccc;
+                border-radius: 3px;
+            }}
+            QCheckBox::indicator:unchecked {{
+                background-color: #ffcdd2;
+                border-color: #d32f2f;
+                image: url({cross_icon});
+            }}
+            QCheckBox::indicator:checked {{
+                background-color: #c8e6c9;
+                border-color: #388e3c;
+                image: url({tick_icon});
+            }}
+            QCheckBox::indicator:unchecked:disabled {{
+                background-color: #ffcdd2;
+                border-color: #d32f2f;
+                image: url({cross_icon});
+            }}
+            QCheckBox::indicator:checked:disabled {{
+                background-color: #c8e6c9;
+                border-color: #388e3c;
+                image: url({tick_icon});
+            }}
+        """
+        )
+
+    def update_road_layer_status(self):
+        """Update the status checkbox based on whether a valid layer is selected."""
+        road_layer = self.road_layer_combo.currentLayer()
+        if road_layer and road_layer.isValid():
+            self.road_layer_status_checkbox.setChecked(True)
+        else:
+            self.road_layer_status_checkbox.setChecked(False)
 
     def emit_road_layer_change(self):
         """⚙️ Emit road layer change."""
@@ -199,6 +260,38 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         if self.working_directory is None or self.working_directory == "":
             QMessageBox.critical(self, "Error", "Working directory is not set")
             return
+
+        # Check if the layer already exists
+        network_layer_path = os.path.join(self.working_directory, "study_area", "active_transport_network.gpkg")
+        if os.path.exists(network_layer_path):
+            # Layer already downloaded - just load it
+            log_message(
+                "Active transport network already exists, loading from cache",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            network_layer_path_with_layer = f"{network_layer_path}|layername=active_transport_network"
+            layer = QgsVectorLayer(network_layer_path_with_layer, "Active Transport Network", "ogr")
+            if layer.isValid():
+                # Load the layer in QGIS and select it
+                QgsProject.instance().addMapLayer(layer)
+                self.road_layer_combo.setLayer(layer)
+                if self._message_bar:
+                    self._message_bar.pushMessage(
+                        "GEEST",
+                        "Active transport network loaded from cache (already downloaded)",
+                        level=Qgis.Info,
+                        duration=5,
+                    )
+                return
+            else:
+                # File exists but is invalid - remove it and re-download
+                log_message(
+                    "Existing active transport network file is invalid, will re-download",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+                os.remove(network_layer_path)
 
         # Create the processor instance and process the features
         debug_env = int(os.getenv("GEEST_DEBUG", 0))

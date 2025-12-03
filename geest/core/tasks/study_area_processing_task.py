@@ -13,13 +13,17 @@ import traceback
 # GDAL / OGR / OSR imports
 from osgeo import gdal, ogr, osr
 from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
     QgsFeedback,
     QgsProject,
+    QgsRectangle,
     QgsTask,
     QgsVectorFileWriter,
     QgsVectorLayer,
 )
 
+from geest.core.algorithms import GHSLDownloader, GHSLProcessor
 from geest.core.settings import setting
 from geest.utilities import calculate_utm_zone, log_message
 
@@ -200,6 +204,191 @@ class StudyAreaProcessingTask(QgsTask):
 
         return shapefile_path
 
+    def download_and_process_ghsl(self):
+        """
+        Download and process GHSL data for the study area.
+
+        Returns:
+            str: Layer name in GeoPackage if successful, None otherwise
+        """
+        try:
+            log_message("Starting GHSL download and processing...")
+
+            # Calculate study area extent in Mollweide
+            study_area_ds = ogr.Open(self.gpkg_path, 0)
+            if not study_area_ds:
+                log_message("Could not open study area GeoPackage for GHSL processing", level="WARNING")
+                return None
+
+            bbox_layer = study_area_ds.GetLayerByName("study_area_bbox")
+            if not bbox_layer:
+                log_message("Could not find study_area_bbox layer", level="WARNING")
+                study_area_ds = None
+                return None
+
+            # Get extent from bbox layer
+            extent = bbox_layer.GetExtent()  # (xmin, xmax, ymin, ymax)
+            study_area_ds = None
+
+            # Transform extent to Mollweide
+            source_srs = self.target_spatial_ref
+            mollweide_srs = osr.SpatialReference()
+            mollweide_srs.ImportFromEPSG(54009)
+
+            transform_to_mollweide = osr.CoordinateTransformation(source_srs, mollweide_srs)
+
+            # Transform corners to get proper extent
+            corners = [
+                (extent[0], extent[2]),  # xmin, ymin
+                (extent[1], extent[3]),  # xmax, ymax
+            ]
+            transformed_corners = []
+            for x, y in corners:
+                point = ogr.Geometry(ogr.wkbPoint)
+                point.AddPoint_2D(x, y)
+                point.Transform(transform_to_mollweide)
+                transformed_corners.append((point.GetX(), point.GetY()))
+
+            # Create Mollweide extent
+            mollweide_xmin = min(transformed_corners[0][0], transformed_corners[1][0])
+            mollweide_xmax = max(transformed_corners[0][0], transformed_corners[1][0])
+            mollweide_ymin = min(transformed_corners[0][1], transformed_corners[1][1])
+            mollweide_ymax = max(transformed_corners[0][1], transformed_corners[1][1])
+
+            # Create QgsRectangle for extent_mollweide
+            extent_mollweide = QgsRectangle(mollweide_xmin, mollweide_ymin, mollweide_xmax, mollweide_ymax)
+
+            log_message(f"Study area extent in Mollweide: {extent_mollweide.toString()}")
+
+            # Download GHSL using downloader
+            log_message("Downloading GHSL tiles...")
+            transform_to_4326 = QgsCoordinateTransform(
+                QgsCoordinateReferenceSystem("EPSG:54009"),
+                QgsCoordinateReferenceSystem("EPSG:4326"),
+                QgsProject.instance(),
+            )
+            extent_4326 = transform_to_4326.transformBoundingBox(extent_mollweide)
+
+            downloader = GHSLDownloader(
+                extents=extent_4326,
+                output_path=os.path.join(self.working_dir, "study_area"),
+                filename="ghsl_temp",
+                use_cache=True,
+                delete_existing=True,
+                feedback=self.feedback,
+            )
+
+            # Download and process tiles
+            tiles = downloader.tiles_intersecting_bbox()
+            if not tiles:
+                log_message("No GHSL tiles intersect study area", level="WARNING")
+                return None
+
+            log_message(f"Downloading {len(tiles)} GHSL tiles...")
+            tile_paths = []
+            for tile_id in tiles:
+                paths = downloader.download_and_unpack_tile(tile_id)
+                tile_paths.extend(paths)
+
+            if not tile_paths:
+                log_message("No GHSL tiles downloaded", level="WARNING")
+                return None
+
+            # Process tiles
+            log_message("Processing GHSL tiles...")
+            processor = GHSLProcessor(input_raster_paths=tile_paths)
+
+            # Reclassify
+            reclassified = processor.reclassify_rasters(suffix="reclass")
+
+            # Polygonize
+            polygonized = processor.polygonize_rasters(reclassified)
+
+            # Combine to temporary GeoParquet
+            temp_parquet = os.path.join(self.working_dir, "study_area", "ghsl_temp.parquet")
+            processor.combine_vectors(polygonized, temp_parquet, extent=extent_mollweide)
+
+            # Reproject and save to GeoPackage
+            log_message("Reprojecting GHSL to study area CRS and saving to GeoPackage...")
+
+            # Read temp parquet
+            temp_layer = QgsVectorLayer(temp_parquet, "ghsl_temp", "ogr")
+            if not temp_layer.isValid():
+                log_message("Could not load temporary GHSL layer", level="WARNING")
+                return None
+
+            # Create layer in GeoPackage
+            ghsl_layer_name = "ghsl_settlements"
+            self.create_ghsl_layer_if_not_exists(ghsl_layer_name)
+
+            # Reproject and write features
+            ds = ogr.Open(self.gpkg_path, 1)
+            ghsl_layer = ds.GetLayerByName(ghsl_layer_name)
+
+            if not ghsl_layer:
+                log_message("Could not create GHSL layer in GeoPackage", level="WARNING")
+                ds = None
+                return None
+
+            # Transform from Mollweide to target CRS
+            transform_from_mollweide = osr.CoordinateTransformation(mollweide_srs, self.target_spatial_ref)
+
+            ghsl_layer.StartTransaction()
+            feature_count = 0
+
+            for qgs_feature in temp_layer.getFeatures():
+                geom_wkb = qgs_feature.geometry().asWkb()
+                ogr_geom = ogr.CreateGeometryFromWkb(bytes(geom_wkb))
+
+                # Transform geometry
+                ogr_geom.Transform(transform_from_mollweide)
+
+                # Create feature
+                feat_defn = ghsl_layer.GetLayerDefn()
+                feature = ogr.Feature(feat_defn)
+                feature.SetField("pixel_value", qgs_feature["pixel_value"])
+                feature.SetGeometry(ogr_geom)
+
+                ghsl_layer.CreateFeature(feature)
+                feature = None
+                feature_count += 1
+
+            ghsl_layer.CommitTransaction()
+            ds = None
+
+            log_message(f"Successfully added {feature_count} GHSL features to GeoPackage")
+
+            # Clean up temporary file
+            if os.path.exists(temp_parquet):
+                os.remove(temp_parquet)
+
+            return ghsl_layer_name
+
+        except Exception as e:
+            log_message(f"Error downloading/processing GHSL: {str(e)}", level="WARNING")
+            log_message(traceback.format_exc(), level="WARNING")
+            return None
+
+    def create_ghsl_layer_if_not_exists(self, layer_name):
+        """
+        Create GHSL layer in GeoPackage if it doesn't exist.
+        """
+        if not os.path.exists(self.gpkg_path):
+            driver = ogr.GetDriverByName("GPKG")
+            driver.CreateDataSource(self.gpkg_path)
+
+        ds = ogr.Open(self.gpkg_path, 1)
+        layer = ds.GetLayerByName(layer_name)
+        if layer is not None:
+            ds = None
+            return  # Already exists
+
+        # Create layer
+        layer = ds.CreateLayer(layer_name, self.target_spatial_ref, geom_type=ogr.wkbPolygon)
+        field_defn = ogr.FieldDefn("pixel_value", ogr.OFTInteger)
+        layer.CreateField(field_defn)
+        ds = None
+
     def run(self):
         """
         Main entry point (mimics process_study_area from QGIS code).
@@ -216,8 +405,18 @@ class StudyAreaProcessingTask(QgsTask):
             # 2) Create the status tracking table
             self.create_status_tracking_table()
 
+            # 2.5) Download and process GHSL data
+            self.setProgress(1)  # Trigger UI update for GHSL download
+            ghsl_layer_name = self.download_and_process_ghsl()
+            if ghsl_layer_name:
+                log_message(f"GHSL layer '{ghsl_layer_name}' added to GeoPackage successfully")
+                self.ghsl_layer_name = ghsl_layer_name
+            else:
+                log_message("GHSL download failed or no data available, continuing without GHSL", level="WARNING")
+                self.ghsl_layer_name = None
+
             # 3) Iterate over features
-            self.setProgress(1)  # Trigger the UI to update with a small value
+            self.setProgress(5)  # Reserve 0-5% for GHSL, 5-95% for features
             invalid_feature_count = 0
             self.valid_feature_count = 0
             fixed_feature_count = 0
@@ -429,8 +628,12 @@ class StudyAreaProcessingTask(QgsTask):
         if self.coord_transform:
             geom.Transform(self.coord_transform)
 
+        # Check GHSL intersection
+        intersects_ghsl = self.check_ghsl_intersection(geom)
+        log_message(f"{normalized_name} intersects GHSL: {intersects_ghsl}")
+
         # Save the geometry (in the target CRS) to "study_area_polygons"
-        self.save_geometry_to_geopackage("study_area_polygons", geom, normalized_name)
+        self.save_geometry_to_geopackage("study_area_polygons", geom, normalized_name, intersects_ghsl)
         self.set_status_tracking_table_value(normalized_name, "geometry_processed", 1)
 
         # Create the grid
@@ -572,10 +775,65 @@ class StudyAreaProcessingTask(QgsTask):
     ##########################################################################
     # Write geometry to GPKG layers
     ##########################################################################
-    def save_geometry_to_geopackage(self, layer_name, geom, area_name):
+    def check_ghsl_intersection(self, geom):
+        """
+        Check if a geometry intersects with any GHSL settlement features.
+
+        Args:
+            geom: OGR geometry to check (already in target CRS)
+
+        Returns:
+            bool: True if intersects any GHSL feature, False otherwise
+        """
+        # Check if GHSL layer exists
+        if not hasattr(self, "ghsl_layer_name") or self.ghsl_layer_name is None:
+            log_message("GHSL layer not available, defaulting to True for intersection", level="INFO")
+            return True
+
+        try:
+            # Open GeoPackage and get GHSL layer
+            ds = ogr.Open(self.gpkg_path, 0)
+            if not ds:
+                log_message("Could not open GeoPackage for GHSL check", level="WARNING")
+                return True
+
+            ghsl_layer = ds.GetLayerByName(self.ghsl_layer_name)
+            if not ghsl_layer:
+                log_message(f"GHSL layer '{self.ghsl_layer_name}' not found", level="WARNING")
+                ds = None
+                return True
+
+            # Set spatial filter using geometry
+            ghsl_layer.SetSpatialFilter(geom)
+
+            # Check if any features intersect
+            intersects = False
+            for ghsl_feature in ghsl_layer:
+                ghsl_geom = ghsl_feature.GetGeometryRef()
+                if ghsl_geom and geom.Intersects(ghsl_geom):
+                    intersects = True
+                    break
+
+            # Clean up
+            ghsl_layer.SetSpatialFilter(None)
+            ds = None
+
+            return intersects
+
+        except Exception as e:
+            log_message(f"Error checking GHSL intersection: {str(e)}", level="WARNING")
+            return True  # Default to True on error
+
+    def save_geometry_to_geopackage(self, layer_name, geom, area_name, intersects_ghsl=True):
         """
         Append a single geometry to a (possibly newly created) layer in GPKG.
         Each layer has a field 'area_name' (string) and polygon geometry.
+
+        Args:
+            layer_name: Name of the layer
+            geom: OGR geometry
+            area_name: Name of the area
+            intersects_ghsl: Whether geometry intersects GHSL (default True)
         """
         self.create_layer_if_not_exists(layer_name)
         ds = ogr.Open(self.gpkg_path, 1)
@@ -586,6 +844,11 @@ class StudyAreaProcessingTask(QgsTask):
         feat_defn = layer.GetLayerDefn()
         feature = ogr.Feature(feat_defn)
         feature.SetField("area_name", area_name)
+
+        # Set intersects_ghsl field if this is study_area_polygons layer
+        if layer_name == "study_area_polygons":
+            feature.SetField("intersects_ghsl", 1 if intersects_ghsl else 0)
+
         feature.SetGeometry(geom)
         layer.CreateFeature(feature)
         feature = None
@@ -614,6 +877,12 @@ class StudyAreaProcessingTask(QgsTask):
         # area_name field
         field_defn = ogr.FieldDefn("area_name", ogr.OFTString)
         layer.CreateField(field_defn)
+
+        # Add intersects_ghsl field if this is study_area_polygons layer
+        if layer_name == "study_area_polygons":
+            intersects_field = ogr.FieldDefn("intersects_ghsl", ogr.OFTInteger)
+            layer.CreateField(intersects_field)
+
         ds = None
 
     # Helper to update time spent in a named metric block

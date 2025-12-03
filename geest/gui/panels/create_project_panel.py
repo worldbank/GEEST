@@ -448,12 +448,31 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             "study_area_creation_status",
         ]
         for layer_name in layers:
+            # Check if layer exists in GeoPackage first
+            from osgeo import ogr
+
+            ds = ogr.Open(gpkg_path, 0)
+            if ds is None:
+                log_message(f"Could not open GeoPackage: {gpkg_path}", tag="Geest", level=Qgis.Warning)
+                continue
+
+            layer_exists = ds.GetLayerByName(layer_name) is not None
+            ds = None
+
+            if not layer_exists:
+                log_message(
+                    f"Layer '{layer_name}' does not exist in GeoPackage yet (will be created during processing).",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                continue
+
             gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
             layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
 
             if not layer.isValid():
                 log_message(
-                    f"Failed to add '{layer_name}' layer to the map.",
+                    f"Failed to load '{layer_name}' layer from GeoPackage.",
                     tag="Geest",
                     level=Qgis.Critical,
                 )

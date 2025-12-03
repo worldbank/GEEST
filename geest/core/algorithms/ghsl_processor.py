@@ -86,47 +86,77 @@ class GHSLProcessor:
         # Open the input raster dataset
         output_raster_paths = []
         for layer in self.input_raster_layers:
+            # Skip non-TIF files (auxiliary files like .aux.xml, .clr, etc.)
+            if not layer.lower().endswith(".tif"):
+                log_message(f"Skipping non-TIF file: {layer}")
+                continue
+
             # replace .tif at the end of the file with _{suffix}.tif
             output_raster_path = os.path.splitext(layer)[0] + f"_{suffix}.tif"
-            input_dataset = gdal.Open(layer, gdal.GA_ReadOnly)
-            if input_dataset is None:
-                raise RuntimeError(f"Failed to open input raster: {layer}")
 
-            # Get raster properties
-            raster_band = input_dataset.GetRasterBand(1)
-            x_size = input_dataset.RasterXSize
-            y_size = input_dataset.RasterYSize
-            geotransform = input_dataset.GetGeoTransform()
-            projection = input_dataset.GetProjection()
+            # Try to open the raster, skip if it has issues (irregular grid, etc.)
+            try:
+                input_dataset = gdal.Open(layer, gdal.GA_ReadOnly)
+                if input_dataset is None:
+                    log_message(f"Skipping file (could not open): {layer}")
+                    continue
+            except RuntimeError as e:
+                log_message(f"Skipping file (GDAL error): {layer} - {str(e)}")
+                continue
 
-            # Read the raster data as numpy array
-            raster_array = raster_band.ReadAsArray()
+            try:
+                # Get raster properties
+                raster_band = input_dataset.GetRasterBand(1)
+                x_size = input_dataset.RasterXSize
+                y_size = input_dataset.RasterYSize
+                geotransform = input_dataset.GetGeoTransform()
+                projection = input_dataset.GetProjection()
 
-            # Apply reclassification logic
-            # Values 10 or 11 become 0, all others become 1
-            reclassified_array = np.where((raster_array == 10) | (raster_array == 11), 0, 1).astype(np.uint8)
+                # Read the raster data as numpy array
+                raster_array = raster_band.ReadAsArray()
+            except Exception as e:
+                log_message(f"Skipping file (error reading raster properties): {layer} - {str(e)}")
+                input_dataset = None
+                continue
 
-            # Create output raster
-            driver = gdal.GetDriverByName("GTiff")
-            output_dataset = driver.Create(output_raster_path, x_size, y_size, 1, gdal.GDT_Byte)
+            try:
+                # Apply reclassification logic
+                # Values 10 or 11 become 0, all others become 1
+                reclassified_array = np.where((raster_array == 10) | (raster_array == 11), 0, 1).astype(np.uint8)
 
-            if output_dataset is None:
-                raise RuntimeError(f"Failed to create output raster: {output_raster_path}")
+                # Create output raster
+                driver = gdal.GetDriverByName("GTiff")
+                output_dataset = driver.Create(output_raster_path, x_size, y_size, 1, gdal.GDT_Byte)
 
-            # Set geotransform and projection
-            output_dataset.SetGeoTransform(geotransform)
-            output_dataset.SetProjection(projection)
+                if output_dataset is None:
+                    log_message(f"Failed to create output raster: {output_raster_path}")
+                    input_dataset = None
+                    continue
 
-            # Write the reclassified data
-            output_band = output_dataset.GetRasterBand(1)
-            output_band.WriteArray(reclassified_array)
-            output_band.FlushCache()
+                # Set geotransform and projection
+                output_dataset.SetGeoTransform(geotransform)
+                output_dataset.SetProjection(projection)
 
-            # Close datasets
-            input_dataset = None
-            output_dataset = None
+                # Write the reclassified data
+                output_band = output_dataset.GetRasterBand(1)
+                output_band.WriteArray(reclassified_array)
+                output_band.FlushCache()
 
-            output_raster_paths.append(output_raster_path)
+                # Close datasets
+                input_dataset = None
+                output_dataset = None
+
+                output_raster_paths.append(output_raster_path)
+                log_message(f"Successfully reclassified: {layer}")
+
+            except Exception as e:
+                log_message(f"Error reclassifying {layer}: {str(e)}")
+                input_dataset = None
+                continue
+
+        if not output_raster_paths:
+            raise RuntimeError("Failed to reclassify any input rasters")
+
         return output_raster_paths
 
     def clean_raster_for_polygonization(self, input_raster_path: str) -> str:

@@ -245,6 +245,19 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QCheckBox" name="road_layer_status_checkbox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item row="4" column="0" colspan="2">
