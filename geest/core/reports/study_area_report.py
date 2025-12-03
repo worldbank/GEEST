@@ -107,6 +107,11 @@ class StudyAreaReport(BaseReport):
         ] = """
         The study area creation status is a record of the time taken to process each part of the study area.
         """
+        self.page_descriptions[
+            "ghsl_settlements"
+        ] = """
+        The Global Human Settlement Layer is used to identify settled areas within the study region. Study area polygons are marked with whether they intersect GHSL settlement data, which is used in various analysis workflows.
+        """
 
     def __del__(self):
         """
