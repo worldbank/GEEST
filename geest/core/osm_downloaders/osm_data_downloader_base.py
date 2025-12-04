@@ -294,20 +294,20 @@ class OSMDataDownloaderBase(ABC):
         # )
         # pipeline = transform.coordinateOperation().projString()
 
-        # log_message(f"Proj4 operation: {pipeline}")
-        processing.run(
+        result = processing.run(
             "native:reprojectlayer",
             {
                 "INPUT": f"{self.output_path}|layername={self.filename}_4326",
                 "TARGET_CRS": self.output_crs,
                 "CONVERT_CURVED_GEOMETRIES": False,
-                # "OPERATION": "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=36 +ellps=WGS84",
-                # The proj4 pipeline string is only available in QGIS >= 3.26
-                # "OPERATION": pipeline,
                 "OUTPUT": f"ogr:dbname='{self.output_path}' table=\"{self.filename}\" (geom)",  # noqa E231
             },
         )
-        self.feedback.setProgress(100)  # Set progress complete
+
+        if not (result and "OUTPUT" in result):
+            raise RuntimeError(f"Failed to reproject OSM data to {self.output_crs.authid()}")
+
+        self.feedback.setProgress(100)
 
         total_end = time.perf_counter()
         log_message(f"GeoPackage written to: {self.output_path} table: {self.filename}")  # noqa E231

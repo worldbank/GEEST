@@ -294,8 +294,34 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         """Get the admin boundary reference layer."""
         return self.layer_combo.currentLayer()
 
-    def crs(self):
-        """Get the crs for the Geest project."""
+    def crs(self, working_directory=None):
+        """Get the crs for the Geest project.
+
+        If study area already exists, return its CRS.
+        Otherwise, calculate CRS from the boundary layer.
+
+        Args:
+            working_directory: Optional working directory path. If not provided, uses self.working_dir
+        """
+        # Use provided working_directory, otherwise fall back to self.working_dir
+        work_dir = working_directory or self.working_dir
+
+        # First, try to get CRS from existing study area
+        if work_dir and os.path.exists(work_dir):
+            study_area_gpkg = os.path.join(work_dir, "study_area", "study_area.gpkg")
+            if os.path.exists(study_area_gpkg):
+                try:
+                    study_area_layer = QgsVectorLayer(
+                        f"{study_area_gpkg}|layername=study_area_polygons", "study_area", "ogr"
+                    )
+                    if study_area_layer.isValid():
+                        crs = study_area_layer.crs()
+                        self.crs_label.setText(f"CRS: {crs.authid()}")
+                        return crs
+                except Exception as e:
+                    log_message(f"Could not load study area CRS: {e}", level=Qgis.Warning)
+
+        # If no study area exists yet, calculate CRS from boundary layer
         crs = None
         if self.use_boundary_crs.isChecked():
             log_message("Using boundary CRS")

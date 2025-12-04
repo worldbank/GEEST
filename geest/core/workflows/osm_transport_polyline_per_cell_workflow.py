@@ -67,13 +67,19 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
                 level=Qgis.Warning,
             )
             layer_path = self.attributes.get("osm_transport_polyline_per_cell_layer_source", None)
+
             if not layer_path:
                 log_message(
-                    "No points layer found in osm_transport_polyline_per_cell_layer_source.",
+                    "No osm_transport_polyline_per_cell_layer_source found, trying road_network_layer_path.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-                return False
+                layer_path = self.attributes.get("road_network_layer_path", None)
+
+                if not layer_path:
+                    error_msg = "No transport layer found. Please configure a data source or download the active transport network."
+                    log_message(error_msg, tag="Geest", level=Qgis.Critical)
+                    raise ValueError(error_msg)
 
         self.features_layer = QgsVectorLayer(layer_path, "OSM Transport Layer", "ogr")
 

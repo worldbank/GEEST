@@ -186,7 +186,9 @@ class GeestDock(QDockWidget):
                     self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
                     self.road_network_widget.set_working_directory(self.create_project_widget.working_dir),
                     self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer()),
-                    self.road_network_widget.set_crs(self.create_project_widget.crs()),
+                    self.road_network_widget.set_crs(
+                        self.create_project_widget.crs(working_directory=self.create_project_widget.working_dir)
+                    ),
                 ][
                     -1
                 ]  # The [-1] ensures the lambda returns the last value
@@ -362,7 +364,7 @@ class GeestDock(QDockWidget):
             log_message(f"Setting road network panel working directory to: {working_directory}")
             self.road_network_widget.set_working_directory(working_directory)
             self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer())
-            self.road_network_widget.set_crs(self.create_project_widget.crs())
+            self.road_network_widget.set_crs(self.create_project_widget.crs(working_directory=working_directory))
         elif index == TREE_PANEL:
             log_message("Switched to Tree panel")
             # self.tree_widget.set_working_directory(self.setup_widget.working_dir)
