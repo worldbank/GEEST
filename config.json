@@ -18,7 +18,7 @@
     "author": "Kartoza for and with The World Bank",
     "email": "info@kartoza.com, gost@worldbank.org",
     "description": "Gender Enabling Environments Spatial Tool",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "changelog": "* Added OOKLA Downloader\\n* Added GHSL Downloader \\n* Added variable distance ACLED Buffer. \\* Fix analysis report.",
     "server": false
   }
