@@ -54,6 +54,12 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         chunk_size = int(setting(key="chunk_size", default=50))
         self.chunk_size.setValue(chunk_size)
 
+        grid_creation_workers = int(setting(key="grid_creation_workers", default=4))
+        self.grid_creation_workers.setValue(grid_creation_workers)
+
+        study_area_workers = int(setting(key="study_area_workers", default=1))
+        self.study_area_workers.setValue(study_area_workers)
+
         zero_default = bool(setting(key="default_raster_to_0", default=0))
         self.default_raster_to_0.setChecked(bool(zero_default))
 
@@ -110,6 +116,8 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             set_setting(key="verbose_mode", value=0)
 
         set_setting(key="chunk_size", value=self.chunk_size.value())
+        set_setting(key="grid_creation_workers", value=self.grid_creation_workers.value())
+        set_setting(key="study_area_workers", value=self.study_area_workers.value())
         set_setting(key="default_raster_to_0", value=self.default_raster_to_0.isChecked())
         set_setting(key="show_layer_on_click", value=self.show_layer_on_click.isChecked())
         set_setting(key="show_overlay", value=self.show_overlay.isChecked())
