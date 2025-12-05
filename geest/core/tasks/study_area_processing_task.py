@@ -641,7 +641,7 @@ class StudyAreaProcessingTask(QgsTask):
         if filter_enabled and not intersects_ghsl:
             log_message(
                 f"Skipping {normalized_name} - no GHSL settlements found (filter_study_areas_by_ghsl=True)",
-                level="INFO"
+                level="INFO",
             )
             # Update progress counter and return early
             self.counter += 1
