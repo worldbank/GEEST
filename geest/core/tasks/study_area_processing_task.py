@@ -636,6 +636,20 @@ class StudyAreaProcessingTask(QgsTask):
         self.save_geometry_to_geopackage("study_area_polygons", geom, normalized_name, intersects_ghsl)
         self.set_status_tracking_table_value(normalized_name, "geometry_processed", 1)
 
+        # Check if we should filter areas without GHSL settlements
+        filter_enabled = bool(setting(key="filter_study_areas_by_ghsl", default=True))
+        if filter_enabled and not intersects_ghsl:
+            log_message(
+                f"Skipping {normalized_name} - no GHSL settlements found (filter_study_areas_by_ghsl=True)",
+                level="INFO",
+            )
+            # Update progress counter and return early
+            self.counter += 1
+            progress = int((self.counter / self.parts_count) * 100)
+            self.setProgress(progress)
+            log_message(f"XXXXXXXXXXXX   Progress: {progress}% XXXXXXXXXXXXXXXXXXXXXXX")
+            return
+
         # Create the grid
         log_message(f"Creating vector grid for {normalized_name}.")
         start_time = time.time()
