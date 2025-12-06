@@ -65,7 +65,7 @@ toml==0.10.2
 tomli==2.3.0
 typer==0.4.0
 typing_extensions==4.15.0
-urllib3==2.5.0
+urllib3==2.6.0
 virtualenv==20.26.6
 watchdog==5.0.2
 zipp==3.23.0
