@@ -11,6 +11,8 @@ import threading
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from queue import Queue
+from threading import Thread
 
 # GDAL / OGR / OSR imports
 from osgeo import gdal, ogr, osr
@@ -96,6 +98,13 @@ class StudyAreaProcessingTask(QgsTask):
         self.total_cells = 0
         self.write_lock = threading.Lock()
         self.gpkg_lock = threading.Lock()
+        self.grid_id_lock = threading.Lock()
+        self.writer_start_lock = threading.Lock()  # Protect writer thread creation
+        self.write_queue = None
+        self.writer_thread = None
+        self.writer_layer = None  # Track which layer the writer is using
+        self.writer_ds = None  # Writer's own dataset connection
+        self.writer_ref_count = 0  # Reference count for parts using the writer
         # Make sure output directory exists
         self.create_study_area_directory(self.working_dir)
 
@@ -466,12 +475,14 @@ class StudyAreaProcessingTask(QgsTask):
                 geom_clone = geom_ref.Clone()
                 geom_type = ogr.GT_Flatten(geom_clone.GetGeometryType())
 
-                geometries_to_process.append({
-                    'geometry': geom_clone,
-                    'normalized_name': normalized_name,
-                    'area_name': area_name,
-                    'is_multipart': geom_type == ogr.wkbMultiPolygon
-                })
+                geometries_to_process.append(
+                    {
+                        "geometry": geom_clone,
+                        "normalized_name": normalized_name,
+                        "area_name": area_name,
+                        "is_multipart": geom_type == ogr.wkbMultiPolygon,
+                    }
+                )
 
             log_message(f"Collected {len(geometries_to_process)} geometries to process")
             self._process_geometries(geometries_to_process)
@@ -528,19 +539,15 @@ class StudyAreaProcessingTask(QgsTask):
             geometries_to_process: List of geometry dicts to process
         """
         for geom_data in geometries_to_process:
-            if geom_data['is_multipart']:
+            if geom_data["is_multipart"]:
                 log_message(f"Processing multipart geometry: {geom_data['normalized_name']}")
                 self.process_multipart_geometry(
-                    geom_data['geometry'],
-                    geom_data['normalized_name'],
-                    geom_data['area_name']
+                    geom_data["geometry"], geom_data["normalized_name"], geom_data["area_name"]
                 )
             else:
                 log_message(f"Processing singlepart geometry: {geom_data['normalized_name']}")
                 self.process_singlepart_geometry(
-                    geom_data['geometry'],
-                    geom_data['normalized_name'],
-                    geom_data['area_name']
+                    geom_data["geometry"], geom_data["normalized_name"], geom_data["area_name"]
                 )
 
     def _process_geometries_parallel(self, geometries_to_process, worker_count):
@@ -558,33 +565,25 @@ class StudyAreaProcessingTask(QgsTask):
         def process_single_geometry(geom_data):
             """Process a single study area geometry."""
             try:
-                if geom_data['is_multipart']:
+                if geom_data["is_multipart"]:
                     log_message(f"[Parallel] Processing multipart geometry: {geom_data['normalized_name']}")
                     self.process_multipart_geometry(
-                        geom_data['geometry'],
-                        geom_data['normalized_name'],
-                        geom_data['area_name']
+                        geom_data["geometry"], geom_data["normalized_name"], geom_data["area_name"]
                     )
                 else:
                     log_message(f"[Parallel] Processing singlepart geometry: {geom_data['normalized_name']}")
                     self.process_singlepart_geometry(
-                        geom_data['geometry'],
-                        geom_data['normalized_name'],
-                        geom_data['area_name']
+                        geom_data["geometry"], geom_data["normalized_name"], geom_data["area_name"]
                     )
-                return (True, geom_data['normalized_name'])
+                return (True, geom_data["normalized_name"])
             except Exception as e:
-                log_message(
-                    f"Failed to process {geom_data['normalized_name']}: {str(e)}",
-                    level="ERROR"
-                )
+                log_message(f"Failed to process {geom_data['normalized_name']}: {str(e)}", level="ERROR")
                 log_message(traceback.format_exc(), level="ERROR")
-                return (False, geom_data['normalized_name'])
+                return (False, geom_data["normalized_name"])
 
         with ThreadPoolExecutor(max_workers=worker_count) as executor:
             future_to_geom = {
-                executor.submit(process_single_geometry, geom_data): geom_data
-                for geom_data in geometries_to_process
+                executor.submit(process_single_geometry, geom_data): geom_data for geom_data in geometries_to_process
             }
 
             for future in as_completed(future_to_geom):
@@ -602,9 +601,7 @@ class StudyAreaProcessingTask(QgsTask):
                         total_processed = completed_count + failed_count
                         try:
                             current_progress = 5 + int((total_processed / total_areas) * 90)
-                            log_message(
-                                f"Study area progress: {total_processed}/{total_areas} ({current_progress}%)"
-                            )
+                            log_message(f"Study area progress: {total_processed}/{total_areas} ({current_progress}%)")
                             self.setProgress(current_progress)
                         except ZeroDivisionError:
                             pass
@@ -613,17 +610,11 @@ class StudyAreaProcessingTask(QgsTask):
                     with progress_lock:
                         failed_count += 1
                         self.error_count += 1
-                    log_message(
-                        f"Study area {geom_data['normalized_name']} failed: {str(e)}",
-                        level="WARNING"
-                    )
+                    log_message(f"Study area {geom_data['normalized_name']} failed: {str(e)}", level="WARNING")
                     log_message(traceback.format_exc(), level="WARNING")
 
         if failed_count > 0:
-            log_message(
-                f"Study area processing completed with {failed_count} failures",
-                level="WARNING"
-            )
+            log_message(f"Study area processing completed with {failed_count} failures", level="WARNING")
 
     ##########################################################################
     # Table creation logic
@@ -673,48 +664,90 @@ class StudyAreaProcessingTask(QgsTask):
             ds = None
 
     def add_row_to_status_tracking_table(self, area_name):
-        """Adds a new row to the tracking table for area_name."""
-        with self.gpkg_lock:
-            ds = ogr.Open(self.gpkg_path, 1)
-            if not ds:
-                raise RuntimeError(f"Could not open {self.gpkg_path} for update.")
-            layer = ds.GetLayerByName(self.status_table_name)
-            if not layer:
-                raise RuntimeError(f"Missing status table layer: {self.status_table_name}")
+        """Add new status tracking row with retry logic for SQLite lock handling.
 
-            feat_defn = layer.GetLayerDefn()
-            feat = ogr.Feature(feat_defn)
-            feat.SetField("area_name", area_name)
-            feat.SetField("timestamp_start", None)
-            feat.SetField("timestamp_end", None)
-            feat.SetField("geometry_processed", 0)
-            feat.SetField("clip_geometry_processed", 0)
-            feat.SetField("grid_processed", 0)
-            feat.SetField("mask_processed", 0)
-            feat.SetField("grid_creation_duration_secs", 0.0)
-            feat.SetField("clip_geom_creation_duration_secs", 0.0)
-            feat.SetField("geom_total_duration_secs", 0.0)
-            layer.CreateFeature(feat)
-            feat = None
-            ds = None
+        Args:
+            area_name: Name of study area to track
+        """
+        max_retries = 5
+        retry_delay = 0.1
+
+        for attempt in range(max_retries):
+            try:
+                with self.gpkg_lock:
+                    ds = ogr.Open(self.gpkg_path, 1)
+                    if not ds:
+                        raise RuntimeError(f"Could not open {self.gpkg_path} for update.")
+                    layer = ds.GetLayerByName(self.status_table_name)
+                    if not layer:
+                        raise RuntimeError(f"Missing status table layer: {self.status_table_name}")
+
+                    feat_defn = layer.GetLayerDefn()
+                    feat = ogr.Feature(feat_defn)
+                    feat.SetField("area_name", area_name)
+                    feat.SetField("timestamp_start", None)
+                    feat.SetField("timestamp_end", None)
+                    feat.SetField("geometry_processed", 0)
+                    feat.SetField("clip_geometry_processed", 0)
+                    feat.SetField("grid_processed", 0)
+                    feat.SetField("mask_processed", 0)
+                    feat.SetField("grid_creation_duration_secs", 0.0)
+                    feat.SetField("clip_geom_creation_duration_secs", 0.0)
+                    feat.SetField("geom_total_duration_secs", 0.0)
+                    layer.CreateFeature(feat)
+                    feat = None
+                    ds = None
+                return
+            except RuntimeError as e:
+                if "database is locked" in str(e) and attempt < max_retries - 1:
+                    log_message(
+                        f"Database locked, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})",
+                        level="WARNING",
+                    )
+                    time.sleep(retry_delay)
+                    retry_delay *= 2
+                else:
+                    raise
 
     def set_status_tracking_table_value(self, area_name, field_name, value):
-        """Update a field value in the tracking table for the specified area_name."""
-        with self.gpkg_lock:
-            ds = ogr.Open(self.gpkg_path, 1)
-            if not ds:
-                raise RuntimeError(f"Could not open {self.gpkg_path} for update.")
-            layer = ds.GetLayerByName(self.status_table_name)
-            if not layer:
-                raise RuntimeError(f"Missing status table layer: {self.status_table_name}")
+        """Update status tracking field with retry logic for SQLite lock handling.
 
-            layer.SetAttributeFilter(f"area_name = '{area_name}'")
-            for feature in layer:
-                feature.SetField(field_name, value)
-                layer.SetFeature(feature)
-            layer.ResetReading()
-        ds = None
-        log_message(f"Updated processing status flag for {field_name} for {area_name} to {value}.")
+        Args:
+            area_name: Name of study area
+            field_name: Field to update
+            value: New value for field
+        """
+        max_retries = 5
+        retry_delay = 0.1
+
+        for attempt in range(max_retries):
+            try:
+                with self.gpkg_lock:
+                    ds = ogr.Open(self.gpkg_path, 1)
+                    if not ds:
+                        raise RuntimeError(f"Could not open {self.gpkg_path} for update.")
+                    layer = ds.GetLayerByName(self.status_table_name)
+                    if not layer:
+                        raise RuntimeError(f"Missing status table layer: {self.status_table_name}")
+
+                    layer.SetAttributeFilter(f"area_name = '{area_name}'")
+                    for feature in layer:
+                        feature.SetField(field_name, value)
+                        layer.SetFeature(feature)
+                    layer.ResetReading()
+                    ds = None
+                log_message(f"Updated {field_name} for {area_name} to {value}")
+                return
+            except RuntimeError as e:
+                if "database is locked" in str(e) and attempt < max_retries - 1:
+                    log_message(
+                        f"Database locked, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})",
+                        level="WARNING",
+                    )
+                    time.sleep(retry_delay)
+                    retry_delay *= 2
+                else:
+                    raise
 
     ##########################################################################
     # Geometry processing
@@ -779,7 +812,7 @@ class StudyAreaProcessingTask(QgsTask):
         self.create_and_save_grid(normalized_name, geom, aligned_bbox)
         self.set_status_tracking_table_value(normalized_name, "grid_processed", 1)
         self.set_status_tracking_table_value(normalized_name, "grid_creation_duration_secs", time.time() - start_time)
-        # Create clip polygon
+
         log_message(f"Creating clip polygon for {normalized_name}.")
         start_time = time.time()
         self.create_clip_polygon(geom, aligned_bbox, normalized_name)
@@ -789,7 +822,7 @@ class StudyAreaProcessingTask(QgsTask):
             "clip_geom_creation_duration_secs",
             time.time() - start_time,
         )
-        # (Optional) create raster mask
+
         log_message(f"Creating raster mask for {normalized_name}.")
         self.create_raster_mask(geom, aligned_bbox, normalized_name)
         self.set_status_tracking_table_value(normalized_name, "mask_processed", 1)
@@ -802,24 +835,100 @@ class StudyAreaProcessingTask(QgsTask):
         )
         self.counter += 1
         progress = int((self.counter / self.parts_count) * 100)
-        # We use the progress object to notify of progress in the subtask
-        # And the QgsTask progressChanged signal to track the main task
         self.setProgress(progress)
         log_message(f"XXXXXXXXXXXX   Progress: {progress}% XXXXXXXXXXXXXXXXXXXXXXX")
 
     def process_multipart_geometry(self, geom, normalized_name, area_name):
-        """
-        Processes each part of a multi-part geometry.
+        """Process each part of a multi-part geometry with parallel or sequential execution.
+
+        Args:
+            geom: OGR multi-part geometry
+            normalized_name: Base name for the area
+            area_name: Original area name
         """
         count = geom.GetGeometryCount()
+        log_message(f"Processing {count} parts for {normalized_name}")
+
+        parts_to_process = []
         for i in range(count):
             part_geom = geom.GetGeometryRef(i)
             part_name = f"{normalized_name}_part{i}"
+            parts_to_process.append((part_geom.Clone(), part_name))
+
+        part_workers = min(4, count, int(setting(key="grid_creation_workers", default=4)))
+
+        if part_workers == 1 or count == 1:
+            log_message(f"Processing {count} parts sequentially")
+            self._process_parts_sequential(parts_to_process, area_name)
+        else:
+            log_message(f"Processing {count} parts with {part_workers} workers")
+            try:
+                self._process_parts_parallel(parts_to_process, area_name, part_workers)
+            except Exception as e:
+                log_message(f"Parallel part processing failed: {str(e)}", level="WARNING")
+                log_message("Falling back to sequential part processing", level="WARNING")
+                log_message(traceback.format_exc(), level="WARNING")
+                self._process_parts_sequential(parts_to_process, area_name)
+
+    def _process_parts_sequential(self, parts_to_process, area_name):
+        """Process geometry parts sequentially.
+
+        Args:
+            parts_to_process: List of (geometry, name) tuples
+            area_name: Original area name
+        """
+        for part_geom, part_name in parts_to_process:
             try:
                 self.process_singlepart_geometry(part_geom, part_name, area_name)
             except Exception as e:
-                del e
+                log_message(f"Failed to process part {part_name}: {str(e)}", level="ERROR")
                 self.error_count += 1
+
+    def _process_parts_parallel(self, parts_to_process, area_name, worker_count):
+        """Process geometry parts in parallel using ThreadPoolExecutor.
+
+        Args:
+            parts_to_process: List of (geometry, name) tuples
+            area_name: Original area name
+            worker_count: Number of parallel workers
+        """
+        failed_count = 0
+        progress_lock = threading.Lock()
+
+        def process_single_part(part_data):
+            """Process single geometry part in worker thread."""
+            part_geom, part_name = part_data
+            try:
+                self.process_singlepart_geometry(part_geom, part_name, area_name)
+                return (True, part_name)
+            except Exception as e:
+                log_message(f"Failed to process part {part_name}: {str(e)}", level="ERROR")
+                log_message(traceback.format_exc(), level="ERROR")
+                return (False, part_name)
+
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
+            future_to_part = {
+                executor.submit(process_single_part, part_data): part_data for part_data in parts_to_process
+            }
+
+            for future in as_completed(future_to_part):
+                part_data = future_to_part[future]
+                try:
+                    success, part_name = future.result()
+                    if not success:
+                        with progress_lock:
+                            failed_count += 1
+                            self.error_count += 1
+                    else:
+                        log_message(f"Part {part_name} completed successfully")
+                except Exception as e:
+                    with progress_lock:
+                        failed_count += 1
+                        self.error_count += 1
+                    log_message(f"Part {part_data[1]} failed: {str(e)}", level="WARNING")
+
+        if failed_count > 0:
+            log_message(f"Part processing completed with {failed_count} failures", level="WARNING")
 
     ##########################################################################
     # BBox handling
@@ -1024,17 +1133,132 @@ class StudyAreaProcessingTask(QgsTask):
         self.metrics[metric_name] += time.time() - start_time
 
     ##########################################################################
-    # Create Vector Grid
+    # Write Queue Management
     ##########################################################################
+    def _start_writer_thread(self, layer, normalized_name):
+        """Start dedicated writer thread for async writing (thread-safe singleton with ref counting)."""
+        with self.writer_start_lock:
+            self.writer_ref_count += 1
+
+            if self.writer_thread is not None and self.writer_thread.is_alive():
+                log_message(
+                    f"Writer thread already running (ref_count={self.writer_ref_count}), reusing existing thread"
+                )
+                return
+
+            log_message(f"Starting new writer thread (ref_count={self.writer_ref_count})")
+            self.write_queue = Queue()
+
+            # Open persistent connection to prevent invalidation when parts close their datasets
+            writer_ds = ogr.Open(self.gpkg_path, 1)
+            if not writer_ds:
+                raise RuntimeError(f"Writer thread could not open {self.gpkg_path}")
+            self.writer_layer = writer_ds.GetLayerByName("study_area_grid")
+            if not self.writer_layer:
+                raise RuntimeError("Writer thread could not open study_area_grid layer")
+            self.writer_ds = writer_ds
+
+            def writer_worker():
+                """Process write queue in batches. Queue items are (geometry, area_name) tuples."""
+                batch = []
+                batch_size = 1000
+                items_in_batch = 0
+
+                while True:
+                    item = self.write_queue.get()
+
+                    if item is None:  # Poison pill signals shutdown
+                        if batch:
+                            self._write_batch(self.writer_layer, batch)
+                        for _ in range(items_in_batch):
+                            self.write_queue.task_done()
+                        self.write_queue.task_done()
+                        break
+
+                    batch.append(item)
+                    items_in_batch += 1
+
+                    if len(batch) >= batch_size:
+                        self._write_batch(self.writer_layer, batch)
+                        for _ in range(items_in_batch):
+                            self.write_queue.task_done()
+                        batch = []
+                        items_in_batch = 0
+
+            self.writer_thread = Thread(target=writer_worker, daemon=False)
+            self.writer_thread.start()
+            log_message("Writer thread started")
+
+    def _stop_writer_thread(self):
+        """Stop writer thread with ref counting. Only stops when last part finishes.
+
+        Returns:
+            bool: True if writer was stopped, False if still in use by other parts
+        """
+        with self.writer_start_lock:
+            self.writer_ref_count -= 1
+            log_message(f"Writer thread ref count: {self.writer_ref_count}")
+
+            if self.writer_ref_count > 0:
+                log_message(f"Writer thread still in use by {self.writer_ref_count} part(s), not stopping")
+                return False
+
+            log_message("All parts finished, stopping writer thread")
+            if self.write_queue is not None:
+                self.write_queue.put(None)
+                self.write_queue.join()
+                if self.writer_thread is not None:
+                    self.writer_thread.join()
+                log_message("Writer thread stopped")
+
+            if self.writer_ds:
+                self.writer_ds.FlushCache()
+                self.writer_ds = None
+            self.writer_layer = None
+            log_message("Writer dataset closed")
+            return True
+
+    def _write_batch(self, layer, items):
+        """Write batch of (geometry, area_name) tuples in single transaction."""
+        start_time = time.time()
+        feat_defn = layer.GetLayerDefn()
+
+        layer.StartTransaction()
+        try:
+            for geometry, area_name in items:
+                feature = ogr.Feature(feat_defn)
+
+                with self.grid_id_lock:
+                    feature.SetField("grid_id", self.current_geom_actual_cell_count)
+                    self.current_geom_actual_cell_count += 1
+                    grid_id = self.current_geom_actual_cell_count
+
+                feature.SetField("area_name", area_name)
+                feature.SetGeometry(geometry)
+                layer.CreateFeature(feature)
+                feature = None
+
+                if grid_id % 20000 == 0:
+                    log_message(f"         Cell count: {grid_id}")
+                    log_message(f"         Grid creation for part {area_name}")
+
+            layer.CommitTransaction()
+            self.track_time("Writing chunks", start_time)
+            log_message(f"Wrote batch of {len(items)} features")
+        except Exception as e:
+            layer.RollbackTransaction()
+            log_message(f"Batch write error: {str(e)}", level="ERROR")
+            log_message(f"Batch write traceback: {traceback.format_exc()}", level="ERROR")
+            raise
+
     def create_and_save_grid(self, normalized_name, geom, bbox):
+        """Create vector grid and write intersecting cells to study_area_grid layer.
+
+        Args:
+            normalized_name: Name of study area
+            geom: OGR geometry defining area boundary
+            bbox: Tuple of (xmin, xmax, ymin, ymax) for grid extent
         """
-        Creates a vector grid covering bbox at self.cell_size_m spacing.
-        Writes those cells that intersect 'geom' to layer 'study_area_grid'.
-        (In practice, this can be quite large for big extents.)
-        """
-        # ----------------------------
-        # Initialize metrics tracking
-        # ----------------------------
         grid_layer_name = "study_area_grid"
         self.create_grid_layer_if_not_exists(grid_layer_name)
 
@@ -1045,7 +1269,6 @@ class StudyAreaProcessingTask(QgsTask):
 
         xmin, xmax, ymin, ymax = bbox
         cell_size = self.cell_size_m
-        # size is squared so 5 will make a 5x5 cell chunk
         chunk_size = int(setting(key="chunk_size", default=50))
 
         chunker = GridChunkerTask(
@@ -1058,18 +1281,19 @@ class StudyAreaProcessingTask(QgsTask):
             epsg=self.epsg_code,
             geometry=geom.ExportToWkb(),
         )
-        chunker.write_chunks_to_gpkg(self.gpkg_path)
+
+        # Thread-safe: protect GeoPackage write from parallel parts
+        with self.gpkg_lock:
+            chunker.write_chunks_to_gpkg(self.gpkg_path)
 
         log_message(f"Creating grid for extents: xmin {xmin}, xmax {xmax}, ymin {ymin}, ymax {ymax}")
 
         feedback = QgsFeedback()
 
-        # Get chunk count and collect chunks to process
         chunk_count = chunker.total_chunks()
         log_message(f"Chunk count: {chunk_count}")
         log_message(f"Chunk size: {chunk_size}")
 
-        # Collect all valid chunks (filter out "undefined" chunks)
         chunks_to_process = []
         for chunk in chunker.chunks():
             if chunk["type"] != "undefined":
@@ -1085,6 +1309,9 @@ class StudyAreaProcessingTask(QgsTask):
 
         self.feedback.setProgress(0)
 
+        # Start dedicated writer thread
+        self._start_writer_thread(layer, normalized_name)
+
         try:
             if worker_count == 1:
                 log_message("Using sequential processing (worker_count=1)")
@@ -1099,8 +1326,16 @@ class StudyAreaProcessingTask(QgsTask):
             log_message("Falling back to sequential processing", level="WARNING")
             log_message(traceback.format_exc(), level="WARNING")
             self._process_chunks_sequential(layer, chunks_to_process, geom, cell_size, normalized_name, feedback)
+        finally:
+            writer_stopped = self._stop_writer_thread()
 
-        ds = None
+            if writer_stopped:
+                if layer:
+                    layer.SyncToDisk()
+                if ds:
+                    ds.FlushCache()
+                ds = None
+                log_message("Dataset closed and flushed to disk")
         # ----------------------------
         # Print out metrics summary
         # ----------------------------
@@ -1152,13 +1387,13 @@ class StudyAreaProcessingTask(QgsTask):
         """Process chunks in parallel using ThreadPoolExecutor.
 
         Args:
-            layer: OGR layer for writing grid cells.
-            chunks: List of chunk dictionaries to process.
-            geom: OGR geometry for intersection testing.
-            cell_size: Cell size in meters.
-            normalized_name: Name of the study area.
-            feedback: QgsFeedback for progress reporting.
-            worker_count: Number of parallel workers.
+            layer: OGR layer for writing grid cells
+            chunks: List of chunk dictionaries to process
+            geom: OGR geometry for intersection testing
+            cell_size: Cell size in meters
+            normalized_name: Name of the study area
+            feedback: QgsFeedback for progress reporting
+            worker_count: Number of parallel workers
         """
         total_chunks = len(chunks)
         completed_count = 0
@@ -1166,7 +1401,7 @@ class StudyAreaProcessingTask(QgsTask):
         progress_lock = threading.Lock()
 
         def process_single_chunk(chunk):
-            """Process a single chunk (runs in worker thread)."""
+            """Process single chunk in worker thread."""
             start_time = time.time()
             index = chunk["index"]
 
@@ -1181,23 +1416,17 @@ class StudyAreaProcessingTask(QgsTask):
 
             return (task, start_time, index)
 
-        # Submit all chunks to thread pool
         with ThreadPoolExecutor(max_workers=worker_count) as executor:
-            # Create futures for all chunks
             future_to_chunk = {executor.submit(process_single_chunk, chunk): chunk for chunk in chunks}
 
-            # Process completed chunks as they finish
             for future in as_completed(future_to_chunk):
                 chunk = future_to_chunk[future]
                 try:
-                    # Get the result
                     task, start_time, index = future.result()
                     self.track_time("Creating chunks", start_time)
 
-                    # Write to GeoPackage (thread-safe with lock)
                     self.write_chunk(layer, task, normalized_name)
 
-                    # Update progress (thread-safe)
                     with progress_lock:
                         completed_count += 1
                         try:
@@ -1212,7 +1441,6 @@ class StudyAreaProcessingTask(QgsTask):
                     self.track_time("Complete chunk", start_time)
 
                 except Exception as e:
-                    # Log individual chunk failure but continue processing
                     with progress_lock:
                         failed_count += 1
                     log_message(f"Chunk {chunk['index']} failed: {str(e)}", level="WARNING")
@@ -1222,41 +1450,18 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(f"Grid creation completed with {failed_count} failed chunks", level="WARNING")
 
     def write_chunk(self, layer, task, normalized_name):
-        """Write chunk to GeoPackage.
+        """Queue features for async batched writing by dedicated writer thread.
 
         Args:
-            layer: OGR layer for writing grid cells
-            task: GridFromBboxTask containing generated features
-            normalized_name: Name of the study area
+            layer: Unused (kept for compatibility)
+            task: GridFromBboxTask with generated features
+            normalized_name: Area name for this chunk
         """
-        start_time = time.time()
-        log_message(f"Writing {len(task.features_out)} features to layer.")
+        log_message(f"Queueing {len(task.features_out)} features for writing (area: {normalized_name})")
         self.track_time("Preparing chunks", task.run_time)
 
-        with self.write_lock:
-            feat_defn = layer.GetLayerDefn()
-            layer.StartTransaction()
-            try:
-                for geometry in task.features_out:
-                    feature = ogr.Feature(feat_defn)
-                    feature.SetField("grid_id", self.current_geom_actual_cell_count)
-                    feature.SetField("area_name", normalized_name)
-                    feature.SetGeometry(geometry)
-                    layer.CreateFeature(feature)
-                    feature = None
-                    self.current_geom_actual_cell_count += 1
-                    if self.current_geom_actual_cell_count % 20000 == 0:
-                        log_message(f"         Cell count: {self.current_geom_actual_cell_count}")
-                        log_message(f"         Grid creation for part {normalized_name}")
-                        layer.CommitTransaction()
-                        layer.StartTransaction()
-                layer.CommitTransaction()
-                self.track_time("Writing chunks", start_time)
-            except Exception as e:
-                layer.RollbackTransaction()
-                log_message(f"write_chunk error: {str(e)}", level="ERROR")
-                log_message(f"write_chunk traceback: {traceback.format_exc()}", level="ERROR")
-                raise
+        for geometry in task.features_out:
+            self.write_queue.put((geometry, normalized_name))
 
     def create_grid_layer_if_not_exists(self, layer_name):
         """
@@ -1295,59 +1500,73 @@ class StudyAreaProcessingTask(QgsTask):
         (xmin, ymin, xmax, ymax) = aligned_box
         grid_layer.SetSpatialFilterRect(xmin, ymin, xmax, ymax)
 
-        # 2) We'll gather all grid cells that intersect *the boundary* of geom
-        #    In OGR, we can do:
-        boundary = geom.GetBoundary()  # line geometry for polygon boundary
+        boundary = geom.GetBoundary()
+        log_message(f"Finding grid cells that intersect boundary for {normalized_name}")
 
-        union_geom = ogr.Geometry(ogr.wkbPolygon)
-        union_geom.Destroy()  # We'll handle it differently—see below.
-
-        # For union accumulation, start with a null geometry
-        dissolved_geom = None
-
-        # For clarity, transform boundary to the same SRS if needed (already is).
-        # We'll just do an Intersects check with each cell.
-
+        all_cells = []
         grid_layer.ResetReading()
-        count = 0
         for f in grid_layer:
             cell_geom = f.GetGeometryRef()
-            if not cell_geom:
-                continue
-            if boundary.Intersects(cell_geom):
-                # We'll union
-                if dissolved_geom is None:
-                    dissolved_geom = cell_geom.Clone()
-                else:
-                    dissolved_geom = dissolved_geom.Union(cell_geom)
-            count += 1
-            if count % 1000 == 0:
-                log_message(f"Processed {count} grid cells.")
+            if cell_geom:
+                all_cells.append(cell_geom.Clone())
         grid_layer.ResetReading()
 
-        # Also union the original geom itself
-        if dissolved_geom is None:
-            # No boundary cells found, fallback
-            dissolved_geom = geom.Clone()
-        else:
-            dissolved_geom = dissolved_geom.Union(geom)
+        total_cells = len(all_cells)
+        log_message(f"Checking {total_cells} grid cells for intersection with boundary")
 
-        # dissolved_geom is now the final clip polygon
+        def check_intersection(cell_geom):
+            if boundary.Intersects(cell_geom):
+                return cell_geom
+            return None
+
+        intersecting_cells = []
+        worker_count = min(4, total_cells)
+
+        if worker_count > 1 and total_cells > 100:
+            log_message(f"Using parallel intersection checking with {worker_count} workers")
+            with ThreadPoolExecutor(max_workers=worker_count) as executor:
+                results = executor.map(check_intersection, all_cells)
+                intersecting_cells = [cell for cell in results if cell is not None]
+        else:
+            log_message("Using sequential intersection checking")
+            for cell_geom in all_cells:
+                if boundary.Intersects(cell_geom):
+                    intersecting_cells.append(cell_geom)
+
+        log_message(f"Found {len(intersecting_cells)} cells intersecting boundary, performing batch union")
+
+        intersecting_cells.append(geom.Clone())
+
+        if len(intersecting_cells) == 0:
+            dissolved_geom = geom.Clone()
+        elif len(intersecting_cells) == 1:
+            dissolved_geom = intersecting_cells[0]
+        else:
+            multi_geom = ogr.Geometry(ogr.wkbMultiPolygon)
+            for cell in intersecting_cells:
+                if cell.GetGeometryType() == ogr.wkbPolygon:
+                    multi_geom.AddGeometry(cell)
+
+            dissolved_geom = multi_geom.UnionCascaded()
+            log_message(f"Batch union completed for {len(intersecting_cells)} geometries")
+
         self.save_geometry_to_geopackage("study_area_clip_polygons", dissolved_geom, normalized_name)
         log_message(f"Created clip polygon: {normalized_name}")
 
-    ##########################################################################
-    # Split the bbox into chunks for parallel processing
-    ##########################################################################
     def chunk_bbox(self, xmin, xmax, ymin, ymax, cell_size, chunk_size=1000):
-        """
-        Generator that yields bounding box chunks. Each chunk is a tuple:
-        (x_start, x_end, y_start, y_end).
+        """Generate bounding box chunks for grid processing.
 
-        `chunk_size` indicates how many cells in the X-direction
-        (and optionally also Y-direction) you want per chunk.
-        """
+        Args:
+            xmin: Minimum X coordinate
+            xmax: Maximum X coordinate
+            ymin: Minimum Y coordinate
+            ymax: Maximum Y coordinate
+            cell_size: Size of grid cells in meters
+            chunk_size: Number of cells per chunk (default: 1000)
 
+        Yields:
+            Tuple of (x_start, x_end, y_start, y_end) for each chunk
+        """
         x_range_count = int((xmax - xmin) / cell_size)
         y_range_count = int((ymax - ymin) / cell_size)
 
@@ -1357,7 +1576,6 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(f"Processing chunk {x_block_start} of {x_range_count}")
             x_block_end = min(x_block_start + chunk_size, x_range_count)
 
-            # Convert from cell index to real coords
             x_start_coord = xmin + x_block_start * cell_size
             x_end_coord = xmin + x_block_end * cell_size
 
@@ -1365,7 +1583,6 @@ class StudyAreaProcessingTask(QgsTask):
                 log_message(f"Processing chunk {y_block_start} of {y_range_count}")
                 y_block_end = min(y_block_start + chunk_size, y_range_count)
 
-                # Convert from cell index to real coords
                 y_start_coord = ymin + y_block_start * cell_size
                 y_end_coord = ymin + y_block_end * cell_size
 
