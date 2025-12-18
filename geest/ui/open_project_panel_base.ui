@@ -36,7 +36,7 @@
    <item row="1" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;GEEST Open Existing Project&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;GeoE3 Open Existing Project&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
@@ -64,7 +64,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Choose from one of the recent project folders you used, or click the ... button to browse to a specific GEEST project folder.</string>
+      <string>Choose from one of the recent project folders you used, or click the ... button to browse to a specific GeoE3 project folder.</string>
      </property>
      <property name="textFormat">
       <enum>Qt::MarkdownText</enum>

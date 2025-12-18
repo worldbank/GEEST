@@ -43,7 +43,7 @@
           </font>
          </property>
          <property name="text">
-          <string>A GEEST project is a folder with files that are managed by the GEEST plugin. Analysis outputs and working files will be stored in this folder. It needs to be an empty folder that contains no other files.</string>
+          <string>This step creates a folder with files that are managed by the GeoE3 plugin. Analysis outputs and working files will be stored in this folder. Please select an empty folder that contains no other files.</string>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
