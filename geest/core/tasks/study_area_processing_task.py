@@ -188,6 +188,18 @@ class StudyAreaProcessingTask(QgsTask):
                 return self.source_layer.GetFeatureCount()
         return parts_count
 
+    def enable_wal_mode(self):
+        """Enable SQLite WAL mode for better concurrent access on Windows."""
+        try:
+            ds = ogr.Open(self.gpkg_path, 1)
+            if ds:
+                ds.ExecuteSQL("PRAGMA journal_mode=WAL")
+                ds.ExecuteSQL("PRAGMA synchronous=NORMAL")
+                ds = None
+                log_message("Enabled WAL mode for GeoPackage")
+        except Exception as e:
+            log_message(f"Could not enable WAL mode: {str(e)}", level="WARNING")
+
     def export_qgs_layer_to_shapefile(self, layer, output_dir):
         """
         Exports a QgsVectorLayer to a Shapefile in output_dir.
@@ -413,6 +425,9 @@ class StudyAreaProcessingTask(QgsTask):
                 self.transformed_layer_bbox,
                 "Study Area Bounding Box",
             )
+
+            # Enable WAL mode for better concurrent access
+            self.enable_wal_mode()
 
             # 2) Create the status tracking table
             self.create_status_tracking_table()
@@ -670,7 +685,7 @@ class StudyAreaProcessingTask(QgsTask):
             area_name: Name of study area to track
         """
         max_retries = 5
-        retry_delay = 0.1
+        retry_delay = 0.5
 
         for attempt in range(max_retries):
             try:
@@ -678,6 +693,7 @@ class StudyAreaProcessingTask(QgsTask):
                     ds = ogr.Open(self.gpkg_path, 1)
                     if not ds:
                         raise RuntimeError(f"Could not open {self.gpkg_path} for update.")
+                    ds.ExecuteSQL("PRAGMA busy_timeout = 5000")
                     layer = ds.GetLayerByName(self.status_table_name)
                     if not layer:
                         raise RuntimeError(f"Missing status table layer: {self.status_table_name}")
@@ -718,7 +734,7 @@ class StudyAreaProcessingTask(QgsTask):
             value: New value for field
         """
         max_retries = 5
-        retry_delay = 0.1
+        retry_delay = 0.5
 
         for attempt in range(max_retries):
             try:
@@ -726,6 +742,7 @@ class StudyAreaProcessingTask(QgsTask):
                     ds = ogr.Open(self.gpkg_path, 1)
                     if not ds:
                         raise RuntimeError(f"Could not open {self.gpkg_path} for update.")
+                    ds.ExecuteSQL("PRAGMA busy_timeout = 5000")
                     layer = ds.GetLayerByName(self.status_table_name)
                     if not layer:
                         raise RuntimeError(f"Missing status table layer: {self.status_table_name}")
@@ -855,7 +872,7 @@ class StudyAreaProcessingTask(QgsTask):
             part_name = f"{normalized_name}_part{i}"
             parts_to_process.append((part_geom.Clone(), part_name))
 
-        part_workers = min(4, count, int(setting(key="grid_creation_workers", default=4)))
+        part_workers = 1  # Sequential processing to avoid database lock contention
 
         if part_workers == 1 or count == 1:
             log_message(f"Processing {count} parts sequentially")
@@ -1161,7 +1178,7 @@ class StudyAreaProcessingTask(QgsTask):
             def writer_worker():
                 """Process write queue in batches. Queue items are (geometry, area_name) tuples."""
                 batch = []
-                batch_size = 1000
+                batch_size = 10000
                 items_in_batch = 0
 
                 while True:
@@ -1282,9 +1299,23 @@ class StudyAreaProcessingTask(QgsTask):
             geometry=geom.ExportToWkb(),
         )
 
-        # Thread-safe: protect GeoPackage write from parallel parts
-        with self.gpkg_lock:
-            chunker.write_chunks_to_gpkg(self.gpkg_path)
+        max_retries = 5
+        retry_delay = 0.5
+        for attempt in range(max_retries):
+            try:
+                with self.gpkg_lock:
+                    chunker.write_chunks_to_gpkg(self.gpkg_path)
+                break
+            except RuntimeError as e:
+                if "database is locked" in str(e) and attempt < max_retries - 1:
+                    log_message(
+                        f"Chunk metadata write locked, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})",
+                        level="WARNING",
+                    )
+                    time.sleep(retry_delay)
+                    retry_delay = min(retry_delay * 2, 5.0)
+                else:
+                    raise
 
         log_message(f"Creating grid for extents: xmin {xmin}, xmax {xmax}, ymin {ymin}, ymax {ymax}")
 
@@ -1468,19 +1499,20 @@ class StudyAreaProcessingTask(QgsTask):
         Create a grid layer with 'grid_id' as integer field
         and a polygon geometry if it does not exist.
         """
-        if not os.path.exists(self.gpkg_path):
-            driver = ogr.GetDriverByName("GPKG")
-            driver.CreateDataSource(self.gpkg_path)
+        with self.gpkg_lock:
+            if not os.path.exists(self.gpkg_path):
+                driver = ogr.GetDriverByName("GPKG")
+                driver.CreateDataSource(self.gpkg_path)
 
-        ds = ogr.Open(self.gpkg_path, 1)
-        layer = ds.GetLayerByName(layer_name)
-        if layer is None:
-            layer = ds.CreateLayer(layer_name, self.target_spatial_ref, geom_type=ogr.wkbPolygon)
-            field_defn = ogr.FieldDefn("grid_id", ogr.OFTInteger)
-            layer.CreateField(field_defn)
-            field_defn = ogr.FieldDefn("area_name", ogr.OFTString)
-            layer.CreateField(field_defn)
-        ds = None
+            ds = ogr.Open(self.gpkg_path, 1)
+            layer = ds.GetLayerByName(layer_name)
+            if layer is None:
+                layer = ds.CreateLayer(layer_name, self.target_spatial_ref, geom_type=ogr.wkbPolygon)
+                field_defn = ogr.FieldDefn("grid_id", ogr.OFTInteger)
+                layer.CreateField(field_defn)
+                field_defn = ogr.FieldDefn("area_name", ogr.OFTString)
+                layer.CreateField(field_defn)
+            ds = None
 
     ##########################################################################
     # Create Clip Polygon
@@ -1510,6 +1542,7 @@ class StudyAreaProcessingTask(QgsTask):
             if cell_geom:
                 all_cells.append(cell_geom.Clone())
         grid_layer.ResetReading()
+        grid_layer.SetSpatialFilter(None)  # Clear filter
 
         total_cells = len(all_cells)
         log_message(f"Checking {total_cells} grid cells for intersection with boundary")
