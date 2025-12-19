@@ -59,21 +59,24 @@
        <item row="2" column="0">
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>Spatial Scale</string>
+          <string>Select scale of analysis</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="0">
-           <widget class="QRadioButton" name="local_scale">
+           <widget class="QRadioButton" name="regional_scale">
             <property name="font">
              <font>
               <pointsize>16</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Local Scale</string>
+             <string>Regional</string>
+            </property>
+            <property name="enabled">
+             <bool>false</bool>
             </property>
             <property name="checked">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -85,14 +88,32 @@
              </font>
             </property>
             <property name="text">
-             <string>National Scale</string>
+             <string>National</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QRadioButton" name="local_scale">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Local</string>
+            </property>
+            <property name="enabled">
+             <bool>false</bool>
             </property>
             <property name="checked">
              <bool>false</bool>
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="2">
+          <item row="2" column="0" colspan="3">
            <widget class="QSpinBox" name="cell_size_spinbox">
             <property name="enabled">
              <bool>true</bool>
@@ -118,19 +139,21 @@
              <number>100</number>
             </property>
             <property name="value">
-             <number>100</number>
+             <number>1000</number>
             </property>
            </widget>
           </item>
-          <item row="1" column="0" colspan="2">
+          <item row="1" column="0" colspan="3">
            <widget class="QLabel" name="description2">
             <property name="font">
              <font>
-              <pointsize>16</pointsize>
+              <pointsize>14</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Set the analysis cell size (m). Smaller sizes require longer processing times, but produce more detailed analysis results. We suggest a value between 100m and 1000m.</string>
+             <string>The Regional analysis allows you to perform large-scale analysis, in a computationally adequate manner, by leveraging global datasets. The National and Local scales allow for more granular (and time-intensive) spatial analysis and GeoE3 will auto-populate with recommendations on assumptions and thresholds, backed by research, which can be adjusted as needed.
+
+Set the analysis grid size (m). Smaller sizes require longer processing times, but produce more detailed analysis results. Recommended grid sizes are available by default.</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignJustify|Qt::AlignTop</set>

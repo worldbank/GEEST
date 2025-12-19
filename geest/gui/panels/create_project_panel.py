@@ -81,14 +81,15 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         parent_layout.update()
 
         self.folder_status_label.setPixmap(QPixmap(resources_path("resources", "icons", "failed.svg")))
-        self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
+        self.regional_scale.clicked.connect(lambda: self.spatial_scale_changed("regional"))
         self.national_scale.clicked.connect(lambda: self.spatial_scale_changed("national"))
+        self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
-        experimental_features = int(os.getenv("GEEST_EXPERIMENTAL", 0))
-        if not experimental_features:
-            # For now these are experimental
-            self.local_scale.hide()
-            self.national_scale.hide()
+        # Note: Regional and Local scales are disabled in the UI for this release
+        # Only National scale is currently active
+        # Explicitly disable Regional and Local radio buttons (overrides enable_widgets())
+        self.regional_scale.setEnabled(False)
+        self.local_scale.setEnabled(False)
 
         # self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
         self.field_combo.setFilters(QgsFieldProxyModel.String)
@@ -144,16 +145,22 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         """Slot to be called when the spatial scale changes.
 
         Args:
-            value (str): The new spatial scale value ("local" or "national").
+            value (str): The new spatial scale value ("regional", "national", or "local").
         """
         log_message(f"Spatial scale changed: {value}")
-        if value == "local":
-            self.cell_size_spinbox.setValue(100)
-            self.cell_size_spinbox.setSingleStep(10)
-            self.cell_size_spinbox.setSuffix(" m")
+        if value == "regional":
+            # Regional scale uses H3 indexes (H3l6 by default)
+            # For this release, regional is disabled
+            self.cell_size_spinbox.setValue(5000)
+            self.cell_size_spinbox.setSingleStep(1000)
+            self.cell_size_spinbox.setSuffix(" m (H3)")
         elif value == "national":
             self.cell_size_spinbox.setValue(1000)
             self.cell_size_spinbox.setSingleStep(100)
+            self.cell_size_spinbox.setSuffix(" m")
+        elif value == "local":
+            self.cell_size_spinbox.setValue(100)
+            self.cell_size_spinbox.setSingleStep(10)
             self.cell_size_spinbox.setSuffix(" m")
 
     def update_crs(self):
@@ -288,6 +295,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def enable_widgets(self):
         """Enable all widgets in the panel."""
         for widget in self.findChildren(QWidget):
+            # Skip Regional and Local scale radio buttons - they should remain disabled
+            if widget in (self.regional_scale, self.local_scale):
+                continue
             widget.setEnabled(True)
 
     def reference_layer(self):
