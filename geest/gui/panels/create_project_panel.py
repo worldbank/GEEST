@@ -91,6 +91,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.regional_scale.setEnabled(False)
         self.local_scale.setEnabled(False)
 
+        # Women Considerations toggle
+        self.women_considerations_checkbox.stateChanged.connect(self.women_considerations_changed)
+        # Initialize EPLEX widgets visibility based on checkbox state
+        self.women_considerations_changed()
+
         # self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
         self.field_combo.setFilters(QgsFieldProxyModel.String)
 
@@ -162,6 +167,21 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             self.cell_size_spinbox.setValue(100)
             self.cell_size_spinbox.setSingleStep(10)
             self.cell_size_spinbox.setSuffix(" m")
+
+    def women_considerations_changed(self):
+        """Slot to be called when the women considerations checkbox changes.
+
+        When unchecked, shows EPLEX score input.
+        When checked, hides EPLEX score input.
+        """
+        is_checked = self.women_considerations_checkbox.isChecked()
+        log_message(f"Women considerations changed: {is_checked}")
+
+        # Show EPLEX widgets when women considerations is NOT selected
+        show_eplex = not is_checked
+        self.eplex_label.setVisible(show_eplex)
+        self.eplex_description.setVisible(show_eplex)
+        self.eplex_score_spinbox.setVisible(show_eplex)
 
     def update_crs(self):
         """Update the CRS label based on the checkbox state."""
@@ -250,8 +270,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     model["analysis_scale"] = "local"
                 else:
                     model["analysis_scale"] = "national"
+                # Save women considerations settings
+                model["women_considerations_enabled"] = self.women_considerations_checkbox.isChecked()
+                model["eplex_score"] = self.eplex_score_spinbox.value()
             with open(model_path, "w") as f:
-                json.dump(model, f)
+                json.dump(model, f, indent=2)
 
             # Create the processor instance and process the features
             debug_env = int(os.getenv("GEEST_DEBUG", 0))

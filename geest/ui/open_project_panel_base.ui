@@ -109,6 +109,77 @@
     </layout>
    </item>
    <item row="5" column="0">
+    <widget class="QGroupBox" name="groupBox_women_considerations">
+     <property name="title">
+      <string>Women Considerations</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_women">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="women_considerations_checkbox">
+        <property name="text">
+         <string>Women's enabling environments</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="women_considerations_description">
+        <property name="text">
+         <string>You can tailor the analysis to include geographic factors that particularly influence women's access to employment, as guided by the Geospatial Women's Employment Analytical Framework (GeoWEAF) developed by the World Bank.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="eplex_label">
+        <property name="text">
+         <string>EPLEX Score (Employment Protection Legislation Index)</string>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="eplex_description">
+        <property name="text">
+         <string>The Employment Protection Legislation Index refers to indicators developed by the International Labour Organization (ILO) to measure the strictness and coverage of laws protecting workers from dismissal, covering areas like fixed-term contracts, probationary periods, unfair dismissal grounds, and severance pay, helping to compare labor market regulations across countries. It's a crucial tool for analyzing labor market flexibility and stability.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QDoubleSpinBox" name="eplex_score_spinbox">
+        <property name="minimum">
+         <double>0.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>5.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="6" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -121,7 +192,7 @@
      </property>
     </spacer>
    </item>
-   <item row="6" column="0">
+   <item row="7" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QPushButton" name="previous_button">

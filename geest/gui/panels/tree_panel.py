@@ -304,6 +304,11 @@ class TreePanel(QWidget):
         """
         # Action to trigger on double-click
         item = index.internalPointer()
+
+        # Don't allow interaction with disabled items
+        if not item.is_enabled():
+            return
+
         if item.role == "indicator":
             self.edit_factor_aggregation(item.parent())
         elif item.role == "factor":
@@ -445,6 +450,7 @@ class TreePanel(QWidget):
                 self.json_file = model_path
                 self.load_json()  # sets the class member json_data
                 self.model.loadJsonData(self.json_data)
+                self.apply_women_considerations_logic()  # Hide factors based on women considerations
                 self.treeView.expandAll()
                 log_message(f"Loaded model.json from {model_path}")
 
@@ -495,6 +501,7 @@ class TreePanel(QWidget):
                     )
             self.load_json()
             self.model.loadJsonData(self.json_data)
+            self.apply_women_considerations_logic()  # Hide factors based on women considerations
             self.treeView.expandAll()
         # Collapse any factors that have only a single indicator
         self.treeView.collapse_single_nodes()
@@ -570,6 +577,66 @@ class TreePanel(QWidget):
             self.json_data = json.load(f)
             log_message(f"Loaded JSON data from {self.json_file}")
 
+    def apply_women_considerations_logic(self):
+        """Apply factor visibility based on women considerations setting.
+
+        When women_considerations_enabled is False, certain factors are hidden:
+        - All Contextual factors
+        - Women's Travel Patterns
+        - Access to Health Facilities
+        - Safety
+        - Water sanitation
+        """
+        if not hasattr(self, "json_data") or self.json_data is None:
+            return
+
+        women_considerations_enabled = self.json_data.get("women_considerations_enabled", True)
+        log_message(f"Women considerations enabled: {women_considerations_enabled}")
+
+        # Factors affected by women considerations setting
+        women_specific_factors = [
+            "Workplace Discrimination",
+            "Regulatory Frameworks",
+            "Financial Inclusion",
+            "Women's Travel Patterns",
+            "Access to Health Facilities",
+            "Safety",
+            "Water sanitation",
+        ]
+
+        # Get all dimensions from the model
+        root_item = self.model.get_analysis_item()
+        if not root_item:
+            return
+
+        # Iterate through dimensions
+        for dim_idx in range(root_item.childCount()):
+            dimension = root_item.child(dim_idx)
+            if not dimension:
+                continue
+
+            # Iterate through factors in this dimension
+            for factor_idx in range(dimension.childCount()):
+                factor = dimension.child(factor_idx)
+                if not factor:
+                    continue
+
+                factor_name = factor.data(0)  # Get factor name
+                if factor_name in women_specific_factors:
+                    # Set enabled state based on women considerations setting
+                    enabled = women_considerations_enabled
+                    log_message(f"Setting factor '{factor_name}' enabled to: {enabled}")
+                    factor.set_enabled(enabled)
+
+                    # Also disable all child indicators
+                    for indicator_idx in range(factor.childCount()):
+                        indicator = factor.child(indicator_idx)
+                        if indicator:
+                            indicator.set_enabled(enabled)
+
+        # Refresh the tree view
+        self.model.layoutChanged.emit()
+
     def load_json_from_file(self):
         """Prompt the user to load a JSON file and update the tree."""
         json_file, _ = QFileDialog.getOpenFileName(
@@ -579,6 +646,7 @@ class TreePanel(QWidget):
             self.json_file = json_file
             self.load_json()
             self.model.loadJsonData(self.json_data)
+            self.apply_women_considerations_logic()  # Hide factors based on women considerations
             self.treeView.expandAll()
 
     def export_json_to_file(self):
@@ -604,6 +672,10 @@ class TreePanel(QWidget):
             return
 
         item = index.internalPointer()
+
+        # Don't show context menu for disabled items
+        if not item.is_enabled():
+            return
         show_json_attributes_action = QAction("Show Attributes", self)
         show_json_attributes_action.triggered.connect(lambda: self.show_attributes(item))
         # We disable items by setting their weight to 0
