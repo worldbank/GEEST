@@ -80,7 +80,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Regulatory Frameworks pertain to laws and policies that protect women\u2019s employment rights, such as childcare support and parental leave, influencing their workforce participation"
+                    "description": "Regulatory Frameworks pertain to laws and policies that protect women’s employment rights, such as childcare support and parental leave, influencing their workforce participation"
                 },
                 {
                     "id": "financial_inclusion",
@@ -117,7 +117,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Financial Inclusion involves laws concerning women\u2019s access to financial resources like loans and credit, which is crucial for starting businesses and investing in economic opportunities."
+                    "description": "Financial Inclusion involves laws concerning women’s access to financial resources like loans and credit, which is crucial for starting businesses and investing in economic opportunities."
                 }
             ]
         },
@@ -127,7 +127,7 @@
             "name": "Accessibility",
             "default_analysis_weighting": 0.45,
             "analysis_weighting": 0.45,
-            "description": "The Accessibility Dimension evaluates women\u2019s daily mobility by examining their access to essential services. Levels of enablement for work access in this dimension are determined by service areas, which represent the geographic zones that facilities like childcare, supermarkets, universities, banks, and clinics can serve based on proximity. The nearer these facilities are to where women live, the more supportive and enabling the environment becomes for their participation in the workforce.",
+            "description": "The Accessibility Dimension evaluates women’s daily mobility by examining their access to essential services. Levels of enablement for work access in this dimension are determined by service areas, which represent the geographic zones that facilities like childcare, supermarkets, universities, banks, and clinics can serve based on proximity. The nearer these facilities are to where women live, the more supportive and enabling the environment becomes for their participation in the workforce.",
             "factors": [
                 {
                     "id": "women_s_travel_patterns",
@@ -272,7 +272,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Women\u2019s Travel Patterns (WTP) refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies, and green spaces crucial."
+                    "description": "Women’s Travel Patterns (WTP) refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies, and green spaces crucial."
                 },
                 {
                     "id": "access_to_public_transport",
@@ -295,6 +295,7 @@
                             "use_index_score_with_ghsl": 0,
                             "default_multi_buffer_distances": "250, 500, 750, 1000, 1500",
                             "use_multi_buffer_point": 1,
+                            "osm_download_enabled": 1,
                             "default_single_buffer_distance": 0,
                             "use_single_buffer_point": 0,
                             "use_classify_polygon_into_classes": 0,
@@ -309,7 +310,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Access to Public Transport focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services."
+                    "description": "Access to Public Transport focuses on the availability and proximity of public transportation stops, especially those who rely on buses, trains, or trams to access jobs, education, and essential services."
                 },
                 {
                     "id": "access_to_health_facilities",
@@ -369,6 +370,7 @@
                             "use_index_score_with_ghsl": 0,
                             "default_multi_buffer_distances": "2000, 4000, 6000, 8000, 10000",
                             "use_multi_buffer_point": 1,
+                            "osm_download_enabled": 1,
                             "default_single_buffer_distance": 0,
                             "use_single_buffer_point": 0,
                             "use_classify_polygon_into_classes": 0,
@@ -406,6 +408,7 @@
                             "use_index_score_with_ghsl": 0,
                             "default_multi_buffer_distances": "500, 1000, 1500, 2000, 3000",
                             "use_multi_buffer_point": 1,
+                            "osm_download_enabled": 1,
                             "default_single_buffer_distance": 0,
                             "use_single_buffer_point": 0,
                             "use_classify_polygon_into_classes": 0,
@@ -420,7 +423,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Access to Financial Facilities focuses on the proximity of banks and financial institutions, which is essential for women\u2019s economic empowerment and ability to access credit."
+                    "description": "Access to Financial Facilities focuses on the proximity of banks and financial institutions, which is essential for women’s economic empowerment and ability to access credit."
                 }
             ]
         },
@@ -430,7 +433,7 @@
             "name": "Place Characterization",
             "default_analysis_weighting": 0.45,
             "analysis_weighting": 0.45,
-            "description": "The Place-Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence women\u2019s ability to participate in the workforce.",
+            "description": "The Place-Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence women’s ability to participate in the workforce.",
             "factors": [
                 {
                     "id": "active_transport",
@@ -468,7 +471,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Active Transport refers to the presence of walkable environments and cycling infrastructure, as women often rely on walking or cycling for their daily commutes and errands."
+                    "description": "Active Transport refers to the presence of walkable infrastructure and is based on different road types that are assessed with respect to the possibility of walking and/ or cycling."
                 },
                 {
                     "id": "safety",
@@ -505,7 +508,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Safety addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women\u2019s ability to move freely, seek employment, and access essential services."
+                    "description": "Safety addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services."
                 },
                 {
                     "id": "fcv",
@@ -542,7 +545,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Fragility, Conflict, and Violence (FCV) considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase women\u2019s vulnerability and limit their access to employment and essential services."
+                    "description": "Fragility, Conflict, and Violence (FCV) considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase women’s vulnerability and limit their access to employment and essential services."
                 },
                 {
                     "id": "education",
@@ -616,7 +619,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Digital Inclusion assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training band education opportunities, and use financial services."
+                    "description": "Digital Inclusion assesses the presence of digital infrastructure in a specific location, which is essential for people to pursue job opportunities, access training and education opportunities, and use financial services. Each polygon is assigned a normalized value on a scale from 0 to 5 based on the proportion of people with internet access, masked using the Ookla dataset where internet coverage has been mapped."
                 },
                 {
                     "id": "environmental_hazards",
@@ -761,7 +764,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Environmental Hazards relate to the impact of environmental risks, such as floods, droughts, landslides, fires, and extreme weather events, which can disrupt job stability, particularly for women in vulnerable sectors."
+                    "description": "Environmental Hazards relate to the impact of environmental risks, such as floods, droughts, landslides, fires, and extreme weather events, which can disrupt job stability."
                 },
                 {
                     "id": "water_sanitation",
@@ -798,7 +801,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Water and Sanitation concerns the availability of clean water and sanitation facilities, affecting women\u2019s time allocation and capacity to engage in employment."
+                    "description": "Water and Sanitation evaluate consumer access to clean water and sanitation by mapping points of interest with available services and treating them as accessible locations."
                 }
             ]
         }
