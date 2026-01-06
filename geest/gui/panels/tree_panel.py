@@ -591,7 +591,8 @@ class TreePanel(QWidget):
             return
 
         women_considerations_enabled = self.json_data.get("women_considerations_enabled", True)
-        log_message(f"Women considerations enabled: {women_considerations_enabled}")
+        eplex_score = self.json_data.get("eplex_score", 0.0)
+        log_message(f"Women considerations enabled: {women_considerations_enabled}, EPLEX score: {eplex_score}")
 
         # Factors affected by women considerations setting
         women_specific_factors = [
@@ -614,6 +615,11 @@ class TreePanel(QWidget):
             dimension = root_item.child(dim_idx)
             if not dimension:
                 continue
+
+            # Propagate settings to Contextual dimension item attributes
+            if dimension.attribute("id", "").lower() == "contextual":
+                dimension.set_attribute("women_considerations_enabled", women_considerations_enabled)
+                dimension.set_attribute("eplex_score", eplex_score)
 
             # Iterate through factors in this dimension
             for factor_idx in range(dimension.childCount()):

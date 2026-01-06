@@ -66,44 +66,32 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
         """
         # Check if this is the Contextual dimension
         if self.id == "contextual":
-            # Load model.json to check women considerations setting
-            model_path = os.path.join(self.working_directory, "model.json")
-            if os.path.exists(model_path):
-                try:
-                    with open(model_path, "r") as f:
-                        model_data = json.load(f)
+            # Read configuration from item attributes (proper architecture)
+            women_considerations_enabled = self.item.attribute("women_considerations_enabled", True)
+            eplex_score = self.item.attribute("eplex_score", 0.0)
 
-                    women_considerations_enabled = model_data.get("women_considerations_enabled", True)
-                    eplex_score = model_data.get("eplex_score", 0.0)
-
-                    if not women_considerations_enabled:
-                        log_message(
-                            f"Using EPLEX score ({eplex_score}) for Contextual dimension (women considerations disabled)",
-                            tag="Geest",
-                            level=Qgis.Info,
-                        )
-                        # Find a template raster and create EPLEX raster
-                        template_path = self._find_template_raster(index)
-                        if template_path:
-                            output_path = os.path.join(
-                                self.workflow_directory,
-                                os.path.basename(self.workflow_directory),
-                                f"contextual_masked_{index}.tif",
-                            )
-                            return create_eplex_raster(eplex_score, template_path, output_path)
-                        else:
-                            log_message(
-                                "Could not create EPLEX raster: no template raster found",
-                                tag="Geest",
-                                level=Qgis.Warning,
-                            )
-                            return None
-                except Exception as e:
+            if not women_considerations_enabled:
+                log_message(
+                    f"Using EPLEX score ({eplex_score}) for Contextual dimension (women considerations disabled)",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                # Find a template raster and create EPLEX raster
+                template_path = self._find_template_raster(index)
+                if template_path:
+                    output_path = os.path.join(
+                        self.workflow_directory,
+                        os.path.basename(self.workflow_directory),
+                        f"contextual_masked_{index}.tif",
+                    )
+                    return create_eplex_raster(eplex_score, template_path, output_path)
+                else:
                     log_message(
-                        f"Error reading model.json for EPLEX check: {e}",
+                        "Could not create EPLEX raster: no template raster found",
                         tag="Geest",
                         level=Qgis.Warning,
                     )
+                    return None
 
         # Otherwise, use the standard aggregation process
         return super()._process_aggregate_for_area(current_area, clip_area, current_bbox, index)

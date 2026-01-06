@@ -8,19 +8,21 @@ import urllib.parse
 
 from qgis.core import (
     Qgis,
+    QgsApplication,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
     QgsMapLayerProxyModel,
     QgsProject,
     QgsRectangle,
+    QgsVectorLayer,
 )
 from qgis.gui import QgsMapLayerComboBox
-from qgis.PyQt.QtCore import QSettings, Qt
+from qgis.PyQt.QtCore import QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QFileDialog, QLineEdit, QPushButton, QToolButton
+from qgis.PyQt.QtWidgets import QFileDialog, QLineEdit, QMessageBox, QPushButton, QToolButton
 
 from geest.core.osm_downloaders import OSMDownloadType
-from geest.gui.widgets import OSMDownloadWidget
+from geest.core.tasks.osm_downloader_task import OSMDownloaderTask
 from geest.utilities import log_message, resources_path
 
 from .base_datasource_widget import BaseDataSourceWidget
@@ -267,13 +269,9 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         self.layer_combo.setFocus()
         self.update_attributes()
 
-    def start_osm_download(self):
-        """Start OSM data download process."""
+    def start_osm_download(self) -> None:
+        """Start OSM data download process using proper QgsTask integration."""
         log_message("Starting OSM download...", tag="Geest", level=Qgis.Info)
-
-        from qgis.PyQt.QtWidgets import QMessageBox
-        from qgis.PyQt.QtCore import QSettings
-        from geest.gui.widgets.osm_download_widget import OSMDownloadWorker
 
         project = QgsProject.instance()
         if not project:
@@ -288,38 +286,74 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             )
             return
 
-        # Calculate extent from all project layers
+        # Check for study area geopackage
+        study_area_dir = os.path.join(working_directory, "study_area")
+        gpkg_path = os.path.join(study_area_dir, "study_area.gpkg")
+
+        if not os.path.exists(gpkg_path):
+            QMessageBox.warning(
+                self,
+                "Study Area Required",
+                "Please create a study area first before downloading OSM data.\n\n"
+                "Use 'Create New Project' to define your study area.",
+            )
+            return
+
+        # Load study area extent from geopackage (most reliable source)
         extent = QgsRectangle()
-        layers = project.mapLayers().values()
-        project_crs = project.crs() if project.crs().isValid() else QgsCoordinateReferenceSystem("EPSG:4326")
+        study_area_layer = QgsVectorLayer(f"{gpkg_path}|layername=study_area_bboxes", "temp_bbox", "ogr")
 
-        if layers:
-            for layer in layers:
-                if layer.extent().isFinite():
-                    if extent.isEmpty():
-                        extent = layer.extent()
-                    else:
-                        extent.combineExtentWith(layer.extent())
+        if study_area_layer.isValid() and study_area_layer.featureCount() > 0:
+            extent = study_area_layer.extent()
+            source_crs = study_area_layer.crs()
 
-        if extent.isEmpty() or not extent.isFinite():
-            extent = QgsRectangle(-180, -90, 180, 90)
-            log_message("Using world extent for OSM download", tag="Geest", level=Qgis.Warning)
-        else:
             # Transform extent to EPSG:4326 (required by Overpass API)
-            if project_crs.authid() != "EPSG:4326":
+            if source_crs.authid() != "EPSG:4326":
                 transform = QgsCoordinateTransform(
-                    project_crs,
+                    source_crs,
                     QgsCoordinateReferenceSystem("EPSG:4326"),
                     project,
                 )
                 extent = transform.transformBoundingBox(extent)
                 log_message(
-                    f"Transformed extent from {project_crs.authid()} to EPSG:4326", tag="Geest", level=Qgis.Info
+                    f"Using study area extent, transformed from {source_crs.authid()} to EPSG:4326",
+                    tag="Geest",
+                    level=Qgis.Info,
                 )
+            else:
+                log_message("Using study area extent (already in EPSG:4326)", tag="Geest", level=Qgis.Info)
+        else:
+            # Fallback: try to get extent from loaded project layers
+            log_message(
+                "Could not load study area bboxes, falling back to project layers", tag="Geest", level=Qgis.Warning
+            )
+            layers = project.mapLayers().values()
+            project_crs = project.crs() if project.crs().isValid() else QgsCoordinateReferenceSystem("EPSG:4326")
 
-        study_area_dir = os.path.join(working_directory, "study_area")
-        if not os.path.exists(study_area_dir):
-            QMessageBox.warning(self, "Error", "Study area directory not found. Please create a project first.")
+            if layers:
+                for layer in layers:
+                    if layer.extent().isFinite():
+                        if extent.isEmpty():
+                            extent = layer.extent()
+                        else:
+                            extent.combineExtentWith(layer.extent())
+
+                if not extent.isEmpty() and extent.isFinite() and project_crs.authid() != "EPSG:4326":
+                    transform = QgsCoordinateTransform(
+                        project_crs,
+                        QgsCoordinateReferenceSystem("EPSG:4326"),
+                        project,
+                    )
+                    extent = transform.transformBoundingBox(extent)
+
+        # Final validation
+        if extent.isEmpty() or not extent.isFinite():
+            QMessageBox.warning(
+                self,
+                "Invalid Extent",
+                "Could not determine a valid extent for OSM download.\n\n"
+                "Please ensure your study area is properly configured.",
+            )
             return
 
         if self.osm_download_type is None:
@@ -342,19 +376,26 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.osm_download_button.setStyleSheet("")
 
         try:
-            self.osm_worker = OSMDownloadWorker(
-                download_type=self.osm_download_type,
+            # Create task using proper QgsTask-based approach
+            self.osm_task = OSMDownloaderTask(
+                osm_download_type=self.osm_download_type,
                 extents=extent,
                 output_path=output_file_path,
-                output_crs=output_crs,
-                filename=filename,
+                crs=output_crs,
+                use_cache=False,
+                delete_gpkg=True,
             )
-            self.osm_worker.finished.connect(self.on_osm_download_finished)
-            self.osm_worker.error.connect(self.on_osm_download_error)
-            self.osm_worker.progress.connect(self.update_button_progress)
-            self.osm_worker.start()
 
-            log_message("OSM download started in background", tag="Geest", level=Qgis.Info)
+            # Connect signals
+            self.osm_task.progress_updated.connect(self.update_button_progress)
+            self.osm_task.error_occurred.connect(self.on_osm_download_error)
+            self.osm_task.taskCompleted.connect(lambda: self.on_osm_download_finished(output_file_path))
+            self.osm_task.taskTerminated.connect(lambda: self.on_osm_download_error("Download was cancelled"))
+
+            # Add to QGIS task manager (proper architecture)
+            QgsApplication.taskManager().addTask(self.osm_task)
+
+            log_message("OSM download task added to QGIS task manager", tag="Geest", level=Qgis.Info)
         except Exception as e:
             log_message(f"Error starting OSM download: {e}", tag="Geest", level=Qgis.Critical)
             import traceback
@@ -376,11 +417,8 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             elif "complete" in message.lower():
                 self.osm_download_button.setText("Complete!")
 
-    def on_osm_download_finished(self, gpkg_path: str):
+    def on_osm_download_finished(self, gpkg_path: str) -> None:
         """Handle completion of OSM download."""
-        from qgis.core import QgsVectorLayer
-        import os
-
         log_message(f"OSM download completed: {gpkg_path}", tag="Geest", level=Qgis.Info)
 
         if os.path.isdir(gpkg_path):
@@ -412,8 +450,6 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             if self.osm_download_button:
                 self.osm_download_button.setText("Downloaded!")
                 self.osm_download_button.setStyleSheet("background-color: #ccffcc;")
-                from qgis.PyQt.QtCore import QTimer
-
                 QTimer.singleShot(2000, lambda: self.reset_osm_button())
         else:
             log_message(f"Failed to load layer from: {gpkg_path}", tag="Geest", level=Qgis.Critical)
@@ -422,7 +458,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                 self.osm_download_button.setStyleSheet("background-color: #ffcccc;")
                 self.osm_download_button.setEnabled(True)
 
-    def on_osm_download_error(self, error_message: str):
+    def on_osm_download_error(self, error_message: str) -> None:
         """Handle OSM download errors."""
         log_message(f"OSM download error: {error_message}", tag="Geest", level=Qgis.Critical)
 
@@ -431,7 +467,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.osm_download_button.setStyleSheet("background-color: #ffcccc;")
             self.osm_download_button.setEnabled(True)
 
-    def reset_osm_button(self):
+    def reset_osm_button(self) -> None:
         """Reset OSM download button to initial state."""
         if self.osm_download_button:
             self.osm_download_button.setText("Get from OSM")
