@@ -11,7 +11,8 @@ event_scores = {
     "Explosions/Remote violence": 1,
     "Violence against civilians": 2,
     "Protests": 4,
-    "Riots": 3,
+    "Riots": 4,
+    "No events": 5,
 }
 buffer_distances = {
     "Battles": 5000,
@@ -19,4 +20,5 @@ buffer_distances = {
     "Violence against civilians": 2000,
     "Protests": 1000,
     "Riots": 2000,
+    "No events": 0,
 }

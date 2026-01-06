@@ -119,26 +119,58 @@ class FactorAggregationDialog(CustomBaseDialog):
         self.configuration_widget.selection_changed.connect(self.populate_table)
         layout.addWidget(self.configuration_widget)
 
-        # Table setup
+        # Check if any indicator has OSM download enabled
+        self.has_osm_column = False
+        for guid in self.guids:
+            indicator_item = self.tree_item.getItemByGuid(guid)
+            if indicator_item and indicator_item.attributes().get("osm_download_enabled", 0) == 1:
+                self.has_osm_column = True
+                break
+
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.guids))
-        self.table.setColumnCount(6)
-        self.table.setHorizontalHeaderLabels(["Input", "Indicator", "Weight 0-1", "Use", "GUID", ""])
-        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
-        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
-        self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Fixed)
-        self.table.setColumnWidth(2, 100)  # Weight column
-        self.table.setColumnWidth(3, 50)  # Use column (checkbox)
-        self.table.setColumnWidth(5, 75)  # Reset column
-        # hide weight and reset column if only one indicator
+
+        if self.has_osm_column:
+            self.table.setColumnCount(7)
+            self.table.setHorizontalHeaderLabels(
+                ["Input", "OSM Download", "Indicator", "Weight 0-1", "Use", "GUID", ""]
+            )
+            self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+            self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Fixed)
+        else:
+            self.table.setColumnCount(6)
+            self.table.setHorizontalHeaderLabels(["Input", "Indicator", "Weight 0-1", "Use", "GUID", ""])
+            self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+            self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+            self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
+            self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
+            self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
+            self.table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Fixed)
+
+        if self.has_osm_column:
+            self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+            self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
+            self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Fixed)
+            self.table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
+            self.table.horizontalHeader().setSectionResizeMode(6, QHeaderView.Fixed)
+
+        if self.has_osm_column:
+            self.table.setColumnWidth(1, 120)
+            self.table.setColumnWidth(3, 100)
+            self.table.setColumnWidth(4, 50)
+            self.table.setColumnWidth(6, 75)
+        else:
+            self.table.setColumnWidth(2, 100)
+            self.table.setColumnWidth(3, 50)
+            self.table.setColumnWidth(5, 75)
+
         if not self.weighting_column_visible:
-            self.hide_widgets_in_column(2)
-            self.hide_widgets_in_column(5)
-            self.table.setColumnHidden(2, True)
-            self.table.setColumnHidden(5, True)
+            weight_col = 3 if self.has_osm_column else 2
+            reset_col = 6 if self.has_osm_column else 5
+            self.hide_widgets_in_column(weight_col)
+            self.hide_widgets_in_column(reset_col)
+            self.table.setColumnHidden(weight_col, True)
+            self.table.setColumnHidden(reset_col, True)
 
         layout.addWidget(self.table)
 
@@ -250,28 +282,41 @@ class FactorAggregationDialog(CustomBaseDialog):
     def populate_table(self):
         """⚙️ Populate table."""
         self.table.setRowCount(len(self.guids))
+
+        col_input = 0
+        col_osm = 1 if self.has_osm_column else None
+        col_indicator = 2 if self.has_osm_column else 1
+        col_weight = 3 if self.has_osm_column else 2
+        col_use = 4 if self.has_osm_column else 3
+        col_guid = 5 if self.has_osm_column else 4
+        col_reset = 6 if self.has_osm_column else 5
+
         for row, guid in enumerate(self.guids):
             item = self.tree_item.getItemByGuid(guid)
             attributes = item.attributes()
             log_message(f"Populating table for GUID: {guid}")
             log_message(f"Attributes: {item.attributesAsMarkdown()}")
-            # Data Source Widget
             data_source_widget = DataSourceWidgetFactory.create_widget(attributes["analysis_mode"], 1, attributes)
-            # Expand the widget to fill the available horizontal space
             data_source_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
             if not data_source_widget:
                 continue
             data_source_widget.data_changed.connect(self.refresh_configuration)
             default_factor_weighting = attributes.get("default_factor_weighting", 0)
-            self.table.setCellWidget(row, 0, data_source_widget)
+            self.table.setCellWidget(row, col_input, data_source_widget)
             self.data_sources[guid] = data_source_widget
 
-            # Indicator Name
+            if self.has_osm_column:
+                osm_button = None
+                if hasattr(data_source_widget, "get_osm_download_button"):
+                    osm_button = data_source_widget.get_osm_download_button()
+                if osm_button:
+                    osm_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                    self.table.setCellWidget(row, col_osm, osm_button)
+
             name_item = QTableWidgetItem(attributes.get("indicator", ""))
             name_item.setFlags(Qt.ItemIsEnabled)
-            self.table.setItem(row, 1, name_item)
+            self.table.setItem(row, col_indicator, name_item)
 
-            # Weighting
             if self.weighting_column_visible:
                 weighting_value = float(attributes.get("factor_weighting", 0.0))
                 weighting_item = QDoubleSpinBox()
@@ -280,38 +325,34 @@ class FactorAggregationDialog(CustomBaseDialog):
                 weighting_item.setSingleStep(0.01)
                 weighting_item.setValue(weighting_value)
                 weighting_item.valueChanged.connect(self.validate_weightings)
-                self.table.setCellWidget(row, 2, weighting_item)
+                self.table.setCellWidget(row, col_weight, weighting_item)
                 self.weightings[guid] = weighting_item
-                # Use (Check box)
                 checkbox_widget = self.create_checkbox_widget(row, weighting_value)
             else:
                 checkbox_widget = self.create_checkbox_widget(row, 1)
-            self.table.setCellWidget(row, 3, checkbox_widget)
+            self.table.setCellWidget(row, col_use, checkbox_widget)
 
-            # GUID
             guid_item = QTableWidgetItem(guid)
             guid_item.setFlags(Qt.ItemIsEnabled)
             guid_item.setToolTip(str(item.attributes()))
-            self.table.setItem(row, 4, guid_item)
+            self.table.setItem(row, col_guid, guid_item)
 
-            # Reset Button
             if self.weighting_column_visible:
                 reset_button = QPushButton("Reset")
                 reset_button.clicked.connect(
                     lambda checked, item=weighting_item, value=default_factor_weighting: item.setValue(value)
                 )
-                self.table.setCellWidget(row, 5, reset_button)
+                self.table.setCellWidget(row, col_reset, reset_button)
 
-        self.table.setColumnHidden(4, not self.guid_column_visible)  # Hide GUID column by default
-        self.validate_weightings()  # Initial validation check
-        # If we dont have the weightings column, we can enable the OK button
+        self.table.setColumnHidden(col_guid, not self.guid_column_visible)
+        self.validate_weightings()
         if not self.weighting_column_visible:
             self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
 
     def toggle_guid_column(self):
         """Toggle the visibility of the GUID column."""
         self.guid_column_visible = not self.guid_column_visible
-        self.table.setColumnHidden(4, not self.guid_column_visible)
+        self.table.setColumnHidden(5, not self.guid_column_visible)
 
     def hide_widgets_in_column(self, column: int):
         """Hide all widgets in the specified column."""
@@ -336,11 +377,11 @@ class FactorAggregationDialog(CustomBaseDialog):
             equal_weighting = 1.0 / len(enabled_rows)
 
         for row in enabled_rows:
-            widget = self.table.cellWidget(row, 2)  # Weight column
+            widget = self.table.cellWidget(row, 3)  # Weight column
             widget.setValue(equal_weighting)
         for row in range(self.table.rowCount()):
             if row not in enabled_rows:
-                widget = self.table.cellWidget(row, 2)
+                widget = self.table.cellWidget(row, 3)
                 widget.setValue(0)
         self.validate_weightings()
 
@@ -365,7 +406,7 @@ class FactorAggregationDialog(CustomBaseDialog):
         Returns:
             The result of the operation.
         """
-        container = self.table.cellWidget(row, 3)  # Use (Checkbox) column
+        container = self.table.cellWidget(row, 4)  # Use (Checkbox) column
         if container and isinstance(container, QWidget):
             layout = container.layout()
             if layout and layout.count() > 0:

@@ -313,8 +313,11 @@ class OSMDataDownloaderBase(ABC):
         log_message(f"GeoPackage written to: {self.output_path} table: {self.filename}")  # noqa E231
         log_message(f"Total processing time: {total_end - total_start:.2f}s")  # noqa E231
 
-    def process_point_response(self, response_data: str) -> None:
+    def process_point_response(self) -> None:
         """Process the OSM response and save it as a GeoPackage."""
+        # Read from XML file (consistent with process_line_response)
+        with open(self.output_xml_path, "r", encoding="utf-8") as f:
+            response_data = f.read()
         root = ET.fromstring(response_data)  # nosec B314
         layer = QgsVectorLayer("Point?crs=EPSG:4326", "OSM Point Data", "memory")
         provider = layer.dataProvider()
@@ -337,8 +340,11 @@ class OSMDataDownloaderBase(ABC):
         QgsVectorFileWriter.writeAsVectorFormat(layer, self.output_path, "UTF-8", layer.crs(), "GPKG")
         log_message(f"GeoPackage written to: {self.output_path}")
 
-    def process_polygon_response(self, response_data: str) -> None:
+    def process_polygon_response(self) -> None:
         """Process the OSM response and save it as a GeoPackage."""
+        # Read from XML file (consistent with process_line_response)
+        with open(self.output_xml_path, "r", encoding="utf-8") as f:
+            response_data = f.read()
         root = ET.fromstring(response_data)  # nosec B314
         layer = QgsVectorLayer("Polygon?crs=EPSG:4326", "OSM Polygon Data", "memory")
         provider = layer.dataProvider()
