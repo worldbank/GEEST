@@ -523,29 +523,14 @@ class StudyAreaProcessingTask(QgsTask):
         return True
 
     def _process_geometries(self, geometries_to_process):
-        """Process study area geometries in parallel or sequential mode.
+        """Process study area geometries sequentially.
 
         Args:
             geometries_to_process: List of dicts with 'geometry', 'normalized_name', 'area_name', 'is_multipart'
         """
-        study_area_workers = int(setting(key="study_area_workers", default=1))
-        study_area_workers = max(1, min(4, study_area_workers))
-
         total_areas = len(geometries_to_process)
-        log_message(f"Processing {total_areas} study areas with {study_area_workers} worker(s)")
-
-        if study_area_workers == 1 or total_areas == 1:
-            log_message("Using sequential study area processing")
-            self._process_geometries_sequential(geometries_to_process)
-        else:
-            log_message(f"Using parallel study area processing with {study_area_workers} workers")
-            try:
-                self._process_geometries_parallel(geometries_to_process, study_area_workers)
-            except Exception as e:
-                log_message(f"Parallel study area processing failed: {str(e)}", level="WARNING")
-                log_message("Falling back to sequential processing", level="WARNING")
-                log_message(traceback.format_exc(), level="WARNING")
-                self._process_geometries_sequential(geometries_to_process)
+        log_message(f"Processing {total_areas} study areas sequentially")
+        self._process_geometries_sequential(geometries_to_process)
 
     def _process_geometries_sequential(self, geometries_to_process):
         """Process study area geometries sequentially.
@@ -564,72 +549,6 @@ class StudyAreaProcessingTask(QgsTask):
                 self.process_singlepart_geometry(
                     geom_data["geometry"], geom_data["normalized_name"], geom_data["area_name"]
                 )
-
-    def _process_geometries_parallel(self, geometries_to_process, worker_count):
-        """Process study area geometries in parallel using ThreadPoolExecutor.
-
-        Args:
-            geometries_to_process: List of geometry dicts to process
-            worker_count: Number of parallel workers
-        """
-        completed_count = 0
-        failed_count = 0
-        progress_lock = threading.Lock()
-        total_areas = len(geometries_to_process)
-
-        def process_single_geometry(geom_data):
-            """Process a single study area geometry."""
-            try:
-                if geom_data["is_multipart"]:
-                    log_message(f"[Parallel] Processing multipart geometry: {geom_data['normalized_name']}")
-                    self.process_multipart_geometry(
-                        geom_data["geometry"], geom_data["normalized_name"], geom_data["area_name"]
-                    )
-                else:
-                    log_message(f"[Parallel] Processing singlepart geometry: {geom_data['normalized_name']}")
-                    self.process_singlepart_geometry(
-                        geom_data["geometry"], geom_data["normalized_name"], geom_data["area_name"]
-                    )
-                return (True, geom_data["normalized_name"])
-            except Exception as e:
-                log_message(f"Failed to process {geom_data['normalized_name']}: {str(e)}", level="ERROR")
-                log_message(traceback.format_exc(), level="ERROR")
-                return (False, geom_data["normalized_name"])
-
-        with ThreadPoolExecutor(max_workers=worker_count) as executor:
-            future_to_geom = {
-                executor.submit(process_single_geometry, geom_data): geom_data for geom_data in geometries_to_process
-            }
-
-            for future in as_completed(future_to_geom):
-                geom_data = future_to_geom[future]
-                try:
-                    success, name = future.result()
-
-                    with progress_lock:
-                        if success:
-                            completed_count += 1
-                        else:
-                            failed_count += 1
-                            self.error_count += 1
-
-                        total_processed = completed_count + failed_count
-                        try:
-                            current_progress = 5 + int((total_processed / total_areas) * 90)
-                            log_message(f"Study area progress: {total_processed}/{total_areas} ({current_progress}%)")
-                            self.setProgress(current_progress)
-                        except ZeroDivisionError:
-                            pass
-
-                except Exception as e:
-                    with progress_lock:
-                        failed_count += 1
-                        self.error_count += 1
-                    log_message(f"Study area {geom_data['normalized_name']} failed: {str(e)}", level="WARNING")
-                    log_message(traceback.format_exc(), level="WARNING")
-
-        if failed_count > 0:
-            log_message(f"Study area processing completed with {failed_count} failures", level="WARNING")
 
     ##########################################################################
     # Table creation logic
@@ -886,20 +805,9 @@ class StudyAreaProcessingTask(QgsTask):
             part_name = f"{normalized_name}_part{i}"
             parts_to_process.append((part_geom.Clone(), part_name))
 
-        part_workers = 1  # Sequential processing to avoid database lock contention
-
-        if part_workers == 1 or count == 1:
-            log_message(f"Processing {count} parts sequentially")
-            self._process_parts_sequential(parts_to_process, area_name)
-        else:
-            log_message(f"Processing {count} parts with {part_workers} workers")
-            try:
-                self._process_parts_parallel(parts_to_process, area_name, part_workers)
-            except Exception as e:
-                log_message(f"Parallel part processing failed: {str(e)}", level="WARNING")
-                log_message("Falling back to sequential part processing", level="WARNING")
-                log_message(traceback.format_exc(), level="WARNING")
-                self._process_parts_sequential(parts_to_process, area_name)
+        # Always process parts sequentially to avoid database lock contention
+        log_message(f"Processing {count} parts sequentially")
+        self._process_parts_sequential(parts_to_process, area_name)
 
     def _process_parts_sequential(self, parts_to_process, area_name):
         """Process geometry parts sequentially.
@@ -914,52 +822,6 @@ class StudyAreaProcessingTask(QgsTask):
             except Exception as e:
                 log_message(f"Failed to process part {part_name}: {str(e)}", level="ERROR")
                 self.error_count += 1
-
-    def _process_parts_parallel(self, parts_to_process, area_name, worker_count):
-        """Process geometry parts in parallel using ThreadPoolExecutor.
-
-        Args:
-            parts_to_process: List of (geometry, name) tuples
-            area_name: Original area name
-            worker_count: Number of parallel workers
-        """
-        failed_count = 0
-        progress_lock = threading.Lock()
-
-        def process_single_part(part_data):
-            """Process single geometry part in worker thread."""
-            part_geom, part_name = part_data
-            try:
-                self.process_singlepart_geometry(part_geom, part_name, area_name)
-                return (True, part_name)
-            except Exception as e:
-                log_message(f"Failed to process part {part_name}: {str(e)}", level="ERROR")
-                log_message(traceback.format_exc(), level="ERROR")
-                return (False, part_name)
-
-        with ThreadPoolExecutor(max_workers=worker_count) as executor:
-            future_to_part = {
-                executor.submit(process_single_part, part_data): part_data for part_data in parts_to_process
-            }
-
-            for future in as_completed(future_to_part):
-                part_data = future_to_part[future]
-                try:
-                    success, part_name = future.result()
-                    if not success:
-                        with progress_lock:
-                            failed_count += 1
-                            self.error_count += 1
-                    else:
-                        log_message(f"Part {part_name} completed successfully")
-                except Exception as e:
-                    with progress_lock:
-                        failed_count += 1
-                        self.error_count += 1
-                    log_message(f"Part {part_data[1]} failed: {str(e)}", level="WARNING")
-
-        if failed_count > 0:
-            log_message(f"Part processing completed with {failed_count} failures", level="WARNING")
 
     ##########################################################################
     # BBox handling
