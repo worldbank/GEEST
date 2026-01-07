@@ -688,7 +688,7 @@ class StudyAreaProcessingTask(QgsTask):
     ##########################################################################
     # Geometry processing
     ##########################################################################
-    def process_singlepart_geometry(self, geom, normalized_name, area_name):
+    def process_singlepart_geometry(self, geom, normalized_name, area_name, shared_layer=None):
         """
         Process a single-part geometry:
          1) Align bounding box
@@ -698,6 +698,13 @@ class StudyAreaProcessingTask(QgsTask):
          5) Create vector grid
          6) Create clip polygon
          7) Optionally create raster mask
+
+        Args:
+            geom: OGR geometry to process
+            normalized_name: Normalized name for this geometry
+            area_name: Original area name
+            shared_layer: Optional pre-opened layer for grid writing (when called from multipart context).
+                         If provided, uses shared writer thread instead of managing its own.
         """
         geometry_start_time = time.time()
 
@@ -759,7 +766,13 @@ class StudyAreaProcessingTask(QgsTask):
         # Create the grid
         log_message(f"Creating vector grid for {normalized_name}.")
         start_time = time.time()
-        self.create_and_save_grid(normalized_name, geom, aligned_bbox)
+        if shared_layer is not None:
+            # Use shared writer thread (multipart geometry context)
+            log_message(f"Using shared writer thread for {normalized_name}")
+            self._process_grid_chunks_for_geometry(shared_layer, normalized_name, geom, aligned_bbox)
+        else:
+            # Standalone singlepart geometry - manage own writer thread
+            self.create_and_save_grid(normalized_name, geom, aligned_bbox)
         self.set_status_tracking_table_value(normalized_name, "grid_processed", 1)
         self.set_status_tracking_table_value(normalized_name, "grid_creation_duration_secs", time.time() - start_time)
 
@@ -789,7 +802,10 @@ class StudyAreaProcessingTask(QgsTask):
         log_message(f"XXXXXXXXXXXX   Progress: {progress}% XXXXXXXXXXXXXXXXXXXXXXX")
 
     def process_multipart_geometry(self, geom, normalized_name, area_name):
-        """Process each part of a multi-part geometry with parallel or sequential execution.
+        """Process each part of a multi-part geometry with shared writer thread.
+
+        This method opens ONE dataset/layer and starts ONE writer thread for ALL parts,
+        eliminating blocking between parts and improving performance for large multipart geometries.
 
         Args:
             geom: OGR multi-part geometry
@@ -797,7 +813,7 @@ class StudyAreaProcessingTask(QgsTask):
             area_name: Original area name
         """
         count = geom.GetGeometryCount()
-        log_message(f"Processing {count} parts for {normalized_name}")
+        log_message(f"Processing {count} parts for {normalized_name} with shared writer thread")
 
         parts_to_process = []
         for i in range(count):
@@ -805,20 +821,51 @@ class StudyAreaProcessingTask(QgsTask):
             part_name = f"{normalized_name}_part{i}"
             parts_to_process.append((part_geom.Clone(), part_name))
 
-        # Always process parts sequentially to avoid database lock contention
-        log_message(f"Processing {count} parts sequentially")
-        self._process_parts_sequential(parts_to_process, area_name)
+        # Open grid layer and start writer thread ONCE for all parts
+        grid_layer_name = "study_area_grid"
+        self.create_grid_layer_if_not_exists(grid_layer_name)
 
-    def _process_parts_sequential(self, parts_to_process, area_name):
+        ds = ogr.Open(self.gpkg_path, 1)  # read-write
+        layer = ds.GetLayerByName(grid_layer_name)
+        if not layer:
+            raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
+
+        log_message(f"Starting shared writer thread for {count} parts")
+        self._start_writer_thread(layer, normalized_name)
+
+        try:
+            # Process all parts with shared writer
+            self._process_parts_sequential(parts_to_process, area_name, shared_layer=layer)
+        finally:
+            # Stop writer thread ONCE after all parts complete
+            log_message(f"Stopping shared writer thread after {count} parts")
+            writer_stopped = self._stop_writer_thread()
+
+            if writer_stopped:
+                if layer:
+                    layer.SyncToDisk()
+                if ds:
+                    ds.FlushCache()
+                ds = None
+                log_message("Shared dataset closed and flushed to disk")
+
+            # Print metrics summary for multipart geometry
+            log_message("=== Multipart Geometry Metrics Summary ===")
+            for k, v in self.metrics.items():
+                log_message(f"{k}: {v:.4f} seconds")
+            self.total_cells += self.current_geom_actual_cell_count
+
+    def _process_parts_sequential(self, parts_to_process, area_name, shared_layer=None):
         """Process geometry parts sequentially.
 
         Args:
             parts_to_process: List of (geometry, name) tuples
             area_name: Original area name
+            shared_layer: Optional pre-opened layer for grid writing (for multipart geometries)
         """
         for part_geom, part_name in parts_to_process:
             try:
-                self.process_singlepart_geometry(part_geom, part_name, area_name)
+                self.process_singlepart_geometry(part_geom, part_name, area_name, shared_layer=shared_layer)
             except Exception as e:
                 log_message(f"Failed to process part {part_name}: {str(e)}", level="ERROR")
                 self.error_count += 1
@@ -1144,22 +1191,20 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(f"Batch write traceback: {traceback.format_exc()}", level="ERROR")
             raise
 
-    def create_and_save_grid(self, normalized_name, geom, bbox):
-        """Create vector grid and write intersecting cells to study_area_grid layer.
+    def _process_grid_chunks_for_geometry(self, layer, normalized_name, geom, bbox):
+        """Process grid chunks for a single geometry (core chunk processing logic).
+
+        This method assumes:
+        - Layer is already open
+        - Writer thread is already started
+        - Does NOT manage writer lifecycle or dataset connections
 
         Args:
+            layer: Already-open OGR layer for writing grid cells
             normalized_name: Name of study area
             geom: OGR geometry defining area boundary
             bbox: Tuple of (xmin, xmax, ymin, ymax) for grid extent
         """
-        grid_layer_name = "study_area_grid"
-        self.create_grid_layer_if_not_exists(grid_layer_name)
-
-        ds = ogr.Open(self.gpkg_path, 1)  # read-write
-        layer = ds.GetLayerByName(grid_layer_name)
-        if not layer:
-            raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
-
         xmin, xmax, ymin, ymax = bbox
         cell_size = self.cell_size_m
         chunk_size = int(setting(key="chunk_size", default=50))
@@ -1216,24 +1261,50 @@ class StudyAreaProcessingTask(QgsTask):
 
         self.feedback.setProgress(0)
 
-        # Start dedicated writer thread
-        self._start_writer_thread(layer, normalized_name)
-
-        try:
-            if worker_count == 1:
-                log_message("Using sequential processing (worker_count=1)")
-                self._process_chunks_sequential(layer, chunks_to_process, geom, cell_size, normalized_name, feedback)
-            else:
-                log_message(f"Using parallel processing with {worker_count} workers")
+        # Process chunks (writer thread must already be started by caller)
+        if worker_count == 1:
+            log_message("Using sequential processing (worker_count=1)")
+            self._process_chunks_sequential(layer, chunks_to_process, geom, cell_size, normalized_name, feedback)
+        else:
+            log_message(f"Using parallel processing with {worker_count} workers")
+            try:
                 self._process_chunks_parallel(
                     layer, chunks_to_process, geom, cell_size, normalized_name, feedback, worker_count
                 )
-        except Exception as e:
-            log_message(f"Parallel processing failed: {str(e)}", level="WARNING")
-            log_message("Falling back to sequential processing", level="WARNING")
-            log_message(traceback.format_exc(), level="WARNING")
-            self._process_chunks_sequential(layer, chunks_to_process, geom, cell_size, normalized_name, feedback)
+            except Exception as e:
+                log_message(f"Parallel processing failed: {str(e)}", level="WARNING")
+                log_message("Falling back to sequential processing", level="WARNING")
+                log_message(traceback.format_exc(), level="WARNING")
+                self._process_chunks_sequential(layer, chunks_to_process, geom, cell_size, normalized_name, feedback)
+        log_message(f"Grid creation completed for area {normalized_name}.")
+
+    def create_and_save_grid(self, normalized_name, geom, bbox):
+        """Create vector grid and write intersecting cells to study_area_grid layer.
+
+        This is the main entry point for grid creation, managing writer thread lifecycle.
+        For singlepart geometries or when called standalone.
+
+        Args:
+            normalized_name: Name of study area
+            geom: OGR geometry defining area boundary
+            bbox: Tuple of (xmin, xmax, ymin, ymax) for grid extent
+        """
+        grid_layer_name = "study_area_grid"
+        self.create_grid_layer_if_not_exists(grid_layer_name)
+
+        ds = ogr.Open(self.gpkg_path, 1)  # read-write
+        layer = ds.GetLayerByName(grid_layer_name)
+        if not layer:
+            raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
+
+        # Start dedicated writer thread for this geometry
+        self._start_writer_thread(layer, normalized_name)
+
+        try:
+            # Process grid chunks
+            self._process_grid_chunks_for_geometry(layer, normalized_name, geom, bbox)
         finally:
+            # Stop writer thread and cleanup
             writer_stopped = self._stop_writer_thread()
 
             if writer_stopped:
@@ -1243,14 +1314,12 @@ class StudyAreaProcessingTask(QgsTask):
                     ds.FlushCache()
                 ds = None
                 log_message("Dataset closed and flushed to disk")
-        # ----------------------------
+
         # Print out metrics summary
-        # ----------------------------
         log_message("=== Metrics Summary ===")
         for k, v in self.metrics.items():
             log_message(f"{k}: {v:.4f} seconds")  # noqa: E231
         self.total_cells += self.current_geom_actual_cell_count
-        log_message(f"Grid creation completed for area {normalized_name}.")
 
     def _process_chunks_sequential(self, layer, chunks, geom, cell_size, normalized_name, feedback):
         """Process chunks sequentially (original implementation).
