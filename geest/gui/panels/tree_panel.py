@@ -618,8 +618,8 @@ class TreePanel(QWidget):
 
             # Propagate settings to Contextual dimension item attributes
             if dimension.attribute("id", "").lower() == "contextual":
-                dimension.set_attribute("women_considerations_enabled", women_considerations_enabled)
-                dimension.set_attribute("eplex_score", eplex_score)
+                dimension.setAttribute("women_considerations_enabled", women_considerations_enabled)
+                dimension.setAttribute("eplex_score", eplex_score)
 
             # Iterate through factors in this dimension
             for factor_idx in range(dimension.childCount()):
