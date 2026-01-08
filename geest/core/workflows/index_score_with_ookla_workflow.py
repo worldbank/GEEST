@@ -128,7 +128,7 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
             feedback=bridge_feedback,  # Use bridge feedback for progress visibility
         )
         downloader.extract_data(output_crs=self.target_crs)
-        self.ookla_layer_path = os.path.join(ookla_layer_path, "ookla_combined.parquet")
+        self.ookla_layer_path = os.path.join(ookla_layer_path, "ookla_combined.gpkg")
         self.ookla_downloaded = True
         log_message("OOKLA data download complete")
 
