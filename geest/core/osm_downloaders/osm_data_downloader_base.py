@@ -410,10 +410,7 @@ class OSMDataDownloaderBase(ABC):
         provider = layer.dataProvider()
 
         # Add attributes: id and geometry type
-        provider.addAttributes([
-            QgsField("osm_id", QVariant.String),
-            QgsField("geom_type", QVariant.String)
-        ])
+        provider.addAttributes([QgsField("osm_id", QVariant.String), QgsField("geom_type", QVariant.String)])
         layer.updateFields()
 
         features_added = 0
@@ -476,11 +473,5 @@ class OSMDataDownloaderBase(ABC):
         log_message(f"Total features: {features_added} ({points_count} points + {polygon_count} polygon centroids)")
 
         # Write to GeoPackage
-        QgsVectorFileWriter.writeAsVectorFormat(
-            layer,
-            self.output_path,
-            "UTF-8",
-            layer.crs(),
-            "GPKG"
-        )
+        QgsVectorFileWriter.writeAsVectorFormat(layer, self.output_path, "UTF-8", layer.crs(), "GPKG")
         log_message(f"GeoPackage written to: {self.output_path}")
