@@ -13,12 +13,14 @@ class OSMFinancialDownloader(OSMDataDownloaderBase):
     Downloads financial facilities from OpenStreetMap.
 
     This includes:
-    - Banks
+    - Banks (amenity, office, building tags)
+    - Financial offices
     - ATMs
     - Microfinance institutions
     - Money transfer services
     - Credit unions
     - Bureau de change
+    - Mobile money agents
     """
 
     def __init__(
@@ -53,7 +55,8 @@ class OSMFinancialDownloader(OSMDataDownloaderBase):
             feedback=feedback,
         )
         # Set the output type - financial facilities can be points or polygons
-        self._set_output_type("point")
+        # Use mixed_to_point to handle both and convert polygons to centroids
+        self._set_output_type("mixed_to_point")
 
         # Define the Overpass query for financial facilities
         osm_query = """[out:xml][timeout:60];
@@ -61,20 +64,38 @@ class OSMFinancialDownloader(OSMDataDownloaderBase):
   node["amenity"="bank"]({{bbox}});
   way["amenity"="bank"]({{bbox}});
   relation["amenity"="bank"]({{bbox}});
+
+  node["office"="financial"]({{bbox}});
+  way["office"="financial"]({{bbox}});
+  relation["office"="financial"]({{bbox}});
+
+  node["office"="bank"]({{bbox}});
+  way["office"="bank"]({{bbox}});
+  relation["office"="bank"]({{bbox}});
+
+  node["building"="bank"]({{bbox}});
+  way["building"="bank"]({{bbox}});
+  relation["building"="bank"]({{bbox}});
+
   node["amenity"="atm"]({{bbox}});
   way["amenity"="atm"]({{bbox}});
+
   node["amenity"="microfinance"]({{bbox}});
   way["amenity"="microfinance"]({{bbox}});
   relation["amenity"="microfinance"]({{bbox}});
+
   node["amenity"="money_transfer"]({{bbox}});
   way["amenity"="money_transfer"]({{bbox}});
   relation["amenity"="money_transfer"]({{bbox}});
+
   node["amenity"="credit_union"]({{bbox}});
   way["amenity"="credit_union"]({{bbox}});
   relation["amenity"="credit_union"]({{bbox}});
+
   node["amenity"="bureau_de_change"]({{bbox}});
   way["amenity"="bureau_de_change"]({{bbox}});
   relation["amenity"="bureau_de_change"]({{bbox}});
+
   node["amenity"="mobile_money_agent"]({{bbox}});
   way["amenity"="mobile_money_agent"]({{bbox}});
 );

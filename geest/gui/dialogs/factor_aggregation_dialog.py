@@ -5,7 +5,7 @@ This module contains functionality for factor aggregation dialog.
 """
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QUrl
-from qgis.PyQt.QtGui import QDesktopServices, QPixmap
+from qgis.PyQt.QtGui import QDesktopServices, QPixmap, QFont
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
     QDialogButtonBox,
@@ -155,7 +155,7 @@ class FactorAggregationDialog(CustomBaseDialog):
             self.table.horizontalHeader().setSectionResizeMode(6, QHeaderView.Fixed)
 
         if self.has_osm_column:
-            self.table.setColumnWidth(1, 120)
+            self.table.setColumnWidth(1, 170)
             self.table.setColumnWidth(3, 100)
             self.table.setColumnWidth(4, 50)
             self.table.setColumnWidth(6, 75)
@@ -164,15 +164,26 @@ class FactorAggregationDialog(CustomBaseDialog):
             self.table.setColumnWidth(3, 50)
             self.table.setColumnWidth(5, 75)
 
-        if not self.weighting_column_visible:
-            weight_col = 3 if self.has_osm_column else 2
-            reset_col = 6 if self.has_osm_column else 5
-            self.hide_widgets_in_column(weight_col)
-            self.hide_widgets_in_column(reset_col)
-            self.table.setColumnHidden(weight_col, True)
-            self.table.setColumnHidden(reset_col, True)
-
         layout.addWidget(self.table)
+
+        # Add OSM disclaimer in footer if any OSM downloads are available
+        if self.has_osm_column:
+            self.osm_disclaimer_label = QLabel()
+            self.osm_disclaimer_label.setWordWrap(True)
+            self.osm_disclaimer_label.setText(
+                "<b>OSM Data Disclaimer:</b> The OSM downloader may return a mix of point and polygon geometries "
+                "depending on how features are mapped in OpenStreetMap. Polygon features should be converted to "
+                "points (e.g., centroids) and merged with the downloaded points to form a complete point input layer "
+                "for this indicator."
+            )
+            disclaimer_font = QFont()
+            disclaimer_font.setPointSize(9)
+            self.osm_disclaimer_label.setFont(disclaimer_font)
+            self.osm_disclaimer_label.setStyleSheet(
+                "QLabel { color: #333333; background-color: #f0f0f0; padding: 8px; border-radius: 4px; margin-top: 8px; }"
+            )
+            self.osm_disclaimer_label.setVisible(False)  # Hidden by default
+            layout.addWidget(self.osm_disclaimer_label)
 
         help_layout = QHBoxLayout()
         help_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
@@ -267,8 +278,13 @@ class FactorAggregationDialog(CustomBaseDialog):
             state: State.
         """
         is_enabled = state == Qt.Checked
+        # Determine columns to skip (Use checkbox and Reset columns)
+        skip_cols = [self.col_use]
+        if self.weighting_column_visible:
+            skip_cols.append(self.col_reset)
+
         for col in range(self.table.columnCount()):
-            if col in (3, 5):  # Skip Use (checkbox) and Reset columns
+            if col in skip_cols:
                 continue
             widget = self.table.cellWidget(row, col)
             if widget:
@@ -281,28 +297,34 @@ class FactorAggregationDialog(CustomBaseDialog):
 
     def populate_table(self):
         """⚙️ Populate table."""
+        # Start with the base number of rows, we'll add more for disclaimers
         self.table.setRowCount(len(self.guids))
 
-        col_input = 0
-        col_osm = 1 if self.has_osm_column else None
-        col_indicator = 2 if self.has_osm_column else 1
-        col_weight = 3 if self.has_osm_column else 2
-        col_use = 4 if self.has_osm_column else 3
-        col_guid = 5 if self.has_osm_column else 4
-        col_reset = 6 if self.has_osm_column else 5
+        # Calculate column indices and store as instance variables for use in other methods
+        self.col_input = 0
+        self.col_osm = 1 if self.has_osm_column else None
+        self.col_indicator = 2 if self.has_osm_column else 1
+        self.col_weight = 3 if self.has_osm_column else 2
+        self.col_use = 4 if self.has_osm_column else 3
+        self.col_guid = 5 if self.has_osm_column else 4
+        self.col_reset = 6 if self.has_osm_column else 5
 
-        for row, guid in enumerate(self.guids):
+        # Track if we need to show the OSM disclaimer in footer
+        has_osm_download = False
+
+        for guid_index, guid in enumerate(self.guids):
+            row = guid_index
             item = self.tree_item.getItemByGuid(guid)
             attributes = item.attributes()
             log_message(f"Populating table for GUID: {guid}")
             log_message(f"Attributes: {item.attributesAsMarkdown()}")
             data_source_widget = DataSourceWidgetFactory.create_widget(attributes["analysis_mode"], 1, attributes)
-            data_source_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
             if not data_source_widget:
                 continue
+            data_source_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
             data_source_widget.data_changed.connect(self.refresh_configuration)
             default_factor_weighting = attributes.get("default_factor_weighting", 0)
-            self.table.setCellWidget(row, col_input, data_source_widget)
+            self.table.setCellWidget(row, self.col_input, data_source_widget)
             self.data_sources[guid] = data_source_widget
 
             if self.has_osm_column:
@@ -311,11 +333,12 @@ class FactorAggregationDialog(CustomBaseDialog):
                     osm_button = data_source_widget.get_osm_download_button()
                 if osm_button:
                     osm_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-                    self.table.setCellWidget(row, col_osm, osm_button)
+                    self.table.setCellWidget(row, self.col_osm, osm_button)
+                    has_osm_download = True
 
             name_item = QTableWidgetItem(attributes.get("indicator", ""))
             name_item.setFlags(Qt.ItemIsEnabled)
-            self.table.setItem(row, col_indicator, name_item)
+            self.table.setItem(row, self.col_indicator, name_item)
 
             if self.weighting_column_visible:
                 weighting_value = float(attributes.get("factor_weighting", 0.0))
@@ -325,34 +348,49 @@ class FactorAggregationDialog(CustomBaseDialog):
                 weighting_item.setSingleStep(0.01)
                 weighting_item.setValue(weighting_value)
                 weighting_item.valueChanged.connect(self.validate_weightings)
-                self.table.setCellWidget(row, col_weight, weighting_item)
+                self.table.setCellWidget(row, self.col_weight, weighting_item)
                 self.weightings[guid] = weighting_item
                 checkbox_widget = self.create_checkbox_widget(row, weighting_value)
             else:
                 checkbox_widget = self.create_checkbox_widget(row, 1)
-            self.table.setCellWidget(row, col_use, checkbox_widget)
+            self.table.setCellWidget(row, self.col_use, checkbox_widget)
 
             guid_item = QTableWidgetItem(guid)
             guid_item.setFlags(Qt.ItemIsEnabled)
             guid_item.setToolTip(str(item.attributes()))
-            self.table.setItem(row, col_guid, guid_item)
+            self.table.setItem(row, self.col_guid, guid_item)
 
             if self.weighting_column_visible:
                 reset_button = QPushButton("Reset")
                 reset_button.clicked.connect(
                     lambda checked, item=weighting_item, value=default_factor_weighting: item.setValue(value)
                 )
-                self.table.setCellWidget(row, col_reset, reset_button)
+                self.table.setCellWidget(row, self.col_reset, reset_button)
 
-        self.table.setColumnHidden(col_guid, not self.guid_column_visible)
+        self.table.setColumnHidden(self.col_guid, not self.guid_column_visible)
+
+        # Store whether we need to show the OSM disclaimer in footer
+        self.has_osm_download = has_osm_download
+
+        # Hide weight and reset columns if not needed
+        if not self.weighting_column_visible:
+            self.hide_widgets_in_column(self.col_weight)
+            self.hide_widgets_in_column(self.col_reset)
+            self.table.setColumnHidden(self.col_weight, True)
+            self.table.setColumnHidden(self.col_reset, True)
+
         self.validate_weightings()
         if not self.weighting_column_visible:
             self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
 
+        # Show OSM disclaimer in footer if any OSM download buttons exist
+        if hasattr(self, "osm_disclaimer_label") and self.has_osm_download:
+            self.osm_disclaimer_label.setVisible(True)
+
     def toggle_guid_column(self):
         """Toggle the visibility of the GUID column."""
         self.guid_column_visible = not self.guid_column_visible
-        self.table.setColumnHidden(5, not self.guid_column_visible)
+        self.table.setColumnHidden(self.col_guid, not self.guid_column_visible)
 
     def hide_widgets_in_column(self, column: int):
         """Hide all widgets in the specified column."""
@@ -377,12 +415,14 @@ class FactorAggregationDialog(CustomBaseDialog):
             equal_weighting = 1.0 / len(enabled_rows)
 
         for row in enabled_rows:
-            widget = self.table.cellWidget(row, 3)  # Weight column
-            widget.setValue(equal_weighting)
+            widget = self.table.cellWidget(row, self.col_weight)  # Weight column
+            if widget:
+                widget.setValue(equal_weighting)
         for row in range(self.table.rowCount()):
             if row not in enabled_rows:
-                widget = self.table.cellWidget(row, 3)
-                widget.setValue(0)
+                widget = self.table.cellWidget(row, self.col_weight)
+                if widget:
+                    widget.setValue(0)
         self.validate_weightings()
 
     def is_checkbox_checked(self, row: int) -> bool:
@@ -406,7 +446,7 @@ class FactorAggregationDialog(CustomBaseDialog):
         Returns:
             The result of the operation.
         """
-        container = self.table.cellWidget(row, 4)  # Use (Checkbox) column
+        container = self.table.cellWidget(row, self.col_use)  # Use (Checkbox) column
         if container and isinstance(container, QWidget):
             layout = container.layout()
             if layout and layout.count() > 0:

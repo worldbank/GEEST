@@ -18,8 +18,17 @@ from qgis.core import (
 )
 from qgis.gui import QgsMapLayerComboBox
 from qgis.PyQt.QtCore import QSettings, Qt, QTimer
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QFileDialog, QLineEdit, QMessageBox, QPushButton, QToolButton
+from qgis.PyQt.QtGui import QIcon, QFont
+from qgis.PyQt.QtWidgets import (
+    QFileDialog,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QToolButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from geest.core.osm_downloaders import OSMDownloadType
 from geest.core.tasks.osm_downloader_task import OSMDownloaderTask
@@ -71,10 +80,11 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             # Determine if OSM download widget should be added based on indicator type
             self.should_add_osm_widget = False
             self.osm_download_type = None
-            self.osm_button_text = "Get from OSM"
+            self.osm_button_text = "Download from OSM"
             self.osm_tooltip = "Download data from OpenStreetMap"
 
-            if self.attributes.get("use_multi_buffer_point", 0):
+            # Check for OSM download eligibility for both multi-buffer and single-buffer point indicators
+            if self.attributes.get("use_multi_buffer_point", 0) or self.attributes.get("use_single_buffer_point", 0):
                 item_id = self.attributes.get("id", "").lower()
                 item_name = self.attributes.get("name", "").lower()
                 indicator_text = self.attributes.get("indicator", "").lower()
@@ -125,6 +135,99 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                     self.osm_download_type = OSMDownloadType.FINANCIAL
                     self.osm_tooltip = "Download financial services from OpenStreetMap"
                     log_message(f"OSM widget (FINANCIAL) will be added for indicator: {item_id}", level=Qgis.Info)
+
+                elif (
+                    "kindergarten" in item_id
+                    or "childcare" in item_id
+                    or "kindergarten" in item_name
+                    or "childcare" in item_name
+                    or "kindergarten" in indicator_text
+                    or "childcare" in indicator_text
+                ):
+                    self.should_add_osm_widget = True
+                    self.osm_download_type = OSMDownloadType.KINDERGARTEN
+                    self.osm_tooltip = "Download kindergarten and childcare facilities from OpenStreetMap"
+                    log_message(f"OSM widget (KINDERGARTEN) will be added for indicator: {item_id}", level=Qgis.Info)
+
+                elif (
+                    "primary" in item_id
+                    or "school" in item_id
+                    or "primary" in item_name
+                    or "school" in item_name
+                    or "primary" in indicator_text
+                    or "school" in indicator_text
+                ):
+                    self.should_add_osm_widget = True
+                    self.osm_download_type = OSMDownloadType.PRIMARY_SCHOOL
+                    self.osm_tooltip = "Download primary schools from OpenStreetMap"
+                    log_message(f"OSM widget (PRIMARY_SCHOOL) will be added for indicator: {item_id}", level=Qgis.Info)
+
+                elif (
+                    "pharmacy" in item_id
+                    or "pharmacies" in item_id
+                    or "pharmacy" in item_name
+                    or "pharmacies" in item_name
+                    or "pharmacy" in indicator_text
+                    or "pharmacies" in indicator_text
+                ):
+                    self.should_add_osm_widget = True
+                    self.osm_download_type = OSMDownloadType.PHARMACY
+                    self.osm_tooltip = "Download pharmacies from OpenStreetMap"
+                    log_message(f"OSM widget (PHARMACY) will be added for indicator: {item_id}", level=Qgis.Info)
+
+                elif (
+                    "grocery" in item_id
+                    or "groceries" in item_id
+                    or "market" in item_id
+                    or "grocery" in item_name
+                    or "groceries" in item_name
+                    or "market" in item_name
+                    or "grocery" in indicator_text
+                    or "groceries" in indicator_text
+                    or "market" in indicator_text
+                ):
+                    self.should_add_osm_widget = True
+                    self.osm_download_type = OSMDownloadType.GROCERY
+                    self.osm_tooltip = "Download grocery stores and markets from OpenStreetMap"
+                    log_message(f"OSM widget (GROCERY) will be added for indicator: {item_id}", level=Qgis.Info)
+
+                elif (
+                    "green" in item_id
+                    or "park" in item_id
+                    or "garden" in item_id
+                    or "green" in item_name
+                    or "park" in item_name
+                    or "garden" in item_name
+                    or "green" in indicator_text
+                    or "park" in indicator_text
+                    or "garden" in indicator_text
+                ):
+                    self.should_add_osm_widget = True
+                    self.osm_download_type = OSMDownloadType.GREEN_SPACE
+                    self.osm_tooltip = "Download green spaces and parks from OpenStreetMap"
+                    log_message(f"OSM widget (GREEN_SPACE) will be added for indicator: {item_id}", level=Qgis.Info)
+
+                elif (
+                    "hospital" in item_id
+                    or "clinic" in item_id
+                    or "health" in item_id
+                    or "hospital" in item_name
+                    or "clinic" in item_name
+                    or "health" in item_name
+                    or "hospital" in indicator_text
+                    or "clinic" in indicator_text
+                    or "health" in indicator_text
+                ):
+                    self.should_add_osm_widget = True
+                    self.osm_download_type = OSMDownloadType.HEALTH_FACILITY
+                    self.osm_tooltip = "Download hospitals and clinics from OpenStreetMap"
+                    log_message(f"OSM widget (HEALTH_FACILITY) will be added for indicator: {item_id}", level=Qgis.Info)
+
+                elif "water" in item_id or "water" in item_name or "water" in indicator_text:
+                    self.should_add_osm_widget = True
+                    self.osm_download_type = OSMDownloadType.WATER_POINT
+                    self.osm_tooltip = "Download water points and water infrastructure from OpenStreetMap"
+                    log_message(f"OSM widget (WATER_POINT) will be added for indicator: {item_id}", level=Qgis.Info)
 
             self.layer_combo = QgsMapLayerComboBox()
             self.layer_combo.setAllowEmptyLayer(True)
@@ -182,14 +285,30 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
 
             # Create OSM download button (added to separate table column by dialog)
             self.osm_download_button = None
+            self.osm_disclaimer_label = None
             if self.should_add_osm_widget:
                 self.osm_download_button = QPushButton(self.osm_button_text)
                 self.osm_download_button.setToolTip(self.osm_tooltip)
+                self.osm_download_button.setStyleSheet("padding: 5px 10px;")
                 self.osm_download_button.clicked.connect(self.start_osm_download)
                 log_message(
                     f"OSM download button created for indicator: {self.attributes.get('id', 'unknown')}",
                     level=Qgis.Info,
                 )
+
+                # Create inline disclaimer label
+                self.osm_disclaimer_label = QLabel()
+                self.osm_disclaimer_label.setText(
+                    "Disclaimer: The OSM downloader may return a mix of point and polygon geometries depending on how features "
+                    "are mapped in OpenStreetMap. Polygon features should be converted to points (e.g., centroids) and merged "
+                    "with the downloaded points to form a complete point input layer for this indicator."
+                )
+                self.osm_disclaimer_label.setWordWrap(True)
+                # Style the disclaimer to match the screenshot
+                disclaimer_font = QFont()
+                disclaimer_font.setPointSize(9)
+                self.osm_disclaimer_label.setFont(disclaimer_font)
+                self.osm_disclaimer_label.setStyleSheet("QLabel { color: #333333; margin-top: 4px; }")
 
             # Add stretch to push everything to the left
             self.layout.addStretch(1)
@@ -373,7 +492,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         if self.osm_download_button:
             self.osm_download_button.setEnabled(False)
             self.osm_download_button.setText("Downloading...")
-            self.osm_download_button.setStyleSheet("")
+            self.osm_download_button.setStyleSheet("padding: 5px 10px;")
 
         try:
             # Create task using proper QgsTask-based approach
@@ -404,7 +523,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
 
             if self.osm_download_button:
                 self.osm_download_button.setEnabled(True)
-                self.osm_download_button.setText("Get from OSM")
+                self.osm_download_button.setText("Download from OSM")
 
             QMessageBox.warning(self, "Error", f"Failed to start download: {str(e)}")
 
@@ -427,7 +546,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             )
             if self.osm_download_button:
                 self.osm_download_button.setText("Error!")
-                self.osm_download_button.setStyleSheet("background-color: #ffcccc;")
+                self.osm_download_button.setStyleSheet("background-color: #ffcccc; padding: 5px 10px;")
                 self.osm_download_button.setEnabled(True)
             return
 
@@ -435,7 +554,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             log_message(f"Error: File does not exist: {gpkg_path}", tag="Geest", level=Qgis.Critical)
             if self.osm_download_button:
                 self.osm_download_button.setText("Not Found!")
-                self.osm_download_button.setStyleSheet("background-color: #ffcccc;")
+                self.osm_download_button.setStyleSheet("background-color: #ffcccc; padding: 5px 10px;")
                 self.osm_download_button.setEnabled(True)
             return
 
@@ -449,13 +568,13 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
 
             if self.osm_download_button:
                 self.osm_download_button.setText("Downloaded!")
-                self.osm_download_button.setStyleSheet("background-color: #ccffcc;")
+                self.osm_download_button.setStyleSheet("background-color: #ccffcc; padding: 5px 10px;")
                 QTimer.singleShot(2000, lambda: self.reset_osm_button())
         else:
             log_message(f"Failed to load layer from: {gpkg_path}", tag="Geest", level=Qgis.Critical)
             if self.osm_download_button:
                 self.osm_download_button.setText("Load Failed!")
-                self.osm_download_button.setStyleSheet("background-color: #ffcccc;")
+                self.osm_download_button.setStyleSheet("background-color: #ffcccc; padding: 5px 10px;")
                 self.osm_download_button.setEnabled(True)
 
     def on_osm_download_error(self, error_message: str) -> None:
@@ -464,14 +583,14 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
 
         if self.osm_download_button:
             self.osm_download_button.setText("Download Failed!")
-            self.osm_download_button.setStyleSheet("background-color: #ffcccc;")
+            self.osm_download_button.setStyleSheet("background-color: #ffcccc; padding: 5px 10px;")
             self.osm_download_button.setEnabled(True)
 
     def reset_osm_button(self) -> None:
         """Reset OSM download button to initial state."""
         if self.osm_download_button:
-            self.osm_download_button.setText("Get from OSM")
-            self.osm_download_button.setStyleSheet("")
+            self.osm_download_button.setText("Download from OSM")
+            self.osm_download_button.setStyleSheet("padding: 5px 10px;")
             self.osm_download_button.setEnabled(True)
 
     def get_osm_download_button(self):
@@ -482,6 +601,15 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             QPushButton or None: The OSM download button
         """
         return self.osm_download_button
+
+    def get_osm_disclaimer_label(self):
+        """
+        Returns the OSM disclaimer label if it was created, None otherwise.
+
+        Returns:
+            QLabel or None: The OSM disclaimer label widget
+        """
+        return self.osm_disclaimer_label
 
     def update_attributes(self):
         """

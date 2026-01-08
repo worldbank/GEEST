@@ -62,8 +62,9 @@ class OSMPublicTransportDownloader(OSMDataDownloaderBase):
             delete_gpkg=delete_gpkg,
             feedback=feedback,
         )
-        # Set the output type to point (will handle mixed geometries)
-        self._set_output_type("point")
+        # Set the output type to handle mixed geometries (points + polygons)
+        # Polygons (platforms, station buildings) will be converted to centroids and merged with point data
+        self._set_output_type("mixed_to_point")
 
         # OSM Overpass query for public transport infrastructure
         # This query fetches various types of public transport nodes and areas
