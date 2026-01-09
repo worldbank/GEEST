@@ -64,7 +64,9 @@ class GeestDock(QDockWidget):
         # Get the plugin version from metadata.txt
         self.plugin_version = version()
 
-        self.setWindowTitle(f"Enabling Environments for Employment - {self.plugin_version}")  # Set the title of the dock
+        self.setWindowTitle(
+            f"Enabling Environments for Employment - {self.plugin_version}"
+        )  # Set the title of the dock
         self.json_file: Optional[str] = json_file
 
         # Initialize main widget and layout for the dock
