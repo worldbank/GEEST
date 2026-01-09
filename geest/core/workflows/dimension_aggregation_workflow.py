@@ -7,7 +7,7 @@ import json
 import os
 
 from qgis.core import Qgis, QgsFeedback, QgsGeometry, QgsProcessingContext, QgsField, QgsVectorLayer
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
@@ -99,9 +99,7 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
         """
         try:
             # Create a temporary copy of the grid layer with the EPLEX score as a field
-            grid_layer_copy = QgsVectorLayer(
-                f"{self.gpkg_path}|layername=study_area_grid", "grid_temp", "ogr"
-            )
+            grid_layer_copy = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_grid", "grid_temp", "ogr")
 
             if not grid_layer_copy.isValid():
                 log_message("Failed to load grid layer for EPLEX raster creation", tag="Geest", level=Qgis.Warning)
@@ -113,7 +111,7 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
             # Check if 'value' field exists, if not add it
             field_index = grid_layer_copy.fields().indexOf("value")
             if field_index == -1:
-                field = QgsField("value", QVariant.Double, "double", 10, 2)
+                field = QgsField("value", QMetaType.Type.Double)
                 grid_layer_copy.dataProvider().addAttributes([field])
                 grid_layer_copy.updateFields()
 

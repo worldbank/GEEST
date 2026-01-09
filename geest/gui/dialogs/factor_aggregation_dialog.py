@@ -226,10 +226,9 @@ class FactorAggregationDialog(CustomBaseDialog):
         self.guid_column_visible = False  # Track GUID column visibility
 
         layout.addWidget(self.button_box)
-        self.populate_table()
-        self.validate_weightings()
         self.setLayout(layout)
         self.populate_table()  # Populate the table after initializing data_sources and weightings
+        self.validate_weightings()
 
     def open_link_in_browser(self, url: str):
         """Open the given URL in the user's default web browser using QDesktopServices."""
