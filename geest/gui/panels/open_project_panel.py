@@ -3,6 +3,7 @@
 
 This module contains functionality for open project panel.
 """
+import json
 import os
 
 from PyQt5.QtCore import Qt
@@ -40,7 +41,7 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
     def __init__(self):
         """🏗️ Initialize the instance."""
         super().__init__()
-        self.setWindowTitle("GEEST")
+        self.setWindowTitle("GeoE3")
         # For running study area processing in a separate thread
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
@@ -54,7 +55,7 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
     def initUI(self):
         """⚙️ Initui."""
         self.custom_label = CustomBannerLabel(
-            "The Gender Enabling Environments Spatial Tool",
+            "The Geospatial Enabling Environments for Employment Spatial Tool",
             resources_path("resources", "geest-banner.png"),
         )
         parent_layout = self.banner_label.parent().layout()
@@ -87,6 +88,13 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         self.previous_project_combo.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
         self.previous_project_combo.setMinimumContentsLength(10)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
+
+        # Set up women considerations toggle
+        self.women_considerations_checkbox.stateChanged.connect(self.women_considerations_changed)
+        self.women_considerations_checkbox.stateChanged.connect(self.save_women_considerations_settings)
+        self.eplex_score_spinbox.valueChanged.connect(self.save_women_considerations_settings)
+        # Initialize visibility
+        self.women_considerations_changed()
 
     def on_previous_button_clicked(self):
         """⚙️ On previous button clicked."""
@@ -165,6 +173,39 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
             return
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
+            # Load women considerations settings from model.json
+            try:
+                with open(model_path, "r") as f:
+                    model_data = json.load(f)
+                women_considerations_enabled = model_data.get("women_considerations_enabled", True)
+                eplex_score = model_data.get("eplex_score", 0.0)
+
+                # Block signals while setting values to avoid triggering save
+                self.women_considerations_checkbox.blockSignals(True)
+                self.eplex_score_spinbox.blockSignals(True)
+
+                self.women_considerations_checkbox.setChecked(women_considerations_enabled)
+                self.eplex_score_spinbox.setValue(eplex_score)
+
+                # Unblock signals
+                self.women_considerations_checkbox.blockSignals(False)
+                self.eplex_score_spinbox.blockSignals(False)
+
+                # Update visibility
+                self.women_considerations_changed()
+
+                log_message(
+                    f"Loaded women considerations: enabled={women_considerations_enabled}, eplex={eplex_score}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+            except Exception as e:
+                log_message(
+                    f"Error loading women considerations from model.json: {e}",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+
             self.settings.setValue("last_working_directory", self.working_dir)  # Update last used project
             # Switch to the next tab if an existing project is found
             self.switch_to_next_tab.emit()
@@ -192,3 +233,48 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         font_size = int(linear_interpolation(self.label.rect().width(), 12, 16, 400, 600))
         # log_message(f"Label Font Size: {font_size}")
         self.label.setFont(QFont("Arial", font_size))
+
+    def women_considerations_changed(self):
+        """Handle women considerations checkbox change."""
+        is_checked = self.women_considerations_checkbox.isChecked()
+        log_message(f"Women considerations changed: {is_checked}", tag="Geest", level=Qgis.Info)
+
+        # Show EPLEX widgets when women considerations is NOT selected
+        show_eplex = not is_checked
+        self.eplex_label.setVisible(show_eplex)
+        self.eplex_description.setVisible(show_eplex)
+        self.eplex_score_spinbox.setVisible(show_eplex)
+
+    def save_women_considerations_settings(self):
+        """Save women considerations settings to model.json."""
+        if not self.working_dir:
+            return
+
+        model_path = os.path.join(self.working_dir, "model.json")
+        if not os.path.exists(model_path):
+            return
+
+        try:
+            # Read model.json
+            with open(model_path, "r") as f:
+                model_data = json.load(f)
+
+            # Update settings
+            model_data["women_considerations_enabled"] = self.women_considerations_checkbox.isChecked()
+            model_data["eplex_score"] = self.eplex_score_spinbox.value()
+
+            # Write back to model.json
+            with open(model_path, "w") as f:
+                json.dump(model_data, f, indent=2)
+
+            log_message(
+                f"Saved women considerations: enabled={model_data['women_considerations_enabled']}, eplex={model_data['eplex_score']}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+        except Exception as e:
+            log_message(
+                f"Error saving women considerations to model.json: {e}",
+                tag="Geest",
+                level=Qgis.Critical,
+            )

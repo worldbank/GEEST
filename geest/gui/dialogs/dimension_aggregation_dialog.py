@@ -65,6 +65,18 @@ class DimensionAggregationDialog(CustomBaseDialog):
         self.guids = self.tree_item.getDimensionFactorGuids()
         self.weightings = {}  # To store the temporary weightings
 
+        # Check if this is Contextual dimension with women considerations disabled
+        is_contextual = self.tree_item.attribute("id", "").lower() == "contextual"
+        women_considerations_enabled = self.tree_item.attribute("women_considerations_enabled", True)
+
+        # Determine which UI to show
+        if is_contextual and not women_considerations_enabled:
+            self._setup_eplex_ui()
+        else:
+            self._setup_factor_weighting_ui()
+
+    def _setup_factor_weighting_ui(self):
+        """Setup the normal factor weighting UI with table of factors."""
         # Layout setup
         layout = QVBoxLayout(self)
         self.resize(800, 600)  # Set a wider dialog size
@@ -89,6 +101,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
         description_label = QLabel()
         description_label.setText(self.dimension_data.get("description", ""))
         description_label.setWordWrap(True)
+        description_label.setTextFormat(Qt.MarkdownText)
         layout.addWidget(description_label)
 
         # Table setup
@@ -207,6 +220,139 @@ class DimensionAggregationDialog(CustomBaseDialog):
 
         # Initial validation check
         self.validate_weightings()
+
+    def _setup_eplex_ui(self):
+        """Setup the simplified EPLEX score UI for Contextual dimension when women considerations is disabled."""
+        # Layout setup
+        layout = QVBoxLayout(self)
+        self.resize(600, 500)  # Slightly smaller dialog
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # Banner
+        self.banner_label = CustomBannerLabel(
+            "The Gender Enabling Environments Spatial Tool",
+            resources_path("resources", "geest-banner.png"),
+        )
+        layout.addWidget(self.banner_label)
+
+        # Get the parent item for hierarchy label
+        parent_item = self.tree_item.parent()
+        if parent_item:
+            hierarchy_label = QLabel(f"{parent_item.data(0)} :: {self.tree_item.data(0)}")
+            hierarchy_label.setStyleSheet("font-size: 14px; font-weight: bold; color: gray;")
+            layout.addWidget(hierarchy_label, alignment=Qt.AlignTop)
+
+        # Description label
+        description_label = QLabel()
+        description_text = self.dimension_data.get("description", "")
+        description_label.setText(description_text)
+        description_label.setWordWrap(True)
+        description_label.setTextFormat(Qt.MarkdownText)
+        layout.addWidget(description_label)
+
+        # Add spacing
+        layout.addSpacing(20)
+
+        # Info label explaining EPLEX mode
+        info_label = QLabel(
+            "**Women considerations are disabled.** The Contextual dimension will use a single EPLEX score "
+            "instead of analyzing individual factors (Workplace Discrimination, Regulatory Frameworks, Financial Inclusion)."
+        )
+        info_label.setWordWrap(True)
+        info_label.setTextFormat(Qt.MarkdownText)
+        info_label.setStyleSheet("background-color: #E8F4F8; padding: 10px; border-radius: 5px; font-size: 12px;")
+        layout.addWidget(info_label)
+
+        layout.addSpacing(20)
+
+        # Table for EPLEX score input (simpler layout for single score)
+        self.table = QTableWidget(self)
+        self.table.setRowCount(1)
+        self.table.setColumnCount(3)
+        self.table.setHorizontalHeaderLabels(["Input", "EPLEX score", "Use"])
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        # Adjust column widths
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Fixed)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
+        self.table.setColumnWidth(0, 200)
+        self.table.setColumnWidth(2, 50)
+
+        # Row 0: Input spinbox in first column
+        self.eplex_spinbox = QDoubleSpinBox(self)
+        self.eplex_spinbox.setRange(0.0, 5.0)
+        self.eplex_spinbox.setDecimals(2)
+        self.eplex_spinbox.setSingleStep(0.1)
+        current_eplex = self.tree_item.attribute("eplex_score", 0.0)
+        self.eplex_spinbox.setValue(current_eplex)
+        self.table.setCellWidget(0, 0, self.eplex_spinbox)
+
+        # EPLEX score label in second column
+        name_item = QTableWidgetItem("EPLEX score")
+        name_item.setFlags(Qt.ItemIsEnabled)
+        self.table.setItem(0, 1, name_item)
+
+        # Use checkbox
+        checkbox_widget = self._create_eplex_checkbox_widget()
+        self.table.setCellWidget(0, 2, checkbox_widget)
+
+        layout.addWidget(self.table)
+
+        # Help section
+        help_layout = QHBoxLayout()
+        help_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.help_icon = QPixmap(resources_path("resources", "images", "help.png"))
+        self.help_icon = self.help_icon.scaledToWidth(20)
+        self.help_label_icon = QLabel()
+        self.help_label_icon.setPixmap(self.help_icon)
+        self.help_label_icon.setScaledContents(True)
+        self.help_label_icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.help_label_icon.setMaximumWidth(20)
+        self.help_label_icon.setAlignment(Qt.AlignRight)
+        help_layout.addWidget(self.help_label_icon)
+
+        self.help_label = QLabel(
+            "For detailed instructions on how to use this tool, please refer to the <a href='https://worldbank.github.io/GEEST/docs/user_guide.html'>GEEST User Guide</a>."
+        )
+        self.help_label.setOpenExternalLinks(True)
+        self.help_label.setAlignment(Qt.AlignCenter)
+        self.help_label.linkActivated.connect(self.open_link_in_browser)
+        help_layout.addWidget(self.help_label)
+        help_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        layout.addLayout(help_layout)
+
+        # Button box
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box.accepted.connect(self._save_eplex_score)
+        self.button_box.rejected.connect(self.reject)
+        layout.addWidget(self.button_box)
+
+    def _create_eplex_checkbox_widget(self) -> QWidget:
+        """Create a QWidget containing a QCheckBox for EPLEX score and center it."""
+        checkbox = QCheckBox()
+        checkbox.setChecked(True)  # Always checked by default
+
+        # Create a container widget with a centered layout
+        container = QWidget()
+        layout = QHBoxLayout()
+        layout.addWidget(checkbox)
+        layout.setAlignment(Qt.AlignCenter)
+        layout.setContentsMargins(0, 0, 0, 0)
+        container.setLayout(layout)
+
+        return container
+
+    def _save_eplex_score(self):
+        """Save the EPLEX score to the dimension item attributes."""
+        eplex_value = self.eplex_spinbox.value()
+        self.tree_item.setAttribute("eplex_score", eplex_value)
+        log_message(
+            f"Saved EPLEX score ({eplex_value}) for Contextual dimension",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        self.accept()
 
     def open_link_in_browser(self, url: str):
         """Open the given URL in the user's default web browser using QDesktopServices."""

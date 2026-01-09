@@ -30,7 +30,7 @@
    <item row="1" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;GEEST Project Selection&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;GeoE3 Project Selection&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
@@ -58,7 +58,7 @@
       </font>
      </property>
      <property name="text">
-      <string>To get started, we need a project folder. You can either select a **previously created** project folder, or **create a new one**. The contents of this folder will be managed by GEEST. It will store the GEEST project file and the working analysis results.</string>
+      <string>This step creates a folder with files that are managed by the GeoE3 plugin. Analysis outputs and working files will be stored in this folder. Please select an empty folder that contains no other files.</string>
      </property>
      <property name="textFormat">
       <enum>Qt::MarkdownText</enum>
