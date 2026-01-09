@@ -808,7 +808,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Water and Sanitation evaluate consumer access to clean water and sanitation by mapping points of interest with available services and treating them as accessible locations."
+                    "description": "This factor captures access to water and sanitation indirectly, using the spatial distribution of facilities whose operation depends on reliable water supply and sanitation services. The presence of these points of interest suggests the existence of minimum water and sanitation infrastructure necessary for service delivery, even where direct household level data are unavailable."
                 }
             ]
         }
