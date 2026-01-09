@@ -293,37 +293,12 @@ class WorkflowBase(QObject):
 
         area_iterator = AreaIterator(self.gpkg_path)
 
-        # Get GHSL filter setting
-        filter_by_ghsl = setting(key="filter_study_areas_by_ghsl", default=True)
-
-        # Load polygon layer to check intersects_ghsl attribute
-        polygon_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_polygons", "study_area_polygons", "ogr")
-
         log_layer_count()  # For performance tuning, write the number of open layers to a log file
 
-        areas_skipped = 0
         areas_processed = 0
 
         try:
-            for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
-                # Check GHSL intersection filter
-                if filter_by_ghsl and polygon_layer.isValid():
-                    # Get the feature at this index
-                    sorted_features = sorted(polygon_layer.getFeatures(), key=lambda f: f.geometry().area())
-                    polygon_feature = list(sorted_features)[index]
-
-                    # Check intersects_ghsl attribute (default to True if missing for backward compatibility)
-                    intersects_ghsl = polygon_feature.attribute("intersects_ghsl")
-                    if intersects_ghsl is not None and intersects_ghsl == 0:
-                        area_name = polygon_feature.attribute("area_name")
-                        log_message(
-                            f"Skipping area '{area_name}' (index {index}) - does not intersect GHSL settlements",
-                            tag="Geest",
-                            level=Qgis.Info,
-                        )
-                        areas_skipped += 1
-                        continue
-
+            for index, (current_area, clip_area, current_bbox, area_name, progress) in enumerate(area_iterator):
                 areas_processed += 1
                 message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"  # noqa E231
                 feedback.pushInfo(message)
@@ -400,13 +375,10 @@ class WorkflowBase(QObject):
                 level=Qgis.Info,
             )
 
-            # Log GHSL filtering summary
-            total_areas = areas_processed + areas_skipped
-            if total_areas > 0:
+            # Log processing summary
+            if areas_processed > 0:
                 log_message(
-                    f"GHSL Filter Summary - Total areas: {total_areas}, "
-                    f"Processed: {areas_processed}, Skipped: {areas_skipped}, "
-                    f"Filter {'enabled' if filter_by_ghsl else 'disabled'}",
+                    f"Processing Summary - Areas processed: {areas_processed}",
                     tag="Geest",
                     level=Qgis.Info,
                 )
