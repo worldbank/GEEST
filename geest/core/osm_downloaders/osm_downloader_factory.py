@@ -6,10 +6,11 @@
 
 This module contains functionality for osm downloader factory.
 """
-from geest.core.osm_downloaders import (
-    OSMDownloadType,
-    OSMActiveTransportDownloader,
-)
+from .osm_download_type import OSMDownloadType
+from .osm_active_transport_downloader import OSMActiveTransportDownloader
+from .osm_public_transport_downloader import OSMPublicTransportDownloader
+from .osm_education_downloader import OSMEducationDownloader
+from .osm_financial_downloader import OSMFinancialDownloader
 
 
 class OSMDownloaderFactory:
@@ -36,6 +37,36 @@ class OSMDownloaderFactory:
     ):
         if download_type == OSMDownloadType.ACTIVE_TRANSPORT:
             return OSMActiveTransportDownloader(
+                extents=extents,
+                output_path=output_path,
+                output_crs=output_crs,
+                filename=filename,
+                use_cache=use_cache,
+                delete_gpkg=delete_gpkg,
+                feedback=feedback,
+            )
+        elif download_type == OSMDownloadType.PUBLIC_TRANSPORT:
+            return OSMPublicTransportDownloader(
+                extents=extents,
+                output_path=output_path,
+                output_crs=output_crs,
+                filename=filename,
+                use_cache=use_cache,
+                delete_gpkg=delete_gpkg,
+                feedback=feedback,
+            )
+        elif download_type == OSMDownloadType.EDUCATION:
+            return OSMEducationDownloader(
+                extents=extents,
+                output_path=output_path,
+                output_crs=output_crs,
+                filename=filename,
+                use_cache=use_cache,
+                delete_gpkg=delete_gpkg,
+                feedback=feedback,
+            )
+        elif download_type == OSMDownloadType.FINANCIAL:
+            return OSMFinancialDownloader(
                 extents=extents,
                 output_path=output_path,
                 output_crs=output_crs,

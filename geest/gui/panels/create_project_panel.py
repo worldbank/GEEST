@@ -57,7 +57,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def __init__(self):
         """🏗️ Initialize the instance."""
         super().__init__()
-        self.setWindowTitle("GEEST")
+        self.setWindowTitle("GeoE3")
         # For running study area processing in a separate thread
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
@@ -72,7 +72,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         """⚙️ Initui."""
         self.enable_widgets()  # Re-enable widgets in case they were disabled
         self.custom_label = CustomBannerLabel(
-            "The Gender Enabling Environments Spatial Tool",
+            "The Geospatial Enabling Environments for Employment Spatial Tool",
             resources_path("resources", "geest-banner.png"),
         )
         parent_layout = self.banner_label.parent().layout()
@@ -81,14 +81,20 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         parent_layout.update()
 
         self.folder_status_label.setPixmap(QPixmap(resources_path("resources", "icons", "failed.svg")))
-        self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
+        self.regional_scale.clicked.connect(lambda: self.spatial_scale_changed("regional"))
         self.national_scale.clicked.connect(lambda: self.spatial_scale_changed("national"))
+        self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
-        experimental_features = int(os.getenv("GEEST_EXPERIMENTAL", 0))
-        if not experimental_features:
-            # For now these are experimental
-            self.local_scale.hide()
-            self.national_scale.hide()
+        # Note: Regional and Local scales are disabled in the UI for this release
+        # Only National scale is currently active
+        # Explicitly disable Regional and Local radio buttons (overrides enable_widgets())
+        self.regional_scale.setEnabled(False)
+        self.local_scale.setEnabled(False)
+
+        # Women Considerations toggle
+        self.women_considerations_checkbox.stateChanged.connect(self.women_considerations_changed)
+        # Initialize EPLEX widgets visibility based on checkbox state
+        self.women_considerations_changed()
 
         # self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
         self.field_combo.setFilters(QgsFieldProxyModel.String)
@@ -144,17 +150,38 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         """Slot to be called when the spatial scale changes.
 
         Args:
-            value (str): The new spatial scale value ("local" or "national").
+            value (str): The new spatial scale value ("regional", "national", or "local").
         """
         log_message(f"Spatial scale changed: {value}")
-        if value == "local":
-            self.cell_size_spinbox.setValue(100)
-            self.cell_size_spinbox.setSingleStep(10)
-            self.cell_size_spinbox.setSuffix(" m")
+        if value == "regional":
+            # Regional scale uses H3 indexes (H3l6 by default)
+            # For this release, regional is disabled
+            self.cell_size_spinbox.setValue(5000)
+            self.cell_size_spinbox.setSingleStep(1000)
+            self.cell_size_spinbox.setSuffix(" m (H3)")
         elif value == "national":
             self.cell_size_spinbox.setValue(1000)
             self.cell_size_spinbox.setSingleStep(100)
             self.cell_size_spinbox.setSuffix(" m")
+        elif value == "local":
+            self.cell_size_spinbox.setValue(100)
+            self.cell_size_spinbox.setSingleStep(10)
+            self.cell_size_spinbox.setSuffix(" m")
+
+    def women_considerations_changed(self):
+        """Slot to be called when the women considerations checkbox changes.
+
+        When unchecked, shows EPLEX score input.
+        When checked, hides EPLEX score input.
+        """
+        is_checked = self.women_considerations_checkbox.isChecked()
+        log_message(f"Women considerations changed: {is_checked}")
+
+        # Show EPLEX widgets when women considerations is NOT selected
+        show_eplex = not is_checked
+        self.eplex_label.setVisible(show_eplex)
+        self.eplex_description.setVisible(show_eplex)
+        self.eplex_score_spinbox.setVisible(show_eplex)
 
     def update_crs(self):
         """Update the CRS label based on the checkbox state."""
@@ -243,8 +270,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     model["analysis_scale"] = "local"
                 else:
                     model["analysis_scale"] = "national"
+                # Save women considerations settings
+                model["women_considerations_enabled"] = self.women_considerations_checkbox.isChecked()
+                model["eplex_score"] = self.eplex_score_spinbox.value()
             with open(model_path, "w") as f:
-                json.dump(model, f)
+                json.dump(model, f, indent=2)
 
             # Create the processor instance and process the features
             debug_env = int(os.getenv("GEEST_DEBUG", 0))
@@ -288,6 +318,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def enable_widgets(self):
         """Enable all widgets in the panel."""
         for widget in self.findChildren(QWidget):
+            # Skip Regional and Local scale radio buttons - they should remain disabled
+            if widget in (self.regional_scale, self.local_scale):
+                continue
             widget.setEnabled(True)
 
     def reference_layer(self):

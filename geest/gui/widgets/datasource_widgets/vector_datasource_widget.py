@@ -4,14 +4,25 @@
 This module contains functionality for vector datasource widget.
 """
 import os
-import urllib.parse  # Add this import
+import urllib.parse
 
-from qgis.core import Qgis, QgsMapLayerProxyModel, QgsProject
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsMapLayerProxyModel,
+    QgsProject,
+    QgsRectangle,
+    QgsVectorLayer,
+)
 from qgis.gui import QgsMapLayerComboBox
-from qgis.PyQt.QtCore import QSettings, Qt
+from qgis.PyQt.QtCore import QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QFileDialog, QLineEdit, QToolButton
+from qgis.PyQt.QtWidgets import QFileDialog, QLineEdit, QMessageBox, QPushButton, QToolButton
 
+from geest.core.osm_downloaders import OSMDownloadType
+from geest.core.tasks.osm_downloader_task import OSMDownloaderTask
 from geest.utilities import log_message, resources_path
 
 from .base_datasource_widget import BaseDataSourceWidget
@@ -56,6 +67,65 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             else:
                 filter = QgsMapLayerProxyModel.PolygonLayer
                 tooltip = "A polygon layer whose features will be counted per cell."
+
+            # Determine if OSM download widget should be added based on indicator type
+            self.should_add_osm_widget = False
+            self.osm_download_type = None
+            self.osm_button_text = "Get from OSM"
+            self.osm_tooltip = "Download data from OpenStreetMap"
+
+            if self.attributes.get("use_multi_buffer_point", 0):
+                item_id = self.attributes.get("id", "").lower()
+                item_name = self.attributes.get("name", "").lower()
+                indicator_text = self.attributes.get("indicator", "").lower()
+
+                if (
+                    "public" in item_id
+                    or "transport" in item_id
+                    or "public" in item_name
+                    or "transport" in item_name
+                    or "public" in indicator_text
+                    or "transport" in indicator_text
+                ):
+                    self.should_add_osm_widget = True
+                    self.osm_download_type = OSMDownloadType.PUBLIC_TRANSPORT
+                    self.osm_tooltip = "Download public transport data from OpenStreetMap"
+                    log_message(
+                        f"OSM widget (PUBLIC_TRANSPORT) will be added for indicator: {item_id}", level=Qgis.Info
+                    )
+
+                elif (
+                    "education" in item_id
+                    or "school" in item_id
+                    or "training" in item_id
+                    or "education" in item_name
+                    or "school" in item_name
+                    or "training" in item_name
+                    or "education" in indicator_text
+                    or "school" in indicator_text
+                    or "training" in indicator_text
+                ):
+                    self.should_add_osm_widget = True
+                    self.osm_download_type = OSMDownloadType.EDUCATION
+                    self.osm_tooltip = "Download education facilities from OpenStreetMap"
+                    log_message(f"OSM widget (EDUCATION) will be added for indicator: {item_id}", level=Qgis.Info)
+
+                elif (
+                    "financial" in item_id
+                    or "bank" in item_id
+                    or "finance" in item_id
+                    or "financial" in item_name
+                    or "bank" in item_name
+                    or "finance" in item_name
+                    or "financial" in indicator_text
+                    or "bank" in indicator_text
+                    or "finance" in indicator_text
+                ):
+                    self.should_add_osm_widget = True
+                    self.osm_download_type = OSMDownloadType.FINANCIAL
+                    self.osm_tooltip = "Download financial services from OpenStreetMap"
+                    log_message(f"OSM widget (FINANCIAL) will be added for indicator: {item_id}", level=Qgis.Info)
+
             self.layer_combo = QgsMapLayerComboBox()
             self.layer_combo.setAllowEmptyLayer(True)
             # Insert placeholder text at the top (only visually, not as a selectable item)
@@ -69,7 +139,6 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.layer_combo.setEditable(False)  # Lock back to non-editable after setting placeholder
 
             self.layer_combo.setFilters(filter)
-            self.layout.addWidget(self.layer_combo)
 
             # Set the selected QgsVectorLayer in QgsMapLayerComboBox
             layer_id = self.attributes.get(f"{self.widget_key}_layer_id", None)
@@ -104,9 +173,28 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                 self.layer_combo.setVisible(False)
             else:
                 self.layer_combo.setVisible(True)
-            self.layout.addWidget(self.shapefile_line_edit)
+
+            # Add widgets directly to self.layout (which is already QHBoxLayout)
+            self.layout.setSpacing(6)
+            self.layout.addWidget(self.layer_combo, 2)
+            self.layout.addWidget(self.shapefile_line_edit, 2)
+            self.layout.addWidget(self.shapefile_button, 0)
+
+            # Create OSM download button (added to separate table column by dialog)
+            self.osm_download_button = None
+            if self.should_add_osm_widget:
+                self.osm_download_button = QPushButton(self.osm_button_text)
+                self.osm_download_button.setToolTip(self.osm_tooltip)
+                self.osm_download_button.clicked.connect(self.start_osm_download)
+                log_message(
+                    f"OSM download button created for indicator: {self.attributes.get('id', 'unknown')}",
+                    level=Qgis.Info,
+                )
+
+            # Add stretch to push everything to the left
+            self.layout.addStretch(1)
+
             self.resize_clear_button()
-            self.layout.addWidget(self.shapefile_button)
 
             # Emit the data_changed signal when any widget is changed
             self.layer_combo.currentIndexChanged.connect(self.update_attributes)
@@ -180,6 +268,220 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         self.layer_combo.setVisible(True)
         self.layer_combo.setFocus()
         self.update_attributes()
+
+    def start_osm_download(self) -> None:
+        """Start OSM data download process using proper QgsTask integration."""
+        log_message("Starting OSM download...", tag="Geest", level=Qgis.Info)
+
+        project = QgsProject.instance()
+        if not project:
+            QMessageBox.warning(self, "Error", "No QGIS project loaded")
+            return
+
+        settings = QSettings()
+        working_directory = settings.value("last_working_directory", "")
+        if not working_directory or not os.path.exists(working_directory):
+            QMessageBox.warning(
+                self, "Error", "No valid working directory found. Please create or open a project first."
+            )
+            return
+
+        # Check for study area geopackage
+        study_area_dir = os.path.join(working_directory, "study_area")
+        gpkg_path = os.path.join(study_area_dir, "study_area.gpkg")
+
+        if not os.path.exists(gpkg_path):
+            QMessageBox.warning(
+                self,
+                "Study Area Required",
+                "Please create a study area first before downloading OSM data.\n\n"
+                "Use 'Create New Project' to define your study area.",
+            )
+            return
+
+        # Load study area extent from geopackage (most reliable source)
+        extent = QgsRectangle()
+        study_area_layer = QgsVectorLayer(f"{gpkg_path}|layername=study_area_bboxes", "temp_bbox", "ogr")
+
+        if study_area_layer.isValid() and study_area_layer.featureCount() > 0:
+            extent = study_area_layer.extent()
+            source_crs = study_area_layer.crs()
+
+            # Transform extent to EPSG:4326 (required by Overpass API)
+            if source_crs.authid() != "EPSG:4326":
+                transform = QgsCoordinateTransform(
+                    source_crs,
+                    QgsCoordinateReferenceSystem("EPSG:4326"),
+                    project,
+                )
+                extent = transform.transformBoundingBox(extent)
+                log_message(
+                    f"Using study area extent, transformed from {source_crs.authid()} to EPSG:4326",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+            else:
+                log_message("Using study area extent (already in EPSG:4326)", tag="Geest", level=Qgis.Info)
+        else:
+            # Fallback: try to get extent from loaded project layers
+            log_message(
+                "Could not load study area bboxes, falling back to project layers", tag="Geest", level=Qgis.Warning
+            )
+            layers = project.mapLayers().values()
+            project_crs = project.crs() if project.crs().isValid() else QgsCoordinateReferenceSystem("EPSG:4326")
+
+            if layers:
+                for layer in layers:
+                    if layer.extent().isFinite():
+                        if extent.isEmpty():
+                            extent = layer.extent()
+                        else:
+                            extent.combineExtentWith(layer.extent())
+
+                if not extent.isEmpty() and extent.isFinite() and project_crs.authid() != "EPSG:4326":
+                    transform = QgsCoordinateTransform(
+                        project_crs,
+                        QgsCoordinateReferenceSystem("EPSG:4326"),
+                        project,
+                    )
+                    extent = transform.transformBoundingBox(extent)
+
+        # Final validation
+        if extent.isEmpty() or not extent.isFinite():
+            QMessageBox.warning(
+                self,
+                "Invalid Extent",
+                "Could not determine a valid extent for OSM download.\n\n"
+                "Please ensure your study area is properly configured.",
+            )
+            return
+
+        if self.osm_download_type is None:
+            log_message("No OSM download type set", tag="Geest", level=Qgis.Critical)
+            return
+
+        filename = f"osm_{self.osm_download_type.value}"
+        output_file_path = os.path.join(study_area_dir, f"{filename}.gpkg")
+        output_crs = QgsCoordinateReferenceSystem("EPSG:4326")
+
+        log_message(f"Output directory: {study_area_dir}", tag="Geest", level=Qgis.Info)
+        log_message(f"Filename: {filename}", tag="Geest", level=Qgis.Info)
+        log_message(f"Full output file path: {output_file_path}", tag="Geest", level=Qgis.Info)
+        log_message(f"Extent: {extent.asWktPolygon()}", tag="Geest", level=Qgis.Info)
+        log_message(f"Output CRS: {output_crs.authid()}", tag="Geest", level=Qgis.Info)
+
+        if self.osm_download_button:
+            self.osm_download_button.setEnabled(False)
+            self.osm_download_button.setText("Downloading...")
+            self.osm_download_button.setStyleSheet("")
+
+        try:
+            # Create task using proper QgsTask-based approach
+            self.osm_task = OSMDownloaderTask(
+                osm_download_type=self.osm_download_type,
+                extents=extent,
+                output_path=output_file_path,
+                crs=output_crs,
+                use_cache=False,
+                delete_gpkg=True,
+            )
+
+            # Connect signals
+            self.osm_task.progress_updated.connect(self.update_button_progress)
+            self.osm_task.error_occurred.connect(self.on_osm_download_error)
+            self.osm_task.taskCompleted.connect(lambda: self.on_osm_download_finished(output_file_path))
+            self.osm_task.taskTerminated.connect(lambda: self.on_osm_download_error("Download was cancelled"))
+
+            # Add to QGIS task manager (proper architecture)
+            QgsApplication.taskManager().addTask(self.osm_task)
+
+            log_message("OSM download task added to QGIS task manager", tag="Geest", level=Qgis.Info)
+        except Exception as e:
+            log_message(f"Error starting OSM download: {e}", tag="Geest", level=Qgis.Critical)
+            import traceback
+
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+
+            if self.osm_download_button:
+                self.osm_download_button.setEnabled(True)
+                self.osm_download_button.setText("Get from OSM")
+
+            QMessageBox.warning(self, "Error", f"Failed to start download: {str(e)}")
+
+    def update_button_progress(self, message: str):
+        """Update button text to show download progress."""
+        log_message(message, tag="Geest", level=Qgis.Info)
+        if self.osm_download_button:
+            if "Processing" in message:
+                self.osm_download_button.setText("Processing...")
+            elif "complete" in message.lower():
+                self.osm_download_button.setText("Complete!")
+
+    def on_osm_download_finished(self, gpkg_path: str) -> None:
+        """Handle completion of OSM download."""
+        log_message(f"OSM download completed: {gpkg_path}", tag="Geest", level=Qgis.Info)
+
+        if os.path.isdir(gpkg_path):
+            log_message(
+                f"Error: Received directory path instead of file: {gpkg_path}", tag="Geest", level=Qgis.Critical
+            )
+            if self.osm_download_button:
+                self.osm_download_button.setText("Error!")
+                self.osm_download_button.setStyleSheet("background-color: #ffcccc;")
+                self.osm_download_button.setEnabled(True)
+            return
+
+        if not os.path.exists(gpkg_path):
+            log_message(f"Error: File does not exist: {gpkg_path}", tag="Geest", level=Qgis.Critical)
+            if self.osm_download_button:
+                self.osm_download_button.setText("Not Found!")
+                self.osm_download_button.setStyleSheet("background-color: #ffcccc;")
+                self.osm_download_button.setEnabled(True)
+            return
+
+        layer_name = os.path.splitext(os.path.basename(gpkg_path))[0]
+        layer = QgsVectorLayer(gpkg_path, layer_name, "ogr")
+
+        if layer.isValid():
+            QgsProject.instance().addMapLayer(layer)
+            log_message(f"Loaded OSM layer: {layer_name}", tag="Geest", level=Qgis.Info)
+            self.layer_combo.setLayer(layer)
+
+            if self.osm_download_button:
+                self.osm_download_button.setText("Downloaded!")
+                self.osm_download_button.setStyleSheet("background-color: #ccffcc;")
+                QTimer.singleShot(2000, lambda: self.reset_osm_button())
+        else:
+            log_message(f"Failed to load layer from: {gpkg_path}", tag="Geest", level=Qgis.Critical)
+            if self.osm_download_button:
+                self.osm_download_button.setText("Load Failed!")
+                self.osm_download_button.setStyleSheet("background-color: #ffcccc;")
+                self.osm_download_button.setEnabled(True)
+
+    def on_osm_download_error(self, error_message: str) -> None:
+        """Handle OSM download errors."""
+        log_message(f"OSM download error: {error_message}", tag="Geest", level=Qgis.Critical)
+
+        if self.osm_download_button:
+            self.osm_download_button.setText("Download Failed!")
+            self.osm_download_button.setStyleSheet("background-color: #ffcccc;")
+            self.osm_download_button.setEnabled(True)
+
+    def reset_osm_button(self) -> None:
+        """Reset OSM download button to initial state."""
+        if self.osm_download_button:
+            self.osm_download_button.setText("Get from OSM")
+            self.osm_download_button.setStyleSheet("")
+            self.osm_download_button.setEnabled(True)
+
+    def get_osm_download_button(self):
+        """
+        Returns the OSM download button if it was created, None otherwise.
+
+        Returns:
+            QPushButton or None: The OSM download button
+        """
+        return self.osm_download_button
 
     def update_attributes(self):
         """
