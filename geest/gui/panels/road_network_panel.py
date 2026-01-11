@@ -155,6 +155,11 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         cross_icon = resources_path("resources", "icons", "cross-red.svg")
         tick_icon = resources_path("resources", "icons", "tick-green.svg")
 
+        # Convert paths to use forward slashes for cross-platform compatibility
+        # Qt stylesheets require forward slashes even on Windows
+        cross_icon = cross_icon.replace("\\", "/")
+        tick_icon = tick_icon.replace("\\", "/")
+
         self.road_layer_status_checkbox.setStyleSheet(
             f"""
             QCheckBox::indicator {{
