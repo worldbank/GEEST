@@ -128,27 +128,22 @@ class AreaIterator:
             # Sort polygon features by area in ascending order
             sorted_features = sorted(self.polygon_layer.getFeatures(), key=lambda f: f.geometry().area())
             for index, polygon_feature in enumerate(sorted_features):
-                # Use area_name instead of FID for lookups to handle cases where
-                # features were skipped during creation (e.g., GHSL filtering)
-                area_name = polygon_feature.attribute("area_name")
-
-                # Request the corresponding features based on area_name
-                clip_request = QgsFeatureRequest().setFilterExpression(f"area_name = '{area_name}'")
-                bbox_request = QgsFeatureRequest().setFilterExpression(f"area_name = '{area_name}'")
-
-                clip_feature = next(self.clip_polygon_layer.getFeatures(clip_request), None)
-                bbox_feature = next(self.bbox_layer.getFeatures(bbox_request), None)
+                polygon_id: int = polygon_feature.id()
+                # Request the corresponding bbox feature based on the polygon's ID
+                feature_request: QgsFeatureRequest = QgsFeatureRequest().setFilterFid(polygon_id)
+                clip_feature = next(self.clip_polygon_layer.getFeatures(feature_request), None)
+                bbox_feature = next(self.bbox_layer.getFeatures(feature_request), None)
 
                 if bbox_feature and clip_feature:
                     # Calculate the progress as the percentage of features processed
                     progress_percent: float = ((index + 1) / self.total_features) * 100
 
-                    # Yield a tuple with polygon geometry, clip geometry, bbox geometry, area_name, and progress percentage
-                    yield polygon_feature.geometry(), clip_feature.geometry(), bbox_feature.geometry(), area_name, progress_percent
+                    # Yield a tuple with polygon geometry, bbox geometry, and progress percentage
+                    yield polygon_feature.geometry(), clip_feature.geometry(), bbox_feature.geometry(), progress_percent
 
                 else:
                     log_message(
-                        f"Warning: No matching bbox or clip feature found for area '{area_name}'",
+                        f"Warning: No matching bbox or clip feature found for polygon ID {polygon_id}",
                         tag="Geest",
                         level=Qgis.Warning,
                     )

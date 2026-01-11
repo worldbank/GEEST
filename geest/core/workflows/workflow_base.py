@@ -298,7 +298,7 @@ class WorkflowBase(QObject):
         areas_processed = 0
 
         try:
-            for index, (current_area, clip_area, current_bbox, area_name, progress) in enumerate(area_iterator):
+            for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
                 areas_processed += 1
                 message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"  # noqa E231
                 feedback.pushInfo(message)
