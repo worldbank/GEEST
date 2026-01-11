@@ -65,6 +65,7 @@ class JsonTreeItem:
         self.factor_font.setItalic(True)
 
         self._visible = True
+        self._enabled = True
 
     def set_visibility(self, visible: bool):
         """Sets the visibility of this item."""
@@ -73,6 +74,14 @@ class JsonTreeItem:
     def is_visible(self) -> bool:
         """Returns the visibility status of this item."""
         return self._visible
+
+    def set_enabled(self, enabled: bool):
+        """Sets whether this item is enabled (not greyed out)."""
+        self._enabled = enabled
+
+    def is_enabled(self) -> bool:
+        """Returns whether this item is enabled."""
+        return self._enabled
 
     def is_only_child(self) -> bool:
         """Returns the only child status of this item."""

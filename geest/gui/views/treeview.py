@@ -348,8 +348,13 @@ class JsonTreeModel(QAbstractItemModel):
 
         if role == Qt.DisplayRole:
             return item.data(index.column())
-        elif role == Qt.ForegroundRole and index.column() == 2:
-            return item.font_color
+        elif role == Qt.ForegroundRole:
+            # If item is disabled, show it greyed out
+            if not item.is_enabled():
+                return QColor(Qt.gray)
+            # Otherwise, use the item's font color for column 2
+            elif index.column() == 2:
+                return item.font_color
         elif role == Qt.DecorationRole and index.column() == 0:  # Icon for the name column
             return item.getIcon()
         elif role == Qt.DecorationRole and index.column() == 1:  # Icon for the status column
@@ -425,7 +430,12 @@ class JsonTreeModel(QAbstractItemModel):
         if not index.isValid():
             return Qt.NoItemFlags
 
-        _ = index.internalPointer()
+        item = index.internalPointer()
+
+        # If item is disabled, return flags without ItemIsEnabled
+        if not item.is_enabled():
+            return Qt.NoItemFlags
+
         if index.column() == 0 or index.column() == 1:
             return Qt.ItemIsEditable | Qt.ItemIsSelectable | Qt.ItemIsEnabled
 

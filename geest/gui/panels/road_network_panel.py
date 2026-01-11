@@ -48,7 +48,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
     def __init__(self):
         """🏗️ Initialize the instance."""
         super().__init__()
-        self.setWindowTitle("GEEST")
+        self.setWindowTitle("GeoE3")
         # For running study area processing in a separate thread
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
@@ -120,7 +120,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
     def initUI(self):
         """⚙️ Initui."""
         self.custom_label = CustomBannerLabel(
-            "The Gender Enabling Environments Spatial Tool",
+            "The Geospatial Enabling Environments for Employment Spatial Tool",
             resources_path("resources", "geest-banner.png"),
         )
         parent_layout = self.banner_label.parent().layout()

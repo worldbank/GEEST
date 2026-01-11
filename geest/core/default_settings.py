@@ -19,4 +19,5 @@ __revision__ = "$Format:%H$"
 
 default_settings = {
     "filter_study_areas_by_ghsl": True,  # Ignore study area polygons that do not intersect with GHSL settlements
+    "grid_creation_workers": 4,  # Number of parallel workers for grid creation (1=sequential, 2-8=parallel)
 }
