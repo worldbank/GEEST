@@ -95,12 +95,13 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             self.attributes["error"] = error
             raise Exception(error)
 
-        if analysis_scale == "local":
-            self.buffer_distance = 20  # 20m buffer
-
-            self.buffer_distance = 565  # 565m buffer for global
-        else:
-            raise
+        # if analysis_scale == "local":
+        #     self.buffer_distance = 20  # 20m buffer for local analysis
+        # else:
+        #     # National (and any other scale): 1000m (1km) buffer as per methodology
+        #     self.buffer_distance = 1000
+        # For now, using 1000m (1km) buffer for all scales as per methodology
+        self.buffer_distance = 1000
 
     def _process_features_for_area(
         self,
@@ -125,9 +126,9 @@ class StreetLightsBufferWorkflow(WorkflowBase):
 
         # Step 1: Buffer the selected features
         buffered_layer = self._buffer_features(area_features, f"{self.layer_id}_buffered_{index}")
-        # Step 2: Select grid cells that intersect with features
+        # Step 2: Select grid cells that intersect with buffered features (1km buffer)
         output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
-        area_grid = select_grid_cells_and_count_features(self.grid_layer, area_features, output_path, self.feedback)
+        area_grid = select_grid_cells_and_count_features(self.grid_layer, buffered_layer, output_path, self.feedback)
 
         # Step 3: Assign scores to the grid layer
         grid_layer = self._score_grid(area_grid, buffered_layer)
