@@ -51,9 +51,7 @@ class EPLEXWorkflow(WorkflowBase):
         :param context: QgsProcessingContext object for processing.
         :param working_directory: Folder containing study_area.gpkg and where outputs will be placed.
         """
-        super().__init__(
-            item, cell_size_m, analysis_scale, feedback, context, working_directory
-        )
+        super().__init__(item, cell_size_m, analysis_scale, feedback, context, working_directory)
 
         # Get EPLEX score from attributes
         self.eplex_score = self.attributes.get("eplex_score", 0.0)
@@ -95,11 +93,7 @@ class EPLEXWorkflow(WorkflowBase):
         fields = QgsFields()
         fields.append(QgsField("value", QVariant.Double))
 
-        eplex_layer = QgsVectorLayer(
-            f"Polygon?crs={self.target_crs.authid()}",
-            "eplex_temp",
-            "memory"
-        )
+        eplex_layer = QgsVectorLayer(f"Polygon?crs={self.target_crs.authid()}", "eplex_temp", "memory")
         eplex_layer.dataProvider().addAttributes(fields)
         eplex_layer.updateFields()
 
