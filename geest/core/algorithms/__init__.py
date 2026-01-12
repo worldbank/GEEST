@@ -27,4 +27,3 @@ from .wee_by_population_score_processor import WEEByPopulationScoreProcessingTas
 from .ghsl_downloader import GHSLDownloader
 from .ghsl_processor import GHSLProcessor
 from .ookla_downloader import OoklaDownloader, OoklaException
-from .eplex_raster_processor import create_eplex_raster

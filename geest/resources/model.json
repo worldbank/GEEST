@@ -9,9 +9,50 @@
             "description": "The Contextual Dimension refers to the laws and policies that shape workplace gender discrimination, financial autonomy, and overall gender empowerment. Although this dimension may vary between countries due to differences in legal frameworks, it remains consistent within a single country, as national policies and regulations are typically applied uniformly across countries.",
             "factors": [
                 {
+                    "id": "eplex",
+                    "output_filename": "eplex_score",
+                    "name": "EPLEX Score",
+                    "women_enabling": 2,
+                    "default_dimension_weighting": 1.0,
+                    "dimension_weighting": 1.0,
+                    "description": "The Employment Protection Legislation Index (EPLEX) measures the strictness and coverage of laws protecting workers from dismissal, covering areas like fixed-term contracts, probationary periods, unfair dismissal grounds, and severance pay. This indicator is used when women-specific contextual factors are not being analyzed.",
+                    "indicators": [
+                        {
+                            "indicator": "Employment Protection Legislation Index",
+                            "id": "eplex_score_indicator",
+                            "output_filename": "EPLEX_output",
+                            "description": "EPLEX score representing employment protection legislation strength",
+                            "default_factor_weighting": 1.0,
+                            "factor_weighting": 1.0,
+                            "index_score": 0.0,
+                            "eplex_score": 0.0,
+                            "use_index_score": 0,
+                            "use_contextual_index_score": 0,
+                            "use_eplex_score": 1,
+                            "use_index_score_with_ookla": 0,
+                            "use_index_score_with_ghsl": 0,
+                            "default_multi_buffer_distances": "0,0,0",
+                            "use_multi_buffer_point": 0,
+                            "default_single_buffer_distance": 0,
+                            "use_single_buffer_point": 0,
+                            "use_classify_polygon_into_classes": 0,
+                            "use_classify_safety_polygon_into_classes": 0,
+                            "use_csv_to_point_layer": 0,
+                            "use_polygon_per_cell": 0,
+                            "use_polyline_per_cell": 0,
+                            "use_point_per_cell": 0,
+                            "use_nighttime_lights": 0,
+                            "use_environmental_hazards": 0,
+                            "use_street_lights": 0,
+                            "analysis_mode": "use_eplex_score"
+                        }
+                    ]
+                },
+                {
                     "id": "workplace_discrimination",
                     "output_filename": "workplace_discrimination",
                     "name": "Workplace Discrimination",
+                    "women_enabling": 1,
                     "default_dimension_weighting": 0.333333,
                     "dimension_weighting": 0.333333,
                     "indicators": [
@@ -49,6 +90,7 @@
                     "id": "regulatory_frameworks",
                     "output_filename": "regulatory_frameworks",
                     "name": "Regulatory Frameworks",
+                    "women_enabling": 1,
                     "default_dimension_weighting": 0.3333333,
                     "dimension_weighting": 0.3333333,
                     "indicators": [
@@ -86,6 +128,7 @@
                     "id": "financial_inclusion",
                     "output_filename": "financial_inclusion",
                     "name": "Financial Inclusion",
+                    "women_enabling": 1,
                     "default_dimension_weighting": 0.333333,
                     "dimension_weighting": 0.333333,
                     "indicators": [
@@ -133,6 +176,7 @@
                     "id": "women_s_travel_patterns",
                     "output_filename": "women_s_travel_patterns",
                     "name": "Women's Travel Patterns",
+                    "women_enabling": 1,
                     "default_dimension_weighting": 0.2,
                     "dimension_weighting": 0.2,
                     "indicators": [
@@ -283,6 +327,7 @@
                     "id": "access_to_public_transport",
                     "output_filename": "access_to_public_transport",
                     "name": "Access to Public Transport",
+                    "women_enabling": 0,
                     "default_dimension_weighting": 0.2,
                     "dimension_weighting": 0.2,
                     "indicators": [
@@ -321,6 +366,7 @@
                     "id": "access_to_health_facilities",
                     "output_filename": "access_to_health_facilities",
                     "name": "Access to Health Facilities",
+                    "women_enabling": 1,
                     "default_dimension_weighting": 0.2,
                     "dimension_weighting": 0.2,
                     "indicators": [
@@ -359,6 +405,7 @@
                     "id": "access_to_education_and_training_facilities",
                     "output_filename": "access_to_education_and_training_facilities",
                     "name": "Access to Education and Training Facilities",
+                    "women_enabling": 0,
                     "default_dimension_weighting": 0.2,
                     "dimension_weighting": 0.2,
                     "indicators": [
@@ -397,6 +444,7 @@
                     "id": "access_to_financial_facilities",
                     "output_filename": "access_to_financial_facilities",
                     "name": "Access to Financial Facilities",
+                    "women_enabling": 0,
                     "default_dimension_weighting": 0.2,
                     "dimension_weighting": 0.2,
                     "indicators": [
@@ -445,6 +493,7 @@
                     "id": "active_transport",
                     "output_filename": "AT_output",
                     "name": "Active Transport",
+                    "women_enabling": 0,
                     "default_dimension_weighting": 0.142857142857143,
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
@@ -483,6 +532,7 @@
                     "id": "safety",
                     "output_filename": "safety",
                     "name": "Safety",
+                    "women_enabling": 1,
                     "default_dimension_weighting": 0.142857142857143,
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
@@ -520,6 +570,7 @@
                     "id": "fcv",
                     "output_filename": "fcv",
                     "name": "FCV",
+                    "women_enabling": 0,
                     "default_dimension_weighting": 0.142857142857143,
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
@@ -557,6 +608,7 @@
                     "id": "education",
                     "output_filename": "education",
                     "name": "Education",
+                    "women_enabling": 0,
                     "default_dimension_weighting": 0.142857142857143,
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
@@ -594,6 +646,7 @@
                     "id": "digital_inclusion",
                     "output_filename": "digital_inclusion",
                     "name": "Digital Inclusion",
+                    "women_enabling": 0,
                     "default_dimension_weighting": 0.142857142857143,
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
@@ -631,6 +684,7 @@
                     "id": "environmental_hazards",
                     "output_filename": "environmental_hazards",
                     "name": "Environmental Hazards",
+                    "women_enabling": 0,
                     "default_dimension_weighting": 0.142857142857143,
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
@@ -776,6 +830,7 @@
                     "id": "water_sanitation",
                     "output_filename": "water_sanitation",
                     "name": "Water sanitation",
+                    "women_enabling": 1,
                     "default_dimension_weighting": 0.142857142857143,
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [

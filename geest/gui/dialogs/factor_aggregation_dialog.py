@@ -82,12 +82,12 @@ class FactorAggregationDialog(CustomBaseDialog):
         layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
 
         self.banner_label = CustomBannerLabel(
-            "The Gender Enabling Environments Spatial Tool",
+            "The Geospatial Enabling Environments for Employment Tool",
             resources_path("resources", "geest-banner.png"),
         )
         layout.addWidget(self.banner_label)
         # Title label
-        self.title_label = QLabel("The Gender Enabling Environments Spatial Tool", self.banner_label)
+        self.title_label = QLabel("The Geospatial Enabling Environments for Employment Tool", self.banner_label)
         self.title_label.setWordWrap(True)
         self.title_label.setStyleSheet(
             "color: white; font-size: 16px; background-color: rgba(0, 0, 0, 0.5); padding: 5px;"
@@ -379,8 +379,6 @@ class FactorAggregationDialog(CustomBaseDialog):
             self.table.setColumnHidden(self.col_reset, True)
 
         self.validate_weightings()
-        if not self.weighting_column_visible:
-            self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
 
         # Show OSM disclaimer in footer if any OSM download buttons exist
         if hasattr(self, "osm_disclaimer_label") and self.has_osm_download:
@@ -477,6 +475,11 @@ class FactorAggregationDialog(CustomBaseDialog):
 
     def validate_weightings(self):
         """Validate weightings to ensure they sum to 1 and are within range."""
+        # If weighting column is not visible (single indicator), always enable OK button
+        if not self.weighting_column_visible:
+            self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
+            return
+
         try:
             total_weighting = sum(float(spin_box.value() or 0) for spin_box in self.weightings.values())
             valid_sum = abs(total_weighting - 1.0) < 0.001  # Allow slight floating-point tolerance

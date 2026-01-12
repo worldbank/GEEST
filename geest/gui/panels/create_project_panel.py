@@ -272,7 +272,18 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     model["analysis_scale"] = "national"
                 # Save women considerations settings
                 model["women_considerations_enabled"] = self.women_considerations_checkbox.isChecked()
-                model["eplex_score"] = self.eplex_score_spinbox.value()
+
+                # Save EPLEX score to the EPLEX indicator in the Contextual dimension
+                for dimension in model.get("dimensions", []):
+                    if dimension.get("id") == "contextual":
+                        for factor in dimension.get("factors", []):
+                            if factor.get("id") == "eplex":
+                                for indicator in factor.get("indicators", []):
+                                    if indicator.get("id") == "eplex_score_indicator":
+                                        indicator["eplex_score"] = self.eplex_score_spinbox.value()
+                                        break
+                                break
+                        break
             with open(model_path, "w") as f:
                 json.dump(model, f, indent=2)
 

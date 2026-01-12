@@ -168,6 +168,11 @@ class GeestDock(QDockWidget):
                 # Switch to the previous tab when the button is clicked
                 lambda: self.tree_widget.set_working_directory(self.open_project_widget.working_dir)
             )
+
+            self.open_project_widget.women_considerations_changed_signal.connect(
+                # Reload and apply women considerations logic when checkbox changes
+                self.tree_widget.reload_and_apply_women_considerations_logic
+            )
             # CREATE_PROJECT_PANEL = 4
             # Create and add the "Create Project" panel
 

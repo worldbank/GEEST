@@ -94,7 +94,7 @@ class GeestPlugin:
     """
     GEEST 2 plugin interface.
 
-    This class provides the main interface for the GEEST (Gender Enabling Environments Spatial Tool)
+    This class provides the main interface for the GeoE3 (Geospatial Enabling Environments for Employment Tool)
     plugin for QGIS. It handles the plugin initialization, GUI setup, debugging capabilities,
     profiling tools, and various development utilities.
 
