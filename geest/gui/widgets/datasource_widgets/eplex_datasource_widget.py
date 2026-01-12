@@ -34,9 +34,7 @@ class EPLEXDataSourceWidget(BaseDataSourceWidget):
             self.spin_box.setDecimals(2)
             self.spin_box.setSingleStep(0.1)
             self.spin_box.setValue(self.attributes.get("eplex_score", 0.0))
-            self.spin_box.setToolTip(
-                "Enter EPLEX score between 0 (weakest protection) and 5 (strongest protection)"
-            )
+            self.spin_box.setToolTip("Enter EPLEX score between 0 (weakest protection) and 5 (strongest protection)")
             self.layout.addWidget(self.spin_box)
 
             # Connect signal to update the data when user changes value
@@ -45,6 +43,7 @@ class EPLEXDataSourceWidget(BaseDataSourceWidget):
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
+
             log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def update_attributes(self):
