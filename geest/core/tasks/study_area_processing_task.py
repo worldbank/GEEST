@@ -1111,6 +1111,10 @@ class StudyAreaProcessingTask(QgsTask):
         (xmin, ymin, xmax, ymax) = aligned_box
         grid_layer.SetSpatialFilterRect(xmin, ymin, xmax, ymax)
 
+        # Get total feature count for progress reporting
+        total_features = grid_layer.GetFeatureCount()
+        log_message(f"Processing {total_features} grid cells for clip polygon creation.")
+
         # 2) We'll gather all grid cells that intersect *the boundary* of geom
         #    In OGR, we can do:
         boundary = geom.GetBoundary()  # line geometry for polygon boundary
@@ -1139,6 +1143,10 @@ class StudyAreaProcessingTask(QgsTask):
             count += 1
             if count % 1000 == 0:
                 log_message(f"Processed {count} grid cells.")
+                # Update progress bar for clip polygon creation
+                if total_features > 0:
+                    progress = int((count / total_features) * 100)
+                    self.feedback.setProgress(progress)
         grid_layer.ResetReading()
 
         # Also union the original geom itself
