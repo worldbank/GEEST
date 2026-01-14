@@ -43,7 +43,7 @@
           </font>
          </property>
          <property name="text">
-          <string>A GEEST project is a folder with files that are managed by the GEEST plugin. Analysis outputs and working files will be stored in this folder. It needs to be an empty folder that contains no other files.</string>
+          <string>This step creates a folder with files that are managed by the GeoE3 plugin. Analysis outputs and working files will be stored in this folder. Please select an empty folder that contains no other files.</string>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
@@ -59,21 +59,24 @@
        <item row="2" column="0">
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>Spatial Scale</string>
+          <string>Select scale of analysis</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="0">
-           <widget class="QRadioButton" name="local_scale">
+           <widget class="QRadioButton" name="regional_scale">
             <property name="font">
              <font>
               <pointsize>16</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Local Scale</string>
+             <string>Regional</string>
+            </property>
+            <property name="enabled">
+             <bool>false</bool>
             </property>
             <property name="checked">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -85,14 +88,32 @@
              </font>
             </property>
             <property name="text">
-             <string>National Scale</string>
+             <string>National</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QRadioButton" name="local_scale">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Local</string>
+            </property>
+            <property name="enabled">
+             <bool>false</bool>
             </property>
             <property name="checked">
              <bool>false</bool>
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="2">
+          <item row="2" column="0" colspan="3">
            <widget class="QSpinBox" name="cell_size_spinbox">
             <property name="enabled">
              <bool>true</bool>
@@ -118,19 +139,21 @@
              <number>100</number>
             </property>
             <property name="value">
-             <number>100</number>
+             <number>1000</number>
             </property>
            </widget>
           </item>
-          <item row="1" column="0" colspan="2">
+          <item row="1" column="0" colspan="3">
            <widget class="QLabel" name="description2">
             <property name="font">
              <font>
-              <pointsize>16</pointsize>
+              <pointsize>14</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Set the analysis cell size (m). Smaller sizes require longer processing times, but produce more detailed analysis results. We suggest a value between 100m and 1000m.</string>
+             <string>The Regional analysis allows you to perform large-scale analysis, in a computationally adequate manner, by leveraging global datasets. The National and Local scales allow for more granular (and time-intensive) spatial analysis and GeoE3 will auto-populate with recommendations on assumptions and thresholds, backed by research, which can be adjusted as needed.
+
+Set the analysis grid size (m). Smaller sizes require longer processing times, but produce more detailed analysis results. Recommended grid sizes are available by default.</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignJustify|Qt::AlignTop</set>
@@ -245,6 +268,115 @@
              </widget>
             </item>
            </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Women Considerations</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="women_considerations_checkbox">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Women's enabling environments</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="women_considerations_description">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>You can tailor the analysis to include geographic factors that particularly influence women's access to employment, as guided by the Geospatial Women's Employment Analytical Framework (GeoWEAF) developed by the World Bank.
+
+When this option is **not selected**, the analysis focuses on generic employment and entrepreneurship factors, and certain women-specific factors will be disabled. The Contextual Dimension will require an EPLEX score instead of individual factor analysis.</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::MarkdownText</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignJustify|Qt::AlignTop</set>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="eplex_label">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>EPLEX Score (Employment Protection Legislation Index)</string>
+            </property>
+            <property name="visible">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="eplex_description">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>The Employment Protection Legislation Index refers to indicators developed by the International Labour Organization (ILO) to measure the strictness and coverage of laws protecting workers from dismissal, covering areas like fixed-term contracts, probationary periods, unfair dismissal grounds, and severance pay, helping to compare labor market regulations across countries.</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignJustify|Qt::AlignTop</set>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="visible">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QDoubleSpinBox" name="eplex_score_spinbox">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>5.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="visible">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -433,7 +565,7 @@
    <item row="1" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;GEEST Project Creation&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;GeoE3 Project Creation&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
