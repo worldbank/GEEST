@@ -256,6 +256,7 @@ class JsonTreeModel(QAbstractItemModel):
             "execution_start_time": factor.get("execution_start_time", ""),
             "result_file": factor.get("result_file", ""),
             "execution_end_time": factor.get("execution_end_time", ""),
+            "women_enabling": factor.get("women_enabling", 0),
         }
         status = ""  # Use item.getStatus to get after constructing the item
         guid = factor.get("guid", str(uuid.uuid4()))  # Deserialize UUID

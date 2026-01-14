@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""📦 OSM Education Facilities Downloader module.
+"""📦 OSM Universities and Training Facilities Downloader module.
 
-This module contains functionality for downloading education and training facilities from OSM.
+This module contains functionality for downloading universities and training facilities from OSM.
+Note: Primary schools and kindergartens are handled by separate downloaders.
 """
 
 from .osm_data_downloader_base import OSMDataDownloaderBase
@@ -10,14 +11,16 @@ from .osm_data_downloader_base import OSMDataDownloaderBase
 
 class OSMEducationDownloader(OSMDataDownloaderBase):
     """
-    Downloads education and training facilities from OpenStreetMap.
+    Downloads universities and training facilities from OpenStreetMap.
 
     This includes:
-    - Schools (primary, secondary)
     - Universities and colleges
     - Training centers
-    - Kindergartens
-    - Vocational schools
+    - Vocational training facilities
+    - Education faculties
+
+    Note: Primary schools and kindergartens are handled by separate downloaders
+    (OSMPrimarySchoolDownloader and OSMKindergartenDownloader).
     """
 
     def __init__(
@@ -52,35 +55,41 @@ class OSMEducationDownloader(OSMDataDownloaderBase):
             feedback=feedback,
         )
         # Set the output type - education facilities can be points or polygons
-        self._set_output_type("point")
+        # Use mixed_to_point to handle both and convert polygons to centroids
+        self._set_output_type("mixed_to_point")
 
-        # Define the Overpass query for education facilities
+        # Define the Overpass query for education and training facilities
+        # Note: This targets universities, colleges, and training centers
+        # Schools and kindergartens are handled by separate downloaders
         osm_query = """[out:xml][timeout:60];
 (
-  node["amenity"="school"]({{bbox}});
-  way["amenity"="school"]({{bbox}});
-  relation["amenity"="school"]({{bbox}});
   node["amenity"="university"]({{bbox}});
   way["amenity"="university"]({{bbox}});
   relation["amenity"="university"]({{bbox}});
+
   node["amenity"="college"]({{bbox}});
   way["amenity"="college"]({{bbox}});
   relation["amenity"="college"]({{bbox}});
-  node["amenity"="kindergarten"]({{bbox}});
-  way["amenity"="kindergarten"]({{bbox}});
-  relation["amenity"="kindergarten"]({{bbox}});
+
+  node["education"="faculty"]({{bbox}});
+  way["education"="faculty"]({{bbox}});
+  relation["education"="faculty"]({{bbox}});
+
+  node["amenity"="vocational_training"]({{bbox}});
+  way["amenity"="vocational_training"]({{bbox}});
+  relation["amenity"="vocational_training"]({{bbox}});
+
   node["amenity"="training"]({{bbox}});
   way["amenity"="training"]({{bbox}});
   relation["amenity"="training"]({{bbox}});
-  node["amenity"="language_school"]({{bbox}});
-  way["amenity"="language_school"]({{bbox}});
-  relation["amenity"="language_school"]({{bbox}});
-  node["amenity"="driving_school"]({{bbox}});
-  way["amenity"="driving_school"]({{bbox}});
-  relation["amenity"="driving_school"]({{bbox}});
-  node["amenity"="music_school"]({{bbox}});
-  way["amenity"="music_school"]({{bbox}});
-  relation["amenity"="music_school"]({{bbox}});
+
+  node["building"="university"]({{bbox}});
+  way["building"="university"]({{bbox}});
+  relation["building"="university"]({{bbox}});
+
+  node["building"="college"]({{bbox}});
+  way["building"="college"]({{bbox}});
+  relation["building"="college"]({{bbox}});
 );
 (._;>;);
 out geom;"""

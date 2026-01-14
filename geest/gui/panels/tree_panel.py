@@ -325,9 +325,12 @@ class TreePanel(QWidget):
         Args:
             index: QModelIndex of the clicked item.
         """
+        item = index.internalPointer()
+        if not item or not item.is_enabled():
+            return
+
         show_layer_on_click = setting(key="show_layer_on_click", default=True)
         if show_layer_on_click:
-            item = index.internalPointer()
             add_to_map(item)
         show_overlay = setting(key="show_overlay", default=False)
         if show_overlay:
@@ -577,33 +580,62 @@ class TreePanel(QWidget):
             self.json_data = json.load(f)
             log_message(f"Loaded JSON data from {self.json_file}")
 
-    def apply_women_considerations_logic(self):
-        """Apply factor visibility based on women considerations setting.
+    def reload_and_apply_women_considerations_logic(self):
+        """Reload model.json and apply women considerations logic.
 
-        When women_considerations_enabled is False, certain factors are hidden:
-        - All Contextual factors
-        - Women's Travel Patterns
-        - Access to Health Facilities
-        - Safety
-        - Water sanitation
+        This method should be called when women considerations settings change
+        during runtime (e.g., checkbox toggled in OpenProjectPanel).
+        """
+        if not hasattr(self, "working_directory") or not self.working_directory:
+            log_message(
+                "reload_and_apply_women_considerations_logic: working_directory not set",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
+
+        model_path = os.path.join(self.working_directory, "model.json")
+        if not os.path.exists(model_path):
+            log_message(
+                f"reload_and_apply_women_considerations_logic: model.json not found at {model_path}",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
+
+        self.json_file = model_path
+        self.load_json()
+        self.apply_women_considerations_logic()
+
+    def apply_women_considerations_logic(self):
+        """Apply factor enabled/disabled state based on women considerations setting.
+
+        Uses the women_enabling attribute from model.json for each factor:
+        - women_enabling = 1: Women-specific factors (enabled when women considerations ON)
+        - women_enabling = 0: Generic factors (always enabled)
+        - women_enabling = 2: EPLEX factors (enabled when women considerations OFF - inverse)
         """
         if not hasattr(self, "json_data") or self.json_data is None:
             return
 
-        women_considerations_enabled = self.json_data.get("women_considerations_enabled", True)
-        eplex_score = self.json_data.get("eplex_score", 0.0)
-        log_message(f"Women considerations enabled: {women_considerations_enabled}, EPLEX score: {eplex_score}")
+        contextual_data = None
+        for dimension in self.json_data.get("dimensions", []):
+            if dimension.get("id", "").lower() == "contextual":
+                contextual_data = dimension
+                break
 
-        # Factors affected by women considerations setting
-        women_specific_factors = [
-            "Workplace Discrimination",
-            "Regulatory Frameworks",
-            "Financial Inclusion",
-            "Women's Travel Patterns",
-            "Access to Health Facilities",
-            "Safety",
-            "Water sanitation",
-        ]
+        if contextual_data is not None:
+            women_considerations_enabled = contextual_data.get("women_considerations_enabled")
+            eplex_score = contextual_data.get("eplex_score")
+        else:
+            women_considerations_enabled = None
+            eplex_score = None
+
+        if women_considerations_enabled is None:
+            women_considerations_enabled = self.json_data.get("women_considerations_enabled", True)
+        if eplex_score is None:
+            eplex_score = self.json_data.get("eplex_score", 0.0)
+        log_message(f"Women considerations enabled: {women_considerations_enabled}, EPLEX score: {eplex_score}")
 
         # Get all dimensions from the model
         root_item = self.model.get_analysis_item()
@@ -627,21 +659,39 @@ class TreePanel(QWidget):
                 if not factor:
                     continue
 
-                factor_name = factor.data(0)  # Get factor name
-                if factor_name in women_specific_factors:
-                    # Set enabled state based on women considerations setting
+                # Read women_enabling attribute from factor (data-driven approach)
+                women_enabling = factor.attribute("women_enabling", 0)
+                factor_name = factor.data(0)
+
+                # Determine enabled state based on women_enabling value
+                if women_enabling == 1:
+                    # Women-specific factors: enabled when women considerations ON, disabled when OFF
                     enabled = women_considerations_enabled
-                    log_message(f"Setting factor '{factor_name}' enabled to: {enabled}")
-                    factor.set_enabled(enabled)
+                    log_message(f"Factor '{factor_name}' (women_enabling=1): enabled={enabled}")
+                elif women_enabling == 2:
+                    # EPLEX factors: enabled when women considerations OFF, disabled when ON (inverse)
+                    enabled = not women_considerations_enabled
+                    log_message(f"Factor '{factor_name}' (women_enabling=2): enabled={enabled}")
+                else:
+                    # Generic factors (women_enabling=0): always enabled
+                    enabled = True
 
-                    # Also disable all child indicators
-                    for indicator_idx in range(factor.childCount()):
-                        indicator = factor.child(indicator_idx)
-                        if indicator:
-                            indicator.set_enabled(enabled)
+                # Apply enabled state to factor
+                factor.set_enabled(enabled)
 
-        # Refresh the tree view
-        self.model.layoutChanged.emit()
+                # Also apply to all child indicators
+                for indicator_idx in range(factor.childCount()):
+                    indicator = factor.child(indicator_idx)
+                    if indicator:
+                        indicator.set_enabled(enabled)
+
+        # Force a complete refresh of the tree view
+        self.model.beginResetModel()
+        self.model.endResetModel()
+
+        # Force viewport repaint
+        self.treeView.viewport().update()
+        self.treeView.update()
 
     def load_json_from_file(self):
         """Prompt the user to load a JSON file and update the tree."""

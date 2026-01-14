@@ -58,7 +58,7 @@
       </font>
      </property>
      <property name="text">
-      <string>To get started, we need a project folder. You can either select a **previously created** project folder, or **create a new one**. The contents of this folder will be managed by GeoE3. It will store the GeoE3 project file and the working analysis results.</string>
+      <string>This step creates a folder with files that are managed by the GeoE3 plugin. Analysis outputs and working files will be stored in this folder. Please select an empty folder that contains no other files.</string>
      </property>
      <property name="textFormat">
       <enum>Qt::MarkdownText</enum>
