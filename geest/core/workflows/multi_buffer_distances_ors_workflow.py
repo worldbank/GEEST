@@ -26,6 +26,7 @@ from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem, setting
 from geest.core.ors_client import ORSClient
+from geest.core.workflows.mappings import MAPPING_REGISTRY
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
@@ -73,6 +74,19 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
         self.workflow_name = "use_multi_buffer_point"
         self.distances = self.attributes.get("multi_buffer_travel_distances", None)
         if not self.distances:
+            factor_id = None
+            if item.isIndicator() and item.parentItem:
+                factor_id = item.parentItem.attribute("id", None)
+            mapping_id = self.attributes.get("mapping_id")
+            indicator_id = self.attributes.get("id")
+            mapping = MAPPING_REGISTRY.get(factor_id or mapping_id or indicator_id)
+            if mapping:
+                config = mapping.get(analysis_scale, mapping.get("national"))
+                if config:
+                    thresholds = config.get("thresholds")
+                    if thresholds:
+                        self.distances = thresholds
+        if not self.distances:
             log_message(
                 "Invalid travel distances, using default.",
                 tag="Geest",
@@ -87,9 +101,11 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
                 )
                 raise Exception("Invalid travel distances.")
         try:
-            self.distances = [float(x.strip()) for x in self.distances.split(",")]
-        except Exception as e:
-            del e
+            if isinstance(self.distances, list):
+                self.distances = [float(x) for x in self.distances]
+            else:
+                self.distances = [float(x.strip()) for x in self.distances.split(",")]
+        except Exception:
             log_message(
                 "Invalid travel distances provided. Distances should be a comma-separated list of up to 5 numbers.",
                 tag="Geest",

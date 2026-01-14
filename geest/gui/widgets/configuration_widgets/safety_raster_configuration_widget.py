@@ -18,8 +18,10 @@ __revision__ = "$Format:%H$"
 # ---------------------------------------------------------------------
 
 from qgis.core import Qgis
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QLabel
 
+from geest.core.workflows.mappings import NIGHTTIME_LIGHTS_SAFETY
 from geest.utilities import log_message
 
 from .base_configuration_widget import BaseConfigurationWidget
@@ -40,6 +42,33 @@ class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
         try:
             self.info_label = QLabel("A raster layer representing safety")
             self.internal_layout.addWidget(self.info_label)
+
+            data_source = NIGHTTIME_LIGHTS_SAFETY.get("data_source", "Nighttime Lights")
+            classes = NIGHTTIME_LIGHTS_SAFETY.get("classes", [])
+            rows = []
+            for entry in classes:
+                min_value = entry.get("min_value", "")
+                max_value = entry.get("max_value", None)
+                score = entry.get("score", "")
+                if max_value is None:
+                    value_range = f"> {min_value}"
+                else:
+                    value_range = f"{min_value}-{max_value}"
+                rows.append(f"<tr><td>{value_range}</td><td>{score}</td></tr>")
+
+            html = f"""
+            <p><b>Nighttime Lights ({data_source})</b></p>
+            <table border='1' cellpadding='4' cellspacing='0'>
+                <tr><th>Raster Cell Value</th><th>Score</th></tr>
+                {''.join(rows)}
+            </table>
+            """
+
+            self.mapping_table_label = QLabel()
+            self.mapping_table_label.setWordWrap(True)
+            self.mapping_table_label.setTextFormat(Qt.RichText)
+            self.mapping_table_label.setText(html)
+            self.internal_layout.addWidget(self.mapping_table_label)
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
