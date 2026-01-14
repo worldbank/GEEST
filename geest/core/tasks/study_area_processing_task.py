@@ -999,7 +999,7 @@ class StudyAreaProcessingTask(QgsTask):
                 log_message(f"Chunk {index} is outside the geometry.")
                 continue
             try:
-                current_progress = int((counter / chunk_count) * 100)
+                current_progress = min(100, int((counter / chunk_count) * 100))
                 log_message(
                     f"XXXXXX Chunks Progress: {counter} / {chunk_count} : {current_progress}% XXXXXX"  # noqa: E203
                 )
@@ -1111,6 +1111,10 @@ class StudyAreaProcessingTask(QgsTask):
         (xmin, ymin, xmax, ymax) = aligned_box
         grid_layer.SetSpatialFilterRect(xmin, ymin, xmax, ymax)
 
+        # Count features for progress updates
+        total_features = grid_layer.GetFeatureCount()
+        log_message(f"Processing {total_features} grid cells for clip polygon creation.")
+
         # 2) We'll gather all grid cells that intersect *the boundary* of geom
         #    In OGR, we can do:
         boundary = geom.GetBoundary()  # line geometry for polygon boundary
@@ -1139,6 +1143,10 @@ class StudyAreaProcessingTask(QgsTask):
             count += 1
             if count % 1000 == 0:
                 log_message(f"Processed {count} grid cells.")
+                # Update progress (capped at 100% since GetFeatureCount can be inaccurate)
+                if total_features > 0:
+                    progress = min(100, int((count / total_features) * 100))
+                    self.feedback.setProgress(progress)
         grid_layer.ResetReading()
 
         # Also union the original geom itself
