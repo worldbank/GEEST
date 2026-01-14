@@ -144,7 +144,7 @@
    </dd_properties>
   </text-style>
  </LayoutItem>
- <LayoutItem groupUuid="" visibility="1" outlineWidthM="0.3,mm" halign="4" background="false" blendMode="0" uuid="{24376350-7a3a-419e-99e6-e7b509bbb5cd}" itemRotation="0" excludeFromExports="0" position="0,15.818,mm" referencePoint="0" marginX="0" zValue="9" size="210,14.6072,mm" marginY="0" frameJoinStyle="miter" labelText="The Gender Enabling Environments Spatial Tool" positionLock="false" frame="false" positionOnPage="0,15.818,mm" opacity="1" valign="128" type="65641" id="" templateUuid="{24376350-7a3a-419e-99e6-e7b509bbb5cd}" htmlState="0">
+ <LayoutItem groupUuid="" visibility="1" outlineWidthM="0.3,mm" halign="4" background="false" blendMode="0" uuid="{24376350-7a3a-419e-99e6-e7b509bbb5cd}" itemRotation="0" excludeFromExports="0" position="0,15.818,mm" referencePoint="0" marginX="0" zValue="9" size="210,14.6072,mm" marginY="0" frameJoinStyle="miter" labelText="The Geospatial Enabling Environments for Employment Tool" positionLock="false" frame="false" positionOnPage="0,15.818,mm" opacity="1" valign="128" type="65641" id="" templateUuid="{24376350-7a3a-419e-99e6-e7b509bbb5cd}" htmlState="0">
   <FrameColor red="0" blue="0" alpha="255" green="0"/>
   <BackgroundColor red="255" blue="255" alpha="255" green="255"/>
   <LayoutObject>
@@ -447,7 +447,7 @@
    </dd_properties>
   </text-style>
  </LayoutItem>
- <LayoutItem groupUuid="" visibility="1" outlineWidthM="0.3,mm" halign="4" background="false" blendMode="0" uuid="{9a0513e2-8660-4fa3-8f80-22520f3baafa}" itemRotation="0" excludeFromExports="0" position="6.45662,60.7796,mm" referencePoint="0" marginX="0" zValue="4" size="198.138,53.1076,mm" marginY="0" frameJoinStyle="miter" labelText="&lt;p>The Gender Enabling Environments Spatial Tool (GEEST), developed by the &lt;strong>World Bank&lt;/strong>, evaluates locations based on how supportive they are of women’s employment and business opportunities.&lt;/p>&#xa;&#xa;&lt;p>By incorporating 15 spatial factors across three dimensions:&lt;/p>&#xa;&#xa;&lt;ol>&#xa;    &lt;li>&lt;strong>Contextual&lt;/strong>&lt;/li>&#xa;    &lt;li>&lt;strong>Accessibility&lt;/strong>&lt;/li>&#xa;    &lt;li>&lt;strong>Place Characterization&lt;/strong>&lt;/li>&#xa;&lt;/ol>&#xa;&#xa;&lt;p>GEEST offers a comprehensive analysis of how the environment impacts women's job prospects, indicating whether it is highly enabling or not enabling at all.&lt;/p>&#xa;" positionLock="false" frame="false" positionOnPage="6.45662,60.7796,mm" opacity="1" valign="32" type="65641" id="" templateUuid="{9a0513e2-8660-4fa3-8f80-22520f3baafa}" htmlState="1">
+ <LayoutItem groupUuid="" visibility="1" outlineWidthM="0.3,mm" halign="4" background="false" blendMode="0" uuid="{9a0513e2-8660-4fa3-8f80-22520f3baafa}" itemRotation="0" excludeFromExports="0" position="6.45662,60.7796,mm" referencePoint="0" marginX="0" zValue="4" size="198.138,53.1076,mm" marginY="0" frameJoinStyle="miter" labelText="&lt;p>The Geospatial Enabling Environments for Employment Tool (GEEST), developed by the &lt;strong>World Bank&lt;/strong>, evaluates locations based on how supportive they are of women’s employment and business opportunities.&lt;/p>&#xa;&#xa;&lt;p>By incorporating 15 spatial factors across three dimensions:&lt;/p>&#xa;&#xa;&lt;ol>&#xa;    &lt;li>&lt;strong>Contextual&lt;/strong>&lt;/li>&#xa;    &lt;li>&lt;strong>Accessibility&lt;/strong>&lt;/li>&#xa;    &lt;li>&lt;strong>Place Characterization&lt;/strong>&lt;/li>&#xa;&lt;/ol>&#xa;&#xa;&lt;p>GEEST offers a comprehensive analysis of how the environment impacts women's job prospects, indicating whether it is highly enabling or not enabling at all.&lt;/p>&#xa;" positionLock="false" frame="false" positionOnPage="6.45662,60.7796,mm" opacity="1" valign="32" type="65641" id="" templateUuid="{9a0513e2-8660-4fa3-8f80-22520f3baafa}" htmlState="1">
   <FrameColor red="0" blue="0" alpha="255" green="0"/>
   <BackgroundColor red="255" blue="255" alpha="255" green="255"/>
   <LayoutObject>
@@ -509,7 +509,7 @@
    </dd_properties>
   </text-style>
  </LayoutItem>
- <LayoutItem groupUuid="" visibility="1" outlineWidthM="0.3,mm" halign="4" background="false" blendMode="0" uuid="{c43d6fb3-8da9-4705-ab30-8e96cbc47929}" itemRotation="0" excludeFromExports="0" position="0,15.8178,mm" referencePoint="0" marginX="0" zValue="3" size="210,14.6072,mm" marginY="0" frameJoinStyle="miter" labelText="The Gender Enabling Environments Spatial Tool" positionLock="false" frame="false" positionOnPage="0,15.8178,mm" opacity="1" valign="128" type="65641" id="" templateUuid="{c43d6fb3-8da9-4705-ab30-8e96cbc47929}" htmlState="0">
+ <LayoutItem groupUuid="" visibility="1" outlineWidthM="0.3,mm" halign="4" background="false" blendMode="0" uuid="{c43d6fb3-8da9-4705-ab30-8e96cbc47929}" itemRotation="0" excludeFromExports="0" position="0,15.8178,mm" referencePoint="0" marginX="0" zValue="3" size="210,14.6072,mm" marginY="0" frameJoinStyle="miter" labelText="The Geospatial Enabling Environments for Employment Tool" positionLock="false" frame="false" positionOnPage="0,15.8178,mm" opacity="1" valign="128" type="65641" id="" templateUuid="{c43d6fb3-8da9-4705-ab30-8e96cbc47929}" htmlState="0">
   <FrameColor red="0" blue="0" alpha="255" green="0"/>
   <BackgroundColor red="255" blue="255" alpha="255" green="255"/>
   <LayoutObject>
