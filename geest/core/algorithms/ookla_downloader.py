@@ -69,8 +69,8 @@ class OoklaDownloader:
 
         Attributes:
             extents (QgsRectangle): The spatial extents for the download.
-            output_path (str): The output path for the GeoPackage.
-            filename_prefix (str): The filename and layer name for the output.
+            output_path (str): The output directory path for the GeoPackage files.
+            filename_prefix (str): The filename prefix for the output.
                 It will have "fixed", "mobile" or "combined" appended to it.
             use_cache (bool): Indicates if cache should be used.
             delete_existing (bool): Indicates if existing files should be deleted.
@@ -79,8 +79,8 @@ class OoklaDownloader:
         """
         # These are required
         self.extents = extents  # must be specified in the EPSG:4326 projection
-        self.output_path = output_path  # The output path for the parquet file
-        self.filename_prefix = filename_prefix  # parquet filename
+        self.output_path = output_path  # The output directory path for GeoPackage files
+        self.filename_prefix = filename_prefix  # GeoPackage filename prefix
         self.use_cache = use_cache
         self.delete_existing = delete_existing
         # Unfortunately we are using gdal's built in S3 support,
@@ -142,10 +142,10 @@ class OoklaDownloader:
             self.extents.yMaximum(),
         )
 
-        # Prepare output file paths
-        fixed_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_fixed.parquet")
-        mobile_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_mobile.parquet")
-        combined_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_combined.parquet")
+        # Prepare output file paths (using GeoPackage for faster Windows performance)
+        fixed_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_fixed.gpkg")
+        mobile_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_mobile.gpkg")
+        combined_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_combined.gpkg")
 
         # Check if use cache is enabled and files exist
         if self.use_cache and os.path.exists(combined_output_file):
@@ -209,11 +209,11 @@ class OoklaDownloader:
         to only fetch records within our bbox and with sufficient upload and download speeds.
 
         Because it is a parquet file, GDAL will still efficiently fetch only the required row groups
-        using an HTTP range requests.
+        using HTTP range requests. The output is saved as GeoPackage for better Windows performance.
 
         Args:
             input_uri (str): The URI of the input Parquet file (can be a local path or S3 path).
-            output_file (str): The path to the output Parquet file where filtered data will be saved.
+            output_file (str): The path to the output GeoPackage file where filtered data will be saved.
             bbox_4326 (tuple): A tuple representing the bounding box (min_x, min_y, max_x, max_y) for filtering.
             output_crs (QgsCoordinateReferenceSystem): The coordinate reference system for the output data.
             speed_threshold_kbps (float): Minimum speed threshold in kbps for both upload and download.
@@ -234,14 +234,14 @@ class OoklaDownloader:
 
         found_bbox = (0, 0, 0, 0)  # As we iterate over the features, we'll find the actual bbox
         start_time = timeit.default_timer()
-        # Open the input Parquet file
 
-        driver = ogr.GetDriverByName("Parquet")
-        if driver is None:
+        # Open the input Parquet file from S3
+        parquet_driver = ogr.GetDriverByName("Parquet")
+        if parquet_driver is None:
             log_message("❌ Parquet driver not available.")
             raise OoklaException("Parquet driver not available.")
 
-        dataset = driver.Open(input_uri, 0)
+        dataset = parquet_driver.Open(input_uri, 0)
         if dataset is None:
             raise OoklaException(f"Failed to open OOKLA data source: {input_uri}")
 
@@ -266,8 +266,19 @@ class OoklaDownloader:
             log_message("Writing results to EPSG:4326")
 
         layer = dataset.GetLayer()
-        out_dataset = driver.CreateDataSource(output_file)
-        out_layer = out_dataset.CreateLayer("filtered_data", target_spatial_reference, geom_type=ogr.wkbPolygon)
+
+        # Create output GeoPackage (much faster on Windows than Parquet)
+        gpkg_driver = ogr.GetDriverByName("GPKG")
+        if gpkg_driver is None:
+            log_message("❌ GPKG driver not available.")
+            raise OoklaException("GPKG driver not available.")
+
+        # Delete existing file if it exists (GPKG doesn't overwrite)
+        if os.path.exists(output_file):
+            os.remove(output_file)
+
+        out_dataset = gpkg_driver.CreateDataSource(output_file)
+        out_layer = out_dataset.CreateLayer("ookla_data", target_spatial_reference, geom_type=ogr.wkbPolygon)
 
         # Copy fields
         # We only will keep the quadkey field and discard the rest
@@ -348,7 +359,7 @@ class OoklaDownloader:
             f"Found BBOX: {found_bbox}"
         )
         self.print_timings(
-            start_time, title="Parquet file generation", message=f"Wrote {kept_count} features to {output_file}."
+            start_time, title="GeoPackage file generation", message=f"Wrote {kept_count} features to {output_file}."
         )
 
     def print_timings(self, start_time, title, message):
@@ -369,15 +380,15 @@ class OoklaDownloader:
 
     def rasterize_filtered_data(self, input_file, output_raster, pixel_size=0.01):
         """
-        This function rasterizes the filtered Parquet data into a GeoTIFF with the specified pixel size.
+        This function rasterizes the filtered GeoPackage data into a GeoTIFF with the specified pixel size.
 
-        gdal_rasterize -l ookla_filtered -burn 1.0 -tr 0.001 0.001 -init 0.0
+        gdal_rasterize -l ookla_data -burn 1.0 -tr 0.001 0.001 -init 0.0
             -a_nodata 0.0 -ot Byte -of GTiff -co COMPRESS=DEFLATE -co PREDICTOR=2
             -co ZLEVEL=9
-            /home/timlinux/dev/python/GEEST/data/ookla_filtered.parquet OUTPUT.tif
+            /path/to/ookla_filtered.gpkg OUTPUT.tif
 
         Args:
-            input_file (str): The path to the input Parquet file.
+            input_file (str): The path to the input GeoPackage file.
             output_raster (str): The path to the output raster file.
             pixel_size (float, optional): The pixel size for the rasterization. Defaults to 0.01.
 
@@ -405,11 +416,11 @@ class OoklaDownloader:
 
     def combine_vectors(self, input_files, output_file, output_crs: QgsCoordinateReferenceSystem):
         """
-        This function combines multiple vector files into a single output file.
+        This function combines multiple GeoPackage files into a single output file.
 
         Args:
-            input_files (list): A list of input vector file paths to be combined.
-            output_file (str): The path to the output combined vector file.
+            input_files (list): A list of input GeoPackage file paths to be combined.
+            output_file (str): The path to the output combined GeoPackage file.
             output_crs (QgsCoordinateReferenceSystem): The coordinate reference system for the output data.
         """
         start_time = timeit.default_timer()
@@ -420,16 +431,30 @@ class OoklaDownloader:
         if output_crs.authid() != "EPSG:4326":
             target_spatial_reference.ImportFromEPSG(int(output_crs.authid().split(":")[1]))
 
-        driver = ogr.GetDriverByName("Parquet")
-        out_dataset = driver.CreateDataSource(output_file)
-        out_layer = out_dataset.CreateLayer("filtered_data", target_spatial_reference, geom_type=ogr.wkbPolygon)
+        # Use GPKG driver for output
+        gpkg_driver = ogr.GetDriverByName("GPKG")
+        if gpkg_driver is None:
+            log_message("❌ GPKG driver not available.")
+            raise OoklaException("GPKG driver not available.")
+
+        # Delete existing file if it exists
+        if os.path.exists(output_file):
+            os.remove(output_file)
+
+        out_dataset = gpkg_driver.CreateDataSource(output_file)
+        out_layer = out_dataset.CreateLayer("ookla_combined", target_spatial_reference, geom_type=ogr.wkbPolygon)
         out_layer.CreateField(ogr.FieldDefn("quadkey", ogr.OFTString))
 
         out_layer_defn = out_layer.GetLayerDefn()
 
         for input_file in input_files:
-            dataset = driver.Open(input_file, 0)
-            layer = dataset.GetLayer()
+            # Open input GeoPackage
+            dataset = gpkg_driver.Open(input_file, 0)
+            if dataset is None:
+                log_message(f"⚠️ Could not open {input_file}, skipping...")
+                continue
+
+            layer = dataset.GetLayer(0)  # GeoPackage: get first layer
 
             for feature in layer:
                 quadkey = feature.GetField("quadkey")
@@ -453,5 +478,5 @@ class OoklaDownloader:
         self.print_timings(
             start_time,
             title="Vector Combination Complete",
-            message=f"Combined vector saved to {output_file} with {duplicate_count} duplicates found.",
+            message=f"Combined GeoPackage saved to {output_file} with {duplicate_count} duplicates found.",
         )
