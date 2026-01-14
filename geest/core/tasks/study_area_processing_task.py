@@ -105,6 +105,7 @@ class StudyAreaProcessingTask(QgsTask):
         self.writer_layer = None  # Track which layer the writer is using
         self.writer_ds = None  # Writer's own dataset connection
         self.writer_ref_count = 0  # Reference count for parts using the writer
+        self._writer_flush_token = object()
         # Make sure output directory exists
         self.create_study_area_directory(self.working_dir)
 
@@ -773,6 +774,8 @@ class StudyAreaProcessingTask(QgsTask):
         else:
             # Standalone singlepart geometry - manage own writer thread
             self.create_and_save_grid(normalized_name, geom, aligned_bbox)
+        if shared_layer is not None:
+            self._wait_for_writer_queue()
         self.set_status_tracking_table_value(normalized_name, "grid_processed", 1)
         self.set_status_tracking_table_value(normalized_name, "grid_creation_duration_secs", time.time() - start_time)
 
@@ -1098,6 +1101,8 @@ class StudyAreaProcessingTask(QgsTask):
                 raise RuntimeError("Writer thread could not open study_area_grid layer")
             self.writer_ds = writer_ds
 
+            flush_token = self._writer_flush_token
+
             def writer_worker():
                 """Process write queue in batches. Queue items are (geometry, area_name) tuples."""
                 batch = []
@@ -1114,6 +1119,15 @@ class StudyAreaProcessingTask(QgsTask):
                             self.write_queue.task_done()
                         self.write_queue.task_done()
                         break
+                    if item is flush_token:
+                        if batch:
+                            self._write_batch(self.writer_layer, batch)
+                        for _ in range(items_in_batch):
+                            self.write_queue.task_done()
+                        batch = []
+                        items_in_batch = 0
+                        self.write_queue.task_done()
+                        continue
 
                     batch.append(item)
                     items_in_batch += 1
@@ -1157,6 +1171,15 @@ class StudyAreaProcessingTask(QgsTask):
             self.writer_layer = None
             log_message("Writer dataset closed")
             return True
+
+    def _wait_for_writer_queue(self):
+        """Block until the writer queue is flushed."""
+        if self.write_queue is None:
+            return
+        log_message("Waiting for grid writer queue to flush before continuing.")
+        self.write_queue.put(self._writer_flush_token)
+        self.write_queue.join()
+        log_message("Grid writer queue flushed.")
 
     def _write_batch(self, layer, items):
         """Write batch of (geometry, area_name) tuples in single transaction."""
@@ -1247,11 +1270,19 @@ class StudyAreaProcessingTask(QgsTask):
         log_message(f"Chunk size: {chunk_size}")
 
         chunks_to_process = []
-        for chunk in chunker.chunks():
+        for counter, chunk in enumerate(chunker.chunks(), start=1):
             if chunk["type"] != "undefined":
                 chunks_to_process.append(chunk)
             else:
                 log_message(f"Chunk {chunk['index']} is outside the geometry.")
+            try:
+                current_progress = min(100, int((counter / chunk_count) * 100))
+                log_message(
+                    f"XXXXXX Chunks Progress: {counter} / {chunk_count} : {current_progress}% XXXXXX"
+                )
+                self.feedback.setProgress(current_progress)
+            except ZeroDivisionError:
+                pass
 
         valid_chunk_count = len(chunks_to_process)
         log_message(f"Valid chunks to process: {valid_chunk_count}")
@@ -1477,8 +1508,12 @@ class StudyAreaProcessingTask(QgsTask):
             raise RuntimeError("Missing study_area_grid layer.")
 
         # We'll do a bounding box filter for performance
-        (xmin, ymin, xmax, ymax) = aligned_box
+        (xmin, xmax, ymin, ymax) = aligned_box
         grid_layer.SetSpatialFilterRect(xmin, ymin, xmax, ymax)
+
+        # Count features for progress updates
+        total_features = grid_layer.GetFeatureCount()
+        log_message(f"Processing {total_features} grid cells for clip polygon creation.")
 
         boundary = geom.GetBoundary()
         log_message(f"Finding grid cells that intersect boundary for {normalized_name}")
@@ -1500,23 +1535,15 @@ class StudyAreaProcessingTask(QgsTask):
         # We'll just do an Intersects check with each cell.
 
         all_cells = []
+        count = 0
         grid_layer.ResetReading()
         for f in grid_layer:
             cell_geom = f.GetGeometryRef()
             if cell_geom:
                 all_cells.append(cell_geom.Clone())
-            if not cell_geom:
-                continue
-            if boundary.Intersects(cell_geom):
-                # We'll union
-                if dissolved_geom is None:
-                    dissolved_geom = cell_geom.Clone()
-                else:
-                    dissolved_geom = dissolved_geom.Union(cell_geom)
             count += 1
             if count % 1000 == 0:
                 log_message(f"Processed {count} grid cells.")
-                # Update progress (capped at 100% since GetFeatureCount can be inaccurate)
                 if total_features > 0:
                     progress = min(100, int((count / total_features) * 100))
                     self.feedback.setProgress(progress)
@@ -1556,11 +1583,25 @@ class StudyAreaProcessingTask(QgsTask):
         else:
             multi_geom = ogr.Geometry(ogr.wkbMultiPolygon)
             for cell in intersecting_cells:
-                if cell.GetGeometryType() == ogr.wkbPolygon:
+                geom_type = cell.GetGeometryType()
+                if geom_type in (ogr.wkbPolygon, ogr.wkbPolygon25D):
                     multi_geom.AddGeometry(cell)
+                elif geom_type in (ogr.wkbMultiPolygon, ogr.wkbMultiPolygon25D):
+                    for i in range(cell.GetGeometryCount()):
+                        part = cell.GetGeometryRef(i)
+                        if part and part.GetGeometryType() in (ogr.wkbPolygon, ogr.wkbPolygon25D):
+                            multi_geom.AddGeometry(part)
 
-            dissolved_geom = multi_geom.UnionCascaded()
-            log_message(f"Batch union completed for {len(intersecting_cells)} geometries")
+            if multi_geom.GetGeometryCount() == 0:
+                log_message("No polygon geometries to union; using original geometry.", level="WARNING")
+                dissolved_geom = geom.Clone()
+            else:
+                dissolved_geom = multi_geom.UnionCascaded()
+                log_message(f"Batch union completed for {len(intersecting_cells)} geometries")
+
+        if dissolved_geom is None or dissolved_geom.IsEmpty():
+            log_message("Clip polygon result empty; falling back to original geometry.", level="WARNING")
+            dissolved_geom = geom.Clone()
 
         self.save_geometry_to_geopackage("study_area_clip_polygons", dissolved_geom, normalized_name)
         log_message(f"Created clip polygon: {normalized_name}")
