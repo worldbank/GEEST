@@ -415,9 +415,11 @@ class OSMDataDownloaderBase(ABC):
 
         features_added = 0
 
-        # Process point nodes
-        log_message("Extracting point features from OSM nodes...")
+        # Process point nodes (only keep tagged nodes; skip polygon vertices)
+        log_message("Extracting tagged point features from OSM nodes...")
         for node in root.findall(".//node"):
+            if not node.findall("tag"):
+                continue
             node_id = node.get("id")
             lat = float(node.get("lat"))
             lon = float(node.get("lon"))
