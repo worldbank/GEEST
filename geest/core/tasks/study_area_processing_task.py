@@ -1277,9 +1277,7 @@ class StudyAreaProcessingTask(QgsTask):
                 log_message(f"Chunk {chunk['index']} is outside the geometry.")
             try:
                 current_progress = min(100, int((counter / chunk_count) * 100))
-                log_message(
-                    f"XXXXXX Chunks Progress: {counter} / {chunk_count} : {current_progress}% XXXXXX"
-                )
+                log_message(f"XXXXXX Chunks Progress: {counter} / {chunk_count} : {current_progress}% XXXXXX")
                 self.feedback.setProgress(current_progress)
             except ZeroDivisionError:
                 pass
@@ -1301,9 +1299,6 @@ class StudyAreaProcessingTask(QgsTask):
             try:
                 self._process_chunks_parallel(
                     layer, chunks_to_process, geom, cell_size, normalized_name, feedback, worker_count
-                current_progress = min(100, int((counter / chunk_count) * 100))
-                log_message(
-                    f"XXXXXX Chunks Progress: {counter} / {chunk_count} : {current_progress}% XXXXXX"  # noqa: E203
                 )
             except Exception as e:
                 log_message(f"Parallel processing failed: {str(e)}", level="WARNING")
