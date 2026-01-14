@@ -85,11 +85,12 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.national_scale.clicked.connect(lambda: self.spatial_scale_changed("national"))
         self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
-        # Note: Regional and Local scales are disabled in the UI for this release
-        # Only National scale is currently active
-        # Explicitly disable Regional and Local radio buttons (overrides enable_widgets())
+        # Note: Regional scale is disabled in the UI for this release
+        # National and Local scales are currently active
+        # Explicitly disable Regional radio button (overrides enable_widgets())
         self.regional_scale.setEnabled(False)
-        self.local_scale.setEnabled(False)
+        # Local mode enabled for National vs Local analysis implementation
+        # self.local_scale.setEnabled(False)
 
         # Women Considerations toggle
         self.women_considerations_checkbox.stateChanged.connect(self.women_considerations_changed)
