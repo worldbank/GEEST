@@ -4,18 +4,19 @@
 Scale Mappings Module.
 
 Provides centralized, scale-specific configurations for WEE indicator analysis.
-Following the ACLED pattern - simple dictionaries with scale-specific data.
 
 Usage:
-    from geest.core.workflows.mappings import WOMENS_TRAVEL_PATTERNS
+    from geest.core.workflows.mappings import WOMENS_TRAVEL_PATTERNS, MAPPING_REGISTRY
 
-    # Get thresholds for specific scale
+    # Direct import (for single-purpose workflows like safety/acled):
     config = WOMENS_TRAVEL_PATTERNS.get(analysis_scale, WOMENS_TRAVEL_PATTERNS["national"])
     thresholds = config["thresholds"]  # [400, 800, 1200, 1500, 2000] for national
 
-    # Or lookup by mapping_id
-    mapping = MAPPING_REGISTRY.get("womens_travel_patterns")
+    # Lookup by factor ID (for multi-buffer workflows handling multiple factors):
+    factor_id = item.attributes.get("id")  # "women_s_travel_patterns"
+    mapping = MAPPING_REGISTRY.get(factor_id)
     config = mapping.get(analysis_scale, mapping["national"])
+    thresholds = config["thresholds"]
 """
 
 # Accessibility mappings
@@ -37,21 +38,18 @@ from .acled import event_scores, buffer_distances
 # Active transport mappings
 from .active_transport import HIGHWAY_CLASSIFICATION, CYCLEWAY_CLASSIFICATION
 
-# Registry for lookup by mapping_id
+# Registry for lookup by factor ID (matches model.json factor IDs)
 MAPPING_REGISTRY = {
-    # Accessibility factors
-    "womens_travel_patterns": WOMENS_TRAVEL_PATTERNS,
-    "public_transport_access": PUBLIC_TRANSPORT_ACCESS,
-    "health_facilities_access": HEALTH_FACILITIES_ACCESS,
-    "education_facilities_access": EDUCATION_FACILITIES_ACCESS,
-    "financial_facilities_access": FINANCIAL_FACILITIES_ACCESS,
-    "water_sanitation_access": WATER_SANITATION_ACCESS,
-    # Safety factors
-    "streetlights_safety": STREETLIGHTS_SAFETY,
-    "nighttime_lights_safety": NIGHTTIME_LIGHTS_SAFETY,
-    # Active transport
-    "highway_classification": HIGHWAY_CLASSIFICATION,
-    "cycleway_classification": CYCLEWAY_CLASSIFICATION,
+    # Accessibility factors (multi-buffer workflows use factor ID for lookup)
+    "women_s_travel_patterns": WOMENS_TRAVEL_PATTERNS,
+    "access_to_public_transport": PUBLIC_TRANSPORT_ACCESS,
+    "access_to_health_facilities": HEALTH_FACILITIES_ACCESS,
+    "access_to_education_and_training_facilities": EDUCATION_FACILITIES_ACCESS,
+    "access_to_financial_facilities": FINANCIAL_FACILITIES_ACCESS,
+    "water_sanitation": WATER_SANITATION_ACCESS,
+    # Note: Active transport workflows import CYCLEWAY_CLASSIFICATION/HIGHWAY_CLASSIFICATION directly
+    # Note: Safety workflows import STREETLIGHTS_SAFETY/NIGHTTIME_LIGHTS_SAFETY directly
+    # Note: ACLED uses event_scores/buffer_distances directly
 }
 
 

@@ -7,7 +7,7 @@ from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QLabel, QWidget
 
-from geest.core.workflows.acled_impact_mappings import buffer_distances, event_scores
+from geest.core.workflows.mappings import buffer_distances, event_scores
 from geest.utilities import log_message
 
 from .base_configuration_widget import BaseConfigurationWidget

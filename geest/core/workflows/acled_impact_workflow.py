@@ -27,7 +27,7 @@ from qgis.PyQt.QtCore import QVariant
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
 
-from .acled_impact_mappings import buffer_distances, event_scores
+from .mappings import buffer_distances, event_scores
 from .workflow_base import WorkflowBase
 
 
