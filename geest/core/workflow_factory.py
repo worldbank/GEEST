@@ -13,6 +13,7 @@ from geest.core.workflows import (
     DefaultIndexScoreWorkflow,
     DimensionAggregationWorkflow,
     DontUseWorkflow,
+    EPLEXWorkflow,
     FactorAggregationWorkflow,
     IndexScoreWithGHSLWorkflow,
     IndexScoreWithOoklaWorkflow,
@@ -80,6 +81,8 @@ class WorkflowFactory:
                 return DefaultIndexScoreWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_contextual_index_score":
                 return ContextualIndexScoreWorkflow(item, cell_size_m, analysis_scale, feedback, context)
+            elif analysis_mode == "use_eplex_score":
+                return EPLEXWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_index_score_with_ookla":
                 return IndexScoreWithOoklaWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_index_score_with_ghsl":

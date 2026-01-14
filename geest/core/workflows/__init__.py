@@ -11,6 +11,7 @@ from .analysis_aggregation_workflow import AnalysisAggregationWorkflow
 from .classified_polygon_workflow import ClassifiedPolygonWorkflow
 from .dimension_aggregation_workflow import DimensionAggregationWorkflow
 from .dont_use_workflow import DontUseWorkflow
+from .eplex_workflow import EPLEXWorkflow
 from .factor_aggregation_workflow import FactorAggregationWorkflow
 from .index_score_workflow import DefaultIndexScoreWorkflow
 from .contextual_index_score_workflow import ContextualIndexScoreWorkflow
