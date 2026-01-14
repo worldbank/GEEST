@@ -89,19 +89,3 @@ FINANCIAL_FACILITIES_ACCESS = {
         "description": "Local scale",
     },
 }
-
-# Water and Sanitation Facilities (single buffer)
-WATER_SANITATION_ACCESS = {
-    "national": {
-        "buffer_distance": 3000,
-        "scoring_method": "binary",
-        "scores": {"intersects": 5, "no_intersection": 0},
-        "description": "National scale - 3km buffer",
-    },
-    "local": {
-        "buffer_distance": 1000,
-        "scoring_method": "binary",
-        "scores": {"intersects": 5, "no_intersection": 0},
-        "description": "Local scale - 1km buffer",
-    },
-}

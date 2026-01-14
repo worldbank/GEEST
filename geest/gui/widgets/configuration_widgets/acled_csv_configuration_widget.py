@@ -3,11 +3,13 @@
 
 This module contains functionality for acled csv configuration widget.
 """
+import traceback
+
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QLabel, QWidget
 
-from geest.core.workflows.mappings import buffer_distances, event_scores
+from geest.core.workflows.mappings import MAPPING_REGISTRY
 from geest.utilities import log_message
 
 from .base_configuration_widget import BaseConfigurationWidget
@@ -50,6 +52,14 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
         """
         try:
             self.widget_key = "use_csv_to_point_layer"
+            mapping = None
+            factor_id = self.attributes.get("factor_id")
+            if factor_id:
+                mapping = MAPPING_REGISTRY.get(factor_id)
+            if not mapping:
+                mapping = MAPPING_REGISTRY.get("acled_conflict")
+            buffer_distances = mapping.get("buffer_distances", {}) if mapping else {}
+            event_scores = mapping.get("event_scores", {}) if mapping else {}
             # Generate HTML table for buffer distances
             buffer_distances_html = ""
             buffer_distances_html += "<table border='1' cellpadding='4' cellspacing='0'>"
@@ -93,8 +103,6 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
 
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
-            import traceback
-
             log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def get_data(self) -> dict:

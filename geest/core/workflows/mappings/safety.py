@@ -9,15 +9,15 @@ Following the ACLED pattern - simple dictionaries with scale-specific data.
 """
 
 # Streetlights Safety
-# National: Large buffer (1km²) with binary scoring
+# National: Large buffer (1km) with binary scoring
 # Local: Small buffer (20m) with percentage-based intersection scoring
 STREETLIGHTS_SAFETY = {
     "national": {
         "buffer_distance": 1000,
-        "buffer_type": "square_km",
+        "buffer_type": "meters",
         "scoring_method": "binary",
         "scores": {"intersects_buffer": 5, "no_intersection": 0},
-        "description": "1km² buffer with binary scoring",
+        "description": "1km buffer with binary scoring",
     },
     "local": {
         "buffer_distance": 20,

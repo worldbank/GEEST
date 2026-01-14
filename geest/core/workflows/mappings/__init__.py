@@ -26,14 +26,14 @@ from .accessibility import (
     HEALTH_FACILITIES_ACCESS,
     EDUCATION_FACILITIES_ACCESS,
     FINANCIAL_FACILITIES_ACCESS,
-    WATER_SANITATION_ACCESS,
 )
+from .water_sanitation import WATER_SANITATION_ACCESS
 
 # Safety mappings
 from .safety import STREETLIGHTS_SAFETY, NIGHTTIME_LIGHTS_SAFETY
 
 # ACLED mappings
-from .acled import event_scores, buffer_distances
+from .acled import ACLED_CONFLICT
 
 # Active transport mappings
 from .active_transport import HIGHWAY_CLASSIFICATION, CYCLEWAY_CLASSIFICATION
@@ -47,9 +47,11 @@ MAPPING_REGISTRY = {
     "access_to_education_and_training_facilities": EDUCATION_FACILITIES_ACCESS,
     "access_to_financial_facilities": FINANCIAL_FACILITIES_ACCESS,
     "water_sanitation": WATER_SANITATION_ACCESS,
+    "acled_conflict": ACLED_CONFLICT,
+    "safety": STREETLIGHTS_SAFETY,
     # Note: Active transport workflows import CYCLEWAY_CLASSIFICATION/HIGHWAY_CLASSIFICATION directly
     # Note: Safety workflows import STREETLIGHTS_SAFETY/NIGHTTIME_LIGHTS_SAFETY directly
-    # Note: ACLED uses event_scores/buffer_distances directly
+    # Note: ACLED uses registry lookup
 }
 
 
@@ -78,8 +80,7 @@ __all__ = [
     "STREETLIGHTS_SAFETY",
     "NIGHTTIME_LIGHTS_SAFETY",
     # ACLED
-    "event_scores",
-    "buffer_distances",
+    "ACLED_CONFLICT",
     # Active Transport
     "HIGHWAY_CLASSIFICATION",
     "CYCLEWAY_CLASSIFICATION",

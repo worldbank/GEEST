@@ -330,8 +330,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def enable_widgets(self):
         """Enable all widgets in the panel."""
         for widget in self.findChildren(QWidget):
-            # Skip Regional and Local scale radio buttons - they should remain disabled
-            if widget in (self.regional_scale, self.local_scale):
+            # Skip Regional scale radio button - it should remain disabled
+            # Local scale is now enabled for National vs Local analysis
+            if widget == self.regional_scale:
                 continue
             widget.setEnabled(True)
 

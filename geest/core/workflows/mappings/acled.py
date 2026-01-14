@@ -30,3 +30,9 @@ buffer_distances = {
     "Riots": 2000,
     "No events": 0,
 }
+
+# Combined mapping for registry lookup
+ACLED_CONFLICT = {
+    "event_scores": event_scores,
+    "buffer_distances": buffer_distances,
+}
