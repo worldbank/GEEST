@@ -178,8 +178,9 @@ class AggregationWorkflowBase(WorkflowBase):
             status = item.getStatus() == "Completed successfully"
             mode = item.attributes().get("analysis_mode", "Do Not Use") == "Do Not Use"
             excluded = item.getStatus() == "Excluded from analysis"
+            disabled = not item.is_enabled()
             id = item.attribute("id").lower()
-            if not status and not mode and not excluded:
+            if not status and not mode and not excluded and not disabled:
                 raise ValueError(
                     f"{id} is not completed successfully and is not set to 'Do Not Use' or 'Excluded from analysis'"
                 )
@@ -194,6 +195,13 @@ class AggregationWorkflowBase(WorkflowBase):
             if excluded:
                 log_message(
                     f"Skipping {item.attribute('id')} as it is excluded from analysis",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                continue
+            if disabled:
+                log_message(
+                    f"Skipping {item.attribute('id')} as it is disabled (women considerations)",
                     tag="Geest",
                     level=Qgis.Info,
                 )
@@ -250,14 +258,15 @@ class AggregationWorkflowBase(WorkflowBase):
         raster_files = self.get_raster_dict(index)
 
         if not raster_files or not isinstance(raster_files, dict):
-            error = f"No valid raster files found in '{self.guids}'. Cannot proceed with aggregation."
+            error = f"No valid raster files found in '{self.guids}'. Cannot proceed with aggregation (likely all factors disabled or excluded)."
             log_message(
                 error,
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            self.attributes[self.result_key] = f"{self.analysis_mode} Aggregation Workflow Failed"
+            self.attributes[self.result_key] = f"{self.analysis_mode} Aggregation Workflow Skipped"
             self.attributes["error"] = error
+            return None
 
         log_message(
             f"Found {len(raster_files)} raster files in 'Result File'. Proceeding with aggregation.",

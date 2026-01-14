@@ -48,7 +48,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;About GEEST&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;About GeoE3&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
@@ -194,9 +194,9 @@
           <string notr="true"/>
          </property>
          <property name="text">
-          <string>This plugin is built with support from the **Canada Clean Energy and Forest Climate Facility (CCEFCFy)**, the **Geospatial Operational Support Team (GOST, DECSC)** for the project Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector.
+          <string>This plugin was build with support from the Canada Clean Energy and Forest Climate Facility (CCEFCF) and the Global Development Fund (GDF), by the Geospatial Team in the Development Economics Data Group (DECDG).
 
-This project is open source, you can download the code at [https://github.com/worldbank/GEEST](https://github.com/worldbank/GEEST).</string>
+The project is open-source and you can access the code here: https://github.com/worldbank/GEEST</string>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
