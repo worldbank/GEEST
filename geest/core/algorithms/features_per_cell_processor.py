@@ -21,47 +21,8 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core.osm_downloaders import OSMDownloadType
+from geest.core.workflows.mappings import CYCLEWAY_CLASSIFICATION, HIGHWAY_CLASSIFICATION
 from geest.utilities import log_message, setting
-
-active_transport_lookup_table = {
-    # Highway types (walkable infrastructure - from OSM highway tag)
-    "highway_residential": 5,
-    "highway_living_street": 5,
-    "highway_pedestrian": 5,
-    "highway_footway": 5,
-    "highway_steps": 5,
-    "highway_tertiary": 4,
-    "highway_tertiary_link": 4,
-    "highway_cycleway": 4,
-    "highway_path": 4,
-    "highway_secondary": 3,
-    "highway_unclassified": 3,
-    "highway_service": 3,
-    "highway_road": 3,
-    "highway_bridleway": 3,
-    "highway_secondary_link": 3,
-    "highway_track": 2,
-    "highway_primary": 2,
-    "highway_primary_link": 2,
-    "highway_motorway": 1,
-    "highway_trunk": 1,
-    "highway_motorway_link": 1,
-    "highway_trunk_link": 1,
-    "highway_bus_guideway": 0,
-    "highway_escape": 0,
-    "highway_raceway": 0,
-    "highway_construction": 0,
-    "highway_proposed": 0,
-    # Cycleway types (cycling infrastructure - from OSM cycleway tag)
-    "cycleway_lane": 4,
-    "cycleway_shared_lane": 4,
-    "cycleway_share_busway": 4,
-    "cycleway_track": 4,
-    "cycleway_separate": 4,
-    "cycleway_crossing": 4,
-    "cycleway_shoulder": 4,
-    "cycleway_link": 4,
-}
 
 
 def select_grid_cells_and_count_features(
@@ -237,6 +198,7 @@ def select_grid_cells_and_assign_transport_score(
     features_layer: QgsVectorLayer,
     output_path: str,
     feedback: QgsFeedback = None,
+    analysis_scale: str = None,
 ) -> QgsVectorLayer:
     """
     Select grid cells that intersect with features, and assign a value
@@ -275,6 +237,15 @@ def select_grid_cells_and_assign_transport_score(
     feature_count = features_layer.featureCount()
     verbose_mode = int(setting(key="verbose_mode", default=0))
 
+    # Build mapping table based on analysis scale (fallback to existing table if not set)
+    scale_key = analysis_scale or "national"
+    cycleway_config = CYCLEWAY_CLASSIFICATION.get(scale_key, CYCLEWAY_CLASSIFICATION["national"])
+    lookup_table = {}
+    for road_type, score in HIGHWAY_CLASSIFICATION.items():
+        lookup_table[f"highway_{road_type}"] = score
+    for cycle_type, score in cycleway_config.items():
+        lookup_table[f"cycleway_{cycle_type}"] = score
+
     # Check which fields exist ONCE before the loop (for efficiency)
     field_names = features_layer.fields().names()
     has_highway_field = "highway" in field_names
@@ -296,7 +267,7 @@ def select_grid_cells_and_assign_transport_score(
             highway_type = feature.attribute("highway")
             if highway_type:  # Not None and not empty string
                 lookup_key = f"highway_{highway_type}"
-                highway_score = active_transport_lookup_table.get(lookup_key, 0)
+                highway_score = lookup_table.get(lookup_key, 0)
                 if verbose_mode:
                     log_message(
                         f"highway_type='{highway_type}' → lookup_key='{lookup_key}' → score={highway_score}",
@@ -312,7 +283,7 @@ def select_grid_cells_and_assign_transport_score(
             cycleway_type = feature.attribute("cycleway")
             if cycleway_type:  # Not None and not empty string
                 lookup_key = f"cycleway_{cycleway_type}"
-                cycleway_score = active_transport_lookup_table.get(lookup_key, 0)
+                cycleway_score = lookup_table.get(lookup_key, 0)
                 if verbose_mode:
                     log_message(
                         f"cycleway_type='{cycleway_type}' → lookup_key='{lookup_key}' → score={cycleway_score}",
@@ -468,8 +439,12 @@ def osm_mapping_table(osm_transport_type: OSMDownloadType) -> str:
     """
 
     if osm_transport_type == OSMDownloadType.ACTIVE_TRANSPORT:
-        # Use the unified active transport lookup table
-        lookup_table = active_transport_lookup_table
+        cycleway_config = CYCLEWAY_CLASSIFICATION["national"]
+        lookup_table = {}
+        for road_type, score in HIGHWAY_CLASSIFICATION.items():
+            lookup_table[f"highway_{road_type}"] = score
+        for cycle_type, score in cycleway_config.items():
+            lookup_table[f"cycleway_{cycle_type}"] = score
     else:
         raise ValueError(f"Unsupported OSM transport type: {osm_transport_type}")
 

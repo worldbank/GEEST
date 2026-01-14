@@ -18,6 +18,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem
+from geest.core.workflows.mappings import MAPPING_REGISTRY
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
@@ -70,11 +71,21 @@ class SinglePointBufferWorkflow(WorkflowBase):
             log_message("single_buffer_point_layer not valid", level=Qgis.Critical)
             log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
             return False
-        if analysis_scale == "local":
-            default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", "1000"))
-        else:
-            default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", "3000"))
-        self.buffer_distance = int(self.attributes.get("single_buffer_point_layer_distance", default_buffer_distance))
+        factor_id = None
+        if item.isIndicator() and item.parentItem:
+            factor_id = item.parentItem.attribute("id", None)
+        mapping_id = self.attributes.get("mapping_id")
+        indicator_id = self.attributes.get("id")
+        mapping = MAPPING_REGISTRY.get(factor_id or mapping_id or indicator_id)
+        config = mapping.get(analysis_scale, mapping.get("national")) if mapping else None
+        mapped_distance = config.get("buffer_distance") if config else None
+        self.mapped_scores = config.get("scores", {}) if config else {}
+        default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", 0))
+        if mapped_distance:
+            default_buffer_distance = int(mapped_distance)
+
+        buffer_distance = self.attributes.get("single_buffer_point_layer_distance", default_buffer_distance)
+        self.buffer_distance = int(buffer_distance) if buffer_distance else int(default_buffer_distance)
 
     def _process_features_for_area(
         self,
@@ -152,7 +163,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         layer.updateFields()
 
         # Assign scores to the buffered polygons
-        score = 5
+        score = self.mapped_scores.get("intersects", 5)
         for feature in layer.getFeatures():
             feature.setAttribute("value", score)
             layer.updateFeature(feature)
