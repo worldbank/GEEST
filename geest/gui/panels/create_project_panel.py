@@ -543,13 +543,19 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             # Check if layer exists in GeoPackage first
             from osgeo import ogr
 
-            ds = ogr.Open(gpkg_path, 0)
-            if ds is None:
-                log_message(f"Could not open GeoPackage: {gpkg_path}", tag="Geest", level=Qgis.Warning)
-                continue
+            try:
+                ds = ogr.Open(gpkg_path, 0)
+                if ds is None:
+                    log_message(f"Could not open GeoPackage: {gpkg_path}", tag="Geest", level=Qgis.Warning)
+                    continue
 
-            layer_exists = ds.GetLayerByName(layer_name) is not None
-            ds = None
+                layer_exists = ds.GetLayerByName(layer_name) is not None
+                ds = None
+            except RuntimeError as e:
+                if "database is locked" in str(e):
+                    log_message(f"Database busy, skipping map refresh for {layer_name}", tag="Geest", level=Qgis.Info)
+                    continue
+                raise
 
             if not layer_exists:
                 log_message(
