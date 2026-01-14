@@ -12,6 +12,7 @@ from geest.gui.widgets.configuration_widgets import (
     ClassifiedPolygonConfigurationWidget,
     ContextualIndexScoreConfigurationWidget,
     DontUseConfigurationWidget,
+    EPLEXConfigurationWidget,
     FeaturePerCellConfigurationWidget,
     IndexScoreConfigurationWidget,
     IndexScoreWithGHSLConfigurationWidget,
@@ -61,6 +62,8 @@ class ConfigurationWidgetFactory:
                 return IndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
             elif key == "use_contextual_index_score" and value == 1:
                 return ContextualIndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
+            elif key == "use_eplex_score" and value == 1:
+                return EPLEXConfigurationWidget(analysis_mode=key, attributes=attributes)
             elif key == "use_index_score_with_ookla" and value == 1:
                 # Uses the same config widget as index score for now ...
                 return IndexScoreWithOOKLAConfigurationWidget(analysis_mode=key, attributes=attributes)
