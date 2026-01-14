@@ -18,6 +18,7 @@ from qgis.PyQt.QtWidgets import (
     QSpacerItem,
     QTableWidget,
     QTableWidgetItem,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -317,14 +318,30 @@ class FactorAggregationDialog(CustomBaseDialog):
             attributes = item.attributes()
             log_message(f"Populating table for GUID: {guid}")
             log_message(f"Attributes: {item.attributesAsMarkdown()}")
+
+            # Data Source Widget
             data_source_widget = DataSourceWidgetFactory.create_widget(attributes["analysis_mode"], 1, attributes)
             if not data_source_widget:
                 continue
             data_source_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
             data_source_widget.data_changed.connect(self.refresh_configuration)
             default_factor_weighting = attributes.get("default_factor_weighting", 0)
+
+            # Important: Show the widget before adding it to the table
+            data_source_widget.show()
+
             self.table.setCellWidget(row, self.col_input, data_source_widget)
             self.data_sources[guid] = data_source_widget
+
+            # Force the widget and all its children to update their style
+            data_source_widget.style().unpolish(data_source_widget)
+            data_source_widget.style().polish(data_source_widget)
+            for child in data_source_widget.findChildren(QWidget):
+                child.style().unpolish(child)
+                child.style().polish(child)
+                if isinstance(child, QToolButton):
+                    child.ensurePolished()
+                    child.update()
 
             if self.has_osm_column:
                 osm_button = None
@@ -335,6 +352,7 @@ class FactorAggregationDialog(CustomBaseDialog):
                     self.table.setCellWidget(row, self.col_osm, osm_button)
                     has_osm_download = True
 
+            # Indicator Name
             name_item = QTableWidgetItem(attributes.get("indicator", ""))
             name_item.setFlags(Qt.ItemIsEnabled)
             self.table.setItem(row, self.col_indicator, name_item)

@@ -111,7 +111,12 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         # Step 1: Select grid cells that intersect with features and assign road scores
         output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
         grid = select_grid_cells_and_assign_transport_score(
-            self.osm_processing_type, self.grid_layer, area_features, output_path, self.feedback
+            self.osm_processing_type,
+            self.grid_layer,
+            area_features,
+            output_path,
+            self.feedback,
+            analysis_scale=self.analysis_scale,
         )
 
         log_message(

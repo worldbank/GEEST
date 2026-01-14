@@ -3,8 +3,7 @@ from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QLabel
 
-from geest.core.algorithms.features_per_cell_processor import osm_mapping_table
-from geest.core.osm_downloaders.osm_download_type import OSMDownloadType
+from geest.core.workflows.mappings import CYCLEWAY_CLASSIFICATION, HIGHWAY_CLASSIFICATION
 from geest.utilities import log_message
 
 from .base_configuration_widget import BaseConfigurationWidget
@@ -48,8 +47,54 @@ class OsmTransportConfigurationWidget(BaseConfigurationWidget):
             self.html_table_label = QLabel()
             self.html_table_label.setWordWrap(True)
             self.html_table_label.setTextFormat(Qt.RichText)
-            # Show the unified active transport lookup table
-            active_transport_html = osm_mapping_table(OSMDownloadType.ACTIVE_TRANSPORT)
+            analysis_scale = self.attributes.get("analysis_scale") or "national"
+            cycleway_config = CYCLEWAY_CLASSIFICATION.get(analysis_scale, CYCLEWAY_CLASSIFICATION["national"])
+
+            def build_wrapped_rows(items, max_rows=8):
+                columns = []
+                for col in range(0, len(items), max_rows):
+                    columns.append(items[col : col + max_rows])
+
+                rows = []
+                for row_index in range(max_rows):
+                    row_cells = []
+                    for col in columns:
+                        if row_index < len(col):
+                            key, value = col[row_index]
+                            row_cells.append(f"<td>{key}</td><td>{value}</td>")
+                        else:
+                            row_cells.append("<td></td><td></td>")
+                    rows.append(f"<tr>{''.join(row_cells)}</tr>")
+                header = "".join("<th>Type</th><th>Score</th>" for _ in columns)
+                return f"<tr>{header}</tr>\n" + "\n".join(rows)
+
+            highway_items = sorted(HIGHWAY_CLASSIFICATION.items(), key=lambda item: (item[1], item[0]))
+            cycleway_items = sorted(cycleway_config.items(), key=lambda item: (item[1], item[0]))
+
+            highway_rows = build_wrapped_rows(highway_items, max_rows=8)
+            cycleway_rows = build_wrapped_rows(cycleway_items, max_rows=8)
+
+            active_transport_html = f"""
+            <table border="1" cellpadding="4" cellspacing="0">
+                <tr>
+                    <th>Highway Classification</th>
+                    <th>Cycleway Classification ({analysis_scale.title()})</th>
+                </tr>
+                <tr>
+                    <td>
+                        <table border="1" cellpadding="4" cellspacing="0">
+                            {highway_rows}
+                        </table>
+                    </td>
+                    <td>
+                        <table border="1" cellpadding="4" cellspacing="0">
+                            {cycleway_rows}
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            """
+
             self.html_table_label.setText(active_transport_html)
             self.internal_layout.addWidget(self.html_table_label)
         except Exception as e:

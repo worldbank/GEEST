@@ -1270,6 +1270,9 @@ class StudyAreaProcessingTask(QgsTask):
             try:
                 self._process_chunks_parallel(
                     layer, chunks_to_process, geom, cell_size, normalized_name, feedback, worker_count
+                current_progress = min(100, int((counter / chunk_count) * 100))
+                log_message(
+                    f"XXXXXX Chunks Progress: {counter} / {chunk_count} : {current_progress}% XXXXXX"  # noqa: E203
                 )
             except Exception as e:
                 log_message(f"Parallel processing failed: {str(e)}", level="WARNING")
@@ -1479,6 +1482,22 @@ class StudyAreaProcessingTask(QgsTask):
 
         boundary = geom.GetBoundary()
         log_message(f"Finding grid cells that intersect boundary for {normalized_name}")
+        # Count features for progress updates
+        total_features = grid_layer.GetFeatureCount()
+        log_message(f"Processing {total_features} grid cells for clip polygon creation.")
+
+        # 2) We'll gather all grid cells that intersect *the boundary* of geom
+        #    In OGR, we can do:
+        boundary = geom.GetBoundary()  # line geometry for polygon boundary
+
+        union_geom = ogr.Geometry(ogr.wkbPolygon)
+        union_geom.Destroy()  # We'll handle it differently—see below.
+
+        # For union accumulation, start with a null geometry
+        dissolved_geom = None
+
+        # For clarity, transform boundary to the same SRS if needed (already is).
+        # We'll just do an Intersects check with each cell.
 
         all_cells = []
         grid_layer.ResetReading()
@@ -1486,6 +1505,21 @@ class StudyAreaProcessingTask(QgsTask):
             cell_geom = f.GetGeometryRef()
             if cell_geom:
                 all_cells.append(cell_geom.Clone())
+            if not cell_geom:
+                continue
+            if boundary.Intersects(cell_geom):
+                # We'll union
+                if dissolved_geom is None:
+                    dissolved_geom = cell_geom.Clone()
+                else:
+                    dissolved_geom = dissolved_geom.Union(cell_geom)
+            count += 1
+            if count % 1000 == 0:
+                log_message(f"Processed {count} grid cells.")
+                # Update progress (capped at 100% since GetFeatureCount can be inaccurate)
+                if total_features > 0:
+                    progress = min(100, int((count / total_features) * 100))
+                    self.feedback.setProgress(progress)
         grid_layer.ResetReading()
         grid_layer.SetSpatialFilter(None)  # Clear filter
 

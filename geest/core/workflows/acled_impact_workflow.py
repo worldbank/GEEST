@@ -27,7 +27,7 @@ from qgis.PyQt.QtCore import QVariant
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
 
-from .acled_impact_mappings import buffer_distances, event_scores
+from .mappings import MAPPING_REGISTRY
 from .workflow_base import WorkflowBase
 
 
@@ -57,6 +57,9 @@ class AcledImpactWorkflow(WorkflowBase):
         super().__init__(
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
+        acled_mapping = MAPPING_REGISTRY.get("acled_conflict", {})
+        self.event_scores = acled_mapping.get("event_scores", {})
+        self.buffer_distances = acled_mapping.get("buffer_distances", {})
         self.csv_file = self.attributes.get("use_csv_to_point_layer_csv_file", "")
         if not self.csv_file:
             error = "No CSV file provided."
@@ -157,8 +160,8 @@ class AcledImpactWorkflow(WorkflowBase):
 
                 feature = QgsFeature()
                 feature.setGeometry(QgsGeometry.fromPointXY(point_transformed))
-                value = event_scores.get(event_type, 5)
-                buffer_m = buffer_distances.get(event_type, 0)
+                value = self.event_scores.get(event_type, 5)
+                buffer_m = self.buffer_distances.get(event_type, 0)
                 score = 0  # this will be replaced later with the lowest overlapping score
                 feature.setAttributes([event_type, value, buffer_m, score])
                 features.append(feature)

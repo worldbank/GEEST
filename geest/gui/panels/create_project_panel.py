@@ -10,7 +10,7 @@ import shutil
 import subprocess  # nosec B404
 import traceback
 
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
+from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QMessageBox, QWidget
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
@@ -25,8 +25,7 @@ from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QPixmap
 
 from geest.core import WorkflowQueueManager
-from geest.core.reports.study_area_report import StudyAreaReport
-from geest.core.tasks import StudyAreaProcessingTask
+from geest.core.tasks import StudyAreaProcessingTask, StudyAreaReportTask
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (
     calculate_utm_zone_from_layer,
@@ -85,11 +84,12 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.national_scale.clicked.connect(lambda: self.spatial_scale_changed("national"))
         self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
-        # Note: Regional and Local scales are disabled in the UI for this release
-        # Only National scale is currently active
-        # Explicitly disable Regional and Local radio buttons (overrides enable_widgets())
+        # Note: Regional scale is disabled in the UI for this release
+        # National and Local scales are currently active
+        # Explicitly disable Regional radio button (overrides enable_widgets())
         self.regional_scale.setEnabled(False)
-        self.local_scale.setEnabled(False)
+        # Local mode enabled for National vs Local analysis implementation
+        # self.local_scale.setEnabled(False)
 
         # Women Considerations toggle
         self.women_considerations_checkbox.stateChanged.connect(self.women_considerations_changed)
@@ -329,8 +329,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def enable_widgets(self):
         """Enable all widgets in the panel."""
         for widget in self.findChildren(QWidget):
-            # Skip Regional and Local scale radio buttons - they should remain disabled
-            if widget in (self.regional_scale, self.local_scale):
+            # Skip Regional scale radio button - it should remain disabled
+            # Local scale is now enabled for National vs Local analysis
+            if widget == self.regional_scale:
                 continue
             widget.setEnabled(True)
 
@@ -429,26 +430,47 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             tag="Geest",
             level=Qgis.Info,
         )
-        self.progress_bar.setVisible(False)
-        self.child_progress_bar.setVisible(False)
-        gpkg_path = os.path.join(self.working_dir, "study_area", "study_area.gpkg")
-        report = StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary")
-        report.create_layout()
-        report.export_pdf(os.path.join(self.working_dir, "study_area_report.pdf"))
-        # open the pdf using the system PDF viewer
-        # Windows
-        if os.name == "nt":  # Windows
-            os.startfile(os.path.join(self.working_dir, "study_area_report.pdf"))  # nosec B606
-        else:  # macOS and Linux
-            system = platform.system().lower()
-            if system == "darwin":  # macOS
-                pdf_path = os.path.join(self.working_dir, "study_area_report.pdf")
-                subprocess.run(["open", pdf_path], check=False)  # nosec B603 B607
-            else:  # Linux
-                pdf_path = os.path.join(self.working_dir, "study_area_report.pdf")
-                subprocess.run(["xdg-open", pdf_path], check=False)  # nosec B603 B607
-        self.enable_widgets()
 
+        # Use child progress bar for report generation (main bar stays at 100%)
+        self.child_progress_bar.setMinimum(0)
+        self.child_progress_bar.setMaximum(0)  # Indeterminate/bouncing
+        self.child_progress_bar.setFormat("Generating study area report...")
+        self.child_progress_bar.setVisible(True)
+
+        # Start report generation in background
+        gpkg_path = os.path.join(self.working_dir, "study_area", "study_area.gpkg")
+        self.report_task = StudyAreaReportTask(self.working_dir, gpkg_path)
+        self.report_task.taskCompleted.connect(self.on_report_completed)
+        self.report_task.taskTerminated.connect(self.on_report_failed)
+
+        from qgis.core import QgsApplication
+
+        QgsApplication.taskManager().addTask(self.report_task)
+
+    def on_report_completed(self):
+        """Slot called when report generation completes successfully."""
+        log_message("Study area report generated successfully.", tag="Geest", level=Qgis.Info)
+
+        self.child_progress_bar.setMinimum(0)
+        self.child_progress_bar.setMaximum(100)
+        self.child_progress_bar.setValue(100)
+        self.child_progress_bar.setFormat("Report generated successfully!")
+
+        self.enable_widgets()
+        self.switch_to_next_tab.emit()
+
+    def on_report_failed(self):
+        """Slot called when report generation fails."""
+        error_msg = str(self.report_task.exception) if hasattr(self.report_task, "exception") else "Unknown error"
+
+        log_message(f"Study area report generation failed: {error_msg}", tag="Geest", level=Qgis.Critical)
+
+        self.child_progress_bar.setMinimum(0)
+        self.child_progress_bar.setMaximum(100)
+        self.child_progress_bar.setValue(0)
+        self.child_progress_bar.setFormat(f"Error: {error_msg}")
+
+        self.enable_widgets()
         self.switch_to_next_tab.emit()
 
     def update_recent_projects(self, directory):
@@ -570,10 +592,19 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     existing_layer = child.layer()
                     break
 
-            # If the layer exists, refresh it instead of removing and re-adding
+            # Refresh existing layer instead of removing and re-adding
             if existing_layer is not None:
                 log_message(f"Refreshing existing layer: {existing_layer.name()}")
-                existing_layer.reload()
+                try:
+                    existing_layer.reload()
+                except Exception as e:
+                    # Skip refresh if layer is locked by background write operation
+                    log_message(
+                        f"Could not refresh layer {existing_layer.name()}: {e}. "
+                        "Layer may be locked (this is normal during processing).",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
             else:
                 # Add the new layer to the appropriate subgroup
                 QgsProject.instance().addMapLayer(layer, False)
