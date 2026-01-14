@@ -12,6 +12,7 @@ from geest.gui.widgets.datasource_widgets import (
     AcledCsvDataSourceWidget,
     BaseDataSourceWidget,
     CsvDataSourceWidget,
+    EPLEXDataSourceWidget,
     FixedValueDataSourceWidget,
     RasterDataSourceWidget,
     VectorAndFieldDataSourceWidget,
@@ -56,6 +57,8 @@ class DataSourceWidgetFactory:
                 return FixedValueDataSourceWidget(widget_key=widget_key, attributes=attributes)
             if widget_key == "use_contextual_index_score" and value == 1:
                 return FixedValueDataSourceWidget(widget_key=widget_key, attributes=attributes)
+            if widget_key == "use_eplex_score" and value == 1:
+                return EPLEXDataSourceWidget(widget_key=widget_key, attributes=attributes)
             if widget_key == "use_index_score_with_ookla" and value == 1:
                 # Uses the same datasource widget as index score for now ...
                 return FixedValueDataSourceWidget(widget_key=widget_key, attributes=attributes)

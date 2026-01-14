@@ -5,7 +5,7 @@ This module contains functionality for dimension aggregation dialog.
 """
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QUrl
-from qgis.PyQt.QtGui import QDesktopServices, QPixmap
+from qgis.PyQt.QtGui import QColor, QDesktopServices, QPixmap
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
     QDialogButtonBox,
@@ -65,13 +65,19 @@ class DimensionAggregationDialog(CustomBaseDialog):
         self.guids = self.tree_item.getDimensionFactorGuids()
         self.weightings = {}  # To store the temporary weightings
 
+        # Always use the standard factor weighting UI
+        # EPLEX is now a regular factor and appears in the table like any other
+        self._setup_factor_weighting_ui()
+
+    def _setup_factor_weighting_ui(self):
+        """Setup the normal factor weighting UI with table of factors."""
         # Layout setup
         layout = QVBoxLayout(self)
         self.resize(800, 600)  # Set a wider dialog size
         layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
 
         self.banner_label = CustomBannerLabel(
-            "The Gender Enabling Environments Spatial Tool",
+            "The Geospatial Enabling Environments for Employment Tool",
             resources_path("resources", "geest-banner.png"),
         )
         layout.addWidget(self.banner_label)
@@ -89,6 +95,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
         description_label = QLabel()
         description_label.setText(self.dimension_data.get("description", ""))
         description_label.setWordWrap(True)
+        description_label.setTextFormat(Qt.MarkdownText)
         layout.addWidget(description_label)
 
         # Table setup
@@ -118,6 +125,8 @@ class DimensionAggregationDialog(CustomBaseDialog):
             factor_id = attributes.get("name")
             dimension_weighting = float(attributes.get("dimension_weighting", 0.0))
             default_dimension_weighting = attributes.get("default_dimension_weighting", 0)
+            is_factor_enabled = item.is_enabled()
+
             name_item = QTableWidgetItem(factor_id)
             name_item.setFlags(Qt.ItemIsEnabled)
             self.table.setItem(row, 0, name_item)
@@ -132,8 +141,8 @@ class DimensionAggregationDialog(CustomBaseDialog):
             self.table.setCellWidget(row, 1, weighting_item)
             self.weightings[guid] = weighting_item
 
-            # Use checkboxes
-            checkbox_widget = self.create_checkbox_widget(row, dimension_weighting)
+            # Use checkboxes - pass the is_enabled state
+            checkbox_widget = self.create_checkbox_widget(row, dimension_weighting, is_factor_enabled)
             self.table.setCellWidget(row, 2, checkbox_widget)
 
             # Reset button
@@ -149,17 +158,19 @@ class DimensionAggregationDialog(CustomBaseDialog):
             self.table.setItem(row, 4, guid_item)
             guid_item.setToolTip(str(item.attributes()))
 
-            # disable the table row if the checkbox is unchecked
-            # Have to do this last after all widgets are initialized
-            # First check if the factor is required
-            # and disable the checkbox if it is
-            for col in range(4):
-                try:
-                    item = self.table.item(row, col)
-                    item.setEnabled(False)
-                    # item.setFlags(Qt.ItemIsEnabled)
-                except AttributeError:
-                    pass
+            # If factor is disabled, grey out the entire row
+            if not is_factor_enabled:
+                # Uncheck and disable the checkbox
+                checkbox = self.get_checkbox_in_row(row)
+                if checkbox:
+                    checkbox.setChecked(False)
+                    checkbox.setEnabled(False)
+
+                # Grey out all widgets in the row
+                name_item.setForeground(QColor(Qt.gray))
+                weighting_item.setEnabled(False)
+                reset_button.setEnabled(False)
+                guid_item.setForeground(QColor(Qt.gray))
 
         layout.addWidget(self.table)
 
@@ -218,13 +229,13 @@ class DimensionAggregationDialog(CustomBaseDialog):
         self.guid_column_visible = not self.guid_column_visible
         self.table.setColumnHidden(4, not self.guid_column_visible)
 
-    def create_checkbox_widget(self, row: int, dimension_weighting: float) -> QWidget:
+    def create_checkbox_widget(self, row: int, dimension_weighting: float, is_enabled: bool = True) -> QWidget:
         """
         Create a QWidget containing a QCheckBox for a specific row and center it.
         """
         checkbox = QCheckBox()
-        if dimension_weighting > 0:
-            checkbox.setChecked(True)  # Initially checked
+        if dimension_weighting > 0 and is_enabled:
+            checkbox.setChecked(True)
         else:
             checkbox.setChecked(False)
         checkbox.stateChanged.connect(lambda state, r=row: self.toggle_row_widgets(r, state))
