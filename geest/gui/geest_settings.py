@@ -102,9 +102,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         settings_key_cache_dir = f"{APPLICATION_NAME}/ookla_local_cache_dir"
         ookla_cache_dir = setting(key="ookla_local_cache_dir", default="")
         if not ookla_cache_dir:
-            ookla_cache_dir = os.path.join(
-                QgsApplication.qgisSettingsDirPath(), "python", "ookla_cache", "parquet"
-            )
+            ookla_cache_dir = os.path.join(QgsApplication.qgisSettingsDirPath(), "python", "ookla_cache", "parquet")
             if not qsettings.contains(settings_key_cache_dir):
                 set_setting(key="ookla_local_cache_dir", value=ookla_cache_dir)
         self.ookla_cache_dir.setText(ookla_cache_dir)
