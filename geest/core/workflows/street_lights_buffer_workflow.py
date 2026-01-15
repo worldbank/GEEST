@@ -19,6 +19,7 @@ from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem
 from geest.core.algorithms.features_per_cell_processor import select_grid_cells_and_count_features
+from geest.core.workflows.mappings import MAPPING_REGISTRY
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
@@ -95,12 +96,24 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             self.attributes["error"] = error
             raise Exception(error)
 
-        if analysis_scale == "local":
-            self.buffer_distance = 20  # 20m buffer
+        factor_id = None
+        if item.isIndicator() and item.parentItem:
+            factor_id = item.parentItem.attribute("id", None)
+        mapping_id = self.attributes.get("mapping_id")
+        indicator_id = self.attributes.get("id")
+        mapping = MAPPING_REGISTRY.get(factor_id or mapping_id or indicator_id)
+        if not mapping:
+            raise Exception("Streetlights mapping not found.")
+        config = mapping.get(analysis_scale, mapping.get("national"))
+        if not config:
+            raise Exception("Streetlights mapping config not found.")
 
-            self.buffer_distance = 565  # 565m buffer for global
-        else:
-            raise
+        self.buffer_distance = int(config.get("buffer_distance", 0))
+        self.scoring_method = config.get("scoring_method", "")
+        self.scores = config.get("scores", {})
+        self.percentage_scores = config.get("percentage_scores", {})
+        if not self.buffer_distance:
+            raise Exception("Invalid buffer distance for streetlights.")
 
     def _process_features_for_area(
         self,
@@ -238,25 +251,23 @@ class StreetLightsBufferWorkflow(WorkflowBase):
                 if intersection.isEmpty():
                     continue
 
-                overlap_percent = (intersection.area() / grid_geom.area()) * 100
+                if self.scoring_method == "binary":
+                    max_score = max(max_score, self.scores.get("intersects_buffer", 5))
+                    continue
 
+                overlap_percent = (intersection.area() / grid_geom.area()) * 100
                 log_message(
                     f"Overlap percentage: {overlap_percent}",
                     tag="Geest",
                     level=Qgis.Info,
                 )
 
-                # Determine score based on overlap percentage
-                if 80 <= overlap_percent <= 100:
-                    max_score = max(max_score, 5)
-                elif 60 <= overlap_percent < 80:
-                    max_score = max(max_score, 4)
-                elif 40 <= overlap_percent < 60:
-                    max_score = max(max_score, 3)
-                elif 20 <= overlap_percent < 40:
-                    max_score = max(max_score, 2)
-                elif 1 <= overlap_percent < 20:
-                    max_score = max(max_score, 1)
+                # Determine score based on overlap percentage thresholds
+                if self.scoring_method == "percentage_intersection":
+                    for min_pct, score in sorted(self.percentage_scores.items(), reverse=True):
+                        if overlap_percent >= min_pct:
+                            max_score = max(max_score, score)
+                            break
 
             # Update the "score" attribute for the feature
             grid_feature.setAttribute("score", max_score)

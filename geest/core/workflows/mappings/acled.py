@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 
-# We keep this in a separate file so that if can be used
-# by the configuration widget without importing the whole workflow
+"""
+ACLED Conflict Event Mappings.
+
+Fragility, Conflict, and Violence factor configurations.
+
+We keep this in a separate file so that it can be used
+by the configuration widget without importing the whole workflow.
+"""
 
 # Define scoring categories based on event_type
 # See https://github.com/worldbank/GEEST/issues/71
 # For where these lookups are specified
+
 event_scores = {
     "Battles": 0,
     "Explosions/Remote violence": 1,
@@ -14,6 +21,7 @@ event_scores = {
     "Riots": 4,
     "No events": 5,
 }
+
 buffer_distances = {
     "Battles": 5000,
     "Explosions/Remote violence": 5000,
@@ -21,4 +29,10 @@ buffer_distances = {
     "Protests": 1000,
     "Riots": 2000,
     "No events": 0,
+}
+
+# Combined mapping for registry lookup
+ACLED_CONFLICT = {
+    "event_scores": event_scores,
+    "buffer_distances": buffer_distances,
 }
