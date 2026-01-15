@@ -1,6 +1,6 @@
 {
   "general": {
-    "name": "Gender Enabling Environments Spatial Tool (GEEST)",
+    "name": "GeoE3 - The Geospatial Enabling Environments for Employment Tool",
     "qgisMinimumVersion": 3.0,
     "qgisMaximumVersion": 3.99,
     "icon": "icon.svg",
@@ -14,11 +14,11 @@
       "plugins"
     ],
     "hasProcessingProvider": "no",
-    "about": "GEEST was built for the practical implementation of the Geospatial Women’s Employment Analytical Framework (GeoWEAF), developed by the World Bank, which identifies the location-specific factors affecting women's access to jobs. This framework categorizes regions based on their level of support for enabling women’s access to employment. It identifies 15 critical, spatially varying factors that influence women’s job prospects, divided into three main dimensions: Contextual, Accessibility, and Place Characterization.",
+    "about": "The Geospatial Enabling Environments for Employment Spatial Tool, developed by the World Bank, supports the evaluation of locations based on its supportiveness for employment and entrepreneurship. It allows for a generic analysis of foundational infrastructure and mobility aspects but also supports the inclusion of women specific considerations that can act as barriers in their economic empowerment. By analyzing spatial factors across three dimensions (Contextual/ Accessibility and Place Characterization) GeoE3 is a steppingstone to identifying the critical employment investments required in cities and regions.",
     "author": "Kartoza for and with The World Bank",
     "email": "info@kartoza.com, gost@worldbank.org",
     "description": "Gender Enabling Environments Spatial Tool",
-    "version": "1.2.4",
+    "version": "1.2.6",
     "changelog": "* Added OOKLA Downloader\\n* Added GHSL Downloader \\n* Added variable distance ACLED Buffer. \\* Fix analysis report.",
     "server": false
   }

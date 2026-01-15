@@ -140,10 +140,10 @@ class OSMDataDownloaderBase(ABC):
         """Set the output type for the data.
 
         Args:
-            output_type (str): The type of output data ('point', 'line', 'polygon').
+            output_type (str): The type of output data ('point', 'line', 'polygon', 'mixed_to_point').
         """
-        if output_type not in ["point", "line", "polygon"]:
-            raise ValueError("Invalid output type. Must be 'point', 'line', or 'polygon'.")
+        if output_type not in ["point", "line", "polygon", "mixed_to_point"]:
+            raise ValueError("Invalid output type. Must be 'point', 'line', 'polygon', or 'mixed_to_point'.")
         self.output_type = output_type
 
     def submit_query(self) -> None:
@@ -215,8 +215,15 @@ class OSMDataDownloaderBase(ABC):
         elif self.output_type == "polygon":
             log_message("Processing polygon data...")
             self.process_polygon_response()
+        elif self.output_type == "mixed_to_point":
+            log_message("Processing mixed data (points + polygons converted to centroids)...")
+            try:
+                self.process_mixed_to_point_response()
+            except Exception as e:
+                log_message(f"Error processing mixed data: {e}")
+                raise e
         else:
-            raise ValueError("Invalid output type. Must be 'point', 'line', or 'polygon'.")
+            raise ValueError("Invalid output type. Must be 'point', 'line', 'polygon', or 'mixed_to_point'.")
 
     def process_line_response(self) -> None:
         """
@@ -313,8 +320,11 @@ class OSMDataDownloaderBase(ABC):
         log_message(f"GeoPackage written to: {self.output_path} table: {self.filename}")  # noqa E231
         log_message(f"Total processing time: {total_end - total_start:.2f}s")  # noqa E231
 
-    def process_point_response(self, response_data: str) -> None:
+    def process_point_response(self) -> None:
         """Process the OSM response and save it as a GeoPackage."""
+        # Read from XML file (consistent with process_line_response)
+        with open(self.output_xml_path, "r", encoding="utf-8") as f:
+            response_data = f.read()
         root = ET.fromstring(response_data)  # nosec B314
         layer = QgsVectorLayer("Point?crs=EPSG:4326", "OSM Point Data", "memory")
         provider = layer.dataProvider()
@@ -337,8 +347,11 @@ class OSMDataDownloaderBase(ABC):
         QgsVectorFileWriter.writeAsVectorFormat(layer, self.output_path, "UTF-8", layer.crs(), "GPKG")
         log_message(f"GeoPackage written to: {self.output_path}")
 
-    def process_polygon_response(self, response_data: str) -> None:
+    def process_polygon_response(self) -> None:
         """Process the OSM response and save it as a GeoPackage."""
+        # Read from XML file (consistent with process_line_response)
+        with open(self.output_xml_path, "r", encoding="utf-8") as f:
+            response_data = f.read()
         root = ET.fromstring(response_data)  # nosec B314
         layer = QgsVectorLayer("Polygon?crs=EPSG:4326", "OSM Polygon Data", "memory")
         provider = layer.dataProvider()
@@ -367,5 +380,100 @@ class OSMDataDownloaderBase(ABC):
                 if features_added % 1000 == 0:
                     log_message(f"Added {features_added} features to the layer...")
 
+        QgsVectorFileWriter.writeAsVectorFormat(layer, self.output_path, "UTF-8", layer.crs(), "GPKG")
+        log_message(f"GeoPackage written to: {self.output_path}")
+
+    def process_mixed_to_point_response(self) -> None:
+        """Process OSM response containing both points and polygons.
+
+        This method extracts both point features (nodes) and polygon features (ways),
+        converts polygons to their centroids, and merges everything into a single
+        point layer. This is useful for OSM data where features can be mapped as
+        either points or polygons (e.g., schools, hospitals, shops).
+
+        The output includes a 'geom_type' field to track the original geometry type:
+        - 'point': Original point feature from OSM
+        - 'polygon_centroid': Centroid of a polygon feature
+
+        Raises:
+            Exception: If XML parsing or layer creation fails.
+        """
+        log_message("Processing mixed geometry types (points + polygon centroids)...")
+
+        # Read from XML file
+        with open(self.output_xml_path, "r", encoding="utf-8") as f:
+            response_data = f.read()
+        root = ET.fromstring(response_data)  # nosec B314
+
+        # Create a memory layer for points
+        layer = QgsVectorLayer("Point?crs=EPSG:4326", "OSM Mixed Data", "memory")
+        provider = layer.dataProvider()
+
+        # Add attributes: id and geometry type
+        provider.addAttributes([QgsField("osm_id", QVariant.String), QgsField("geom_type", QVariant.String)])
+        layer.updateFields()
+
+        features_added = 0
+
+        # Process point nodes (only keep tagged nodes; skip polygon vertices)
+        log_message("Extracting tagged point features from OSM nodes...")
+        for node in root.findall(".//node"):
+            if not node.findall("tag"):
+                continue
+            node_id = node.get("id")
+            lat = float(node.get("lat"))
+            lon = float(node.get("lon"))
+
+            feature = QgsFeature()
+            feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
+            feature.setAttributes([node_id, "point"])
+            provider.addFeature(feature)
+            features_added += 1
+
+            if features_added % 1000 == 0:
+                log_message(f"Added {features_added} point features...")
+
+        points_count = features_added
+        log_message(f"Extracted {points_count} point features from OSM nodes")
+
+        # Process polygon ways and convert to centroids
+        log_message("Extracting polygon features and converting to centroids...")
+        polygon_count = 0
+
+        for way in root.findall(".//way"):
+            way_id = way.get("id")
+            coords = []
+
+            # Get coordinates for the way
+            for nd in way.findall("nd"):
+                ref = nd.get("ref")
+                node = root.find(f".//node[@id='{ref}']")
+                if node is not None:
+                    lat = float(node.get("lat"))
+                    lon = float(node.get("lon"))
+                    coords.append(QgsPointXY(lon, lat))
+
+            # Process if it's a closed polygon
+            if coords and len(coords) >= 3 and coords[0] == coords[-1]:
+                polygon_geom = QgsGeometry.fromPolygonXY([coords])
+
+                # Calculate centroid
+                if polygon_geom.isGeosValid():
+                    centroid = polygon_geom.centroid()
+
+                    feature = QgsFeature()
+                    feature.setGeometry(centroid)
+                    feature.setAttributes([way_id, "polygon_centroid"])
+                    provider.addFeature(feature)
+                    features_added += 1
+                    polygon_count += 1
+
+                    if polygon_count % 1000 == 0:
+                        log_message(f"Converted {polygon_count} polygons to centroids...")
+
+        log_message(f"Converted {polygon_count} polygon features to centroids")
+        log_message(f"Total features: {features_added} ({points_count} points + {polygon_count} polygon centroids)")
+
+        # Write to GeoPackage
         QgsVectorFileWriter.writeAsVectorFormat(layer, self.output_path, "UTF-8", layer.crs(), "GPKG")
         log_message(f"GeoPackage written to: {self.output_path}")
