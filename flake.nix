@@ -5,7 +5,6 @@
   inputs.qgis-upstream.url = "github:qgis/qgis";
   inputs.geospatial.url = "github:imincik/geospatial-nix.repo";
   inputs.nixpkgs.follows = "geospatial/nixpkgs";
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
   outputs =
     {

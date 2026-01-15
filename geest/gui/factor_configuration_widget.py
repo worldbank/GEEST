@@ -49,6 +49,13 @@ class FactorConfigurationWidget(QWidget):
         # We work with a copy so any changes you make to attributes
         # will NOT update the indicator item
         attributes = item.getItemByGuid(guids[0]).attributes().copy()
+        # Include factor metadata so configuration widgets don't need to read model.json.
+        attributes["factor_id"] = item.attribute("id", "")
+        attributes["factor_name"] = item.attribute("name", "")
+        # Include analysis scale from the analysis item for scale-aware rendering.
+        analysis_item = item.parentItem.parentItem if item.parentItem and item.parentItem.parentItem else None
+        if analysis_item:
+            attributes["analysis_scale"] = analysis_item.attribute("analysis_scale", "")
         self.attributes = attributes
         self.layout: QVBoxLayout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)

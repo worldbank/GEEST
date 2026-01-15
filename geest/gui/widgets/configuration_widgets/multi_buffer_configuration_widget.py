@@ -3,9 +3,16 @@
 
 This module contains functionality for multi buffer configuration widget.
 """
+import json
+import os
+import traceback
+
 from qgis.core import Qgis
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QLineEdit, QRadioButton
 
+from geest.core.settings import setting
+from geest.core.workflows.mappings import MAPPING_REGISTRY
 from geest.utilities import log_message
 
 from .base_configuration_widget import BaseConfigurationWidget
@@ -16,6 +23,131 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
     A widget to define inputs for an open route services routing request.
     """
 
+    def _add_mapping_thresholds_table(self) -> None:
+        """
+        Adds a table showing scale-specific thresholds from the mappings module.
+        """
+        self.mapping_thresholds = None
+        try:
+            log_message(
+                f"_add_mapping_thresholds_table called with attributes: {self.attributes.get('id')}", level=Qgis.Info
+            )
+
+            # Get analysis scale from model.json
+            working_dir = setting("last_working_directory", "")
+            model_path = os.path.join(working_dir, "model.json")
+
+            analysis_scale = self.attributes.get("analysis_scale") or "national"
+            if os.path.exists(model_path):
+                try:
+                    with open(model_path, "r") as f:
+                        model = json.load(f)
+                        analysis_scale = model.get("analysis_scale", analysis_scale)
+                    log_message(f"Analysis scale from model.json: {analysis_scale}", level=Qgis.Info)
+                except Exception as e:
+                    log_message(f"Could not read analysis_scale from model.json: {e}", level=Qgis.Warning)
+
+            # Get factor ID from attributes (injected by FactorConfigurationWidget)
+            # Indicators have their own ID, but we need the parent factor's ID.
+            indicator_id = self.attributes.get("id")
+            factor_id = self.attributes.get("factor_id")
+            log_message(f"Indicator ID from attributes: {indicator_id}", level=Qgis.Info)
+            log_message(f"Factor ID from attributes: {factor_id}", level=Qgis.Info)
+
+            # Fallback: try to find factor_id by searching model.json
+            if not factor_id and os.path.exists(model_path):
+                try:
+                    with open(model_path, "r") as f:
+                        model = json.load(f)
+                        # Search for this indicator in the model and get its parent factor
+                        for dimension in model.get("dimensions", []):
+                            for factor in dimension.get("factors", []):
+                                for indicator in factor.get("indicators", []):
+                                    if indicator.get("id") == indicator_id:
+                                        factor_id = factor.get("id")
+                                        log_message(f"Found parent factor ID: {factor_id}", level=Qgis.Info)
+                                        break
+                                if factor_id:
+                                    break
+                            if factor_id:
+                                break
+                except Exception as e:
+                    log_message(f"Error searching for parent factor: {e}", level=Qgis.Warning)
+
+            if not factor_id:
+                log_message(f"No parent factor ID found for indicator: {indicator_id}", level=Qgis.Warning)
+                return  # No factor ID, skip table
+
+            mapping = MAPPING_REGISTRY.get(factor_id)
+
+            log_message(f"Mapping lookup for '{factor_id}': {mapping is not None}", level=Qgis.Info)
+
+            if not mapping:
+                log_message(
+                    f"No mapping found for factor: {factor_id}. Available mappings: {list(MAPPING_REGISTRY.keys())}",
+                    level=Qgis.Warning,
+                )
+                return  # No mapping found for this factor
+
+            # Get scale-specific config
+            config = mapping.get(analysis_scale, mapping.get("national"))
+
+            if not config:
+                return  # No config found
+
+            # Get factor name from attributes; fallback to model.json lookup.
+            factor_name = self.attributes.get("factor_name") or "Multi-Buffer Analysis"
+            if factor_name == "Multi-Buffer Analysis" and os.path.exists(model_path):
+                try:
+                    with open(model_path, "r") as f:
+                        model = json.load(f)
+                        for dimension in model.get("dimensions", []):
+                            for factor in dimension.get("factors", []):
+                                if factor.get("id") == factor_id:
+                                    factor_name = factor.get("name", factor_name)
+                                    break
+                except Exception:
+                    pass
+
+            thresholds = config.get("thresholds", [])
+            scores = config.get("scores", [])
+            if thresholds:
+                self.mapping_thresholds = thresholds
+
+            # Generate HTML table
+            html = f"""
+            <p><b>{factor_name} ({analysis_scale.title()} Scale)</b></p>
+            <table border='1' cellpadding='4' cellspacing='0'>
+                <tr><th>Distance Range (m)</th><th>Score</th></tr>
+            """
+
+            # Build distance ranges
+            for i, score in enumerate(scores):
+                if i == 0:
+                    distance_range = f"0 - {thresholds[0]}"
+                elif i < len(thresholds):
+                    distance_range = f"{thresholds[i-1]} - {thresholds[i]}"
+                else:
+                    distance_range = f"> {thresholds[-1]}"
+
+                html += f"<tr><td>{distance_range}</td><td>{score}</td></tr>"
+
+            html += "</table>"
+            html += "<p><i>Note: You can override these defaults below</i></p>"
+
+            # Display table
+            self.mapping_table_label = QLabel()
+            self.mapping_table_label.setWordWrap(True)
+            self.mapping_table_label.setTextFormat(Qt.RichText)
+            self.mapping_table_label.setText(html)
+            self.internal_layout.addWidget(self.mapping_table_label)
+
+            log_message(f"✓ Thresholds table added successfully for {factor_name}", level=Qgis.Info)
+
+        except Exception as e:
+            log_message(f"Error adding mapping thresholds table: {e}", level=Qgis.Warning)
+            log_message(traceback.format_exc(), level=Qgis.Warning)
+
     def add_internal_widgets(self) -> None:
         """
         Adds internal widgets specific to self.set_internal_widgets_visible(self.isChecked()) - in this case there are none.
@@ -23,6 +155,10 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
         try:
             log_message("Adding internal widgets for MultiBufferConfigurationWidget")
             # log_message(f"Attributes: {self.attributes}")
+
+            # Add mapping thresholds table at the top
+            self._add_mapping_thresholds_table()
+
             # Travel Mode group
             self.travel_mode_group = QGroupBox("Travel Mode:")
             self.travel_mode_layout = QHBoxLayout()
@@ -55,10 +191,15 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             self.increments_input = QLineEdit("")
             self.travel_increments_layout.addWidget(self.increments_label)
             self.travel_increments_layout.addWidget(self.increments_input)
-            if self.attributes.get("multi_buffer_travel_distances", False):
-                self.increments_input.setText(self.attributes["multi_buffer_travel_distances"])
+            default_distances = self.attributes.get("default_multi_buffer_distances", "")
+            user_distances = self.attributes.get("multi_buffer_travel_distances")
+            has_user_override = bool(user_distances) and user_distances != default_distances
+            if has_user_override:
+                self.increments_input.setText(user_distances)
+            elif self.mapping_thresholds:
+                self.increments_input.setText(", ".join(str(x) for x in self.mapping_thresholds))
             else:
-                self.increments_input.setText(self.attributes.get("default_multi_buffer_distances", ""))
+                self.increments_input.setText(default_distances)
 
             # Add all layouts to the main layout
             self.internal_layout.addWidget(self.travel_mode_group)
@@ -79,8 +220,6 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
 
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
-            import traceback
-
             log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def validate_increments_input(self) -> bool:

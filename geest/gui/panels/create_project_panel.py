@@ -10,7 +10,7 @@ import shutil
 import subprocess  # nosec B404
 import traceback
 
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
+from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QMessageBox, QWidget
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
@@ -25,8 +25,7 @@ from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QPixmap
 
 from geest.core import WorkflowQueueManager
-from geest.core.reports.study_area_report import StudyAreaReport
-from geest.core.tasks import StudyAreaProcessingTask
+from geest.core.tasks import StudyAreaProcessingTask, StudyAreaReportTask
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (
     calculate_utm_zone_from_layer,
@@ -57,7 +56,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def __init__(self):
         """🏗️ Initialize the instance."""
         super().__init__()
-        self.setWindowTitle("GEEST")
+        self.setWindowTitle("GeoE3")
         # For running study area processing in a separate thread
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
@@ -72,7 +71,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         """⚙️ Initui."""
         self.enable_widgets()  # Re-enable widgets in case they were disabled
         self.custom_label = CustomBannerLabel(
-            "The Gender Enabling Environments Spatial Tool",
+            "The Geospatial Enabling Environments for Employment Spatial Tool",
             resources_path("resources", "geest-banner.png"),
         )
         parent_layout = self.banner_label.parent().layout()
@@ -81,14 +80,21 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         parent_layout.update()
 
         self.folder_status_label.setPixmap(QPixmap(resources_path("resources", "icons", "failed.svg")))
-        self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
+        self.regional_scale.clicked.connect(lambda: self.spatial_scale_changed("regional"))
         self.national_scale.clicked.connect(lambda: self.spatial_scale_changed("national"))
+        self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
-        experimental_features = int(os.getenv("GEEST_EXPERIMENTAL", 0))
-        if not experimental_features:
-            # For now these are experimental
-            self.local_scale.hide()
-            self.national_scale.hide()
+        # Note: Regional scale is disabled in the UI for this release
+        # National and Local scales are currently active
+        # Explicitly disable Regional radio button (overrides enable_widgets())
+        self.regional_scale.setEnabled(False)
+        # Local mode enabled for National vs Local analysis implementation
+        # self.local_scale.setEnabled(False)
+
+        # Women Considerations toggle
+        self.women_considerations_checkbox.stateChanged.connect(self.women_considerations_changed)
+        # Initialize EPLEX widgets visibility based on checkbox state
+        self.women_considerations_changed()
 
         # self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
         self.field_combo.setFilters(QgsFieldProxyModel.String)
@@ -144,17 +150,38 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         """Slot to be called when the spatial scale changes.
 
         Args:
-            value (str): The new spatial scale value ("local" or "national").
+            value (str): The new spatial scale value ("regional", "national", or "local").
         """
         log_message(f"Spatial scale changed: {value}")
-        if value == "local":
-            self.cell_size_spinbox.setValue(100)
-            self.cell_size_spinbox.setSingleStep(10)
-            self.cell_size_spinbox.setSuffix(" m")
+        if value == "regional":
+            # Regional scale uses H3 indexes (H3l6 by default)
+            # For this release, regional is disabled
+            self.cell_size_spinbox.setValue(5000)
+            self.cell_size_spinbox.setSingleStep(1000)
+            self.cell_size_spinbox.setSuffix(" m (H3)")
         elif value == "national":
             self.cell_size_spinbox.setValue(1000)
             self.cell_size_spinbox.setSingleStep(100)
             self.cell_size_spinbox.setSuffix(" m")
+        elif value == "local":
+            self.cell_size_spinbox.setValue(100)
+            self.cell_size_spinbox.setSingleStep(10)
+            self.cell_size_spinbox.setSuffix(" m")
+
+    def women_considerations_changed(self):
+        """Slot to be called when the women considerations checkbox changes.
+
+        When unchecked, shows EPLEX score input.
+        When checked, hides EPLEX score input.
+        """
+        is_checked = self.women_considerations_checkbox.isChecked()
+        log_message(f"Women considerations changed: {is_checked}")
+
+        # Show EPLEX widgets when women considerations is NOT selected
+        show_eplex = not is_checked
+        self.eplex_label.setVisible(show_eplex)
+        self.eplex_description.setVisible(show_eplex)
+        self.eplex_score_spinbox.setVisible(show_eplex)
 
     def update_crs(self):
         """Update the CRS label based on the checkbox state."""
@@ -243,8 +270,22 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     model["analysis_scale"] = "local"
                 else:
                     model["analysis_scale"] = "national"
+                # Save women considerations settings
+                model["women_considerations_enabled"] = self.women_considerations_checkbox.isChecked()
+
+                # Save EPLEX score to the EPLEX indicator in the Contextual dimension
+                for dimension in model.get("dimensions", []):
+                    if dimension.get("id") == "contextual":
+                        for factor in dimension.get("factors", []):
+                            if factor.get("id") == "eplex":
+                                for indicator in factor.get("indicators", []):
+                                    if indicator.get("id") == "eplex_score_indicator":
+                                        indicator["eplex_score"] = self.eplex_score_spinbox.value()
+                                        break
+                                break
+                        break
             with open(model_path, "w") as f:
-                json.dump(model, f)
+                json.dump(model, f, indent=2)
 
             # Create the processor instance and process the features
             debug_env = int(os.getenv("GEEST_DEBUG", 0))
@@ -288,6 +329,10 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def enable_widgets(self):
         """Enable all widgets in the panel."""
         for widget in self.findChildren(QWidget):
+            # Skip Regional scale radio button - it should remain disabled
+            # Local scale is now enabled for National vs Local analysis
+            if widget == self.regional_scale:
+                continue
             widget.setEnabled(True)
 
     def reference_layer(self):
@@ -385,26 +430,47 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             tag="Geest",
             level=Qgis.Info,
         )
-        self.progress_bar.setVisible(False)
-        self.child_progress_bar.setVisible(False)
-        gpkg_path = os.path.join(self.working_dir, "study_area", "study_area.gpkg")
-        report = StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary")
-        report.create_layout()
-        report.export_pdf(os.path.join(self.working_dir, "study_area_report.pdf"))
-        # open the pdf using the system PDF viewer
-        # Windows
-        if os.name == "nt":  # Windows
-            os.startfile(os.path.join(self.working_dir, "study_area_report.pdf"))  # nosec B606
-        else:  # macOS and Linux
-            system = platform.system().lower()
-            if system == "darwin":  # macOS
-                pdf_path = os.path.join(self.working_dir, "study_area_report.pdf")
-                subprocess.run(["open", pdf_path], check=False)  # nosec B603 B607
-            else:  # Linux
-                pdf_path = os.path.join(self.working_dir, "study_area_report.pdf")
-                subprocess.run(["xdg-open", pdf_path], check=False)  # nosec B603 B607
-        self.enable_widgets()
 
+        # Use child progress bar for report generation (main bar stays at 100%)
+        self.child_progress_bar.setMinimum(0)
+        self.child_progress_bar.setMaximum(0)  # Indeterminate/bouncing
+        self.child_progress_bar.setFormat("Generating study area report...")
+        self.child_progress_bar.setVisible(True)
+
+        # Start report generation in background
+        gpkg_path = os.path.join(self.working_dir, "study_area", "study_area.gpkg")
+        self.report_task = StudyAreaReportTask(self.working_dir, gpkg_path)
+        self.report_task.taskCompleted.connect(self.on_report_completed)
+        self.report_task.taskTerminated.connect(self.on_report_failed)
+
+        from qgis.core import QgsApplication
+
+        QgsApplication.taskManager().addTask(self.report_task)
+
+    def on_report_completed(self):
+        """Slot called when report generation completes successfully."""
+        log_message("Study area report generated successfully.", tag="Geest", level=Qgis.Info)
+
+        self.child_progress_bar.setMinimum(0)
+        self.child_progress_bar.setMaximum(100)
+        self.child_progress_bar.setValue(100)
+        self.child_progress_bar.setFormat("Report generated successfully!")
+
+        self.enable_widgets()
+        self.switch_to_next_tab.emit()
+
+    def on_report_failed(self):
+        """Slot called when report generation fails."""
+        error_msg = str(self.report_task.exception) if hasattr(self.report_task, "exception") else "Unknown error"
+
+        log_message(f"Study area report generation failed: {error_msg}", tag="Geest", level=Qgis.Critical)
+
+        self.child_progress_bar.setMinimum(0)
+        self.child_progress_bar.setMaximum(100)
+        self.child_progress_bar.setValue(0)
+        self.child_progress_bar.setFormat(f"Error: {error_msg}")
+
+        self.enable_widgets()
         self.switch_to_next_tab.emit()
 
     def update_recent_projects(self, directory):
@@ -477,13 +543,19 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             # Check if layer exists in GeoPackage first
             from osgeo import ogr
 
-            ds = ogr.Open(gpkg_path, 0)
-            if ds is None:
-                log_message(f"Could not open GeoPackage: {gpkg_path}", tag="Geest", level=Qgis.Warning)
-                continue
+            try:
+                ds = ogr.Open(gpkg_path, 0)
+                if ds is None:
+                    log_message(f"Could not open GeoPackage: {gpkg_path}", tag="Geest", level=Qgis.Warning)
+                    continue
 
-            layer_exists = ds.GetLayerByName(layer_name) is not None
-            ds = None
+                layer_exists = ds.GetLayerByName(layer_name) is not None
+                ds = None
+            except RuntimeError as e:
+                if "database is locked" in str(e):
+                    log_message(f"Database busy, skipping map refresh for {layer_name}", tag="Geest", level=Qgis.Info)
+                    continue
+                raise
 
             if not layer_exists:
                 log_message(
@@ -520,10 +592,19 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     existing_layer = child.layer()
                     break
 
-            # If the layer exists, refresh it instead of removing and re-adding
+            # Refresh existing layer instead of removing and re-adding
             if existing_layer is not None:
                 log_message(f"Refreshing existing layer: {existing_layer.name()}")
-                existing_layer.reload()
+                try:
+                    existing_layer.reload()
+                except Exception as e:
+                    # Skip refresh if layer is locked by background write operation
+                    log_message(
+                        f"Could not refresh layer {existing_layer.name()}: {e}. "
+                        "Layer may be locked (this is normal during processing).",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
             else:
                 # Add the new layer to the appropriate subgroup
                 QgsProject.instance().addMapLayer(layer, False)

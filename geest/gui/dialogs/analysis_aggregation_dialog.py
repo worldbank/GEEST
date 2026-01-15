@@ -74,7 +74,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.weightings = {}  # To store the temporary weightings
         # Banner label
         self.custom_label = CustomBannerLabel(
-            "The Gender Enabling Environments Spatial Tool",
+            "The Geospatial Enabling Environments for Employment Tool",
             resources_path("resources", "geest-banner.png"),
         )
         parent_layout = self.banner_label.parent().layout()
