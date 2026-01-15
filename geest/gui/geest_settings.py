@@ -8,9 +8,13 @@ __revision__ = "$Format:%H$"
 
 import os
 
+from qgis.core import QgsApplication
 from qgis.gui import QgsOptionsPageWidget, QgsOptionsWidgetFactory
 from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QFileDialog
+from qgis.PyQt.QtCore import QSettings
 
+from geest.core.constants import APPLICATION_NAME
 from geest.core.settings import set_setting, setting
 from geest.utilities import get_ui_class, log_message, resources_path
 
@@ -88,6 +92,24 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         ookla_fixed_threshold = float(setting(key="ookla_fixed_threshold", default=0.0))
         self.ookla_fixed_threshold.setValue(ookla_fixed_threshold)
 
+        settings_key_cache = f"{APPLICATION_NAME}/ookla_use_local_cache"
+        qsettings = QSettings()
+        if not qsettings.contains(settings_key_cache):
+            set_setting(key="ookla_use_local_cache", value=True)
+        ookla_use_local_cache = bool(setting(key="ookla_use_local_cache", default=True))
+        self.ookla_use_local_cache.setChecked(ookla_use_local_cache)
+
+        settings_key_cache_dir = f"{APPLICATION_NAME}/ookla_local_cache_dir"
+        ookla_cache_dir = setting(key="ookla_local_cache_dir", default="")
+        if not ookla_cache_dir:
+            ookla_cache_dir = os.path.join(
+                QgsApplication.qgisSettingsDirPath(), "python", "ookla_cache", "parquet"
+            )
+            if not qsettings.contains(settings_key_cache_dir):
+                set_setting(key="ookla_local_cache_dir", value=ookla_cache_dir)
+        self.ookla_cache_dir.setText(ookla_cache_dir)
+        self.ookla_cache_dir_browse.clicked.connect(self._select_ookla_cache_dir)
+
         # GHSL filter setting
         filter_study_areas_by_ghsl = bool(setting(key="filter_study_areas_by_ghsl", default=True))
         self.filter_study_areas_by_ghsl.setChecked(filter_study_areas_by_ghsl)
@@ -121,7 +143,16 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         set_setting(key="ookla_use_thresholds", value=self.ookla_use_thresholds.isChecked())
         set_setting(key="ookla_mobile_threshold", value=self.ookla_mobile_threshold.value())
         set_setting(key="ookla_fixed_threshold", value=self.ookla_fixed_threshold.value())
+        set_setting(key="ookla_use_local_cache", value=self.ookla_use_local_cache.isChecked())
+        set_setting(key="ookla_local_cache_dir", value=self.ookla_cache_dir.text())
         set_setting(key="filter_study_areas_by_ghsl", value=self.filter_study_areas_by_ghsl.isChecked())
+
+    def _select_ookla_cache_dir(self):
+        """Select local cache directory for Ookla parquet files."""
+        current_dir = self.ookla_cache_dir.text()
+        directory = QFileDialog.getExistingDirectory(self, "Select Ookla Cache Directory", current_dir)
+        if directory:
+            self.ookla_cache_dir.setText(directory)
 
 
 class GeestOptionsFactory(QgsOptionsWidgetFactory):
