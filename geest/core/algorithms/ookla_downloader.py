@@ -223,18 +223,14 @@ class OoklaDownloader:
         # Extract fixed internet data
         log_message("Starting extraction of fixed internet data...")
         try:
-            self.extract_ookla_data(
-                fixed_input_uri, fixed_output_file, bbox, output_crs, self.fixed_threshold_kbps
-            )
+            self.extract_ookla_data(fixed_input_uri, fixed_output_file, bbox, output_crs, self.fixed_threshold_kbps)
         except Exception as e:
             raise OoklaException(f"Error extracting fixed internet data: {e}")
 
         # Extract mobile internet data
         log_message("Starting extraction of mobile internet data...")
         try:
-            self.extract_ookla_data(
-                mobile_input_uri, mobile_output_file, bbox, output_crs, self.mobile_threshold_kbps
-            )
+            self.extract_ookla_data(mobile_input_uri, mobile_output_file, bbox, output_crs, self.mobile_threshold_kbps)
         except Exception as e:
             raise OoklaException(f"Error extracting mobile internet data: {e}")
 
