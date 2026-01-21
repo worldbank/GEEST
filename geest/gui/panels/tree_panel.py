@@ -680,6 +680,24 @@ class TreePanel(QWidget):
                     if indicator:
                         indicator.set_enabled(enabled)
 
+            # Rebalance weights per dimension based on enabled state
+            enabled_factors = [
+                dimension.child(idx)
+                for idx in range(dimension.childCount())
+                if dimension.child(idx) and dimension.child(idx).is_enabled()
+            ]
+            if enabled_factors:
+                equal_weight = 1.0 / len(enabled_factors)
+            else:
+                equal_weight = 0.0
+
+            for factor_idx in range(dimension.childCount()):
+                factor = dimension.child(factor_idx)
+                if not factor:
+                    continue
+                new_weight = equal_weight if factor.is_enabled() else 0.0
+                root_item.updateFactorWeighting(factor.guid, new_weight)
+
         # Force a complete refresh of the tree view
         self.model.beginResetModel()
         self.model.endResetModel()
