@@ -3,6 +3,7 @@
 
 This module contains functionality for aggregation workflow base.
 """
+
 import os
 
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry

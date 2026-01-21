@@ -4,6 +4,7 @@
 This module combines roads and cycleways into a single dataset
 for Active Transport analysis.
 """
+
 from typing import Optional
 
 from qgis.core import (

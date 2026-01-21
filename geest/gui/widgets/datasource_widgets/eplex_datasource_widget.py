@@ -3,6 +3,7 @@
 
 This module contains functionality for EPLEX datasource widget.
 """
+
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QDoubleSpinBox
 

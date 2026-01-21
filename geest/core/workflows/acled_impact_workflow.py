@@ -3,6 +3,7 @@
 
 This module contains functionality for acled impact workflow.
 """
+
 import csv
 import os
 

@@ -3,6 +3,7 @@
 
 This module contains functionality for workflow queue.
 """
+
 from functools import partial
 from typing import List
 

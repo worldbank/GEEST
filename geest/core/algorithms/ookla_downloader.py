@@ -4,6 +4,7 @@
 
 This module contains functionality for ookla downloader.
 """
+
 import os
 import timeit
 from typing import Optional

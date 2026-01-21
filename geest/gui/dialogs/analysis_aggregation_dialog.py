@@ -3,6 +3,7 @@
 
 This module contains functionality for analysis aggregation dialog.
 """
+
 from urllib.parse import unquote
 
 from qgis.core import Qgis, QgsMapLayerProxyModel, QgsProject

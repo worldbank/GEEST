@@ -3,6 +3,7 @@
 
 This module contains functionality for road network panel.
 """
+
 import os
 import traceback
 
@@ -160,8 +161,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         cross_icon = cross_icon.replace("\\", "/")
         tick_icon = tick_icon.replace("\\", "/")
 
-        self.road_layer_status_checkbox.setStyleSheet(
-            f"""
+        self.road_layer_status_checkbox.setStyleSheet(f"""
             QCheckBox::indicator {{
                 width: 24px;
                 height: 24px;
@@ -188,8 +188,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
                 border-color: #388e3c;
                 image: url({tick_icon});
             }}
-        """
-        )
+        """)
 
     def update_road_layer_status(self):
         """Update the status checkbox based on whether a valid layer is selected."""

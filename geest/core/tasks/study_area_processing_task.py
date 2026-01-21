@@ -3,6 +3,7 @@
 
 This module contains functionality for study area processing task.
 """
+
 import datetime
 import glob
 import os
@@ -135,7 +136,7 @@ class StudyAreaProcessingTask(QgsTask):
         # Compute bounding box from entire layer
         # (OGR Envelope: (xmin, xmax, ymin, ymax))
         layer_extent = self.source_layer.GetExtent()
-        (xmin, xmax, ymin, ymax) = layer_extent
+        xmin, xmax, ymin, ymax = layer_extent
         self.layer_bbox = (xmin, xmax, ymin, ymax)
 
         if crs is None:
@@ -888,7 +889,7 @@ class StudyAreaProcessingTask(QgsTask):
         then align to cell_size_m grid.
         Returns new (xmin, xmax, ymin, ymax) in target CRS.
         """
-        (xmin, xmax, ymin, ymax) = bbox
+        xmin, xmax, ymin, ymax = bbox
 
         # If we have a coordinate transform, we need to convert min/max
         # We'll do a polygon-based approach to ensure correctness
@@ -956,7 +957,7 @@ class StudyAreaProcessingTask(QgsTask):
         Save a bounding-box polygon to the specified layer (creating it if needed).
         """
         # BBox is (xmin, xmax, ymin, ymax)
-        (xmin, xmax, ymin, ymax) = bbox
+        xmin, xmax, ymin, ymax = bbox
         ring = ogr.Geometry(ogr.wkbLinearRing)
         ring.AddPoint(xmin, ymin)
         ring.AddPoint(xmin, ymax)
@@ -1509,7 +1510,7 @@ class StudyAreaProcessingTask(QgsTask):
             raise RuntimeError("Missing study_area_grid layer.")
 
         # We'll do a bounding box filter for performance
-        (xmin, xmax, ymin, ymax) = aligned_box
+        xmin, xmax, ymin, ymax = aligned_box
         grid_layer.SetSpatialFilterRect(xmin, ymin, xmax, ymax)
 
         # Count features for progress updates
@@ -1672,7 +1673,7 @@ class StudyAreaProcessingTask(QgsTask):
         x_res = self.cell_size_m
         y_res = self.cell_size_m
 
-        (xmin, xmax, ymin, ymax) = aligned_box
+        xmin, xmax, ymin, ymax = aligned_box
 
         # For pixel width/height, we can compute:
         # width in coordinate space: (xmax - xmin)

@@ -3,6 +3,7 @@
 
 This module contains functionality for dimension aggregation dialog.
 """
+
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QUrl
 from qgis.PyQt.QtGui import QColor, QDesktopServices, QPixmap

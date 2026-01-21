@@ -3,6 +3,7 @@
 
 This module contains functionality for tree panel.
 """
+
 import json
 import os
 import platform
@@ -124,8 +125,7 @@ class TreePanel(QWidget):
 
         self.configure_network_button = QPushButton("Configure")
         self.configure_network_button.clicked.connect(self._on_configure_clicked)
-        self.configure_network_button.setStyleSheet(
-            """
+        self.configure_network_button.setStyleSheet("""
             QPushButton {
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #b8dce3, stop:1 #8ec8d0);
@@ -142,14 +142,12 @@ class TreePanel(QWidget):
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #8ec8d0, stop:1 #b8dce3);
             }
-        """
-        )
+        """)
         warning_layout.addWidget(self.configure_network_button)
 
         close_warning_button = QPushButton("✕")
         close_warning_button.setFixedSize(24, 24)
-        close_warning_button.setStyleSheet(
-            """
+        close_warning_button.setStyleSheet("""
             QPushButton {
                 border: none;
                 color: #856404;
@@ -161,20 +159,17 @@ class TreePanel(QWidget):
                 background-color: rgba(0, 0, 0, 0.1);
                 border-radius: 3px;
             }
-        """
-        )
+        """)
         close_warning_button.clicked.connect(self.hide_validation_warning)
         warning_layout.addWidget(close_warning_button)
 
-        self.warning_widget.setStyleSheet(
-            """
+        self.warning_widget.setStyleSheet("""
             QWidget {
                 background-color: #fff3cd;
                 border-left: 4px solid #ffc107;
                 border-radius: 3px;
             }
-        """
-        )
+        """)
 
         layout.addWidget(self.warning_widget)
 

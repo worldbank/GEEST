@@ -3,6 +3,7 @@
 
 This module contains functionality for single buffer configuration widget.
 """
+
 import traceback
 
 from qgis.core import Qgis

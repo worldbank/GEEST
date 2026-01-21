@@ -3,6 +3,7 @@
 
 This module contains functionality for osm data downloader base.
 """
+
 try:
     from defusedxml import ElementTree as ET
 except ImportError:

@@ -3,6 +3,7 @@
 
 This module contains functionality for geest dock.
 """
+
 import os
 from typing import Optional
 

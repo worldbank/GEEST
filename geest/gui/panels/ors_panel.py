@@ -3,6 +3,7 @@
 
 This module contains functionality for ors panel.
 """
+
 from PyQt5.QtWidgets import QWidget
 from qgis.PyQt.QtCore import QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices, QFont, QPixmap

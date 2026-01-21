@@ -6,6 +6,7 @@
 
 This module contains functionality for panels.
 """
+
 from .create_project_panel import CreateProjectPanel
 from .credits_panel import CreditsPanel
 from .help_panel import HelpPanel

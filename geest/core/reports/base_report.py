@@ -3,6 +3,7 @@
 
 This module contains functionality for base report.
 """
+
 import math
 from collections import defaultdict
 

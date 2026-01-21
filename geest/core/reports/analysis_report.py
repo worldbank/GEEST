@@ -3,6 +3,7 @@
 
 This module contains functionality for analysis report.
 """
+
 import json
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -58,9 +59,7 @@ class AnalysisReport(BaseReport):
         if working_directory:
             self._load_study_area_layer()
 
-        self.page_descriptions[
-            "analysis_summary"
-        ] = """
+        self.page_descriptions["analysis_summary"] = """
         This shows the relative elapsed time for each analysis step. The time is in minutes.
         """
 

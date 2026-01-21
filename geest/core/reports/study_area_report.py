@@ -3,6 +3,7 @@
 
 This module contains functionality for study area report.
 """
+
 from qgis.core import (
     QgsLayout,
     QgsLayoutItemLabel,
@@ -54,30 +55,22 @@ class StudyAreaReport(BaseReport):
         self.load_layers_from_gpkg()
         self.template_path = resources_path("resources", "qpt", "study_area_report_template.qpt")
         self.page_descriptions = {}
-        self.page_descriptions[
-            "study_area_bbox"
-        ] = """
+        self.page_descriptions["study_area_bbox"] = """
         The study area bounding box (bbox) is the outer extent of the entire study area.
         The bounding box width and height is guaranteed to be a factor of the
         analysis dimension. All other data products are then aligned to this bbox.
         """
-        self.page_descriptions[
-            "study_area_bboxes"
-        ] = """
+        self.page_descriptions["study_area_bboxes"] = """
         The study area bboxes are a set of smaller bounding boxes that surround each
         polygon in the study area. They are grid aligned such that the origin and
         furthest corners are guaranteed to be a factor of the analysis dimension
         apart.
         """
-        self.page_descriptions[
-            "study_area_polygons"
-        ] = """
+        self.page_descriptions["study_area_polygons"] = """
         The study area polygons are the single part form of all polygons in the
         study area. Any invalid geometries will have been discarded.
         """
-        self.page_descriptions[
-            "study_area_grid"
-        ] = """
+        self.page_descriptions["study_area_grid"] = """
         The study area grid is a set of polygon squares that each have the
         x and y dimension of the analysis cell size. They are guaranteed to
         be aligned to the study area bbox and bboxes layers. The grid is used
@@ -87,29 +80,21 @@ class StudyAreaReport(BaseReport):
         The grid is also used to perform certain types of spatial analysis such as
         the Active Transport layer analyses.
         """
-        self.page_descriptions[
-            "chunks"
-        ] = """
+        self.page_descriptions["chunks"] = """
         The chunks are the result of splitting the study area grid into smaller
         chunks that are used to process the study area more efficiently. Each chunk
         is labelled as to whether it is inside, on the edge of, or outside the
         geometry of a study area polygon. Grid cells in chunks that are 'inside' can be processed
         more efficiently as we can skip the intersection test with the study area polygons.
         """
-        self.page_descriptions[
-            "study_area_clip_polygons"
-        ] = """
+        self.page_descriptions["study_area_clip_polygons"] = """
         The study area clip polygons are the original polygon areas but expanded so that the edges
         of the polygon exactly coincide with the edges of the grid. This will ensure that all analysis
         results are coherant with the grid."""
-        self.page_descriptions[
-            "study_area_creation_status"
-        ] = """
+        self.page_descriptions["study_area_creation_status"] = """
         The study area creation status is a record of the time taken to process each part of the study area.
         """
-        self.page_descriptions[
-            "ghsl_settlements"
-        ] = """
+        self.page_descriptions["ghsl_settlements"] = """
         The Global Human Settlement Layer is used to identify settled areas within the study region. Study area polygons are marked with whether they intersect GHSL settlement data, which is used in various analysis workflows.
         """
 

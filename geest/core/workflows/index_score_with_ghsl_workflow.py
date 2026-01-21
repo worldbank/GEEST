@@ -3,6 +3,7 @@
 
 This module contains functionality for index score with ghsl workflow.
 """
+
 import os
 from typing import Optional
 
