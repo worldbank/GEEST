@@ -9,6 +9,7 @@ from typing import Optional
 from qgis import processing  # noqa: F401 # QGIS processing toolbox
 from qgis.core import (  # noqa: F401
     QgsFeature,
+    QgsFeatureRequest,
     QgsFeedback,
     QgsField,
     QgsGeometry,
@@ -35,9 +36,10 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
     """
     Concrete implementation of a 'use_index_score_with_ghsl' workflow.
 
-    This follows the same logic as the index score workflow but additionally
-    masks the result using the GHSL coverage layer to ensure that only areas
-    that have GHSL data are included in the final output.
+    This workflow scores areas using an index value, masked to GHSL settlement boundaries.
+    Study area clip polygons are pre-filtered during study area creation to only include
+    areas that intersect GHSL, so this workflow intersects with GHSL to get the precise
+    settlement boundaries for scoring.
     """
 
     def __init__(
@@ -102,44 +104,41 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         :return: Raster file path of the output.
         """
         _ = area_features  # unused
-        log_message(f"Processing area {index} score workflow")
+        log_message(f"Processing area {index} with index score {self.index_score}")
+        self.progressChanged.emit(10.0)
 
-        log_message(f"Index score: {self.index_score}")
-        self.progressChanged.emit(10.0)  # We just use nominal intervals for progress updates
-
-        # Create a scored boundary layer filtered by current_area
-        scored_layer = self.create_scored_boundary_layer(
-            clip_area=clip_area,
-            index=index,
-        )
-        self.progressChanged.emit(30.0)  # We just use nominal intervals for progress updates
-        # Now mask with GHSL coverage layer
-        # First select the features from the GHSL layer that intersect our current area
+        # Load GHSL layer and get features intersecting this area
+        # Clip polygons are pre-filtered during study area creation, so we just need
+        # to intersect with GHSL to get precise settlement boundaries for scoring
         ghsl_layer = QgsVectorLayer(self.ghsl_layer_path, "ghsl_layer", "ogr")
-
-        # Select features in ghsl_layer that intersect current_area
-        expr = f"intersects($geometry, geom_from_wkt('{current_area.asWkt()}'))"
-        ghsl_layer.selectByExpression(expr, QgsVectorLayer.SetSelection)
-        # Now only keep the parts of the geometry of the current area that intersect with the ghsl_layer
-        ghsl_features = ghsl_layer.selectedFeatures()
-        final_geom: QgsGeometry = None
-        if ghsl_features:
-            ghsl_union_geom = QgsGeometry.unaryUnion([feat.geometry() for feat in ghsl_features])
-            # Intersect with the clip_area to get the final geometry to use
-            final_geom = clip_area.intersection(ghsl_union_geom)
+        if not ghsl_layer.isValid():
+            log_message(f"GHSL layer not valid, using full clip area for area {index}")
+            masked_geom = clip_area
         else:
-            log_message(f"No GHSL coverage in area {index}, skipping ghsl masking.")
+            # Use QgsFeatureRequest spatial filter for cross-platform reliability
+            request = QgsFeatureRequest().setFilterRect(current_area.boundingBox())
+            ghsl_geometries = []
+            for feat in ghsl_layer.getFeatures(request):
+                if feat.geometry().intersects(current_area):
+                    ghsl_geometries.append(feat.geometry())
 
-        if not final_geom or final_geom.isEmpty():
-            log_message(f"No GHSL coverage in area {index} after intersection, skipping rasterization.")
-        else:
-            scored_layer = self.create_scored_boundary_layer(
-                clip_area=final_geom,
-                index=index,
-            )
-        self.progressChanged.emit(60.0)  # We just use nominal intervals for progress
+            if ghsl_geometries:
+                ghsl_union = QgsGeometry.unaryUnion(ghsl_geometries)
+                masked_geom = clip_area.intersection(ghsl_union)
+                if masked_geom.isEmpty():
+                    log_message(f"GHSL intersection empty for area {index}, using full clip area")
+                    masked_geom = clip_area
+            else:
+                log_message(f"No GHSL features found for area {index}, using full clip area")
+                masked_geom = clip_area
 
-        # Create a scored boundary layer
+        self.progressChanged.emit(40.0)
+
+        # Create scored layer with GHSL-masked geometry
+        scored_layer = self.create_scored_boundary_layer(clip_area=masked_geom, index=index)
+        self.progressChanged.emit(60.0)
+
+        # Rasterize
         raster_output = self._rasterize(
             scored_layer,
             current_bbox,
@@ -147,10 +146,9 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
             value_field="score",
             default_value=255,
         )
-        self.progressChanged.emit(100.0)  # We just use nominal intervals for progress updates
+        self.progressChanged.emit(100.0)
 
         log_message(f"Raster output: {raster_output}")
-        log_message(f"Workflow completed for area {index}")
         return raster_output
 
     def create_scored_boundary_layer(self, clip_area: QgsGeometry, index: int) -> QgsVectorLayer:

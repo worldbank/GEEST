@@ -383,9 +383,15 @@ class StudyAreaProcessingTask(QgsTask):
 
             log_message(f"Successfully added {feature_count} GHSL features to GeoPackage")
 
-            # Clean up temporary file
-            if os.path.exists(temp_parquet):
-                os.remove(temp_parquet)
+            # Clean up temporary file - must release QgsVectorLayer first (Windows file locking)
+            del temp_layer
+            temp_layer = None
+            try:
+                if os.path.exists(temp_parquet):
+                    os.remove(temp_parquet)
+            except OSError as cleanup_error:
+                # Don't fail if we can't delete - GHSL data is already in GeoPackage
+                log_message(f"Could not remove temp parquet file: {cleanup_error}", level="INFO")
 
             return ghsl_layer_name
 
