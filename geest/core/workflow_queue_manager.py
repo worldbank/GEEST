@@ -3,6 +3,7 @@
 
 This module contains functionality for workflow queue manager.
 """
+
 from PyQt5.QtCore import QObject, pyqtSignal
 from qgis.core import Qgis, QgsProcessingContext, QgsProject, QgsTask
 
@@ -85,8 +86,10 @@ class WorkflowQueueManager(QObject):
 
         # ⭐️ Note we are passing the item reference to the WorkflowJob
         #    any changes made to the item will be reflected in the tree directly
+        # Use unique description to avoid collision in active_tasks dictionary
+        # when running multiple concurrent tasks (fixes issue #231)
         task = WorkflowJob(
-            description="Geest Task",
+            description=f"Geest: {item.attribute('id', item.guid)}",
             item=item,
             cell_size_m=cell_size_m,
             analysis_scale=analysis_scale,

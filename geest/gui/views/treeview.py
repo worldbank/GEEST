@@ -3,6 +3,7 @@
 
 This module contains functionality for treeview.
 """
+
 import uuid
 
 from qgis.core import Qgis

@@ -6,6 +6,7 @@
 
 This module contains functionality for osm downloader factory.
 """
+
 from .osm_download_type import OSMDownloadType
 from .osm_active_transport_downloader import OSMActiveTransportDownloader
 from .osm_public_transport_downloader import OSMPublicTransportDownloader

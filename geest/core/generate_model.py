@@ -5,6 +5,7 @@
 
 This module contains functionality for generate model.
 """
+
 import json
 
 import pandas as pd

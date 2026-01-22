@@ -6,6 +6,7 @@
 
 This module contains functionality for workflows.
 """
+
 from .acled_impact_workflow import AcledImpactWorkflow
 from .analysis_aggregation_workflow import AnalysisAggregationWorkflow
 from .classified_polygon_workflow import ClassifiedPolygonWorkflow

@@ -155,6 +155,43 @@
            </property>
           </widget>
          </item>
+         <item row="3" column="0" colspan="2">
+          <widget class="QCheckBox" name="ookla_use_local_cache">
+           <property name="text">
+            <string>Cache Ookla parquet locally</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0" colspan="2">
+          <widget class="QLabel" name="label_ookla_cache_note">
+           <property name="text">
+            <string>Note: First run downloads large files; later runs reuse the cache.</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_ookla_cache_dir">
+           <property name="text">
+            <string>Local cache directory:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QLineEdit" name="ookla_cache_dir"/>
+         </item>
+         <item row="5" column="2">
+          <widget class="QToolButton" name="ookla_cache_dir_browse">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>

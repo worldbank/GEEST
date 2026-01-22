@@ -3,6 +3,7 @@
 
 This module contains functionality for acled csv configuration widget.
 """
+
 import traceback
 
 from qgis.core import Qgis
@@ -88,11 +89,9 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
                 </tr>
             </table>
             """
-            self.info_label = QLabel(
-                """
+            self.info_label = QLabel("""
                 Each point from the ACLED CSV file will be buffered by a
-                specified distance based on the following event types. """
-            )
+                specified distance based on the following event types. """)
             self.info_label.setWordWrap(True)
             self.internal_layout.addWidget(self.info_label)
             self.html_table_label = QLabel()

@@ -3,6 +3,7 @@
 
 This module contains functionality for ors checker task.
 """
+
 from typing import Optional
 
 from qgis.core import Qgis, QgsTask

@@ -3,6 +3,7 @@
 
 This module contains functionality for factor configuration widget.
 """
+
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QButtonGroup, QVBoxLayout, QWidget

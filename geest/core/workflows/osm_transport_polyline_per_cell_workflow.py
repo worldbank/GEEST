@@ -3,6 +3,7 @@
 
 This module contains functionality for osm transport polyline per cell workflow.
 """
+
 import os
 from typing import Optional
 from urllib.parse import unquote

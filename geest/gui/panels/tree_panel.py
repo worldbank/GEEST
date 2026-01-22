@@ -3,6 +3,7 @@
 
 This module contains functionality for tree panel.
 """
+
 import json
 import os
 import platform
@@ -79,6 +80,7 @@ class TreePanel(QWidget):
     switch_to_setup_tab = pyqtSignal()
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_network_tab = pyqtSignal()  # Signal to open the road network tab
+    switch_to_ors_tab = pyqtSignal()  # Signal to open the ORS setup tab
 
     def __init__(self, parent=None, json_file=None):
         """🏗️ Initialize the instance.
@@ -124,8 +126,7 @@ class TreePanel(QWidget):
 
         self.configure_network_button = QPushButton("Configure")
         self.configure_network_button.clicked.connect(self._on_configure_clicked)
-        self.configure_network_button.setStyleSheet(
-            """
+        self.configure_network_button.setStyleSheet("""
             QPushButton {
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #b8dce3, stop:1 #8ec8d0);
@@ -142,14 +143,12 @@ class TreePanel(QWidget):
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #8ec8d0, stop:1 #b8dce3);
             }
-        """
-        )
+        """)
         warning_layout.addWidget(self.configure_network_button)
 
         close_warning_button = QPushButton("✕")
         close_warning_button.setFixedSize(24, 24)
-        close_warning_button.setStyleSheet(
-            """
+        close_warning_button.setStyleSheet("""
             QPushButton {
                 border: none;
                 color: #856404;
@@ -161,20 +160,17 @@ class TreePanel(QWidget):
                 background-color: rgba(0, 0, 0, 0.1);
                 border-radius: 3px;
             }
-        """
-        )
+        """)
         close_warning_button.clicked.connect(self.hide_validation_warning)
         warning_layout.addWidget(close_warning_button)
 
-        self.warning_widget.setStyleSheet(
-            """
+        self.warning_widget.setStyleSheet("""
             QWidget {
                 background-color: #fff3cd;
                 border-left: 4px solid #ffc107;
                 border-radius: 3px;
             }
-        """
-        )
+        """)
 
         layout.addWidget(self.warning_widget)
 
@@ -294,6 +290,7 @@ class TreePanel(QWidget):
         # Workflows need to be run in batches: first indicators, then factors, then dimensions
         # to prevent race conditions
         self.workflow_queue = []
+        self.workflow_scope_item = None
         self.queue_manager.processing_completed.connect(self.run_next_workflow_queue)
 
     def on_item_double_clicked(self, index):
@@ -685,6 +682,24 @@ class TreePanel(QWidget):
                     if indicator:
                         indicator.set_enabled(enabled)
 
+            # Rebalance weights per dimension based on enabled state
+            enabled_factors = [
+                dimension.child(idx)
+                for idx in range(dimension.childCount())
+                if dimension.child(idx) and dimension.child(idx).is_enabled()
+            ]
+            if enabled_factors:
+                equal_weight = 1.0 / len(enabled_factors)
+            else:
+                equal_weight = 0.0
+
+            for factor_idx in range(dimension.childCount()):
+                factor = dimension.child(factor_idx)
+                if not factor:
+                    continue
+                new_weight = equal_weight if factor.is_enabled() else 0.0
+                root_item.updateFactorWeighting(factor.guid, new_weight)
+
         # Force a complete refresh of the tree view
         self.model.beginResetModel()
         self.model.endResetModel()
@@ -781,10 +796,13 @@ class TreePanel(QWidget):
             edit_analysis_action.triggered.connect(lambda: self.edit_analysis_aggregation(item))  # Connect to method
             set_network_layers_action = QAction("Set Network Layers")
             set_network_layers_action.triggered.connect(self.switch_to_network_tab)  # Connect to method
+            set_ors_action = QAction("Set ORS Options")
+            set_ors_action.triggered.connect(self.switch_to_ors_tab)
             remove_unused_layers_action = QAction("Clean Unused Layers from Project")
             remove_unused_layers_action.triggered.connect(self.clean_unused_layers)
             menu.addAction(edit_analysis_action)
             menu.addAction(set_network_layers_action)
+            menu.addAction(set_ors_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)
@@ -1475,30 +1493,32 @@ class TreePanel(QWidget):
         Args:
             workflow_type: Type of workflow to start (indicators, factors, dimensions, analysis).
         """
+        scope_item = self.workflow_scope_item or self.model.rootItem
         log_message("\n############################################")
         log_message(f"Starting {workflow_type} workflows")
         log_message("############################################\n")
         if workflow_type == "indicators":
-            for item in self.model.rootItem.getDescendantIndicators(
+            for item in scope_item.getDescendantIndicators(
                 include_completed=not self.run_only_incomplete, include_disabled=False
             ):
                 self.queue_workflow_task(item, item.role)
         elif workflow_type == "factors":
-            for item in self.model.rootItem.getDescendantFactors(
+            for item in scope_item.getDescendantFactors(
                 include_completed=not self.run_only_incomplete, include_disabled=False
             ):
                 self.queue_workflow_task(item, item.role)
         elif workflow_type == "dimensions":
-            for item in self.model.rootItem.getDescendantDimensions(
+            for item in scope_item.getDescendantDimensions(
                 include_completed=not self.run_only_incomplete, include_disabled=False
             ):
                 self.queue_workflow_task(item, item.role)
         elif workflow_type == "analysis":
-            item = self.model.get_analysis_item()
-            log_message("############################################")
-            log_message(f"Starting analysis workflow for {item.data(0)}")
-            log_message("############################################")
-            self.queue_workflow_task(item, item.role)
+            analyses = scope_item.getDescendantAnalyses(include_completed=not self.run_only_incomplete)
+            for analysis_item in analyses:
+                log_message("############################################")
+                log_message(f"Starting analysis workflow for {analysis_item.data(0)}")
+                log_message("############################################")
+                self.queue_workflow_task(analysis_item, analysis_item.role)
 
     def _count_workflows_to_run(self, parent_item=None):
         """
@@ -1656,18 +1676,21 @@ class TreePanel(QWidget):
 
         """
         self.items_to_run = 0
+        self.workflow_scope_item = item
         if shift_pressed:
             self.run_only_incomplete = False
         else:
             self.run_only_incomplete = True
 
-        indicators = item.getDescendantIndicators(
-            include_completed=not self.run_only_incomplete, include_disabled=False
-        )
-        factors = item.getDescendantFactors(include_completed=not self.run_only_incomplete, include_disabled=False)
-        dimensions = item.getDescendantDimensions(include_completed=not self.run_only_incomplete)
-        # Fix for issue #50 - we need to run the analysis last
-        analyses = item.getDescendantAnalyses(include_completed=not self.run_only_incomplete)
+        workflow_queue = []
+        if item.role == "indicator":
+            workflow_queue = ["indicators"]
+        elif item.role == "factor":
+            workflow_queue = ["indicators", "factors"]
+        elif item.role == "dimension":
+            workflow_queue = ["indicators", "factors", "dimensions"]
+        elif item.role == "analysis":
+            workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
         self.overall_progress_bar.setVisible(True)
         self.workflow_progress_bar.setVisible(True)
         self.help_button.setVisible(False)
@@ -1676,26 +1699,25 @@ class TreePanel(QWidget):
         self.overall_progress_bar.setMaximum(self.items_to_run)
         self.workflow_progress_bar.setValue(0)
 
-        for indicator in indicators:
-            self.queue_workflow_task(indicator, indicator.role)
-        for factor in factors:
-            self.queue_workflow_task(factor, factor.role)
-        for dimension in dimensions:
-            self.queue_workflow_task(dimension, dimension.role)
-        # Fix for issue #50 - we need to run the analysis last
-        for analysis in analyses:
-            self.queue_workflow_task(analysis, analysis.role)
-        # Commented out see issue #50 - causes double execution of indicator
-        # self.queue_workflow_task(item, item.role)
-        self.items_to_run = len(indicators) + len(factors) + len(dimensions) + 1
+        items_to_run = 0
+        if "indicators" in workflow_queue:
+            items_to_run += len(
+                item.getDescendantIndicators(include_completed=not self.run_only_incomplete, include_disabled=False)
+            )
+        if "factors" in workflow_queue:
+            items_to_run += len(
+                item.getDescendantFactors(include_completed=not self.run_only_incomplete, include_disabled=False)
+            )
+        if "dimensions" in workflow_queue:
+            items_to_run += len(item.getDescendantDimensions(include_completed=not self.run_only_incomplete))
+        if "analysis" in workflow_queue:
+            items_to_run += len(item.getDescendantAnalyses(include_completed=not self.run_only_incomplete))
+        self.items_to_run = items_to_run
         log_message(f"Total workflows to run: {self.items_to_run}")
         self.overall_progress_bar.setMaximum(self.items_to_run)
 
-        debug_env = int(os.getenv("GEEST_DEBUG", 0))
-        if debug_env:
-            self.queue_manager.start_processing_in_foreground()
-        else:
-            self.queue_manager.start_processing()
+        self.workflow_queue = workflow_queue
+        self.run_next_workflow_queue()
 
     @pyqtSlot()
     def on_workflow_created(self, item):
@@ -1950,6 +1972,7 @@ class TreePanel(QWidget):
     def run_all(self):
         """Run all workflows in the tree, regardless of their status."""
         self.run_only_incomplete = False
+        self.workflow_scope_item = None
         self.clear_workflows()
         self._count_workflows_to_run()
         log_message(f"Total items to process: {self.items_to_run}")
@@ -1962,6 +1985,7 @@ class TreePanel(QWidget):
         processes each one whilst showing an animated icon.
         """
         self.run_only_incomplete = True
+        self.workflow_scope_item = None
         self._count_workflows_to_run()
         self._queue_workflows()
 
@@ -1990,6 +2014,7 @@ class TreePanel(QWidget):
             self.workflow_progress_bar.setVisible(False)
             self.help_button.setVisible(True)
             self.project_button.setVisible(True)
+            self.workflow_scope_item = None
             return
         # pop the first item from the queue
         next_workflow = self.workflow_queue.pop(0)

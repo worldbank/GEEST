@@ -3,6 +3,7 @@
 
 This module contains functionality for grid chunker task.
 """
+
 import os
 
 from osgeo import ogr, osr

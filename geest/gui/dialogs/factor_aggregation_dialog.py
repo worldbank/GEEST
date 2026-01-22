@@ -3,6 +3,7 @@
 
 This module contains functionality for factor aggregation dialog.
 """
+
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QPixmap, QFont

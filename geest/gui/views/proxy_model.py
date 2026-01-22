@@ -5,6 +5,7 @@
 
 This module contains functionality for proxy model.
 """
+
 from typing import Dict, List, Optional
 
 from qgis.PyQt.QtCore import QAbstractProxyModel, QModelIndex, QObject, Qt

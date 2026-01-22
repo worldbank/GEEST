@@ -3,6 +3,7 @@
 
 This module contains functionality for datasource widget factory.
 """
+
 from typing import Optional
 
 from qgis.core import Qgis

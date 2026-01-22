@@ -3,6 +3,7 @@
 
 This module contains functionality for osm roads downloader.
 """
+
 from typing import Optional
 
 from qgis.core import (

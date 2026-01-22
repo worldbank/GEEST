@@ -3,6 +3,7 @@
 
 This module contains the QgsTask for generating study area reports in the background.
 """
+
 import os
 import platform
 import subprocess  # nosec B404
