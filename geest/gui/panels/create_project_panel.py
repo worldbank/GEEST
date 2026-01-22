@@ -3,6 +3,7 @@
 
 This module contains functionality for create project panel.
 """
+
 import json
 import os
 import platform

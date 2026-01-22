@@ -5,6 +5,7 @@
 
 This module contains functionality for osm cycleway downloader.
 """
+
 from typing import Optional
 
 from qgis.core import (

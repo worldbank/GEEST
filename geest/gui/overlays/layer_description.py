@@ -3,6 +3,7 @@
 
 This module contains functionality for layer description.
 """
+
 from qgis.gui import QgsMapCanvasItem
 from qgis.PyQt.QtCore import QRectF, QSettings, Qt
 from qgis.PyQt.QtGui import QColor, QFont, QIcon, QPainter

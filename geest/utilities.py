@@ -629,7 +629,7 @@ def calculate_utm_zone(bbox: tuple, source_epsg: str = None) -> str:
     Returns:
         str: UTM zone EPSG code.
     """
-    (xmin, xmax, ymin, ymax) = bbox
+    xmin, xmax, ymin, ymax = bbox
     log_message("Bounding box: %s, %s, %s, %s" % (xmin, xmax, ymin, ymax))
     cx = xmin + (0.5 * (xmax - xmin))
     cy = ymin + (0.5 * (ymax - ymin))

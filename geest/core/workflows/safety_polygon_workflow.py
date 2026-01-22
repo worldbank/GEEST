@@ -3,6 +3,7 @@
 
 This module contains functionality for safety polygon workflow.
 """
+
 from urllib.parse import unquote
 
 from qgis.core import (

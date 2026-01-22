@@ -3,6 +3,7 @@
 
 This module contains functionality for csv datasource widget.
 """
+
 import os
 
 from qgis.core import Qgis

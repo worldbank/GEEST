@@ -3,6 +3,7 @@
 
 This module contains functionality for polygon per cell workflow.
 """
+
 import os
 from urllib.parse import unquote
 

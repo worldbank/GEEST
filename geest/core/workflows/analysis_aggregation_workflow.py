@@ -3,6 +3,7 @@
 
 This module contains functionality for analysis aggregation workflow.
 """
+
 import os
 
 from qgis.core import QgsFeedback, QgsProcessingContext

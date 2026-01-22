@@ -3,6 +3,7 @@
 
 This module contains functionality for safety raster workflow.
 """
+
 import os
 from urllib.parse import unquote
 

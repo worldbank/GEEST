@@ -3,6 +3,7 @@
 
 This module contains functionality for open project panel.
 """
+
 import json
 import os
 

@@ -3,6 +3,7 @@
 
 This module contains functionality for EPLEX score workflow.
 """
+
 import os
 
 from qgis.core import (

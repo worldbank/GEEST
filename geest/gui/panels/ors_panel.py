@@ -3,6 +3,7 @@
 
 This module contains functionality for ors panel.
 """
+
 from PyQt5.QtWidgets import QWidget
 from qgis.PyQt.QtCore import QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices, QFont, QPixmap
@@ -62,9 +63,19 @@ class OrsPanel(FORM_CLASS, QWidget):
         self.check_key_button.clicked.connect(self.check_ors_key)
         ors_key = setting("ors_key", "")
         self.ors_key_line_edit.setText(ors_key)
+        use_ors = setting("use_ors_for_accessibility", False)
+        if isinstance(use_ors, str):
+            use_ors = use_ors.lower() in ("1", "true", "yes", "y", "on")
+        self.radioButton_2.setChecked(use_ors)
+        self.radioButton.setChecked(not use_ors)
+        self._sync_accessibility_mode(use_ors)
+        self.radioButton_2.toggled.connect(self.update_accessibility_provider)
+        self.radioButton.toggled.connect(self.update_accessibility_provider)
 
     def check_ors_key(self):
         """Check the ORS API key."""
+        if not self.radioButton_2.isChecked():
+            return
         ors_key = self.ors_key_line_edit.text()
         if not ors_key:
             QMessageBox.critical(self, "Error", "Please enter an ORS API key.")
@@ -78,6 +89,21 @@ class OrsPanel(FORM_CLASS, QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Error checking ORS key: {e}")
             return
+
+    def _sync_accessibility_mode(self, use_ors: bool):
+        """Update UI elements based on the selected accessibility provider."""
+        self.ors_key_line_edit.setEnabled(use_ors)
+        self.check_key_button.setEnabled(use_ors)
+        if not use_ors:
+            self.next_button.setEnabled(True)
+        else:
+            self.next_button.setEnabled(False)
+
+    def update_accessibility_provider(self, _checked=None):
+        """Persist the selected accessibility provider."""
+        use_ors = self.radioButton_2.isChecked()
+        set_setting("use_ors_for_accessibility", use_ors)
+        self._sync_accessibility_mode(use_ors)
 
     def task_completed(self, result):
         """Handle the result of the ORS key check."""

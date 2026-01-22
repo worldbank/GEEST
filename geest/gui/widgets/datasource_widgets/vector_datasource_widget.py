@@ -3,6 +3,7 @@
 
 This module contains functionality for vector datasource widget.
 """
+
 import os
 import urllib.parse
 

@@ -3,6 +3,7 @@
 
 This module contains functionality for configuration widget factory.
 """
+
 from qgis.core import Qgis
 
 from geest.core.settings import setting

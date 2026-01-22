@@ -3,6 +3,7 @@
 
 This module contains functionality for street lights buffer workflow.
 """
+
 import os
 from urllib.parse import unquote
 

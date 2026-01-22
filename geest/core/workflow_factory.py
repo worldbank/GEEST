@@ -3,6 +3,7 @@
 
 This module contains functionality for workflow factory.
 """
+
 from qgis.core import Qgis, QgsFeedback, QgsProcessingContext
 
 from geest.core.workflows import (
@@ -18,6 +19,7 @@ from geest.core.workflows import (
     IndexScoreWithGHSLWorkflow,
     IndexScoreWithOoklaWorkflow,
     MultiBufferDistancesNativeWorkflow,
+    MultiBufferDistancesORSWorkflow,
     OsmTransportPolylinePerCellWorkflow,
     PointPerCellWorkflow,
     PolygonPerCellWorkflow,
@@ -30,6 +32,7 @@ from geest.core.workflows import (
 )
 from geest.utilities import log_message
 
+from .settings import setting
 from .json_tree_item import JsonTreeItem
 
 
@@ -90,6 +93,12 @@ class WorkflowFactory:
             elif analysis_mode == "Do Not Use":
                 return DontUseWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_multi_buffer_point":
+                use_ors = setting(key="use_ors_for_accessibility", default=False)
+                if isinstance(use_ors, str):
+                    use_ors = use_ors.lower() in ("1", "true", "yes", "y", "on")
+                if use_ors:
+                    log_message("Using Multi Buffer Distances ORS Workflow")
+                    return MultiBufferDistancesORSWorkflow(item, cell_size_m, analysis_scale, feedback, context)
                 log_message("Using Multi Buffer Distances Native Workflow")
                 return MultiBufferDistancesNativeWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_single_buffer_point":

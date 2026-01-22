@@ -3,6 +3,7 @@
 
 This module contains functionality for feature per cell configuration widget.
 """
+
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QLabel
 

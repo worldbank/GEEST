@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Init for Geest."""
+
 from __future__ import annotations
 
 __copyright__ = "Copyright 2024, Tim Sutton"
@@ -302,14 +303,12 @@ class GeestPlugin:
                         shell.runCommand("test_runner = unittest.TextTestRunner(verbosity=2)")
                         shell.runCommand("test_runner.run(test_suite)")
                         # Unload test modules
-                        shell.runCommand(
-                            """
+                        shell.runCommand("""
 for module_name in list(sys.modules.keys()):
     if module_name.startswith("test_") or module_name.startswith("utilities_for_testing"):
         del sys.modules[module_name]
 
-                            """  # noqa: E241, E272
-                        )
+                            """)  # noqa: E241, E272
 
                         log_message("Test modules unloaded")
                         break
@@ -495,13 +494,11 @@ for module_name in list(sys.modules.keys()):
                         shell.runCommand("test_case = unittest.defaultTestLoader.loadTestsFromName(test_name)")
                         shell.runCommand("runner = unittest.TextTestRunner(verbosity=2)")
                         shell.runCommand("runner.run(test_case)")
-                        shell.runCommand(
-                            """
+                        shell.runCommand("""
 for module_name in list(sys.modules.keys()):
     if module_name.startswith("test_") or module_name.startswith("utilities_for_testing"):
         del sys.modules[module_name]
-                        """
-                        )
+                        """)
                         break
 
     def save_geometry(self) -> None:

@@ -4,6 +4,7 @@
 This module downloads public transport stops and stations from OpenStreetMap,
 including bus stops, tram stops, train stations, ferry terminals, and subway entrances.
 """
+
 from typing import Optional
 
 from qgis.core import (

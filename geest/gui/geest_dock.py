@@ -3,6 +3,7 @@
 
 This module contains functionality for geest dock.
 """
+
 import os
 from typing import Optional
 
@@ -19,6 +20,7 @@ from geest.gui.panels import (
     HelpPanel,
     IntroPanel,
     OpenProjectPanel,
+    OrsPanel,
     RoadNetworkPanel,
     SetupPanel,
     TreePanel,
@@ -35,9 +37,10 @@ CREDITS_PANEL = 1
 SETUP_PANEL = 2
 OPEN_PROJECT_PANEL = 3
 CREATE_PROJECT_PANEL = 4
-ROAD_NETWORK_PANEL = 5
-TREE_PANEL = 6
-HELP_PANEL = 7
+ORS_PANEL = 5
+ROAD_NETWORK_PANEL = 6
+TREE_PANEL = 7
+HELP_PANEL = 8
 
 
 class GeestDock(QDockWidget):
@@ -91,6 +94,7 @@ class GeestDock(QDockWidget):
         self.road_network_widget: RoadNetworkPanel = RoadNetworkPanel()
         self.road_network_widget.set_message_bar(self.message_bar)  # Pass message bar reference
         self.create_project_widget: CreateProjectPanel = CreateProjectPanel()
+        self.ors_widget: OrsPanel = OrsPanel()
         self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
         help_widget: HelpPanel = HelpPanel()
 
@@ -190,12 +194,7 @@ class GeestDock(QDockWidget):
             self.create_project_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: [
-                    self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
-                    self.road_network_widget.set_working_directory(self.create_project_widget.working_dir),
-                    self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer()),
-                    self.road_network_widget.set_crs(
-                        self.create_project_widget.crs(working_directory=self.create_project_widget.working_dir)
-                    ),
+                    self.stacked_widget.setCurrentIndex(ORS_PANEL),
                 ][
                     -1
                 ]  # The [-1] ensures the lambda returns the last value
@@ -204,7 +203,22 @@ class GeestDock(QDockWidget):
             self.create_project_widget.working_directory_changed.connect(
                 lambda: self.tree_widget.set_working_directory(self.create_project_widget.working_dir)
             )
-            # ROAD_NETWORK_PANEL = 5
+            # ORS_PANEL = 5
+            # Create and add the "ORS" panel
+
+            ors_panel: QWidget = QWidget()
+            ors_layout: QVBoxLayout = QVBoxLayout(ors_panel)
+            ors_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
+            ors_layout.addWidget(self.ors_widget)
+            self.stacked_widget.addWidget(ors_panel)
+
+            self.ors_widget.switch_to_previous_tab.connect(
+                lambda: self.stacked_widget.setCurrentIndex(CREATE_PROJECT_PANEL)
+            )
+
+            self.ors_widget.switch_to_next_tab.connect(self._open_road_network_from_ors)
+
+            # ROAD_NETWORK_PANEL = 6
             # Create and add the "Road Network" panel
 
             road_network_panel: QWidget = QWidget()
@@ -251,6 +265,11 @@ class GeestDock(QDockWidget):
                 # This is also called from the context menu in the tree_panel
                 lambda: [
                     self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
+                ]
+            )
+            self.tree_widget.switch_to_ors_tab.connect(
+                lambda: [
+                    self.stacked_widget.setCurrentIndex(ORS_PANEL),
                 ]
             )
             self.tree_widget.switch_to_setup_tab.connect(
@@ -366,6 +385,8 @@ class GeestDock(QDockWidget):
         elif index == CREATE_PROJECT_PANEL:
             self.create_project_widget.set_font_size()
             log_message("Switched to Create Project panel")
+        elif index == ORS_PANEL:
+            log_message("Switched to ORS panel")
         elif index == ROAD_NETWORK_PANEL:
             working_directory = self.tree_widget.working_directory
             log_message(f"Setting road network panel working directory to: {working_directory}")
@@ -377,3 +398,20 @@ class GeestDock(QDockWidget):
             # self.tree_widget.set_working_directory(self.setup_widget.working_dir)
         elif index == HELP_PANEL:
             log_message("Switched to Help panel")
+
+    def _open_road_network_from_ors(self) -> None:
+        """Open the road network panel from ORS with a valid working directory."""
+        working_directory = self.create_project_widget.working_dir or self.tree_widget.working_directory
+        if not working_directory:
+            self.message_bar.pushWarning(
+                "Missing working directory",
+                "Open or create a project before setting network layers.",
+            )
+            return
+        self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL)
+        self.road_network_widget.set_working_directory(working_directory)
+        if self.create_project_widget.working_dir:
+            self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer())
+            self.road_network_widget.set_crs(
+                self.create_project_widget.crs(working_directory=self.create_project_widget.working_dir)
+            )
