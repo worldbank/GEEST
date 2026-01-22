@@ -290,6 +290,7 @@ class TreePanel(QWidget):
         # Workflows need to be run in batches: first indicators, then factors, then dimensions
         # to prevent race conditions
         self.workflow_queue = []
+        self.workflow_scope_item = None
         self.queue_manager.processing_completed.connect(self.run_next_workflow_queue)
 
     def on_item_double_clicked(self, index):
@@ -1492,30 +1493,32 @@ class TreePanel(QWidget):
         Args:
             workflow_type: Type of workflow to start (indicators, factors, dimensions, analysis).
         """
+        scope_item = self.workflow_scope_item or self.model.rootItem
         log_message("\n############################################")
         log_message(f"Starting {workflow_type} workflows")
         log_message("############################################\n")
         if workflow_type == "indicators":
-            for item in self.model.rootItem.getDescendantIndicators(
+            for item in scope_item.getDescendantIndicators(
                 include_completed=not self.run_only_incomplete, include_disabled=False
             ):
                 self.queue_workflow_task(item, item.role)
         elif workflow_type == "factors":
-            for item in self.model.rootItem.getDescendantFactors(
+            for item in scope_item.getDescendantFactors(
                 include_completed=not self.run_only_incomplete, include_disabled=False
             ):
                 self.queue_workflow_task(item, item.role)
         elif workflow_type == "dimensions":
-            for item in self.model.rootItem.getDescendantDimensions(
+            for item in scope_item.getDescendantDimensions(
                 include_completed=not self.run_only_incomplete, include_disabled=False
             ):
                 self.queue_workflow_task(item, item.role)
         elif workflow_type == "analysis":
-            item = self.model.get_analysis_item()
-            log_message("############################################")
-            log_message(f"Starting analysis workflow for {item.data(0)}")
-            log_message("############################################")
-            self.queue_workflow_task(item, item.role)
+            analyses = scope_item.getDescendantAnalyses(include_completed=not self.run_only_incomplete)
+            for analysis_item in analyses:
+                log_message("############################################")
+                log_message(f"Starting analysis workflow for {analysis_item.data(0)}")
+                log_message("############################################")
+                self.queue_workflow_task(analysis_item, analysis_item.role)
 
     def _count_workflows_to_run(self, parent_item=None):
         """
@@ -1673,18 +1676,21 @@ class TreePanel(QWidget):
 
         """
         self.items_to_run = 0
+        self.workflow_scope_item = item
         if shift_pressed:
             self.run_only_incomplete = False
         else:
             self.run_only_incomplete = True
 
-        indicators = item.getDescendantIndicators(
-            include_completed=not self.run_only_incomplete, include_disabled=False
-        )
-        factors = item.getDescendantFactors(include_completed=not self.run_only_incomplete, include_disabled=False)
-        dimensions = item.getDescendantDimensions(include_completed=not self.run_only_incomplete)
-        # Fix for issue #50 - we need to run the analysis last
-        analyses = item.getDescendantAnalyses(include_completed=not self.run_only_incomplete)
+        workflow_queue = []
+        if item.role == "indicator":
+            workflow_queue = ["indicators"]
+        elif item.role == "factor":
+            workflow_queue = ["indicators", "factors"]
+        elif item.role == "dimension":
+            workflow_queue = ["indicators", "factors", "dimensions"]
+        elif item.role == "analysis":
+            workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
         self.overall_progress_bar.setVisible(True)
         self.workflow_progress_bar.setVisible(True)
         self.help_button.setVisible(False)
@@ -1693,26 +1699,25 @@ class TreePanel(QWidget):
         self.overall_progress_bar.setMaximum(self.items_to_run)
         self.workflow_progress_bar.setValue(0)
 
-        for indicator in indicators:
-            self.queue_workflow_task(indicator, indicator.role)
-        for factor in factors:
-            self.queue_workflow_task(factor, factor.role)
-        for dimension in dimensions:
-            self.queue_workflow_task(dimension, dimension.role)
-        # Fix for issue #50 - we need to run the analysis last
-        for analysis in analyses:
-            self.queue_workflow_task(analysis, analysis.role)
-        # Commented out see issue #50 - causes double execution of indicator
-        # self.queue_workflow_task(item, item.role)
-        self.items_to_run = len(indicators) + len(factors) + len(dimensions) + 1
+        items_to_run = 0
+        if "indicators" in workflow_queue:
+            items_to_run += len(
+                item.getDescendantIndicators(include_completed=not self.run_only_incomplete, include_disabled=False)
+            )
+        if "factors" in workflow_queue:
+            items_to_run += len(
+                item.getDescendantFactors(include_completed=not self.run_only_incomplete, include_disabled=False)
+            )
+        if "dimensions" in workflow_queue:
+            items_to_run += len(item.getDescendantDimensions(include_completed=not self.run_only_incomplete))
+        if "analysis" in workflow_queue:
+            items_to_run += len(item.getDescendantAnalyses(include_completed=not self.run_only_incomplete))
+        self.items_to_run = items_to_run
         log_message(f"Total workflows to run: {self.items_to_run}")
         self.overall_progress_bar.setMaximum(self.items_to_run)
 
-        debug_env = int(os.getenv("GEEST_DEBUG", 0))
-        if debug_env:
-            self.queue_manager.start_processing_in_foreground()
-        else:
-            self.queue_manager.start_processing()
+        self.workflow_queue = workflow_queue
+        self.run_next_workflow_queue()
 
     @pyqtSlot()
     def on_workflow_created(self, item):
@@ -1967,6 +1972,7 @@ class TreePanel(QWidget):
     def run_all(self):
         """Run all workflows in the tree, regardless of their status."""
         self.run_only_incomplete = False
+        self.workflow_scope_item = None
         self.clear_workflows()
         self._count_workflows_to_run()
         log_message(f"Total items to process: {self.items_to_run}")
@@ -1979,6 +1985,7 @@ class TreePanel(QWidget):
         processes each one whilst showing an animated icon.
         """
         self.run_only_incomplete = True
+        self.workflow_scope_item = None
         self._count_workflows_to_run()
         self._queue_workflows()
 
@@ -2007,6 +2014,7 @@ class TreePanel(QWidget):
             self.workflow_progress_bar.setVisible(False)
             self.help_button.setVisible(True)
             self.project_button.setVisible(True)
+            self.workflow_scope_item = None
             return
         # pop the first item from the queue
         next_workflow = self.workflow_queue.pop(0)

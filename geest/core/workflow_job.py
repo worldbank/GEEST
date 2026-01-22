@@ -9,6 +9,7 @@ import inspect
 import io
 import pstats
 from functools import lru_cache, wraps
+from threading import Lock
 
 from qgis.core import Qgis, QgsApplication, QgsFeedback, QgsProcessingContext, QgsTask
 from qgis.PyQt.QtCore import pyqtSignal
@@ -146,6 +147,7 @@ class WorkflowJob(QgsTask):
     _profiling_enabled = False
     _profiling_initialized = False
     _jobs_profiled = 0
+    _profiling_lock = Lock()
     _cache_registry = []  # Registry of all cached methods
 
     @classmethod
@@ -291,6 +293,7 @@ class WorkflowJob(QgsTask):
 
         # Per-instance profiler
         self._profiler = None
+        self._profiling_active = False
 
         # Emit the 'queued' signal upon initialization
         self.job_queued.emit()
@@ -316,12 +319,27 @@ class WorkflowJob(QgsTask):
         """
         # Set up profiling if enabled
         if self.__class__._profiling_enabled:
-            self._profiler = cProfile.Profile()
-            self._profiler.enable()
-            log_message(
-                f"🔍 Profiling started for workflow: {self.description()}",
-                level=Qgis.Info,
-            )
+            if self.__class__._profiling_lock.acquire(blocking=False):
+                try:
+                    self._profiler = cProfile.Profile()
+                    self._profiler.enable()
+                    self._profiling_active = True
+                    log_message(
+                        f"🔍 Profiling started for workflow: {self.description()}",
+                        level=Qgis.Info,
+                    )
+                except ValueError as e:
+                    self.__class__._profiling_lock.release()
+                    self._profiler = None
+                    log_message(
+                        f"Profiling skipped for {self.description()}: {e}",
+                        level=Qgis.Warning,
+                    )
+            else:
+                log_message(
+                    f"Profiling skipped for {self.description()}: another profiler is active.",
+                    level=Qgis.Info,
+                )
 
         if not self._workflow:
             log_message(
@@ -374,40 +392,44 @@ class WorkflowJob(QgsTask):
 
         finally:
             # Stop profiling and accumulate stats if enabled
-            if self.__class__._profiling_enabled and self._profiler:
-                self._profiler.disable()
+            if self._profiling_active and self._profiler:
+                try:
+                    self._profiler.disable()
 
-                # Add this profile to the combined stats
-                stats = pstats.Stats(self._profiler)
-                if self.__class__._combined_profiler is None:
-                    self.__class__._combined_profiler = stats
-                else:
-                    self.__class__._combined_profiler.add(stats)
+                    # Add this profile to the combined stats
+                    stats = pstats.Stats(self._profiler)
+                    if self.__class__._combined_profiler is None:
+                        self.__class__._combined_profiler = stats
+                    else:
+                        self.__class__._combined_profiler.add(stats)
 
-                self.__class__._jobs_profiled += 1
+                    self.__class__._jobs_profiled += 1
 
-                # Log a brief summary
-                s = io.StringIO()
-                stats.sort_stats("cumulative")
-                stats.print_stats(10, 0.3, s)  # Top 10 functions, min 30% of total time
+                    # Log a brief summary
+                    s = io.StringIO()
+                    stats.sort_stats("cumulative")
+                    stats.print_stats(10, 0.3, s)  # Top 10 functions, min 30% of total time
 
-                log_message(
-                    f"🔍 Profiling results for workflow: {self.description()}",
-                    level=Qgis.Info,
-                )
-                log_message(f"Total jobs profiled so far: {self.__class__._jobs_profiled}")
-                # Only log detailed stats in verbose mode
-                verbose_mode = int(setting(key="verbose_mode", default=0))
-                if verbose_mode:
-                    log_message(s.getvalue())
-
-                # Save profiling stats to a file
-                output_file = self.__class__.save_profiling_stats()
-                if output_file:
                     log_message(
-                        f"Profiling stats saved to {output_file}",
+                        f"🔍 Profiling results for workflow: {self.description()}",
                         level=Qgis.Info,
                     )
+                    log_message(f"Total jobs profiled so far: {self.__class__._jobs_profiled}")
+                    # Only log detailed stats in verbose mode
+                    verbose_mode = int(setting(key="verbose_mode", default=0))
+                    if verbose_mode:
+                        log_message(s.getvalue())
+
+                    # Save profiling stats to a file
+                    output_file = self.__class__.save_profiling_stats()
+                    if output_file:
+                        log_message(
+                            f"Profiling stats saved to {output_file}",
+                            level=Qgis.Info,
+                        )
+                finally:
+                    self._profiling_active = False
+                    self.__class__._profiling_lock.release()
 
     @lru_cache(maxsize=8)
     def feedback(self) -> QgsFeedback:
