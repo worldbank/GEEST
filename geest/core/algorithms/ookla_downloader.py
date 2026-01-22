@@ -6,6 +6,7 @@ This module contains functionality for ookla downloader.
 """
 import os
 import timeit
+import urllib.request
 from typing import Optional
 
 from osgeo import gdal, ogr, osr
@@ -15,8 +16,10 @@ from qgis.core import (
     QgsFeedback,
     QgsRectangle,
 )
+from qgis.PyQt.QtCore import QSettings
 
-from geest.core.settings import setting
+from geest.core.constants import APPLICATION_NAME
+from geest.core.settings import set_setting, setting
 from geest.utilities import log_message
 
 ogr.UseExceptions()
@@ -88,8 +91,16 @@ class OoklaDownloader:
         # self.network_manager = QgsNetworkAccessManager()
         self.feedback = feedback
 
+        # Persist default cache setting on first use.
+        qsettings = QSettings()
+        cache_key = f"{APPLICATION_NAME}/ookla_use_local_cache"
+        if not qsettings.contains(cache_key):
+            set_setting(key="ookla_use_local_cache", value=True)
+
         # Read Ookla threshold settings
         use_thresholds = bool(setting(key="ookla_use_thresholds", default=False))
+        self.use_local_cache = bool(setting(key="ookla_use_local_cache", default=True))
+        self.local_cache_dir = setting(key="ookla_local_cache_dir", default="")
         if use_thresholds:
             # Convert from Mbps to kbps (multiply by 1000)
             mobile_threshold_mbps = float(setting(key="ookla_mobile_threshold", default=0.0))
@@ -121,6 +132,57 @@ class OoklaDownloader:
         os.makedirs(cache_dir, exist_ok=True)
         return cache_dir
 
+    def _local_cache_root(self):
+        """
+        Returns the directory for local Parquet caching.
+        """
+        if self.local_cache_dir:
+            cache_dir = self.local_cache_dir
+        else:
+            cache_dir = os.path.join(self._cache_dir(), "parquet")
+        os.makedirs(cache_dir, exist_ok=True)
+        return cache_dir
+
+    def _s3_to_https(self, input_uri: str) -> str:
+        """
+        Convert /vsis3/bucket/key to https://bucket.s3.amazonaws.com/key.
+        """
+        if input_uri.startswith("/vsis3/"):
+            path = input_uri[len("/vsis3/") :]
+            bucket, _, key = path.partition("/")
+            return f"https://{bucket}.s3.amazonaws.com/{key}"
+        return input_uri
+
+    def _ensure_local_parquet(self, input_uri: str) -> str:
+        """
+        Download a remote Parquet to local cache if needed and return local path.
+        """
+        cache_dir = self._local_cache_root()
+        filename = os.path.basename(input_uri)
+        local_path = os.path.join(cache_dir, filename)
+        if os.path.exists(local_path) and os.path.getsize(local_path) > 0:
+            log_message(f"Using cached Ookla parquet: {local_path}")
+            return local_path
+
+        url = self._s3_to_https(input_uri)
+        tmp_path = f"{local_path}.tmp"
+        log_message(f"Downloading Ookla parquet to local cache: {url}")
+        try:
+            with urllib.request.urlopen(url) as response, open(tmp_path, "wb") as handle:
+                while True:
+                    if self.feedback is not None and self.feedback.isCanceled():
+                        raise OoklaException("Ookla parquet download canceled.")
+                    chunk = response.read(8 * 1024 * 1024)
+                    if not chunk:
+                        break
+                    handle.write(chunk)
+            os.replace(tmp_path, local_path)
+        except Exception:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+            raise
+        return local_path
+
     def extract_data(self, output_crs: QgsCoordinateReferenceSystem):
         """
         Main method to extract OOKLA data based on the specified extents and save it to the output path.
@@ -147,6 +209,12 @@ class OoklaDownloader:
         mobile_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_mobile.gpkg")
         combined_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_combined.gpkg")
 
+        fixed_input_uri = self.FIXED_INTERNET_URL
+        mobile_input_uri = self.MOBILE_INTERNET_URL
+        if self.use_local_cache:
+            fixed_input_uri = self._ensure_local_parquet(self.FIXED_INTERNET_URL)
+            mobile_input_uri = self._ensure_local_parquet(self.MOBILE_INTERNET_URL)
+
         # Check if use cache is enabled and files exist
         if self.use_cache and os.path.exists(combined_output_file):
             log_message(f"Using cached Ookla data at: {combined_output_file}")
@@ -155,18 +223,14 @@ class OoklaDownloader:
         # Extract fixed internet data
         log_message("Starting extraction of fixed internet data...")
         try:
-            self.extract_ookla_data(
-                self.FIXED_INTERNET_URL, fixed_output_file, bbox, output_crs, self.fixed_threshold_kbps
-            )
+            self.extract_ookla_data(fixed_input_uri, fixed_output_file, bbox, output_crs, self.fixed_threshold_kbps)
         except Exception as e:
             raise OoklaException(f"Error extracting fixed internet data: {e}")
 
         # Extract mobile internet data
         log_message("Starting extraction of mobile internet data...")
         try:
-            self.extract_ookla_data(
-                self.MOBILE_INTERNET_URL, mobile_output_file, bbox, output_crs, self.mobile_threshold_kbps
-            )
+            self.extract_ookla_data(mobile_input_uri, mobile_output_file, bbox, output_crs, self.mobile_threshold_kbps)
         except Exception as e:
             raise OoklaException(f"Error extracting mobile internet data: {e}")
 
