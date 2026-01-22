@@ -3,6 +3,7 @@
 
 This module contains functionality for opportunities by wee score population processor.
 """
+
 import os
 import shutil
 import traceback

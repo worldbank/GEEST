@@ -3,6 +3,7 @@
 
 This module contains functionality for credits panel.
 """
+
 from PyQt5.QtWidgets import QWidget
 from qgis.core import Qgis  # noqa F401
 from qgis.PyQt.QtCore import QUrl, pyqtSignal

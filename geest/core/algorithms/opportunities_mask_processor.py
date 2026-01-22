@@ -3,6 +3,7 @@
 
 This module contains functionality for opportunities mask processor.
 """
+
 import os
 import traceback
 from typing import Optional

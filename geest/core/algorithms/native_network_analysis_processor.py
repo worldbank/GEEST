@@ -3,6 +3,7 @@
 
 This module contains functionality for native network analysis processor.
 """
+
 import os
 import traceback
 from typing import List

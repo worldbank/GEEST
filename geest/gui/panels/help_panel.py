@@ -3,6 +3,7 @@
 
 This module contains functionality for help panel.
 """
+
 from PyQt5.QtGui import QDesktopServices
 from qgis.PyQt.QtCore import Qt, QUrl, pyqtSignal
 from qgis.PyQt.QtWidgets import (

@@ -3,6 +3,7 @@
 
 This module contains functionality for tree panel.
 """
+
 import json
 import os
 import platform
@@ -79,6 +80,7 @@ class TreePanel(QWidget):
     switch_to_setup_tab = pyqtSignal()
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_network_tab = pyqtSignal()  # Signal to open the road network tab
+    switch_to_ors_tab = pyqtSignal()  # Signal to open the ORS setup tab
 
     def __init__(self, parent=None, json_file=None):
         """🏗️ Initialize the instance.
@@ -124,8 +126,7 @@ class TreePanel(QWidget):
 
         self.configure_network_button = QPushButton("Configure")
         self.configure_network_button.clicked.connect(self._on_configure_clicked)
-        self.configure_network_button.setStyleSheet(
-            """
+        self.configure_network_button.setStyleSheet("""
             QPushButton {
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #b8dce3, stop:1 #8ec8d0);
@@ -142,14 +143,12 @@ class TreePanel(QWidget):
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #8ec8d0, stop:1 #b8dce3);
             }
-        """
-        )
+        """)
         warning_layout.addWidget(self.configure_network_button)
 
         close_warning_button = QPushButton("✕")
         close_warning_button.setFixedSize(24, 24)
-        close_warning_button.setStyleSheet(
-            """
+        close_warning_button.setStyleSheet("""
             QPushButton {
                 border: none;
                 color: #856404;
@@ -161,20 +160,17 @@ class TreePanel(QWidget):
                 background-color: rgba(0, 0, 0, 0.1);
                 border-radius: 3px;
             }
-        """
-        )
+        """)
         close_warning_button.clicked.connect(self.hide_validation_warning)
         warning_layout.addWidget(close_warning_button)
 
-        self.warning_widget.setStyleSheet(
-            """
+        self.warning_widget.setStyleSheet("""
             QWidget {
                 background-color: #fff3cd;
                 border-left: 4px solid #ffc107;
                 border-radius: 3px;
             }
-        """
-        )
+        """)
 
         layout.addWidget(self.warning_widget)
 
@@ -685,6 +681,24 @@ class TreePanel(QWidget):
                     if indicator:
                         indicator.set_enabled(enabled)
 
+            # Rebalance weights per dimension based on enabled state
+            enabled_factors = [
+                dimension.child(idx)
+                for idx in range(dimension.childCount())
+                if dimension.child(idx) and dimension.child(idx).is_enabled()
+            ]
+            if enabled_factors:
+                equal_weight = 1.0 / len(enabled_factors)
+            else:
+                equal_weight = 0.0
+
+            for factor_idx in range(dimension.childCount()):
+                factor = dimension.child(factor_idx)
+                if not factor:
+                    continue
+                new_weight = equal_weight if factor.is_enabled() else 0.0
+                root_item.updateFactorWeighting(factor.guid, new_weight)
+
         # Force a complete refresh of the tree view
         self.model.beginResetModel()
         self.model.endResetModel()
@@ -781,10 +795,13 @@ class TreePanel(QWidget):
             edit_analysis_action.triggered.connect(lambda: self.edit_analysis_aggregation(item))  # Connect to method
             set_network_layers_action = QAction("Set Network Layers")
             set_network_layers_action.triggered.connect(self.switch_to_network_tab)  # Connect to method
+            set_ors_action = QAction("Set ORS Options")
+            set_ors_action.triggered.connect(self.switch_to_ors_tab)
             remove_unused_layers_action = QAction("Clean Unused Layers from Project")
             remove_unused_layers_action.triggered.connect(self.clean_unused_layers)
             menu.addAction(edit_analysis_action)
             menu.addAction(set_network_layers_action)
+            menu.addAction(set_ors_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)

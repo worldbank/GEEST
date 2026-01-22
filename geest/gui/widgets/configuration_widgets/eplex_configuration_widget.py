@@ -3,6 +3,7 @@
 
 This module contains functionality for EPLEX score configuration widget.
 """
+
 from .base_configuration_widget import BaseConfigurationWidget
 
 

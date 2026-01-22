@@ -4,6 +4,7 @@
 
 This module contains functionality for osm download type.
 """
+
 from enum import Enum
 
 

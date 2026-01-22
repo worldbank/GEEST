@@ -3,6 +3,7 @@
 
 This module contains functionality for index score with ookla workflow.
 """
+
 import os
 from typing import Optional
 

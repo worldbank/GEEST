@@ -3,6 +3,7 @@
 
 This module contains functionality for pie chart.
 """
+
 import math
 
 from qgis.gui import QgsMapCanvasItem

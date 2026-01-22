@@ -6,6 +6,7 @@
 
 This module contains functionality for datasource widgets.
 """
+
 from .acled_csv_datasource_widget import AcledCsvDataSourceWidget  # noqa F401
 from .base_datasource_widget import BaseDataSourceWidget  # noqa F401
 from .csv_datasource_widget import CsvDataSourceWidget  # noqa F401

@@ -3,6 +3,7 @@
 
 This module contains functionality for dimension aggregation workflow.
 """
+
 from qgis.core import QgsFeedback, QgsProcessingContext
 
 from geest.core import JsonTreeItem

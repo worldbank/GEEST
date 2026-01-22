@@ -3,6 +3,7 @@
 
 This module contains functionality for base configuration widget.
 """
+
 from abc import abstractmethod
 
 from qgis.core import Qgis

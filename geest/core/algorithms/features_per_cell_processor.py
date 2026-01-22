@@ -3,6 +3,7 @@
 
 This module contains functionality for features per cell processor.
 """
+
 from qgis import processing  # noqa: F401
 from qgis.core import (
     Qgis,

@@ -3,6 +3,7 @@
 
 This module contains functionality for osm downloader task.
 """
+
 import datetime
 import os
 import traceback

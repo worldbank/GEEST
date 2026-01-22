@@ -3,6 +3,7 @@
 
 This module contains functionality for custom base dialog.
 """
+
 from qgis.PyQt.QtCore import QRect, Qt
 from qgis.PyQt.QtGui import QPainter
 from qgis.PyQt.QtWidgets import QDialog

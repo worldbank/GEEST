@@ -3,6 +3,7 @@
 
 This module contains functionality for vector and field datasource widget.
 """
+
 import os
 from urllib.parse import quote, unquote
 

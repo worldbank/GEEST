@@ -3,6 +3,7 @@
 
 This module contains functionality for single point buffer workflow.
 """
+
 import os
 from urllib.parse import unquote
 
