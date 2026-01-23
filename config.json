@@ -18,8 +18,8 @@
     "author": "Kartoza for and with The World Bank",
     "email": "info@kartoza.com, gost@worldbank.org",
     "description": "Geospatial Enabling Environments for Employment Spatial Tool",
-    "version": "1.2.6",
-    "changelog": "* Added OOKLA Downloader\\n* Added GHSL Downloader \\n* Added variable distance ACLED Buffer. \\* Fix analysis report.",
+    "version": "1.3.0",
+    "changelog": "* Major performance improvements - study area processing ~3x faster\\n* OSM download: Added spinner animation and improved error feedback\\n* Reintegrated ORS v0.6 as routing option\\n* Auto-balance weights under dimension\\n* Education factor now uses index score with GHSL\\n* Fixed workflows stopping after 1 factor under dimension\\n* Added local caching for Ookla parquet files\\n* UI improvements: Dynamic font sizing, GeoE3 branding updates",
     "server": false
   }
 }
