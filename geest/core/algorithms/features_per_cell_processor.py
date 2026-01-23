@@ -54,113 +54,129 @@ def select_grid_cells_and_count_features(
         level=Qgis.Info,
     )
 
-    # Create a spatial index for the grid layer to optimize intersection queries
-    grid_index = QgsSpatialIndex(grid_layer.getFeatures())
+    # Initialize variables for cleanup
+    grid_index = None
+    grid_feature_counts = None
+    writer = None
 
-    # Create a dictionary to hold the count of intersecting features for each grid cell ID
-    grid_feature_counts = {}
-    counter = 0
-    feature_count = features_layer.featureCount()
-    # Iterate over each feature and use the spatial index to find the intersecting grid cells
-    for feature in features_layer.getFeatures():
-        feature_geom = feature.geometry()
+    try:
+        # Create a spatial index for the grid layer to optimize intersection queries
+        grid_index = QgsSpatialIndex(grid_layer.getFeatures())
 
-        # Use bounding box only for point geometries; otherwise, use the actual geometry for intersection checks
-        if feature_geom.isEmpty():
-            continue
+        # Create a dictionary to hold the count of intersecting features for each grid cell ID
+        grid_feature_counts = {}
+        counter = 0
+        feature_count = features_layer.featureCount()
+        # Iterate over each feature and use the spatial index to find the intersecting grid cells
+        for feature in features_layer.getFeatures():
+            feature_geom = feature.geometry()
 
-        if feature_geom.type() == QgsWkbTypes.PointGeometry:
-            # For point geometries, use bounding box to find intersecting grid cells
-            intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
-        else:
-            # For line and polygon geometries, check actual geometry against grid cells
-            intersecting_ids = grid_index.intersects(feature_geom.boundingBox())  # Initial rough filter
-            log_message(
-                f"{len(intersecting_ids)} rough intersections found.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            intersecting_ids = [
-                grid_id
-                for grid_id in intersecting_ids
-                if grid_layer.getFeature(grid_id).geometry().intersects(feature_geom)
-            ]
-            log_message(
-                f"{len(intersecting_ids)} refined intersections found.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
+            # Use bounding box only for point geometries; otherwise, use the actual geometry for intersection checks
+            if feature_geom.isEmpty():
+                continue
 
-        # Iterate over the intersecting grid cell IDs and count intersections
-        for grid_id in intersecting_ids:
-            if grid_id in grid_feature_counts:
-                grid_feature_counts[grid_id] += 1
+            if feature_geom.type() == QgsWkbTypes.PointGeometry:
+                # For point geometries, use bounding box to find intersecting grid cells
+                intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
             else:
-                grid_feature_counts[grid_id] = 1
-        counter += 1
-        feedback.setProgress((counter / feature_count) * 100.0)  # We just use nominal intervals for progress updates
+                # For line and polygon geometries, check actual geometry against grid cells
+                intersecting_ids = grid_index.intersects(feature_geom.boundingBox())  # Initial rough filter
+                log_message(
+                    f"{len(intersecting_ids)} rough intersections found.",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                intersecting_ids = [
+                    grid_id
+                    for grid_id in intersecting_ids
+                    if grid_layer.getFeature(grid_id).geometry().intersects(feature_geom)
+                ]
+                log_message(
+                    f"{len(intersecting_ids)} refined intersections found.",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
 
-    log_message(f"{len(grid_feature_counts)} intersections found.")
+            # Iterate over the intersecting grid cell IDs and count intersections
+            for grid_id in intersecting_ids:
+                if grid_id in grid_feature_counts:
+                    grid_feature_counts[grid_id] += 1
+                else:
+                    grid_feature_counts[grid_id] = 1
+            counter += 1
+            if feedback:
+                feedback.setProgress((counter / feature_count) * 100.0)
 
-    options = QgsVectorFileWriter.SaveVectorOptions()
-    options.driverName = "GPKG"
-    options.fileEncoding = "UTF-8"
-    options.layerName = "grid_with_feature_counts"
+        log_message(f"{len(grid_feature_counts)} intersections found.")
 
-    # Define fields for the new layer: only 'id' and 'intersecting_features'
-    fields = QgsFields()
-    fields.append(QgsField("id", QVariant.Int))
-    fields.append(QgsField("intersecting_features", QVariant.Int))
-    # Will be used to hold the scaled value from 0-5
-    fields.append(QgsField("value", QVariant.Int))
+        options = QgsVectorFileWriter.SaveVectorOptions()
+        options.driverName = "GPKG"
+        options.fileEncoding = "UTF-8"
+        options.layerName = "grid_with_feature_counts"
 
-    writer = QgsVectorFileWriter.create(
-        fileName=output_path,
-        fields=fields,
-        geometryType=grid_layer.wkbType(),
-        srs=grid_layer.crs(),
-        transformContext=QgsCoordinateTransformContext(),
-        options=options,
-    )
-    if writer.hasError() != QgsVectorFileWriter.NoError:
-        raise Exception(f"Failed to create output layer: {writer.errorMessage()}")
+        # Define fields for the new layer: only 'id' and 'intersecting_features'
+        fields = QgsFields()
+        fields.append(QgsField("id", QVariant.Int))
+        fields.append(QgsField("intersecting_features", QVariant.Int))
+        # Will be used to hold the scaled value from 0-5
+        fields.append(QgsField("value", QVariant.Int))
 
-    # Select only grid cells based on the keys (grid IDs) in the grid_feature_counts dictionary
-    request = QgsFeatureRequest().setFilterFids(list(grid_feature_counts.keys()))
-    log_message(
-        f"Looping over {len(grid_feature_counts.keys())} grid polygons",
-        tag="Geest",
-        level=Qgis.Info,
-    )
+        writer = QgsVectorFileWriter.create(
+            fileName=output_path,
+            fields=fields,
+            geometryType=grid_layer.wkbType(),
+            srs=grid_layer.crs(),
+            transformContext=QgsCoordinateTransformContext(),
+            options=options,
+        )
+        if writer.hasError() != QgsVectorFileWriter.NoError:
+            raise Exception(f"Failed to create output layer: {writer.errorMessage()}")
 
-    for grid_feature in grid_layer.getFeatures(request):
-        log_message(f"Writing Feature #{counter}")
-        counter += 1
-        new_feature = QgsFeature()
-        new_feature.setGeometry(grid_feature.geometry())  # Use the original geometry
+        # Select only grid cells based on the keys (grid IDs) in the grid_feature_counts dictionary
+        grid_ids = list(grid_feature_counts.keys())
+        request = QgsFeatureRequest().setFilterFids(grid_ids)
+        log_message(
+            f"Looping over {len(grid_ids)} grid polygons",
+            tag="Geest",
+            level=Qgis.Info,
+        )
 
-        # Set the 'id' and 'intersecting_features' attributes
-        new_feature.setFields(fields)
-        new_feature.setAttribute("id", grid_feature.id())  # Set the grid cell ID
-        new_feature.setAttribute("intersecting_features", grid_feature_counts[grid_feature.id()])
-        new_feature.setAttribute("value", None)
+        for grid_feature in grid_layer.getFeatures(request):
+            log_message(f"Writing Feature #{counter}")
+            counter += 1
+            new_feature = QgsFeature()
+            new_feature.setGeometry(grid_feature.geometry())  # Use the original geometry
 
-        # Write the feature to the new layer
-        writer.addFeature(new_feature)
+            # Set the 'id' and 'intersecting_features' attributes
+            new_feature.setFields(fields)
+            new_feature.setAttribute("id", grid_feature.id())  # Set the grid cell ID
+            new_feature.setAttribute("intersecting_features", grid_feature_counts[grid_feature.id()])
+            new_feature.setAttribute("value", None)
 
-    del writer  # Finalize the writer and close the file
+            # Write the feature to the new layer
+            writer.addFeature(new_feature)
 
-    log_message(
-        f"Grid cells with feature counts saved to {output_path}",
-        tag="Geest",
-        level=Qgis.Info,
-    )
+        log_message(
+            f"Grid cells with feature counts saved to {output_path}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
 
-    return QgsVectorLayer(
-        f"{output_path}|layername=grid_with_feature_counts",
-        "grid_with_feature_counts",
-        "ogr",
-    )
+        return QgsVectorLayer(
+            f"{output_path}|layername=grid_with_feature_counts",
+            "grid_with_feature_counts",
+            "ogr",
+        )
+
+    finally:
+        # Explicit cleanup to release memory
+        if writer:
+            del writer
+        if grid_index:
+            del grid_index
+        if grid_feature_counts:
+            grid_feature_counts.clear()
+            del grid_feature_counts
 
 
 def assign_values_to_grid(grid_layer: QgsVectorLayer, feedback: QgsFeedback = None) -> QgsVectorLayer:

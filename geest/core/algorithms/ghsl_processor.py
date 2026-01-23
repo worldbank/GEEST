@@ -104,6 +104,7 @@ class GHSLProcessor:
                 log_message(f"Skipping file (GDAL error): {layer} - {str(e)}")
                 continue
 
+            output_dataset = None
             try:
                 # Get raster properties
                 raster_band = input_dataset.GetRasterBand(1)
@@ -111,18 +112,6 @@ class GHSLProcessor:
                 y_size = input_dataset.RasterYSize
                 geotransform = input_dataset.GetGeoTransform()
                 projection = input_dataset.GetProjection()
-
-                # Read the raster data as numpy array
-                raster_array = raster_band.ReadAsArray()
-            except Exception as e:
-                log_message(f"Skipping file (error reading raster properties): {layer} - {str(e)}")
-                input_dataset = None
-                continue
-
-            try:
-                # Apply reclassification logic
-                # Values 10 or 11 become 0, all others become 1
-                reclassified_array = np.where((raster_array == 10) | (raster_array == 11), 0, 1).astype(np.uint8)
 
                 # Create output raster
                 driver = gdal.GetDriverByName("GTiff")
@@ -136,23 +125,50 @@ class GHSLProcessor:
                 # Set geotransform and projection
                 output_dataset.SetGeoTransform(geotransform)
                 output_dataset.SetProjection(projection)
-
-                # Write the reclassified data
                 output_band = output_dataset.GetRasterBand(1)
-                output_band.WriteArray(reclassified_array)
+
+                # Memory-efficient block-wise processing
+                # Get natural block size (typically 256x256 for tiled TIFFs)
+                block_x, block_y = raster_band.GetBlockSize()
+                # Use larger blocks for efficiency, but cap to limit memory
+                block_x = min(max(block_x, 512), 2048)
+                block_y = min(max(block_y, 512), 2048)
+
+                for y_offset in range(0, y_size, block_y):
+                    # Calculate actual block height (handle edge)
+                    actual_block_y = min(block_y, y_size - y_offset)
+
+                    for x_offset in range(0, x_size, block_x):
+                        # Calculate actual block width (handle edge)
+                        actual_block_x = min(block_x, x_size - x_offset)
+
+                        # Read block
+                        block_array = raster_band.ReadAsArray(x_offset, y_offset, actual_block_x, actual_block_y)
+
+                        # Apply reclassification logic in place
+                        # Values 10 or 11 become 0, all others become 1
+                        reclassified_block = np.where((block_array == 10) | (block_array == 11), 0, 1).astype(np.uint8)
+
+                        # Write block
+                        output_band.WriteArray(reclassified_block, x_offset, y_offset)
+
+                        # Explicitly release block memory
+                        del block_array
+                        del reclassified_block
+
                 output_band.FlushCache()
-
-                # Close datasets
-                input_dataset = None
-                output_dataset = None
-
                 output_raster_paths.append(output_raster_path)
                 log_message(f"Successfully reclassified: {layer}")
 
             except Exception as e:
                 log_message(f"Error reclassifying {layer}: {str(e)}")
-                input_dataset = None
-                continue
+            finally:
+                # Ensure cleanup
+                if input_dataset:
+                    input_dataset = None
+                if output_dataset:
+                    output_dataset.FlushCache()
+                    output_dataset = None
 
         if not output_raster_paths:
             raise RuntimeError("Failed to reclassify any input rasters")
@@ -345,6 +361,8 @@ class GHSLProcessor:
         """
         Combine multiple vector layers into a single GeoParquet file.
 
+        Uses memory-efficient batch processing to limit memory usage.
+
         Args:
             input_vector_paths: List of paths to the input vector files to combine.
             output_vector_path: Path for the output combined GeoParquet file.
@@ -358,7 +376,12 @@ class GHSLProcessor:
         Raises:
             RuntimeError: If combination fails or files cannot be opened.
         """
+        # Batch size for memory-efficient processing
+        BATCH_SIZE = 5000
+
         # convert the QGIS extents to an ogr geometry
+        ring = None
+        ring_envelope = None
         if extent:
             min_x = extent.xMinimum()
             min_y = extent.yMinimum()
@@ -370,6 +393,7 @@ class GHSLProcessor:
             ring.AddPoint(max_x, max_y)
             ring.AddPoint(min_x, max_y)
             ring.CloseRings()
+            ring_envelope = ring.GetEnvelope()
             log_message(f"filtering geometry using extents: {extent.toString()}")
 
         driver = ogr.GetDriverByName("Parquet")
@@ -377,106 +401,130 @@ class GHSLProcessor:
         if Path(output_vector_path).exists():
             driver.DeleteDataSource(output_vector_path)
         log_message(f"Creating combined output at {output_vector_path}")
-        output_datasource = driver.CreateDataSource(output_vector_path)
-        if output_datasource is None:
-            raise RuntimeError(f"Failed to create output vector datasource: {output_vector_path}")
 
-        combined_layer = None
-        counter = 0
-
-        for input_vector_path in input_vector_paths:
-            log_message(f"Adding layer from {input_vector_path} to combined dataset")
-
-            input_datasource = ogr.Open(input_vector_path, gdal.GA_ReadOnly)
-            if input_datasource is None:
-                raise RuntimeError(f"Failed to open input vector: {input_vector_path}")
-
-            input_layer = input_datasource.GetLayer(0)
-            if extent:
-                log_message("Checking intersection with extents...")
-                log_message(f"Input layer extent: {input_layer.GetExtent()}")
-                log_message(f"Filtering extent: {ring.ExportToWkt()}")
-                # Confirm that the input vector intersects with the extents
-                crs = input_layer.GetSpatialRef()
-
-                log_message(f"Input layer CRS EPSG: {crs.GetAttrValue('AUTHORITY', 1)}")
-
-                input_extent = input_layer.GetExtent()  # returns (minX, maxX, minY, maxY)
-                ring_envelope = ring.GetEnvelope()  # returns (minX, maxX, minY, maxY)
-                # Check for intersection between two envelopes
-                intersects = not (
-                    input_extent[1] < ring_envelope[0]  # input maxX < ring minX # noqa W503
-                    or input_extent[0] > ring_envelope[1]  # input minX > ring maxX # noqa W503
-                    or input_extent[3] < ring_envelope[2]  # input maxY < ring minY # noqa W503
-                    or input_extent[2] > ring_envelope[3]  # input minY > ring maxY # noqa W503
-                )
-                if not intersects:
-                    log_message("Input vector layer does not intersect with extents.")
-                    continue
-                else:
-                    log_message("Input vector layer intersects with extents, processing...")
-            # Create combined layer if not already created
-            if combined_layer is None:
-                log_message("Creating combined layer...")
-                spatial_reference = input_layer.GetSpatialRef()
-                geom_type = input_layer.GetGeomType()
-                combined_layer = output_datasource.CreateLayer("combined", srs=spatial_reference, geom_type=geom_type)
-                if combined_layer is None:
-                    raise RuntimeError("Failed to create combined layer in GeoPackage")
-
-                # Copy field definitions from the first layer
-                input_layer_definition = input_layer.GetLayerDefn()
-                for i in range(input_layer_definition.GetFieldCount()):
-                    field_definition = input_layer_definition.GetFieldDefn(i)
-                    combined_layer.CreateField(field_definition)
-
-            # Copy features from input layer to combined layer
-
-            input_layer.ResetReading()
-            for feature in input_layer:
-                combined_feature = ogr.Feature(combined_layer.GetLayerDefn())
-                combined_feature.SetGeometry(feature.GetGeometryRef())
-
-                if counter % 1000 == 0 and counter > 0:
-                    log_message(f"Processed {counter} features...")
-                # Copy all attributes
-                for i in range(feature.GetFieldCount()):
-                    combined_feature.SetField(i, feature.GetField(i))
-
-                if extent:
-                    # if the feature intersects with the extents, add it
-                    feature_geom = feature.GetGeometryRef()
-
-                    feature_envelope = feature_geom.GetEnvelope()  # (minX, maxX, minY, maxY)
-                    ring_envelope = ring.GetEnvelope()
-                    feature_intersects = not (
-                        feature_envelope[1] < ring_envelope[0]  # feature maxX < ring minX # noqa W503
-                        or feature_envelope[0] > ring_envelope[1]  # feature minX > ring maxX # noqa W503
-                        or feature_envelope[3] < ring_envelope[2]  # feature maxY < ring minY # noqa W503
-                        or feature_envelope[2] > ring_envelope[3]  # feature minY > ring maxY # noqa W503
-                    )
-                    if feature_intersects:
-                        combined_layer.CreateFeature(combined_feature)
-                        # log_message(f"Attribute {field_name}: {field_value}")
-                        counter += 1
-                    else:
-                        # log_message("Feature does not intersect with extents, skipping...")
-                        pass
-                else:
-                    # Calling function did not constrain by extent, add all features
-
-                    combined_layer.CreateFeature(combined_feature)
-                    counter += 1
-                combined_feature = None
-            log_message(f"Finished adding features from {input_vector_path}")
-            # Sync to disk
-            combined_layer.SyncToDisk()
-            output_datasource.FlushCache()
-            log_message(f"Combined layer now has {combined_layer.GetFeatureCount()} features")
-            # Close input datasource
-            input_datasource = None
-        # Close output datasource
-        combined_layer = None
         output_datasource = None
-        log_message(f"Finished combining vectors. Total features: {counter}")
-        return True
+        combined_layer = None
+        input_datasource = None
+
+        try:
+            output_datasource = driver.CreateDataSource(output_vector_path)
+            if output_datasource is None:
+                raise RuntimeError(f"Failed to create output vector datasource: {output_vector_path}")
+
+            counter = 0
+
+            for input_vector_path in input_vector_paths:
+                log_message(f"Adding layer from {input_vector_path} to combined dataset")
+
+                try:
+                    input_datasource = ogr.Open(input_vector_path, gdal.GA_ReadOnly)
+                    if input_datasource is None:
+                        raise RuntimeError(f"Failed to open input vector: {input_vector_path}")
+
+                    input_layer = input_datasource.GetLayer(0)
+                    if extent:
+                        log_message("Checking intersection with extents...")
+                        log_message(f"Input layer extent: {input_layer.GetExtent()}")
+                        log_message(f"Filtering extent: {ring.ExportToWkt()}")
+                        # Confirm that the input vector intersects with the extents
+                        crs = input_layer.GetSpatialRef()
+
+                        log_message(f"Input layer CRS EPSG: {crs.GetAttrValue('AUTHORITY', 1)}")
+
+                        input_extent = input_layer.GetExtent()  # returns (minX, maxX, minY, maxY)
+                        # Check for intersection between two envelopes
+                        intersects = not (
+                            input_extent[1] < ring_envelope[0]  # input maxX < ring minX # noqa W503
+                            or input_extent[0] > ring_envelope[1]  # input minX > ring maxX # noqa W503
+                            or input_extent[3] < ring_envelope[2]  # input maxY < ring minY # noqa W503
+                            or input_extent[2] > ring_envelope[3]  # input minY > ring maxY # noqa W503
+                        )
+                        if not intersects:
+                            log_message("Input vector layer does not intersect with extents.")
+                            continue
+                        else:
+                            log_message("Input vector layer intersects with extents, processing...")
+
+                    # Create combined layer if not already created
+                    if combined_layer is None:
+                        log_message("Creating combined layer...")
+                        spatial_reference = input_layer.GetSpatialRef()
+                        geom_type = input_layer.GetGeomType()
+                        combined_layer = output_datasource.CreateLayer(
+                            "combined", srs=spatial_reference, geom_type=geom_type
+                        )
+                        if combined_layer is None:
+                            raise RuntimeError("Failed to create combined layer in GeoPackage")
+
+                        # Copy field definitions from the first layer
+                        input_layer_definition = input_layer.GetLayerDefn()
+                        for i in range(input_layer_definition.GetFieldCount()):
+                            field_definition = input_layer_definition.GetFieldDefn(i)
+                            combined_layer.CreateField(field_definition)
+
+                    # Copy features from input layer to combined layer in batches
+                    input_layer.ResetReading()
+                    batch_count = 0
+
+                    for feature in input_layer:
+                        should_add = True
+
+                        if extent:
+                            # Check if feature intersects with extents
+                            feature_geom = feature.GetGeometryRef()
+                            if feature_geom:
+                                feature_envelope = feature_geom.GetEnvelope()  # (minX, maxX, minY, maxY)
+                                should_add = not (
+                                    feature_envelope[1] < ring_envelope[0]  # noqa W503
+                                    or feature_envelope[0] > ring_envelope[1]  # noqa W503
+                                    or feature_envelope[3] < ring_envelope[2]  # noqa W503
+                                    or feature_envelope[2] > ring_envelope[3]  # noqa W503
+                                )
+                            else:
+                                should_add = False
+
+                        if should_add:
+                            combined_feature = ogr.Feature(combined_layer.GetLayerDefn())
+                            combined_feature.SetGeometry(feature.GetGeometryRef())
+
+                            # Copy all attributes
+                            for i in range(feature.GetFieldCount()):
+                                combined_feature.SetField(i, feature.GetField(i))
+
+                            combined_layer.CreateFeature(combined_feature)
+                            combined_feature = None  # Release reference
+                            counter += 1
+                            batch_count += 1
+
+                        # Sync to disk periodically to limit memory usage
+                        if batch_count >= BATCH_SIZE:
+                            combined_layer.SyncToDisk()
+                            batch_count = 0
+                            if counter % 10000 == 0:
+                                log_message(f"Processed {counter} features...")
+
+                    log_message(f"Finished adding features from {input_vector_path}")
+                    # Sync remaining batch to disk
+                    combined_layer.SyncToDisk()
+                    output_datasource.FlushCache()
+                    log_message(f"Combined layer now has {combined_layer.GetFeatureCount()} features")
+
+                finally:
+                    # Close input datasource after each file
+                    if input_datasource:
+                        input_datasource.FlushCache()
+                        input_datasource = None
+
+            log_message(f"Finished combining vectors. Total features: {counter}")
+            return True
+
+        finally:
+            # Ensure proper cleanup
+            if combined_layer:
+                combined_layer.SyncToDisk()
+                combined_layer = None
+            if output_datasource:
+                output_datasource.FlushCache()
+                output_datasource = None
+            if input_datasource:
+                input_datasource = None

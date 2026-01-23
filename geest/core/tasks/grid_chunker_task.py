@@ -191,37 +191,42 @@ class GridChunkerTask:
         """
         Yields chunks of the grid with their bounding box coordinates.
 
+        Uses throttled logging to avoid performance overhead from excessive log calls.
+
         Yields:
             dict: A dictionary containing the index and bounding box coordinates of each chunk.
         """
-        x_blocks = range(0, self.x_range_count, self.chunk_size)
-        y_blocks = range(0, self.y_range_count, self.chunk_size)
+        x_blocks = list(range(0, self.x_range_count, self.chunk_size))
+        y_blocks = list(range(0, self.y_range_count, self.chunk_size))
+        total_x_blocks = len(x_blocks)
+        total_y_blocks = len(y_blocks)
         index = 0
 
-        for x_block_start in x_blocks:
-            log_message(f"Processing chunk (x) {x_block_start} of {self.x_range_count}")
+        # Log interval - only log every N chunks to reduce overhead
+        log_interval = max(1, (total_x_blocks * total_y_blocks) // 20)  # ~5% intervals
+
+        for x_idx, x_block_start in enumerate(x_blocks):
             x_block_end = min(x_block_start + self.chunk_size, self.x_range_count)
 
             x_start_coord = self.xmin + x_block_start * self.cell_size
             x_end_coord = self.xmin + x_block_end * self.cell_size
 
-            for y_block_start in y_blocks:
-                log_message(f"Processing chunk (y) {y_block_start} of {self.y_range_count}")
+            for y_idx, y_block_start in enumerate(y_blocks):
                 y_block_end = min(y_block_start + self.chunk_size, self.y_range_count)
 
                 y_start_coord = self.ymin + y_block_start * self.cell_size
                 y_end_coord = self.ymin + y_block_end * self.cell_size
 
-                # Create polygon from bounding box coordinates
-                ring = ogr.Geometry(ogr.wkbLinearRing)
-                ring.AddPoint(x_start_coord, y_start_coord)
-                ring.AddPoint(x_end_coord, y_start_coord)
-                ring.AddPoint(x_end_coord, y_end_coord)
-                ring.AddPoint(x_start_coord, y_end_coord)
-                ring.AddPoint(x_start_coord, y_start_coord)
+                # Create polygon from bounding box coordinates using WKT (faster)
+                wkt = (
+                    f"POLYGON(({x_start_coord} {y_start_coord},"
+                    f"{x_end_coord} {y_start_coord},"
+                    f"{x_end_coord} {y_end_coord},"
+                    f"{x_start_coord} {y_end_coord},"
+                    f"{x_start_coord} {y_start_coord}))"
+                )
+                polygon = ogr.CreateGeometryFromWkt(wkt)
 
-                polygon = ogr.Geometry(ogr.wkbPolygon)
-                polygon.AddGeometry(ring)
                 chunk_position = None
                 # if the geometry is not none and the polygon intersects with it, add it to the layer
                 if self.geometry is not None and self.geometry.Intersects(polygon):
@@ -231,9 +236,12 @@ class GridChunkerTask:
                         chunk_position = "edge"
                 else:
                     chunk_position = "undefined"
-                log_message(
-                    f"Created Chunk bbox: {x_start_coord}, {x_end_coord}, {y_start_coord}, {y_end_coord}, {chunk_position}"
-                )
+
+                # Throttled logging - only log at intervals
+                if index % log_interval == 0:
+                    progress = int((index / (total_x_blocks * total_y_blocks)) * 100)
+                    log_message(f"Chunk progress: {progress}% ({index} chunks processed)")
+
                 yield {
                     "index": index,
                     "x_start": x_start_coord,
@@ -244,6 +252,9 @@ class GridChunkerTask:
                     "type": chunk_position,
                 }
                 index += 1
+
+        # Log completion
+        log_message(f"Chunk generation complete: {index} total chunks")
 
     def total_cells_in_chunk(self):
         """

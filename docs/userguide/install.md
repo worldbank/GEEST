@@ -25,7 +25,7 @@ Follow the steps below to install the GEEST QGIS plugin.
 
 > - 1. After installation, check the QGIS toolbar for the new **GEEST** icon *Show/Hide GEEST Panel*. [![GEEST Toolbar Icons](https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/icons.jpg)](https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/icons.jpg "Click to enlarge")
 > - 2. If the icon is not visible, go to **Plugins** > **Manage and Install Plugins…**, then click on the **Installed** tab.
-> - 3. In the list, find **Gender Enabling Environments Spatial Tool (GEEST)** and ensure the checkbox is ticked. The GEEST panel should now appear in the QGIS interface.
+> - 3. In the list, find **Geospatial Enabling Environments for Employment Spatial Tool (GEEST)** and ensure the checkbox is ticked. The GEEST panel should now appear in the QGIS interface.
 
 <p align="center">
   <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Install_page_show.png" target="_blank">

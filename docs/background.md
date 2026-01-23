@@ -21,7 +21,7 @@ For a comprehensive understanding of the GeoWEAF and the associated methodology 
 <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GeoWEAF.png" target="_blank">
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GeoWEAF.png" alt="Analytical Framework" width="700" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view the Analytical Framework">
 </a>
-## 2. The Gender Enabling Environments Spatial Tool (GEEST)
+## 2. The Geospatial Enabling Environments for Employment Spatial Tool (GEEST)
 
 ---
 

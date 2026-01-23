@@ -126,9 +126,33 @@ class AreaIterator:
 
             # Iterate over each polygon feature and calculate progress
 
-            # Sort polygon features by area in ascending order
-            sorted_features = sorted(self.polygon_layer.getFeatures(), key=lambda f: f.geometry().area())
-            for index, polygon_feature in enumerate(sorted_features):
+            # Memory-efficient approach: use stored area attribute if available,
+            # otherwise compute it (for backwards compatibility with older data)
+            feature_areas = []
+            has_area_field = "geom_area" in [f.name() for f in self.polygon_layer.fields()]
+
+            for feature in self.polygon_layer.getFeatures():
+                geom = feature.geometry()
+                if geom and not geom.isEmpty():
+                    # Use stored area if available (faster), otherwise compute
+                    if has_area_field:
+                        area = feature["geom_area"]
+                        if area is None or area == 0:
+                            area = geom.area()
+                    else:
+                        area = geom.area()
+                    feature_areas.append((feature.id(), area))
+
+            # Sort by area (ascending) - only IDs and areas in memory, not full features
+            feature_areas.sort(key=lambda x: x[1])
+
+            # Now iterate in sorted order, fetching features one at a time
+            for index, (fid, _area) in enumerate(feature_areas):
+                # Fetch the polygon feature by ID
+                request = QgsFeatureRequest().setFilterFid(fid)
+                polygon_feature = next(self.polygon_layer.getFeatures(request), None)
+                if polygon_feature is None:
+                    continue
                 polygon_id: int = polygon_feature.id()
                 # Request the corresponding bbox feature based on the polygon's ID
                 feature_request: QgsFeatureRequest = QgsFeatureRequest().setFilterFid(polygon_id)
