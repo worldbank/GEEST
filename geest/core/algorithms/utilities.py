@@ -117,13 +117,29 @@ def geometry_to_memory_layer(
 
     Returns:
         QgsVectorLayer: The memory layer containing the geometry.
+
+    Raises:
+        ValueError: If geometry is None, empty, or invalid.
     """
+    # Validate geometry before creating layer
+    if geometry is None:
+        raise ValueError("Cannot create memory layer from None geometry")
+    if geometry.isEmpty():
+        raise ValueError("Cannot create memory layer from empty geometry")
+    if not geometry.isGeosValid():
+        # Try to fix invalid geometry
+        geometry = geometry.makeValid()
+        if not geometry.isGeosValid():
+            raise ValueError("Cannot create memory layer from invalid geometry that could not be fixed")
+
     memory_layer = QgsVectorLayer("Polygon", layer_name, "memory")
     memory_layer.setCrs(target_crs)
     feature = QgsFeature()
     feature.setGeometry(geometry)
     memory_layer.dataProvider().addFeatures([feature])
-    memory_layer.commitChanges()
+    # Note: commitChanges() not needed when using dataProvider().addFeatures() directly
+    # as this bypasses the editing buffer
+    memory_layer.updateExtents()
     return memory_layer
 
 
