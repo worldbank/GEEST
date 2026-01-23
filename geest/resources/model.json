@@ -529,9 +529,9 @@
                     "description": "Active Transport refers to the presence of walkable infrastructure and is based on different road types that are assessed with respect to the possibility of walking and/ or cycling."
                 },
                 {
-                    "id": "safety",
-                    "output_filename": "safety",
-                    "name": "Safety",
+                    "id": "safety_perception",
+                    "output_filename": "safety_perception",
+                    "name": "Safety Perception",
                     "women_enabling": 1,
                     "default_dimension_weighting": 0.142857142857143,
                     "dimension_weighting": 0.142857142857143,

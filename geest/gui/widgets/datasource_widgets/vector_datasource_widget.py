@@ -573,21 +573,25 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
 
         self._stop_spinner()
         if os.path.isdir(gpkg_path):
-            log_message(
-                f"Error: Received directory path instead of file: {gpkg_path}", tag="Geest", level=Qgis.Critical
-            )
+            error_msg = f"Expected a file but received a directory: {gpkg_path}"
+            log_message(f"Error: {error_msg}", tag="Geest", level=Qgis.Critical)
             if self.osm_download_button:
                 self.osm_download_button.setText("Error!")
                 self.osm_download_button.setStyleSheet("background-color: #ffcccc; padding: 5px 10px;")
                 self.osm_download_button.setEnabled(True)
+                self.osm_download_button.setToolTip(f"Error: {error_msg}")
+            QMessageBox.warning(self, "OSM Download Error", error_msg)
             return
 
         if not os.path.exists(gpkg_path):
-            log_message(f"Error: File does not exist: {gpkg_path}", tag="Geest", level=Qgis.Critical)
+            error_msg = f"Download completed but output file not found: {gpkg_path}"
+            log_message(f"Error: {error_msg}", tag="Geest", level=Qgis.Critical)
             if self.osm_download_button:
                 self.osm_download_button.setText("Not Found!")
                 self.osm_download_button.setStyleSheet("background-color: #ffcccc; padding: 5px 10px;")
                 self.osm_download_button.setEnabled(True)
+                self.osm_download_button.setToolTip(f"Error: {error_msg}")
+            QMessageBox.warning(self, "OSM Download Error", error_msg)
             return
 
         layer_name = os.path.splitext(os.path.basename(gpkg_path))[0]
@@ -603,11 +607,20 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                 self.osm_download_button.setStyleSheet("background-color: #ccffcc; padding: 5px 10px;")
                 QTimer.singleShot(2000, lambda: self.reset_osm_button())
         else:
-            log_message(f"Failed to load layer from: {gpkg_path}", tag="Geest", level=Qgis.Critical)
+            error_msg = f"Downloaded file exists but could not be loaded as a valid layer: {gpkg_path}"
+            log_message(f"Failed to load layer: {error_msg}", tag="Geest", level=Qgis.Critical)
             if self.osm_download_button:
                 self.osm_download_button.setText("Load Failed!")
                 self.osm_download_button.setStyleSheet("background-color: #ffcccc; padding: 5px 10px;")
                 self.osm_download_button.setEnabled(True)
+                self.osm_download_button.setToolTip(f"Error: {error_msg}")
+            QMessageBox.warning(
+                self,
+                "OSM Layer Load Failed",
+                f"The OSM data was downloaded but could not be loaded.\n\n"
+                f"File: {gpkg_path}\n\n"
+                "The file may be corrupted or empty. Try downloading again.",
+            )
 
     def on_osm_download_error(self, error_message: str) -> None:
         """Handle OSM download errors."""
@@ -618,6 +631,16 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.osm_download_button.setText("Download Failed!")
             self.osm_download_button.setStyleSheet("background-color: #ffcccc; padding: 5px 10px;")
             self.osm_download_button.setEnabled(True)
+            # Set tooltip with error details so user can hover to see what went wrong
+            self.osm_download_button.setToolTip(f"Error: {error_message}\n\nClick to retry.")
+
+        # Show error message to user
+        QMessageBox.warning(
+            self,
+            "OSM Download Failed",
+            f"The OSM data download failed.\n\n{error_message}\n\n"
+            "You can try again by clicking the download button.",
+        )
 
     def _stop_spinner(self) -> None:
         """Stop the spinner animation and hide it."""
@@ -632,6 +655,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.osm_download_button.setText("Download from OSM")
             self.osm_download_button.setStyleSheet("padding: 5px 10px;")
             self.osm_download_button.setEnabled(True)
+            self.osm_download_button.setToolTip(self.osm_tooltip)  # Restore original tooltip
         self._stop_spinner()
 
     def get_osm_download_button(self):

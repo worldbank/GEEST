@@ -14,8 +14,8 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import Qt, QSettings, pyqtSignal, pyqtSlot
-from qgis.PyQt.QtGui import QFont
+from qgis.PyQt.QtCore import QSettings, pyqtSignal, pyqtSlot
+from qgis.PyQt.QtGui import QFont, QPixmap
 from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from geest.core import WorkflowQueueManager
@@ -144,59 +144,17 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
 
-        self.setup_status_checkbox_style()
         self.update_road_layer_status()
 
-    def setup_status_checkbox_style(self):
-        """Setup the stylesheet for the status checkbox to show red X / green checkmark."""
-        # Make checkbox non-interactive - block all user clicks
-        self.road_layer_status_checkbox.setFocusPolicy(Qt.NoFocus)
-        self.road_layer_status_checkbox.setAttribute(Qt.WA_TransparentForMouseEvents)
-
-        cross_icon = resources_path("resources", "icons", "cross-red.svg")
-        tick_icon = resources_path("resources", "icons", "tick-green.svg")
-
-        # Convert paths to use forward slashes for cross-platform compatibility
-        # Qt stylesheets require forward slashes even on Windows
-        cross_icon = cross_icon.replace("\\", "/")
-        tick_icon = tick_icon.replace("\\", "/")
-
-        self.road_layer_status_checkbox.setStyleSheet(f"""
-            QCheckBox::indicator {{
-                width: 24px;
-                height: 24px;
-                border: 2px solid #ccc;
-                border-radius: 3px;
-            }}
-            QCheckBox::indicator:unchecked {{
-                background-color: #ffcdd2;
-                border-color: #d32f2f;
-                image: url({cross_icon});
-            }}
-            QCheckBox::indicator:checked {{
-                background-color: #c8e6c9;
-                border-color: #388e3c;
-                image: url({tick_icon});
-            }}
-            QCheckBox::indicator:unchecked:disabled {{
-                background-color: #ffcdd2;
-                border-color: #d32f2f;
-                image: url({cross_icon});
-            }}
-            QCheckBox::indicator:checked:disabled {{
-                background-color: #c8e6c9;
-                border-color: #388e3c;
-                image: url({tick_icon});
-            }}
-        """)
+        self.layer_status_label.setPixmap(QPixmap(resources_path("resources", "icons", "failed.svg")))
 
     def update_road_layer_status(self):
         """Update the status checkbox based on whether a valid layer is selected."""
         road_layer = self.road_layer_combo.currentLayer()
         if road_layer and road_layer.isValid():
-            self.road_layer_status_checkbox.setChecked(True)
+            self.layer_status_label.setPixmap(QPixmap(resources_path("resources", "icons", "completed-success.svg")))
         else:
-            self.road_layer_status_checkbox.setChecked(False)
+            self.layer_status_label.setPixmap(QPixmap(resources_path("resources", "icons", "failed.svg")))
 
     def emit_road_layer_change(self):
         """⚙️ Emit road layer change."""

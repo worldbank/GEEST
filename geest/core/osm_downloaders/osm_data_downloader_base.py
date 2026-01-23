@@ -112,6 +112,9 @@ class OSMDataDownloaderBase(ABC):
                 if "error" in line:
                     log_message("OSM xml file indicates an error...")
                     return False
+        # delete the existing xml file if it exists
+        os.remove(self.output_xml_path)
+
         return True  # No issues found
 
     def set_osm_query(self, query: str) -> None:
@@ -169,6 +172,10 @@ class OSMDataDownloaderBase(ABC):
 
         # Send the request and connect the finished signal
         log_message("Sending request to Overpass API...")
+        # delete the existing xml file if it exists
+        if os.path.exists(self.output_xml_path):
+            os.remove(self.output_xml_path)
+
         with open(self.output_xml_path, "wb") as output_file:
             response = self.network_manager.blockingPost(request, QByteArray(f"data={self.formatted_query}".encode()))
             output_file.write(response.content().data())
