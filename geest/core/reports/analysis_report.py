@@ -59,19 +59,29 @@ class AnalysisReport(BaseReport):
         if working_directory:
             self._load_study_area_layer()
 
-        self.page_descriptions["analysis_summary"] = """
+        self.page_descriptions[
+            "analysis_summary"
+        ] = """
         This shows the relative elapsed time for each analysis step. The time is in minutes.
         """
 
-    def __del__(self):
+    def cleanup(self):
         """
-        Destructor to clean up layers from the QGIS project.
+        Explicitly clean up temporary layers. Call this when done with the report,
+        or use the context manager pattern.
         """
+        if self._cleanup_done:
+            return
         # Remove temporary layers added for rendering
         for layer in self.temp_layers:
             if layer:
-                QgsProject.instance().removeMapLayer(layer.id())
-                log_message(f"Removed temporary layer '{layer.name()}' from project.")
+                try:
+                    QgsProject.instance().removeMapLayer(layer.id())
+                    log_message(f"Removed temporary layer '{layer.name()}' from project.")
+                except Exception as e:
+                    log_message(f"Could not remove temporary layer: {e}")
+        self.temp_layers = []
+        super().cleanup()
 
     def _load_study_area_layer(self):
         """

@@ -58,12 +58,26 @@ class BaseReport:
         self.report_name = report_name
         self.template_path = template_path
         self.page_descriptions = {}
+        self._cleanup_done = False
 
-    def __del__(self):
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit - ensures cleanup happens."""
+        self.cleanup()
+        return False  # Don't suppress exceptions
+
+    def cleanup(self):
         """
-        Destructor to clean up layers from the QGIS project.
+        Explicitly clean up resources. Call this when done with the report,
+        or use the context manager pattern. Subclasses should override this
+        to clean up their specific resources.
         """
-        pass
+        if self._cleanup_done:
+            return
+        self._cleanup_done = True
 
     def load_layers_from_gpkg(self):
         """

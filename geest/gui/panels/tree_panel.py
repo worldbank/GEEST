@@ -126,7 +126,8 @@ class TreePanel(QWidget):
 
         self.configure_network_button = QPushButton("Configure")
         self.configure_network_button.clicked.connect(self._on_configure_clicked)
-        self.configure_network_button.setStyleSheet("""
+        self.configure_network_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #b8dce3, stop:1 #8ec8d0);
@@ -143,12 +144,14 @@ class TreePanel(QWidget):
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #8ec8d0, stop:1 #b8dce3);
             }
-        """)
+        """
+        )
         warning_layout.addWidget(self.configure_network_button)
 
         close_warning_button = QPushButton("✕")
         close_warning_button.setFixedSize(24, 24)
-        close_warning_button.setStyleSheet("""
+        close_warning_button.setStyleSheet(
+            """
             QPushButton {
                 border: none;
                 color: #856404;
@@ -160,17 +163,20 @@ class TreePanel(QWidget):
                 background-color: rgba(0, 0, 0, 0.1);
                 border-radius: 3px;
             }
-        """)
+        """
+        )
         close_warning_button.clicked.connect(self.hide_validation_warning)
         warning_layout.addWidget(close_warning_button)
 
-        self.warning_widget.setStyleSheet("""
+        self.warning_widget.setStyleSheet(
+            """
             QWidget {
                 background-color: #fff3cd;
                 border-left: 4px solid #ffc107;
                 border-radius: 3px;
             }
-        """)
+        """
+        )
 
         layout.addWidget(self.warning_widget)
 
@@ -938,19 +944,19 @@ class TreePanel(QWidget):
     def generate_analysis_report(self):
         """Add a report showing analysis results."""
         model_path = os.path.join(self.working_directory, "model.json")
-        report = AnalysisReport(
+        with AnalysisReport(
             model_path=model_path,
             working_directory=self.working_directory,
             report_name="Study Area Summary",
-        )
-        self.overall_progress_bar.setVisible(True)
-        self.overall_progress_bar.setValue(10)
-        report.create_layout()
-        self.overall_progress_bar.setValue(30)
-        report.export_pdf(os.path.join(self.working_directory, "analysis_report.pdf"))
-        self.overall_progress_bar.setValue(60)
-        report.export_qpt(os.path.join(self.working_directory, "analysis_report.qpt"))
-        self.overall_progress_bar.setValue(90)
+        ) as report:
+            self.overall_progress_bar.setVisible(True)
+            self.overall_progress_bar.setValue(10)
+            report.create_layout()
+            self.overall_progress_bar.setValue(30)
+            report.export_pdf(os.path.join(self.working_directory, "analysis_report.pdf"))
+            self.overall_progress_bar.setValue(60)
+            report.export_qpt(os.path.join(self.working_directory, "analysis_report.qpt"))
+            self.overall_progress_bar.setValue(90)
 
         # open the pdf using the system PDF viewer
         # Windows
@@ -979,13 +985,14 @@ class TreePanel(QWidget):
     def generate_study_area_report(self):
         """Add a report showing population information for the study area."""
         gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
-        report = StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary")
-        self.overall_progress_bar.setVisible(True)
-        self.overall_progress_bar.setValue(10)
-        report.create_layout()
-        self.overall_progress_bar.setValue(30)
-        report.export_pdf(os.path.join(self.working_directory, "study_area_report.pdf"))
-        self.overall_progress_bar.setValue(90)
+        with StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary") as report:
+            self.overall_progress_bar.setVisible(True)
+            self.overall_progress_bar.setValue(10)
+            report.create_layout()
+            self.overall_progress_bar.setValue(30)
+            report.export_pdf(os.path.join(self.working_directory, "study_area_report.pdf"))
+            self.overall_progress_bar.setValue(90)
+
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
@@ -1392,6 +1399,7 @@ class TreePanel(QWidget):
             "study_area_bboxes",
             "study_area_bbox",
             "study_area_creation_status",
+            "chunks",
         ]
         for layer_name in layers:
             gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
@@ -1408,9 +1416,9 @@ class TreePanel(QWidget):
             source_qml = resources_path("resources", "qml", f"{layer_name}.qml")
             result = layer.loadNamedStyle(source_qml)
             if result[0]:  # loadNamedStyle returns (success, error_message)
-                print(f"Successfully applied QML style to layer '{layer_name}'")
+                log_message(f"Successfully applied QML style to layer '{layer_name}'")
             else:
-                print(f"Failed to apply QML style: {result[1]}")
+                log_message(f"Failed to apply QML style: {result[1]}")
 
             # Check if a layer with the same data source exists in the correct group
             existing_layer = None

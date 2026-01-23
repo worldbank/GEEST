@@ -50,10 +50,10 @@ class GridChunkerTask:
     Example:
         grid_chunker = GridChunker(0, 100, 0, 100, 10, 5)
         for chunk in grid_chunker.chunks():
-            print(chunk)
+            log_message(chunk)
 
         total_cells = grid_chunker.total_cells_in_chunk()
-        print(f"Total cells in each chunk: {total_cells}")
+        log_message(f"Total cells in each chunk: {total_cells}")
     """
 
     def __init__(

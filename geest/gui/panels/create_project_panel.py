@@ -11,7 +11,6 @@ import shutil
 import subprocess  # nosec B404
 import traceback
 
-from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QMessageBox, QWidget
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
@@ -24,6 +23,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QPixmap
+from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QMessageBox, QWidget
 
 from geest.core import WorkflowQueueManager
 from geest.core.tasks import StudyAreaProcessingTask, StudyAreaReportTask
@@ -580,9 +580,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             source_qml = resources_path("resources", "qml", f"{layer_name}.qml")
             result = layer.loadNamedStyle(source_qml)
             if result[0]:  # loadNamedStyle returns (success, error_message)
-                print(f"Successfully applied QML style to layer '{layer_name}'")
+                log_message(f"Successfully applied QML style to layer '{layer_name}'")
             else:
-                print(f"Failed to apply QML style: {result[1]}")
+                log_message(f"Failed to apply QML style: {result[1]}")
 
             # Check if a layer with the same data source exists in the correct group
             existing_layer = None
