@@ -19,15 +19,15 @@ from qgis.core import (
 )
 from qgis.gui import QgsMapLayerComboBox
 from qgis.PyQt.QtCore import QSettings, Qt, QTimer
-from qgis.PyQt.QtGui import QIcon, QFont
+from qgis.PyQt.QtGui import QFont, QIcon, QMovie
 from qgis.PyQt.QtWidgets import (
     QFileDialog,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
     QMessageBox,
     QPushButton,
     QToolButton,
-    QVBoxLayout,
     QWidget,
 )
 
@@ -287,11 +287,35 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             # Create OSM download button (added to separate table column by dialog)
             self.osm_download_button = None
             self.osm_disclaimer_label = None
+            self.osm_spinner_label = None
+            self.osm_spinner_movie = None
+            self.osm_button_container = None
             if self.should_add_osm_widget:
+                # Create container widget for button and spinner
+                self.osm_button_container = QWidget()
+                container_layout = QHBoxLayout(self.osm_button_container)
+                container_layout.setContentsMargins(0, 0, 0, 0)
+                container_layout.setSpacing(6)
+
                 self.osm_download_button = QPushButton(self.osm_button_text)
                 self.osm_download_button.setToolTip(self.osm_tooltip)
                 self.osm_download_button.setStyleSheet("padding: 5px 10px;")
                 self.osm_download_button.clicked.connect(self.start_osm_download)
+
+                # Create spinner label with animated gif
+                self.osm_spinner_label = QLabel()
+                self.osm_spinner_movie = QMovie(resources_path("resources", "throbber.gif"))
+                # Scale the spinner to match button height
+                self.osm_spinner_movie.setScaledSize(
+                    self.osm_spinner_movie.currentPixmap().size().scaled(24, 24, Qt.KeepAspectRatio)
+                )
+                self.osm_spinner_label.setMovie(self.osm_spinner_movie)
+                self.osm_spinner_label.setVisible(False)  # Hidden initially
+
+                container_layout.addWidget(self.osm_download_button)
+                container_layout.addWidget(self.osm_spinner_label)
+                container_layout.addStretch()
+
                 log_message(
                     f"OSM download button created for indicator: {self.attributes.get('id', 'unknown')}",
                     level=Qgis.Info,
@@ -494,6 +518,10 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.osm_download_button.setEnabled(False)
             self.osm_download_button.setText("Downloading...")
             self.osm_download_button.setStyleSheet("padding: 5px 10px;")
+            # Start the spinner animation
+            if self.osm_spinner_label and self.osm_spinner_movie:
+                self.osm_spinner_label.setVisible(True)
+                self.osm_spinner_movie.start()
 
         try:
             # Create task using proper QgsTask-based approach
@@ -525,6 +553,8 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             if self.osm_download_button:
                 self.osm_download_button.setEnabled(True)
                 self.osm_download_button.setText("Download from OSM")
+            # Stop the spinner on error
+            self._stop_spinner()
 
             QMessageBox.warning(self, "Error", f"Failed to start download: {str(e)}")
 
@@ -541,6 +571,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         """Handle completion of OSM download."""
         log_message(f"OSM download completed: {gpkg_path}", tag="Geest", level=Qgis.Info)
 
+        self._stop_spinner()
         if os.path.isdir(gpkg_path):
             log_message(
                 f"Error: Received directory path instead of file: {gpkg_path}", tag="Geest", level=Qgis.Critical
@@ -582,10 +613,18 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         """Handle OSM download errors."""
         log_message(f"OSM download error: {error_message}", tag="Geest", level=Qgis.Critical)
 
+        self._stop_spinner()
         if self.osm_download_button:
             self.osm_download_button.setText("Download Failed!")
             self.osm_download_button.setStyleSheet("background-color: #ffcccc; padding: 5px 10px;")
             self.osm_download_button.setEnabled(True)
+
+    def _stop_spinner(self) -> None:
+        """Stop the spinner animation and hide it."""
+        if self.osm_spinner_movie:
+            self.osm_spinner_movie.stop()
+        if self.osm_spinner_label:
+            self.osm_spinner_label.setVisible(False)
 
     def reset_osm_button(self) -> None:
         """Reset OSM download button to initial state."""
@@ -593,15 +632,16 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.osm_download_button.setText("Download from OSM")
             self.osm_download_button.setStyleSheet("padding: 5px 10px;")
             self.osm_download_button.setEnabled(True)
+        self._stop_spinner()
 
     def get_osm_download_button(self):
         """
-        Returns the OSM download button if it was created, None otherwise.
+        Returns the OSM download button container (button + spinner) if created, None otherwise.
 
         Returns:
-            QPushButton or None: The OSM download button
+            QWidget or None: The container widget with OSM download button and spinner
         """
-        return self.osm_download_button
+        return self.osm_button_container
 
     def get_osm_disclaimer_label(self):
         """

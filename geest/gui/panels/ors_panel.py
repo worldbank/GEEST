@@ -144,4 +144,7 @@ class OrsPanel(FORM_CLASS, QWidget):
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases
         font_size = int(linear_interpolation(self.description.rect().width(), 12, 16, 400, 600))
         # log_message(f"Label Font Size: {font_size}")
-        self.description.setFont(QFont("Arial", font_size))
+        font = QFont("Arial", font_size)
+        self.description.setFont(font)
+        self.radioButton.setFont(font)
+        self.radioButton_2.setFont(font)
