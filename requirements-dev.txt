@@ -72,5 +72,5 @@ typing_extensions==4.15.0
 urllib3==2.6.3
 virtualenv==20.36.1
 watchdog==5.0.2
-wheel==0.45.1
+wheel==0.46.2
 zipp==3.23.0
