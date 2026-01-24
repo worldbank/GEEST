@@ -249,6 +249,8 @@ class WorkflowJob(QgsTask):
     # Custom signal to emit when the job is finished
     job_finished = pyqtSignal(bool)
     error_occurred = pyqtSignal(str)
+    # Signal to emit status messages for UI display
+    status_message = pyqtSignal(str)
 
     def __init__(
         self,
@@ -287,6 +289,8 @@ class WorkflowJob(QgsTask):
         self.setProgress(0.0)  # always use float
         # This should be automatic see https://qgis.org/pyqgis/3.40/core/QgsTask.html#qgis.core.QgsTask.setProgress
         self._workflow.progressChanged.connect(self.updateProgress)
+        # Forward status messages from workflow to job signal for UI display
+        self._workflow.statusChanged.connect(self.updateStatus)
 
         # Initialize the class-level profiling if needed
         self.__class__.initialize_profiling()
@@ -309,6 +313,13 @@ class WorkflowJob(QgsTask):
         """
         log_message(f"Progress in workflow job is: {progress}")
         self.setProgress(progress)
+
+    def updateStatus(self, status: str):
+        """
+        Used by the workflow to set the status message for the task.
+        :param status: A short description of the current operation
+        """
+        self.status_message.emit(status)
 
     # Don't cache run - this is the main execution method and should always run
     def run(self) -> bool:

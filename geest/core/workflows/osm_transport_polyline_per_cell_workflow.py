@@ -110,6 +110,7 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
             level=Qgis.Info,
         )
         # Step 1: Select grid cells that intersect with features and assign road scores
+        self.updateStatus(f"Scoring {area_features_count} road features...")
         output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
         grid = select_grid_cells_and_assign_transport_score(
             self.osm_processing_type,
@@ -129,6 +130,7 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
 
         # Step 2: Rasterize the grid layer using the assigned values
         # Create a scored boundary layer
+        self.updateStatus("Rasterizing grid cells...")
         raster_output = self._rasterize(
             grid,
             current_bbox,

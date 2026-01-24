@@ -97,6 +97,15 @@ class AreaIterator:
         # Get the total number of polygon features for progress calculation
         self.total_features: int = self.polygon_layer.featureCount()
 
+    def area_count(self) -> int:
+        """
+        Return the total number of areas to be processed.
+
+        Returns:
+            int: The total number of polygon features.
+        """
+        return self.total_features
+
     def __iter__(self) -> Iterator[Tuple[QgsGeometry, QgsGeometry, float]]:
         """
         Iterator that yields pairs of geometries from the polygon layer and the corresponding bbox layer,

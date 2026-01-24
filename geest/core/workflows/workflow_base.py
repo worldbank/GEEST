@@ -46,6 +46,8 @@ class WorkflowBase(QObject):
 
     # Signal for progress changes - will be propagated to the task that owns this workflow
     progressChanged = pyqtSignal(float)
+    # Signal for status message changes - shows what step is currently running
+    statusChanged = pyqtSignal(str)
 
     def __init__(
         self,
@@ -159,6 +161,14 @@ class WorkflowBase(QObject):
         log_message(f"Progress in workflow is : {progress}")  # noqa E203
         self.progressChanged.emit(progress)
 
+    def updateStatus(self, status: str):
+        """
+        Used by the workflow to set the status message for the task.
+        :param status: A short description of the current operation
+        """
+        log_message(f"Status: {status}")
+        self.statusChanged.emit(status)
+
     #
     # Every concrete subclass needs to implement these three methods
     #
@@ -258,12 +268,14 @@ class WorkflowBase(QObject):
         self.attributes["execution_start_time"] = datetime.datetime.now().isoformat()
 
         log_message("Processing Started")
+        self.updateStatus(f"Starting {self.workflow_name}")
 
         feedback = QgsProcessingFeedback()
         output_rasters = []
 
         try:
             if self.features_layer and type(self.features_layer) is QgsVectorLayer:
+                self.updateStatus("Reprojecting features layer...")
                 log_message(f"Features layer for {self.workflow_name} is {self.features_layer.source()}")
                 self.features_layer = check_and_reproject_layer(self.features_layer, self.target_crs)
         except Exception as e:
@@ -299,9 +311,11 @@ class WorkflowBase(QObject):
         areas_processed = 0
 
         try:
+            total_areas = area_iterator.area_count()
             for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
                 areas_processed += 1
                 message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"  # noqa E231
+                self.updateStatus(f"Processing area {index + 1}/{total_areas}")
                 feedback.pushInfo(message)
                 log_message(message)
                 if self.feedback.isCanceled():
@@ -357,19 +371,23 @@ class WorkflowBase(QObject):
                     )
 
                 # clip the area by its matching mask layer in study_area geopackage
+                self.updateStatus(f"Masking area {index + 1}...")
                 masked_layer = self._mask_raster(
                     raster_path=raster_output,
                     area_geometry=clip_area,
                     index=index,
                 )
                 output_rasters.append(masked_layer)
-                log_message("Iterator progress for workflow")
-                self.progressChanged.emit(progress)  # float please
+                # Note: We don't emit area iterator progress here because it would
+                # override the sub-task progress in the Task Progress bar.
+                # The sub-task progress (0-100%) is more useful to the user.
             # Combine all area rasters into a VRT
+            self.updateStatus("Combining area rasters...")
             vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
             self.attributes[self.result_file_key] = vrt_filepath
             self.attributes[self.result_key] = f"{self.workflow_name} Workflow Completed"
 
+            self.updateStatus(f"{self.workflow_name} complete")
             log_message(
                 f"{self.workflow_name} Completed. Output VRT: {vrt_filepath}",
                 tag="Geest",

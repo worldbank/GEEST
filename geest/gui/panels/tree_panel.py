@@ -260,6 +260,13 @@ class TreePanel(QWidget):
         # Add the button to the button bar
         button_bar.addWidget(self.prepare_analysis_button)
 
+        # Add a status label to show current operation
+        self.status_label = QLabel("")
+        self.status_label.setStyleSheet("color: #666; font-style: italic;")
+        self.status_label.setFixedWidth(200)
+        self.status_label.setVisible(False)
+        button_bar.addWidget(self.status_label)
+
         self.project_button = QPushButton("Project")
         self.project_button.clicked.connect(self.switch_to_setup_tab)
         button_bar.addWidget(self.project_button)
@@ -1671,6 +1678,8 @@ class TreePanel(QWidget):
         task.job_finished.connect(lambda success: self.on_workflow_completed(item, success))
         # Hook up the QTask feedback signal to the progress bar
         task.progressChanged.connect(self.task_progress_updated)
+        # Hook up the status message signal to the status label
+        task.status_message.connect(self.task_status_updated)
 
     def run_item(self, item, shift_pressed):
         """Run the item and the ones below it.
@@ -1701,6 +1710,9 @@ class TreePanel(QWidget):
             workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
         self.overall_progress_bar.setVisible(True)
         self.workflow_progress_bar.setVisible(True)
+        self.status_label.setVisible(True)
+        self.status_label.setText("Starting...")
+        self.prepare_analysis_button.setVisible(False)
         self.help_button.setVisible(False)
         self.project_button.setVisible(False)
         self.overall_progress_bar.setValue(0)
@@ -1817,6 +1829,19 @@ class TreePanel(QWidget):
         """
         log_message(f"Task progress: {progress}")
         self.workflow_progress_bar.setValue(int(progress))
+
+    def task_status_updated(self, status: str):
+        """Slot to be called when the task status message is updated.
+
+        Args:
+            status: A short description of the current operation.
+        """
+        # Truncate long status messages to fit the label
+        max_len = 35
+        if len(status) > max_len:
+            status = status[: max_len - 3] + "..."
+        self.status_label.setText(status)
+        self.status_label.setToolTip(status)  # Show full text on hover
 
     @pyqtSlot(bool)
     def on_workflow_completed(self, item, success):
@@ -2005,6 +2030,9 @@ class TreePanel(QWidget):
         self.workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
         self.overall_progress_bar.setVisible(True)
         self.workflow_progress_bar.setVisible(True)
+        self.status_label.setVisible(True)
+        self.status_label.setText("Starting...")
+        self.prepare_analysis_button.setVisible(False)
         self.help_button.setVisible(False)
         self.project_button.setVisible(False)
         self.overall_progress_bar.setValue(0)
@@ -2020,6 +2048,9 @@ class TreePanel(QWidget):
         if len(self.workflow_queue) == 0:
             self.overall_progress_bar.setVisible(False)
             self.workflow_progress_bar.setVisible(False)
+            self.status_label.setVisible(False)
+            self.status_label.setText("")
+            self.prepare_analysis_button.setVisible(True)
             self.help_button.setVisible(True)
             self.project_button.setVisible(True)
             self.workflow_scope_item = None
