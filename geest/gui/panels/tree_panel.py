@@ -42,6 +42,7 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from qgis.utils import iface
 
 from geest.core import JsonTreeItem, WorkflowQueueManager
 from geest.core.algorithms import (
@@ -854,14 +855,7 @@ class TreePanel(QWidget):
             menu.addAction(add_masked_scores)
 
             add_job_opportunities_mask = QAction("Add Job Opportunities Mask to Map")
-            add_job_opportunities_mask.triggered.connect(
-                lambda: add_to_map(
-                    item,
-                    key="opportunities_mask_result_file",
-                    layer_name="Opportunities Mask",
-                    group="WEE",
-                )
-            )
+            add_job_opportunities_mask.triggered.connect(lambda: self.add_opportunities_mask_to_map(item))
             menu.addAction(add_job_opportunities_mask)
 
             add_study_area_layers_action = QAction("Add Study Area to Map", self)
@@ -1031,6 +1025,48 @@ class TreePanel(QWidget):
             item,
             key="wee_by_population_by_opportunities_mask_result_file",
             layer_name="Masked WEE by Population Score",
+            group="WEE",
+        )
+
+    def add_opportunities_mask_to_map(self, item):
+        """Add the opportunities mask to the map with diagnostic feedback.
+
+        Args:
+            item: The analysis item containing opportunities mask configuration.
+        """
+        mask_file = item.attribute("opportunities_mask_result_file")
+
+        if not mask_file:
+            iface.messageBar().pushMessage(
+                "Opportunities Mask",
+                "Not configured. Run the opportunities mask processing first.",
+                level=Qgis.Warning,
+                duration=8,
+            )
+            return
+
+        if not os.path.exists(mask_file):
+            iface.messageBar().pushMessage(
+                "Opportunities Mask",
+                f"File not found: {os.path.basename(mask_file)}. Run the mask processing.",
+                level=Qgis.Warning,
+                duration=8,
+            )
+            return
+
+        if os.path.getsize(mask_file) == 0:
+            iface.messageBar().pushMessage(
+                "Opportunities Mask",
+                "File is empty (0 bytes). Run the mask processing again.",
+                level=Qgis.Warning,
+                duration=8,
+            )
+            return
+
+        add_to_map(
+            item,
+            key="opportunities_mask_result_file",
+            layer_name="Opportunities Mask",
             group="WEE",
         )
 

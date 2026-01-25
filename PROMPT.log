@@ -49,3 +49,4 @@ implement full support for geoparquet writing with fallback to gpkg
 2026-01-25 - Remove @unittest.expectedFailure decorators from GHSL processor and native network analysis tests now that CI passes
 2026-01-25 - Add GHSL download fallback to OpportunitiesMaskProcessor when job opportunities mask is missing or 0 bytes
 2026-01-25 - Add GeoPackage fallback for GHSL tile index to support CI environments without parquet driver
+2026-01-25 - Add diagnostic message bar feedback when adding opportunities mask to map, with GHSL auto-download fallback
