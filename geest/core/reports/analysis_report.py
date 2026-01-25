@@ -145,8 +145,78 @@ class AnalysisReport(BaseReport):
         # Add pages for each indicator
         self.create_detail_pages(current_page=current_page)
 
+    def _add_map_page(self, title: str, description_key: str, layer_uri: str, current_page: int) -> bool:
+        """Add a page with a map to the report.
+
+        Args:
+            title: The title for the page.
+            description_key: Key for the page description in self.page_descriptions.
+            layer_uri: Path to the raster layer file.
+            current_page: The current page number.
+
+        Returns:
+            bool: True if the page was successfully added, False otherwise.
+        """
+        if not layer_uri:
+            log_message(f"No layer URI for '{title}', skipping page", tag="Geest")
+            return False
+
+        self.make_page(
+            title=title,
+            description_key=description_key,
+            current_page=current_page,
+            show_header_and_footer=True,
+        )
+
+        log_message(f"Adding {layer_uri} to map")
+        layer = QgsRasterLayer(layer_uri, title)
+
+        if not layer.isValid():
+            log_message(f"Layer {layer_uri} is invalid and cannot be added.", tag="Geest")
+            return True  # Page was created, even if map couldn't be added
+
+        # Add the layer to the project temporarily for rendering
+        QgsProject.instance().addMapLayer(layer, False)
+        self.temp_layers.append(layer)
+
+        # Build layers list: raster layer + study area outline (if available)
+        layers = [layer]
+        if self.study_area_layer:
+            layers.append(self.study_area_layer)
+
+        self.make_map(layers=layers, current_page=current_page, crs=layer.crs())
+        return True
+
+    def _has_used_indicators(self, factor: dict) -> bool:
+        """Check if a factor has any indicators that are not 'Do Not Use'.
+
+        Args:
+            factor: Factor dictionary from the model.
+
+        Returns:
+            bool: True if at least one indicator is used.
+        """
+        for indicator in factor.get("indicators", []):
+            if indicator.get("analysis_mode", "") != "Do Not Use":
+                return True
+        return False
+
+    def _has_used_factors(self, dimension: dict) -> bool:
+        """Check if a dimension has any factors with used indicators.
+
+        Args:
+            dimension: Dimension dictionary from the model.
+
+        Returns:
+            bool: True if at least one factor has used indicators.
+        """
+        for factor in dimension.get("factors", []):
+            if self._has_used_indicators(factor):
+                return True
+        return False
+
     def create_detail_pages(self, current_page: int = 1):
-        """Iterate over each indicator and create a detail page for it.
+        """Iterate over dimensions, factors, and indicators to create detail pages.
 
         Args:
             current_page: The current page number to start from. Incremented for each new page.
@@ -156,48 +226,46 @@ class AnalysisReport(BaseReport):
             model = json.load(f)
 
         # Print the analysis wee, wee by population etc maps first
-        # wee_by_opportunities_mask_result_file
         self.page_descriptions["wee_by_opportunities"] = "WEE By Opportunities Analysis Map"
-        start_str = model.get("execution_start_time", "")
-        end_str = model.get("execution_end_time", "")
-        # Create a new page for the indicator
-        title = "WEE by Opportunities Mask"
-        self.make_page(
-            title=title, description_key="wee_by_opportunities", current_page=current_page, show_header_and_footer=True
-        )
         layer_uri = model.get("wee_by_opportunities_mask_result_file")
-        log_message(f"Adding {layer_uri} to map")
-        if layer_uri:
-            layer = QgsRasterLayer(layer_uri, title)
+        if self._add_map_page("WEE by Opportunities Mask", "wee_by_opportunities", layer_uri, current_page):
+            current_page += 1
 
-            if not layer.isValid():
-                log_message(
-                    f"Layer {layer_uri} is invalid and cannot be added.",
-                    tag="Geest",
-                )
-            else:
-                # Add the layer to the project temporarily for rendering
-                QgsProject.instance().addMapLayer(layer, False)
-                self.temp_layers.append(layer)
-            # Build layers list: raster layer + study area outline (if available)
-            layers = [layer]
-            if self.study_area_layer:
-                layers.append(self.study_area_layer)
-            crs = layer.crs()
-            self.make_map(
-                layers=layers,
-                current_page=current_page,
-                crs=crs,
-            )
-
-        # Increment the page counter
-        current_page += 1
-
+        # Iterate through dimensions, factors, and indicators
         for dimension in model.get("dimensions", []):
             dim_name = dimension.get("name", "")
+
+            # Skip dimensions with no used factors
+            if not self._has_used_factors(dimension):
+                log_message(f"Skipping dimension '{dim_name}' - no used indicators", tag="Geest")
+                continue
+
+            # Add dimension page with map
+            self.page_descriptions[dim_name] = dimension.get(
+                "description", f"Aggregated analysis for dimension: {dim_name}"
+            )
+            dim_layer_uri = dimension.get("result_file")
+            if dim_layer_uri:
+                if self._add_map_page(f"Dimension: {dim_name}", dim_name, dim_layer_uri, current_page):
+                    current_page += 1
+
             for factor in dimension.get("factors", []):
                 factor_name = factor.get("name", "")
-                self.page_descriptions[factor_name] = factor.get("description", f"Analysis for factor: {factor_name}")
+
+                # Skip factors with no used indicators
+                if not self._has_used_indicators(factor):
+                    log_message(f"Skipping factor '{factor_name}' - no used indicators", tag="Geest")
+                    continue
+
+                # Add factor page with map
+                self.page_descriptions[factor_name] = factor.get(
+                    "description", f"Aggregated analysis for factor: {factor_name}"
+                )
+                factor_layer_uri = factor.get("result_file")
+                if factor_layer_uri:
+                    if self._add_map_page(f"Factor: {factor_name}", factor_name, factor_layer_uri, current_page):
+                        current_page += 1
+
                 for indicator in factor.get("indicators", []):
                     # Skip indicators that are not used
                     analysis_mode = indicator.get("analysis_mode", "")
@@ -209,53 +277,11 @@ class AnalysisReport(BaseReport):
                         continue
 
                     indicator_name = indicator.get("indicator", "")
-                    start_str = indicator.get("execution_start_time", "")
-                    end_str = indicator.get("execution_end_time", "")
 
-                    start_datetime = self.parse_iso_datetime(start_str)
-                    end_datetime = self.parse_iso_datetime(end_str)
-
-                    if start_datetime and end_datetime:
-                        duration = round((end_datetime - start_datetime).total_seconds() / 60, 2)
-                    else:
-                        duration = None
-                    log_message(
-                        f"Indicator '{indicator_name}' (factor: '{factor_name}', dimension: '{dim_name}') "  # noqa E231
-                        f"started at {start_str}, ended at {end_str}, duration: {duration} min"  # noqa E231
-                    )
-                    # Create a new page for the indicator
-                    self.make_page(
-                        title=f"Indicator: {indicator_name}",
-                        description_key=factor_name,
-                        current_page=current_page,
-                        show_header_and_footer=True,
-                    )
+                    # Add indicator page with map
                     layer_uri = indicator.get("result_file")
-                    log_message(f"Adding {layer_uri} to map")
-                    if layer_uri:
-                        layer = QgsRasterLayer(layer_uri, indicator_name)
-                        if not layer.isValid():
-                            log_message(
-                                f"Layer {layer_uri} is invalid and cannot be added.",
-                                tag="Geest",
-                            )
-                        else:
-                            # Add the layer to the project temporarily for rendering
-                            QgsProject.instance().addMapLayer(layer, False)
-                            self.temp_layers.append(layer)
-                        # Build layers list: raster layer + study area outline (if available)
-                        layers = [layer]
-                        if self.study_area_layer:
-                            layers.append(self.study_area_layer)
-                        crs = layer.crs()
-                        self.make_map(
-                            layers=layers,
-                            current_page=current_page,
-                            crs=crs,
-                        )
-
-                    # Increment the page counter
-                    current_page += 1
+                    if self._add_map_page(f"Indicator: {indicator_name}", factor_name, layer_uri, current_page):
+                        current_page += 1
 
     def parse_iso_datetime(self, iso_str: str) -> Optional[datetime]:
         """Parse ISO 8601 datetime string safely.
