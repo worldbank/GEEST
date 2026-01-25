@@ -71,12 +71,19 @@ class StudyAreaProcessingTask(QgsTask):
         feedback: QgsFeedback = None,
         crs=None,
     ):
-        """
-        :param input_vector_path: Path to an OGR-readable vector file (e.g. .gpkg or .shp).
-        :param field_name: Name of the field that holds the study area name.
-        :param cell_size_m: Cell size for grid spacing (in meters).
-        :param working_dir: Directory path where outputs will be saved.
-        :param crs_epsg: EPSG code for target CRS. If None, a UTM zone will be computed.
+        """Initialize the study area processing task.
+
+        Args:
+            layer: The input vector layer containing study area polygons.
+            field_name: Name of the field that holds the study area name.
+            cell_size_m: Cell size for grid spacing (in meters).
+            working_dir: Directory path where outputs will be saved.
+            feedback: QgsFeedback object for progress reporting.
+            crs: Target CRS. If None, a UTM zone will be computed.
+
+        Raises:
+            RuntimeError: If the input layer cannot be opened with OGR.
+            Exception: If the CRS is not EPSG-based.
         """
         super().__init__("Study Area Preparation", QgsTask.CanCancel)
 
@@ -205,6 +212,9 @@ class StudyAreaProcessingTask(QgsTask):
 
         Uses ogr2ogr via GDAL Python bindings for efficient conversion.
         The Parquet file is deleted after successful conversion.
+
+        Raises:
+            RuntimeError: If the conversion fails.
         """
         if not os.path.exists(self.parquet_grid_path):
             log_message("No Parquet grid file to convert", level="WARNING")
@@ -249,10 +259,10 @@ class StudyAreaProcessingTask(QgsTask):
             raise
 
     def count_layer_parts(self):
-        """
-        Returns the number of parts in the layer.
+        """Return the number of parts in the layer.
 
-        :return: The number of parts in the layer.
+        Returns:
+            The number of parts in the layer.
         """
         self.source_layer.ResetReading()
         parts_count = 0
@@ -280,9 +290,17 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(f"Could not enable WAL mode: {str(e)}", level="WARNING")
 
     def export_qgs_layer_to_shapefile(self, layer, output_dir):
-        """
-        Exports a QgsVectorLayer to a Shapefile in output_dir.
-        Returns the full path to the .shp (main file).
+        """Export a QgsVectorLayer to a Shapefile in output_dir.
+
+        Args:
+            layer: The QgsVectorLayer to export.
+            output_dir: Directory where the shapefile will be saved.
+
+        Returns:
+            Full path to the .shp (main file).
+
+        Raises:
+            RuntimeError: If the export fails.
         """
         # ensure the study area directory exists
         if not os.path.exists(os.path.join(output_dir, "study_area")):
@@ -474,8 +492,10 @@ class StudyAreaProcessingTask(QgsTask):
             return None
 
     def create_ghsl_layer_if_not_exists(self, layer_name):
-        """
-        Create GHSL layer in GeoPackage if it doesn't exist.
+        """Create GHSL layer in GeoPackage if it doesn't exist.
+
+        Args:
+            layer_name: Name of the layer to create.
         """
         if not os.path.exists(self.gpkg_path):
             driver = ogr.GetDriverByName("GPKG")
@@ -494,8 +514,10 @@ class StudyAreaProcessingTask(QgsTask):
         ds = None
 
     def run(self):
-        """
-        Main entry point (mimics process_study_area from QGIS code).
+        """Main entry point (mimics process_study_area from QGIS code).
+
+        Returns:
+            True if processing completed successfully, False otherwise.
         """
         try:
             # 1) Create the bounding box as a single polygon feature
@@ -649,7 +671,7 @@ class StudyAreaProcessingTask(QgsTask):
             if hasattr(self, "writer_ds") and self.writer_ds:
                 try:
                     self.writer_ds.FlushCache()
-                except Exception:
+                except Exception:  # nosec B110 - intentional cleanup, ignore errors
                     pass
                 self.writer_ds = None
 
@@ -660,9 +682,9 @@ class StudyAreaProcessingTask(QgsTask):
                     while not self.write_queue.empty():
                         try:
                             self.write_queue.get_nowait()
-                        except Exception:
+                        except Exception:  # nosec B110 - queue drain, break on any error
                             break
-                except Exception:
+                except Exception:  # nosec B110 - intentional cleanup, ignore errors
                     pass
                 self.write_queue = None
 
@@ -674,9 +696,10 @@ class StudyAreaProcessingTask(QgsTask):
     # Table creation logic
     ##########################################################################
     def create_status_tracking_table(self):
-        """
-        Create a table in the GeoPackage to track processing status,
-        similar to the QGIS version.
+        """Create a table in the GeoPackage to track processing status.
+
+        Raises:
+            RuntimeError: If the GeoPackage cannot be created or opened.
         """
         if not os.path.exists(self.gpkg_path):
             # Just create it if no GPKG
@@ -753,6 +776,10 @@ class StudyAreaProcessingTask(QgsTask):
         """Flush pending status updates (must hold _status_update_lock).
 
         Performs all pending inserts and updates in a single database transaction.
+
+        Raises:
+            RuntimeError: If the GeoPackage cannot be opened.
+            Exception: If all retry attempts fail.
         """
         if not self._pending_status_updates:
             return
@@ -966,6 +993,9 @@ class StudyAreaProcessingTask(QgsTask):
             geom: OGR multi-part geometry
             normalized_name: Base name for the area
             area_name: Original area name
+
+        Raises:
+            RuntimeError: If the grid layer cannot be opened for writing.
         """
         count = geom.GetGeometryCount()
         log_message(f"Processing {count} parts for {normalized_name} with shared writer thread")
@@ -980,8 +1010,14 @@ class StudyAreaProcessingTask(QgsTask):
         grid_layer_name = "study_area_grid"
         self.create_grid_layer_if_not_exists(grid_layer_name)
 
-        ds = ogr.Open(self.gpkg_path, 1)  # read-write
-        layer = ds.GetLayerByName(grid_layer_name)
+        # Open the appropriate datasource based on output format
+        if self.use_parquet:
+            ds = ogr.Open(self.parquet_grid_path, 1)  # read-write
+            layer = ds.GetLayer(0)  # Parquet has single layer
+        else:
+            ds = ogr.Open(self.gpkg_path, 1)  # read-write
+            layer = ds.GetLayerByName(grid_layer_name)
+
         if not layer:
             raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
 
@@ -1029,10 +1065,13 @@ class StudyAreaProcessingTask(QgsTask):
     # BBox handling
     ##########################################################################
     def transform_and_align_bbox(self, bbox):
-        """
-        BBox is (xmin, xmax, ymin, ymax). Transform to target CRS if possible,
-        then align to cell_size_m grid.
-        Returns new (xmin, xmax, ymin, ymax) in target CRS.
+        """Transform and align a bounding box to the target CRS and grid.
+
+        Args:
+            bbox: Bounding box tuple (xmin, xmax, ymin, ymax) in source CRS.
+
+        Returns:
+            New bounding box (xmin, xmax, ymin, ymax) aligned to grid in target CRS.
         """
         xmin, xmax, ymin, ymax = bbox
 
@@ -1098,17 +1137,22 @@ class StudyAreaProcessingTask(QgsTask):
         return (x_min_snap, x_max_snap, y_min_snap, y_max_snap)
 
     def save_bbox_polygon(self, layer_name, bbox, area_name):
-        """
-        Save a bounding-box polygon to the specified layer (creating it if needed).
+        """Save a bounding-box polygon to the specified layer (creating it if needed).
+
+        Args:
+            layer_name: Name of the layer to save to.
+            bbox: Bounding box tuple (xmin, xmax, ymin, ymax).
+            area_name: Name of the area for the feature.
         """
         # BBox is (xmin, xmax, ymin, ymax)
         xmin, xmax, ymin, ymax = bbox
         ring = ogr.Geometry(ogr.wkbLinearRing)
-        ring.AddPoint(xmin, ymin)
-        ring.AddPoint(xmin, ymax)
-        ring.AddPoint(xmax, ymax)
-        ring.AddPoint(xmax, ymin)
-        ring.AddPoint(xmin, ymin)
+        # Use AddPoint_2D to create 2D geometry (not 2.5D with Z=0)
+        ring.AddPoint_2D(xmin, ymin)
+        ring.AddPoint_2D(xmin, ymax)
+        ring.AddPoint_2D(xmax, ymax)
+        ring.AddPoint_2D(xmax, ymin)
+        ring.AddPoint_2D(xmin, ymin)
         polygon = ogr.Geometry(ogr.wkbPolygon)
         polygon.AddGeometry(ring)
         self.save_geometry_to_geopackage(layer_name, polygon, area_name)
@@ -1173,6 +1217,9 @@ class StudyAreaProcessingTask(QgsTask):
             geom: OGR geometry
             area_name: Name of the area
             intersects_ghsl: Whether geometry intersects GHSL
+
+        Raises:
+            RuntimeError: If the layer cannot be opened.
         """
         self.create_layer_if_not_exists(layer_name)
         with self.gpkg_lock:
@@ -1198,7 +1245,11 @@ class StudyAreaProcessingTask(QgsTask):
             ds = None
 
     def create_layer_if_not_exists(self, layer_name):
-        """Create a GPKG layer if it does not exist."""
+        """Create a GPKG layer if it does not exist.
+
+        Args:
+            layer_name: Name of the layer to create.
+        """
         with self.gpkg_lock:
             if not os.path.exists(self.gpkg_path):
                 driver = ogr.GetDriverByName("GPKG")
@@ -1244,6 +1295,13 @@ class StudyAreaProcessingTask(QgsTask):
 
         Uses bounded queue to limit memory usage and avoids circular references.
         Supports both GeoPackage and Parquet output formats.
+
+        Args:
+            layer: OGR layer to write to (may be None, writer opens its own connection).
+            normalized_name: Name of the area being processed.
+
+        Raises:
+            RuntimeError: If the grid layer cannot be opened.
         """
         with self.writer_start_lock:
             self.writer_ref_count += 1
@@ -1295,7 +1353,7 @@ class StudyAreaProcessingTask(QgsTask):
                 while True:
                     try:
                         item = write_queue.get(timeout=60)  # Timeout to allow checking for shutdown
-                    except Exception:
+                    except Exception:  # nosec B112 - timeout expected, continue to check for shutdown
                         # Timeout - check if we should continue
                         continue
 
@@ -1400,7 +1458,15 @@ class StudyAreaProcessingTask(QgsTask):
         log_message("Grid writer queue flushed.")
 
     def _write_batch(self, layer, items):
-        """Write batch of (geometry, area_name) tuples in single transaction."""
+        """Write batch of (geometry, area_name) tuples in single transaction.
+
+        Args:
+            layer: OGR layer to write to.
+            items: List of (geometry, area_name) tuples.
+
+        Raises:
+            Exception: If the batch write fails.
+        """
         start_time = time.time()
         feat_defn = layer.GetLayerDefn()
 
@@ -1445,6 +1511,9 @@ class StudyAreaProcessingTask(QgsTask):
             normalized_name: Name of study area
             geom: OGR geometry defining area boundary
             bbox: Tuple of (xmin, xmax, ymin, ymax) for grid extent
+
+        Raises:
+            RuntimeError: If there is an error processing the grid chunks.
         """
         xmin, xmax, ymin, ymax = bbox
         cell_size = self.cell_size_m
@@ -1535,12 +1604,21 @@ class StudyAreaProcessingTask(QgsTask):
             normalized_name: Name of study area
             geom: OGR geometry defining area boundary
             bbox: Tuple of (xmin, xmax, ymin, ymax) for grid extent
+
+        Raises:
+            RuntimeError: If the grid layer cannot be opened for writing.
         """
         grid_layer_name = "study_area_grid"
         self.create_grid_layer_if_not_exists(grid_layer_name)
 
-        ds = ogr.Open(self.gpkg_path, 1)  # read-write
-        layer = ds.GetLayerByName(grid_layer_name)
+        # Open the appropriate datasource based on output format
+        if self.use_parquet:
+            ds = ogr.Open(self.parquet_grid_path, 1)  # read-write
+            layer = ds.GetLayer(0)  # Parquet has single layer
+        else:
+            ds = ogr.Open(self.gpkg_path, 1)  # read-write
+            layer = ds.GetLayerByName(grid_layer_name)
+
         if not layer:
             raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
 
@@ -1624,7 +1702,14 @@ class StudyAreaProcessingTask(QgsTask):
         progress_lock = threading.Lock()
 
         def process_single_chunk(chunk):
-            """Process single chunk in worker thread."""
+            """Process single chunk in worker thread.
+
+            Args:
+                chunk: Dictionary with chunk parameters.
+
+            Returns:
+                Tuple of (task, start_time, index).
+            """
             start_time = time.time()
             index = chunk["index"]
 
@@ -1686,12 +1771,13 @@ class StudyAreaProcessingTask(QgsTask):
             self.write_queue.put((geometry, normalized_name))
 
     def create_grid_layer_if_not_exists(self, layer_name):
-        """
-        Create a grid layer with 'grid_id' as integer field
-        and a polygon geometry if it does not exist.
+        """Create a grid layer with 'grid_id' as integer field and polygon geometry.
 
         If Parquet is available, creates a Parquet file for the grid layer.
         Otherwise falls back to GeoPackage.
+
+        Args:
+            layer_name: Name of the layer to create.
         """
         if self.use_parquet:
             self._create_parquet_grid_layer()
@@ -1721,7 +1807,11 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(f"Created Parquet grid file: {self.parquet_grid_path}")
 
     def _create_gpkg_grid_layer(self, layer_name):
-        """Create a GeoPackage grid layer."""
+        """Create a GeoPackage grid layer.
+
+        Args:
+            layer_name: Name of the layer to create.
+        """
         with self.gpkg_lock:
             if not os.path.exists(self.gpkg_path):
                 driver = ogr.GetDriverByName("GPKG")
@@ -1741,9 +1831,7 @@ class StudyAreaProcessingTask(QgsTask):
     # Create Clip Polygon
     ##########################################################################
     def create_clip_polygon(self, geom, aligned_box, normalized_name):
-        """
-        Creates a polygon that includes the original geometry plus all grid cells
-        that intersect the boundary of the geometry. Then dissolves them into one polygon.
+        """Create a polygon that includes geometry plus all grid cells that intersect boundary.
 
         Uses optimized spatial filtering with buffered boundary to reduce intersection checks.
         Memory-efficient batched processing limits memory usage to ~500MB max.
@@ -1752,6 +1840,14 @@ class StudyAreaProcessingTask(QgsTask):
         - Buffered boundary spatial filter reduces candidate cells by ~90%
         - Two-phase check: fast Contains() then precise Intersects()
         - Batched UnionCascaded for efficient geometry merging
+
+        Args:
+            geom: OGR geometry to create clip polygon for.
+            aligned_box: Aligned bounding box (unused, kept for API compatibility).
+            normalized_name: Name of the area.
+
+        Raises:
+            RuntimeError: If the grid layer is missing.
         """
         # Memory-efficient batch size - roughly 50k geometries at ~10KB each = ~500MB
         BATCH_SIZE = 50000
@@ -1947,13 +2043,21 @@ class StudyAreaProcessingTask(QgsTask):
     # Create Raster Mask
     ##########################################################################
     def create_raster_mask(self, geom, aligned_box, mask_name):
-        """
-        Creates a 1-bit raster mask for a single geometry using gdal.Rasterize.
+        """Create a 1-bit raster mask for a single geometry using gdal.Rasterize.
 
         Uses optimized TIFF creation options for better I/O performance:
-        - DEFLATE compression for smaller file size
-        - Tiled output for better random access
-        - NBITS=1 for minimal storage
+        DEFLATE compression, tiled output, NBITS=1.
+
+        Args:
+            geom: OGR geometry to rasterize.
+            aligned_box: Aligned bounding box (xmin, xmax, ymin, ymax).
+            mask_name: Name for the output mask file.
+
+        Returns:
+            Path to the created mask file, or None if mask is too small.
+
+        Raises:
+            RuntimeError: If rasterization fails.
         """
         mask_filepath = os.path.join(self.working_dir, "study_area", f"{mask_name}.tif")
 
@@ -2045,9 +2149,10 @@ class StudyAreaProcessingTask(QgsTask):
     # Create VRT
     ##########################################################################
     def create_raster_vrt(self, output_vrt_name="combined_mask.vrt"):
-        """
-        Creates a VRT file from all .tif masks in the 'study_area' dir using
-        gdal.BuildVRT (Python API) or gdalbuildvrt approach.
+        """Create a VRT file from all .tif masks in the study_area directory.
+
+        Args:
+            output_vrt_name: Name for the output VRT file.
         """
         raster_dir = os.path.join(self.working_dir, "study_area")
         raster_files = glob.glob(os.path.join(raster_dir, "*.tif"))
@@ -2073,8 +2178,10 @@ class StudyAreaProcessingTask(QgsTask):
     # Directory creation
     ##########################################################################
     def create_study_area_directory(self, working_dir):
-        """
-        Create 'study_area' subdir if not exist
+        """Create 'study_area' subdirectory if it doesn't exist.
+
+        Args:
+            working_dir: Parent directory for the study_area subdirectory.
         """
         study_area_dir = os.path.join(working_dir, "study_area")
         if not os.path.exists(study_area_dir):
