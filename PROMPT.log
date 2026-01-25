@@ -40,3 +40,6 @@ if we want to do write to geoparquet and then convert to gpkg, we would need to 
 implement full support for geoparquet writing with fallback to gpkg
 
 2026-01-25 - Strip out GeoParquet support and keep only optimized GeoPackage writes (benchmarks showed comparable performance without requiring Arrow libraries)
+
+2026-01-25 - Add raster layer validation in workflow_base._subset_raster_layer and GHSL download fallback for workflows that need GHSL data
+2026-01-25 - Fix all Google-style docstring issues in workflow_base.py and index_score_with_ghsl_workflow.py
