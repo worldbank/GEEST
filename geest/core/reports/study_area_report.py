@@ -275,8 +275,13 @@ class StudyAreaReport(BaseReport):
         self.layout.addLayoutItem(summary_label)
 
         # Compute and add summary statistics for each layer on separate pages
+        # Skip study_area_grid as it has too many features and takes very long to render
+        layers_to_skip = {"study_area_grid"}
         current_page = 1
         for page_number, (layer_name, layer) in enumerate(self.layers.items()):
+            if layer_name in layers_to_skip:
+                log_message(f"Skipping layer '{layer_name}' in report (too many features)")
+                continue
             # Add a new page for each layer
             page = self.make_page(
                 title=layer_name, description_key=layer_name, current_page=current_page, show_header_and_footer=True
