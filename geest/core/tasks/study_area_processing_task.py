@@ -197,15 +197,60 @@ class StudyAreaProcessingTask(QgsTask):
         self.status_table_name = "study_area_creation_status"
 
     def _check_parquet_driver(self):
-        """Check if the Parquet driver is available in GDAL.
+        """Check if the Parquet driver is available and functional in GDAL.
+
+        Tests by actually creating a small test file to verify the driver
+        works end-to-end (some systems have the driver but missing libraries).
 
         Returns:
-            bool: True if Parquet driver is available, False otherwise.
+            bool: True if Parquet driver is available and functional, False otherwise.
         """
         driver = ogr.GetDriverByName("Parquet")
-        if driver is not None:
+        if driver is None:
+            return False
+
+        # Test that we can actually create and open a Parquet file
+        # Some systems have the driver registered but lack Arrow/Parquet libs
+        import tempfile
+
+        test_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".parquet", delete=False) as tmp:
+                test_path = tmp.name
+
+            # Try to create a simple Parquet file
+            test_ds = driver.CreateDataSource(test_path)
+            if test_ds is None:
+                log_message("Parquet driver exists but cannot create files", level="WARNING")
+                return False
+
+            test_layer = test_ds.CreateLayer("test", geom_type=ogr.wkbPoint)
+            if test_layer is None:
+                test_ds = None
+                log_message("Parquet driver exists but cannot create layers", level="WARNING")
+                return False
+
+            test_ds = None  # Close the file
+
+            # Try to re-open it
+            test_ds = ogr.Open(test_path, 0)
+            if test_ds is None:
+                log_message("Parquet driver exists but cannot open files", level="WARNING")
+                return False
+
+            test_ds = None
             return True
-        return False
+
+        except Exception as e:
+            log_message(f"Parquet driver test failed: {e}", level="WARNING")
+            return False
+        finally:
+            # Clean up test file
+            if test_path and os.path.exists(test_path):
+                try:
+                    os.remove(test_path)
+                except OSError:
+                    pass
 
     def _convert_parquet_grid_to_gpkg(self):
         """Convert the Parquet grid file to GeoPackage layer.
