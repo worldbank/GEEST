@@ -165,7 +165,7 @@ class GeestOptionsFactory(QgsOptionsWidgetFactory):
     def __init__(self):  # pylint: disable=useless-super-delegation
         """🏗️ Initialize the instance."""
         super().__init__()
-        self.setTitle("Geest")
+        self.setTitle("GeoE3")
 
     def icon(self):  # pylint: disable=missing-function-docstring
         """⚙️ Icon.

@@ -33,7 +33,7 @@ class AnalysisReport(BaseReport):
 
     """
 
-    def __init__(self, model_path: str, working_directory: str = None, report_name="Geest Analysis Report"):
+    def __init__(self, model_path: str, working_directory: str = None, report_name="GeoE3 Analysis Report"):
         """
         Initialize the report.
 

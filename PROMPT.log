@@ -57,3 +57,4 @@ implement full support for geoparquet writing with fallback to gpkg
 2026-01-25 - Exclude unused indicators (analysis_mode="Do Not Use") from analysis summary report
 2026-01-25 - Add dimension and factor map pages to analysis summary report
 2026-01-25 - Fix report: show "Not run" instead of "None min" and hide bar for unexecuted indicators
+2026-01-25 - Rebrand user-visible text from GEEST/Geest to GeoE3 (report title, plugin name, menu items, settings)
