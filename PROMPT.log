@@ -45,3 +45,4 @@ implement full support for geoparquet writing with fallback to gpkg
 2026-01-25 - Fix all Google-style docstring issues in workflow_base.py and index_score_with_ghsl_workflow.py
 2026-01-25 - Pin GitHub CI black version to 25.x to match nixpkgs version used in local development
 2026-01-25 - Bump version to 2.0.0 and write comprehensive changelog
+2026-01-25 - Add unit tests for GHSLDownloader to verify downloads work and output files are not 0 bytes
