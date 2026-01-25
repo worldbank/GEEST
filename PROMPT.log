@@ -43,3 +43,4 @@ implement full support for geoparquet writing with fallback to gpkg
 
 2026-01-25 - Add raster layer validation in workflow_base._subset_raster_layer and GHSL download fallback for workflows that need GHSL data
 2026-01-25 - Fix all Google-style docstring issues in workflow_base.py and index_score_with_ghsl_workflow.py
+2026-01-25 - Pin GitHub CI black version to 25.x to match nixpkgs version used in local development
