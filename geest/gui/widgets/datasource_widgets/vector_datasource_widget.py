@@ -534,11 +534,14 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                 delete_gpkg=True,
             )
 
+            # Track if error already occurred to avoid duplicate messages
+            self._osm_error_handled = False
+
             # Connect signals
             self.osm_task.progress_updated.connect(self.update_button_progress)
             self.osm_task.error_occurred.connect(self.on_osm_download_error)
             self.osm_task.taskCompleted.connect(lambda: self.on_osm_download_finished(output_file_path))
-            self.osm_task.taskTerminated.connect(lambda: self.on_osm_download_error("Download was cancelled"))
+            self.osm_task.taskTerminated.connect(self.on_osm_download_terminated)
 
             # Add to QGIS task manager (proper architecture)
             QgsApplication.taskManager().addTask(self.osm_task)
@@ -559,7 +562,11 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             QMessageBox.warning(self, "Error", f"Failed to start download: {str(e)}")
 
     def update_button_progress(self, message: str):
-        """Update button text to show download progress."""
+        """Update button text to show download progress.
+
+        Args:
+            message: Progress message from the download task.
+        """
         log_message(message, tag="Geest", level=Qgis.Info)
         if self.osm_download_button:
             if "Processing" in message:
@@ -568,7 +575,11 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                 self.osm_download_button.setText("Complete!")
 
     def on_osm_download_finished(self, gpkg_path: str) -> None:
-        """Handle completion of OSM download."""
+        """Handle completion of OSM download.
+
+        Args:
+            gpkg_path: Path to the downloaded GeoPackage file.
+        """
         log_message(f"OSM download completed: {gpkg_path}", tag="Geest", level=Qgis.Info)
 
         self._stop_spinner()
@@ -623,8 +634,15 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             )
 
     def on_osm_download_error(self, error_message: str) -> None:
-        """Handle OSM download errors."""
+        """Handle OSM download errors.
+
+        Args:
+            error_message: The error message from the download task.
+        """
         log_message(f"OSM download error: {error_message}", tag="Geest", level=Qgis.Critical)
+
+        # Mark that we've handled an error to avoid duplicate message from taskTerminated
+        self._osm_error_handled = True
 
         self._stop_spinner()
         if self.osm_download_button:
@@ -641,6 +659,25 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             f"The OSM data download failed.\n\n{error_message}\n\n"
             "You can try again by clicking the download button.",
         )
+
+    def on_osm_download_terminated(self) -> None:
+        """Handle OSM download task termination (cancellation).
+
+        Only shows a message if an error wasn't already handled.
+        """
+        # Skip if error was already handled (avoids duplicate message boxes)
+        if getattr(self, "_osm_error_handled", False):
+            log_message("OSM task terminated after error - skipping duplicate message", tag="Geest")
+            return
+
+        log_message("OSM download was cancelled by user", tag="Geest", level=Qgis.Warning)
+
+        self._stop_spinner()
+        if self.osm_download_button:
+            self.osm_download_button.setText("Cancelled")
+            self.osm_download_button.setStyleSheet("background-color: #ffffcc; padding: 5px 10px;")
+            self.osm_download_button.setEnabled(True)
+            self.osm_download_button.setToolTip("Download was cancelled. Click to retry.")
 
     def _stop_spinner(self) -> None:
         """Stop the spinner animation and hide it."""
@@ -677,13 +714,9 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         return self.osm_disclaimer_label
 
     def update_attributes(self):
-        """
-        Updates the attributes dict to match the current state of the widget.
+        """Update the attributes dict to match the current state of the widget.
 
         The attributes dict is a reference so any tree item attributes will be updated directly.
-
-        Returns:
-            None
         """
         layer = self.layer_combo.currentLayer()
         if not layer:
