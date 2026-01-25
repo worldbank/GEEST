@@ -37,14 +37,10 @@ class AnalysisReport(BaseReport):
         """
         Initialize the report.
 
-        Parameters:
-            model_path (str): Path to the model JSON file.
-            working_directory (str): Path to the working directory containing the study area GeoPackage.
-            report_name (str): The title to use for the report.
-
-        Raises:
-            ValueError: If the layer cannot be loaded from the given file path.
-            TypeError: If layer_input is neither a string nor a QgsVectorLayer.
+        Args:
+            model_path: Path to the model JSON file.
+            working_directory: Path to the working directory containing the study area GeoPackage.
+            report_name: The title to use for the report.
         """
         template_path = resources_path("resources", "qpt", "analysis_summary_report_template.qpt")
         super().__init__(template_path, report_name)
@@ -150,13 +146,10 @@ class AnalysisReport(BaseReport):
         self.create_detail_pages(current_page=current_page)
 
     def create_detail_pages(self, current_page: int = 1):
-        """
-        Iterate over each indicator and create a detail page for it.
+        """Iterate over each indicator and create a detail page for it.
 
-        Parameters
-        ----------
-        current_page : int
-            The current page number to start from. This is incremented for each new page created.
+        Args:
+            current_page: The current page number to start from. Incremented for each new page.
         """
 
         with open(self.model_path, "r", encoding="utf-8") as f:
@@ -206,6 +199,15 @@ class AnalysisReport(BaseReport):
                 factor_name = factor.get("name", "")
                 self.page_descriptions[factor_name] = factor.get("description", f"Analysis for factor: {factor_name}")
                 for indicator in factor.get("indicators", []):
+                    # Skip indicators that are not used
+                    analysis_mode = indicator.get("analysis_mode", "")
+                    if analysis_mode == "Do Not Use":
+                        log_message(
+                            f"Skipping indicator '{indicator.get('indicator', '')}' - analysis_mode is 'Do Not Use'",
+                            tag="Geest",
+                        )
+                        continue
+
                     indicator_name = indicator.get("indicator", "")
                     start_str = indicator.get("execution_start_time", "")
                     end_str = indicator.get("execution_end_time", "")
@@ -256,16 +258,29 @@ class AnalysisReport(BaseReport):
                     current_page += 1
 
     def parse_iso_datetime(self, iso_str: str) -> Optional[datetime]:
-        """Parse ISO 8601 datetime string safely."""
+        """Parse ISO 8601 datetime string safely.
+
+        Args:
+            iso_str: ISO 8601 formatted datetime string.
+
+        Returns:
+            datetime: Parsed datetime object, or None if parsing fails.
+        """
         try:
             return datetime.fromisoformat(iso_str)
         except Exception:
             return None
 
     def interpolate_color(self, rel: float) -> str:
-        """
-        Linearly interpolate between forest green and off-red.
+        """Linearly interpolate between forest green and off-red.
+
         rel = 0.0 => forest green (#228B22), rel = 1.0 => off-red (#CC4444)
+
+        Args:
+            rel: Relative value from 0.0 to 1.0.
+
+        Returns:
+            str: Hex color string (e.g., "#228B22").
         """
         fg = (34, 139, 34)  # Forest Green
         or_ = (204, 68, 68)  # Off Red
@@ -275,24 +290,11 @@ class AnalysisReport(BaseReport):
         return f"#{r:02x}{g:02x}{b:02x}"  # noqa E231
 
     def extract_execution_times_with_colors(self) -> List[Dict[str, Optional[str]]]:
-        """
-        Extracts execution times for indicators and adds relative time and a color gradient.
+        """Extract execution times for indicators with relative time and color gradient.
 
-        Parameters
-        ----------
-        model_path : str
-            Path to the GEEST model JSON file.
-
-        Returns
-        -------
-        List[Dict[str, Optional[str]]]
-            A sorted list of dictionaries with:
-                - indicator
-                - factor
-                - dimension
-                - execution_time_minutes
-                - relative_time (float from 0.0 to 1.0)
-                - color (string "rgb(r, g, b)")
+        Returns:
+            List[Dict]: A sorted list of dictionaries with indicator, factor, dimension,
+                execution_time_minutes, relative_time (0.0-1.0), and color (hex string).
         """
 
         with open(self.model_path, "r", encoding="utf-8") as f:
@@ -305,6 +307,11 @@ class AnalysisReport(BaseReport):
             for factor in dimension.get("factors", []):
                 factor_name = factor.get("name", "")
                 for indicator in factor.get("indicators", []):
+                    # Skip indicators that are not used
+                    analysis_mode = indicator.get("analysis_mode", "")
+                    if analysis_mode == "Do Not Use":
+                        continue
+
                     ind_name = indicator.get("indicator", "")
                     start_str = indicator.get("execution_start_time", "")
                     end_str = indicator.get("execution_end_time", "")
@@ -355,17 +362,12 @@ class AnalysisReport(BaseReport):
         return results
 
     def create_execution_time_layout(self, entries: list, max_bar_width_mm: float = 10.0, page: int = 1):
-        """
-        Creates a QGIS layout showing execution times with colored bars and labels.
+        """Create a QGIS layout showing execution times with colored bars and labels.
 
-        Parameters
-        ----------
-        layout_name : str
-            Name of the layout to create.
-        entries : list of dict
-            Output from `extract_execution_times_with_colors()`.
-        max_bar_width_mm : float
-            Maximum width (in mm) for the bar representing the slowest task.
+        Args:
+            entries: Output from `extract_execution_times_with_colors()`.
+            max_bar_width_mm: Maximum width (in mm) for the bar representing the slowest task.
+            page: Page number in the layout to add the execution time bars to.
         """
         y_offset = 80  # mm
         row_height = 5  # mm
