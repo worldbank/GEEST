@@ -403,11 +403,16 @@ class AnalysisReport(BaseReport):
             y = y_offset + i * (row_height + 2)
 
             # Add label
-
             duration_label = QgsLayoutItemLabel(self.layout)
             indicator = entry["indicator"]
             duration = entry["execution_time_minutes"]
-            duration_label.setText(f"{indicator} - {duration} min")
+
+            # Show "Not run" for indicators that weren't executed
+            if duration is None:
+                duration_label.setText(f"{indicator} - Not run")
+            else:
+                duration_label.setText(f"{indicator} - {duration} min")
+
             duration_label.setFont(QFont("Arial", 10))
             duration_label.adjustSizeToText()
             duration_label.attemptMove(
@@ -420,19 +425,16 @@ class AnalysisReport(BaseReport):
             )
             self.layout.addLayoutItem(duration_label)
 
-            # Skip if no timing data
-            # if entry["execution_time_minutes"] is None or entry["color"] is None:
-            #    continue
+            # Skip bar if no timing data
+            if entry.get("color", None) is None or duration is None:
+                log_message(f"Skipping bar for '{indicator}' - not run")
+                continue
 
             # Add bar (shape item)
             bar = QgsLayoutItemShape(self.layout)
             log_message(f"Processing entry: {entry}")
-            if entry.get("color", None) is None:
-                bar_width = 10.0
-                color = "#ff0000"
-            else:
-                color = entry["color"]
-                bar_width = max_bar_width_mm * entry["relative_time"]
+            color = entry["color"]
+            bar_width = max_bar_width_mm * entry["relative_time"]
 
             bar.attemptMove(
                 QgsLayoutPoint(

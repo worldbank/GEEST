@@ -56,3 +56,4 @@ implement full support for geoparquet writing with fallback to gpkg
 2026-01-25 - Add robust error handling for GeoPackage access during concurrent writes in add_bboxes_to_map: handle malformed db errors, check file exists and size before opening
 2026-01-25 - Exclude unused indicators (analysis_mode="Do Not Use") from analysis summary report
 2026-01-25 - Add dimension and factor map pages to analysis summary report
+2026-01-25 - Fix report: show "Not run" instead of "None min" and hide bar for unexecuted indicators
