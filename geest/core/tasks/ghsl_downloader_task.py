@@ -88,7 +88,7 @@ class GHSLDownloaderTask(QgsTask):
         self.extent_mollweide = extent_mollweide
         # Compute bounding box in EPSG:4326
         transform = QgsCoordinateTransform(
-            QgsCoordinateReferenceSystem("EPSG:54009"),  # Mollweide
+            QgsCoordinateReferenceSystem("ESRI:54009"),  # Mollweide
             QgsCoordinateReferenceSystem("EPSG:4326"),
             QgsProject.instance(),
         )

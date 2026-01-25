@@ -259,10 +259,10 @@ class StudyAreaProcessingTask(QgsTask):
             extent = bbox_layer.GetExtent()  # (xmin, xmax, ymin, ymax)
             study_area_ds = None
 
-            # Transform extent to Mollweide
+            # Transform extent to Mollweide (ESRI:54009, not EPSG)
             source_srs = self.target_spatial_ref
             mollweide_srs = osr.SpatialReference()
-            mollweide_srs.ImportFromEPSG(54009)
+            mollweide_srs.SetFromUserInput("ESRI:54009")
 
             transform_to_mollweide = osr.CoordinateTransformation(source_srs, mollweide_srs)
 
@@ -292,7 +292,7 @@ class StudyAreaProcessingTask(QgsTask):
             # Download GHSL using downloader
             log_message("Downloading GHSL tiles...")
             transform_to_4326 = QgsCoordinateTransform(
-                QgsCoordinateReferenceSystem("EPSG:54009"),
+                QgsCoordinateReferenceSystem("ESRI:54009"),
                 QgsCoordinateReferenceSystem("EPSG:4326"),
                 QgsProject.instance(),
             )

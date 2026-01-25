@@ -41,6 +41,9 @@ class GridFromBboxTask(QgsTask):
         self.chunk_id = chunk_id
         self.bbox_chunk = bbox_chunk  # (x_start, x_end, y_start, y_end)
         self.geom = geom
+        # Ensure geometry is 2D (not 2.5D or 3D)
+        if self.geom.GetCoordinateDimension() == 3:
+            self.geom.FlattenTo2D()
         self.cell_size = cell_size
         self.feedback = feedback
         self.run_time = 0.0
