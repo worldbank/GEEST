@@ -87,25 +87,18 @@ class StudyAreaProcessingTask(QgsTask):
         """
         super().__init__("Study Area Preparation", QgsTask.CanCancel)
 
-        # Check if Parquet driver is available for faster grid writes
-        self.use_parquet = self._check_parquet_driver()
-        if self.use_parquet:
-            log_message("GeoParquet driver available - using fast Parquet writes for grid layer")
-        else:
-            log_message("GeoParquet driver not available - using optimized GeoPackage writes")
-
-        # Configure GDAL for optimized GeoPackage writes (used for non-grid layers always)
+        # Configure GDAL for optimized GeoPackage writes
         # These settings trade crash safety for performance - acceptable for processing tasks
         gdal.SetConfigOption("OGR_SQLITE_JOURNAL", "MEMORY")
         gdal.SetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF")
         gdal.SetConfigOption("SQLITE_USE_OGR_VFS", "YES")
+        log_message("Using optimized GeoPackage write settings")
 
         self.input_vector_path = self.export_qgs_layer_to_shapefile(layer, working_dir)
         self.field_name = field_name
         self.cell_size_m = cell_size_m
         self.working_dir = working_dir
         self.gpkg_path = os.path.join(working_dir, "study_area", "study_area.gpkg")
-        self.parquet_grid_path = os.path.join(working_dir, "study_area", "study_area_grid.parquet")
         self.counter = 0
         self.feedback = feedback
         self.metrics = {
@@ -195,113 +188,6 @@ class StudyAreaProcessingTask(QgsTask):
         log_message(f"Transformed layer bbox to target CRS and aligned to grid: {self.transformed_layer_bbox}")
         # Tracking table name
         self.status_table_name = "study_area_creation_status"
-
-    def _check_parquet_driver(self):
-        """Check if the Parquet driver is available and functional in GDAL.
-
-        Tests by actually creating a small test file to verify the driver
-        works end-to-end (some systems have the driver but missing libraries).
-
-        Returns:
-            bool: True if Parquet driver is available and functional, False otherwise.
-        """
-        driver = ogr.GetDriverByName("Parquet")
-        if driver is None:
-            return False
-
-        # Test that we can actually create and open a Parquet file
-        # Some systems have the driver registered but lack Arrow/Parquet libs
-        import tempfile
-
-        test_path = None
-        try:
-            with tempfile.NamedTemporaryFile(suffix=".parquet", delete=False) as tmp:
-                test_path = tmp.name
-
-            # Try to create a simple Parquet file
-            test_ds = driver.CreateDataSource(test_path)
-            if test_ds is None:
-                log_message("Parquet driver exists but cannot create files", level="WARNING")
-                return False
-
-            test_layer = test_ds.CreateLayer("test", geom_type=ogr.wkbPoint)
-            if test_layer is None:
-                test_ds = None
-                log_message("Parquet driver exists but cannot create layers", level="WARNING")
-                return False
-
-            test_ds = None  # Close the file
-
-            # Try to re-open it
-            test_ds = ogr.Open(test_path, 0)
-            if test_ds is None:
-                log_message("Parquet driver exists but cannot open files", level="WARNING")
-                return False
-
-            test_ds = None
-            return True
-
-        except Exception as e:
-            log_message(f"Parquet driver test failed: {e}", level="WARNING")
-            return False
-        finally:
-            # Clean up test file
-            if test_path and os.path.exists(test_path):
-                try:
-                    os.remove(test_path)
-                except OSError:
-                    pass
-
-    def _convert_parquet_grid_to_gpkg(self):
-        """Convert the Parquet grid file to GeoPackage layer.
-
-        Uses ogr2ogr via GDAL Python bindings for efficient conversion.
-        The Parquet file is deleted after successful conversion.
-
-        Raises:
-            RuntimeError: If the conversion fails.
-        """
-        if not os.path.exists(self.parquet_grid_path):
-            log_message("No Parquet grid file to convert", level="WARNING")
-            return
-
-        log_message(f"Converting Parquet grid to GeoPackage: {self.parquet_grid_path}")
-        start_time = time.time()
-
-        try:
-            # Use gdal.VectorTranslate for efficient conversion
-            options = gdal.VectorTranslateOptions(
-                format="GPKG",
-                accessMode="append",  # Append to existing GPKG
-                layerName="study_area_grid",
-            )
-
-            result = gdal.VectorTranslate(
-                self.gpkg_path,
-                self.parquet_grid_path,
-                options=options,
-            )
-
-            if result is None:
-                raise RuntimeError("gdal.VectorTranslate returned None")
-
-            # Close the result to flush writes
-            result = None
-
-            elapsed = time.time() - start_time
-            log_message(f"Parquet to GeoPackage conversion completed in {elapsed:.2f} seconds")
-
-            # Delete the Parquet file after successful conversion
-            try:
-                os.remove(self.parquet_grid_path)
-                log_message(f"Removed temporary Parquet file: {self.parquet_grid_path}")
-            except Exception as e:
-                log_message(f"Warning: could not remove Parquet file: {e}", level="WARNING")
-
-        except Exception as e:
-            log_message(f"Error converting Parquet to GeoPackage: {e}", level="CRITICAL")
-            log_message(traceback.format_exc(), level="CRITICAL")
-            raise
 
     def count_layer_parts(self):
         """Return the number of parts in the layer.
@@ -677,10 +563,6 @@ class StudyAreaProcessingTask(QgsTask):
             # 4) Create a VRT of all generated raster masks
             self.create_raster_vrt()
 
-            # 5) If we used Parquet for grid, convert to GPKG now
-            if self.use_parquet:
-                self._convert_parquet_grid_to_gpkg()
-
         except Exception as e:
             log_message(f"Error in run(): {str(e)}")
             log_message(traceback.format_exc())
@@ -1055,13 +937,9 @@ class StudyAreaProcessingTask(QgsTask):
         grid_layer_name = "study_area_grid"
         self.create_grid_layer_if_not_exists(grid_layer_name)
 
-        # Open the appropriate datasource based on output format
-        if self.use_parquet:
-            ds = ogr.Open(self.parquet_grid_path, 1)  # read-write
-            layer = ds.GetLayer(0)  # Parquet has single layer
-        else:
-            ds = ogr.Open(self.gpkg_path, 1)  # read-write
-            layer = ds.GetLayerByName(grid_layer_name)
+        # Open GeoPackage for writing
+        ds = ogr.Open(self.gpkg_path, 1)  # read-write
+        layer = ds.GetLayerByName(grid_layer_name)
 
         if not layer:
             raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
@@ -1339,7 +1217,6 @@ class StudyAreaProcessingTask(QgsTask):
         """Start dedicated writer thread for async writing (thread-safe singleton with ref counting).
 
         Uses bounded queue to limit memory usage and avoids circular references.
-        Supports both GeoPackage and Parquet output formats.
 
         Args:
             layer: OGR layer to write to (may be None, writer opens its own connection).
@@ -1361,23 +1238,13 @@ class StudyAreaProcessingTask(QgsTask):
             # Use bounded queue to limit memory usage
             self.write_queue = Queue(maxsize=self.WRITE_QUEUE_MAX_SIZE)
 
-            # Open persistent connection based on output format
-            if self.use_parquet:
-                writer_ds = ogr.Open(self.parquet_grid_path, 1)
-                if not writer_ds:
-                    raise RuntimeError(f"Writer thread could not open {self.parquet_grid_path}")
-                self.writer_layer = writer_ds.GetLayer(0)  # Parquet has single layer
-                if not self.writer_layer:
-                    raise RuntimeError("Writer thread could not open Parquet grid layer")
-                log_message("Writer thread using Parquet output")
-            else:
-                writer_ds = ogr.Open(self.gpkg_path, 1)
-                if not writer_ds:
-                    raise RuntimeError(f"Writer thread could not open {self.gpkg_path}")
-                self.writer_layer = writer_ds.GetLayerByName("study_area_grid")
-                if not self.writer_layer:
-                    raise RuntimeError("Writer thread could not open study_area_grid layer")
-                log_message("Writer thread using GeoPackage output")
+            # Open persistent connection to GeoPackage
+            writer_ds = ogr.Open(self.gpkg_path, 1)
+            if not writer_ds:
+                raise RuntimeError(f"Writer thread could not open {self.gpkg_path}")
+            self.writer_layer = writer_ds.GetLayerByName("study_area_grid")
+            if not self.writer_layer:
+                raise RuntimeError("Writer thread could not open study_area_grid layer")
             self.writer_ds = writer_ds
 
             # Store references locally to avoid circular reference with self
@@ -1656,13 +1523,9 @@ class StudyAreaProcessingTask(QgsTask):
         grid_layer_name = "study_area_grid"
         self.create_grid_layer_if_not_exists(grid_layer_name)
 
-        # Open the appropriate datasource based on output format
-        if self.use_parquet:
-            ds = ogr.Open(self.parquet_grid_path, 1)  # read-write
-            layer = ds.GetLayer(0)  # Parquet has single layer
-        else:
-            ds = ogr.Open(self.gpkg_path, 1)  # read-write
-            layer = ds.GetLayerByName(grid_layer_name)
+        # Open GeoPackage for writing
+        ds = ogr.Open(self.gpkg_path, 1)  # read-write
+        layer = ds.GetLayerByName(grid_layer_name)
 
         if not layer:
             raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
@@ -1816,42 +1679,6 @@ class StudyAreaProcessingTask(QgsTask):
             self.write_queue.put((geometry, normalized_name))
 
     def create_grid_layer_if_not_exists(self, layer_name):
-        """Create a grid layer with 'grid_id' as integer field and polygon geometry.
-
-        If Parquet is available, creates a Parquet file for the grid layer.
-        Otherwise falls back to GeoPackage.
-
-        Args:
-            layer_name: Name of the layer to create.
-        """
-        if self.use_parquet:
-            self._create_parquet_grid_layer()
-        else:
-            self._create_gpkg_grid_layer(layer_name)
-
-    def _create_parquet_grid_layer(self):
-        """Create a Parquet file for the grid layer."""
-        with self.gpkg_lock:
-            if os.path.exists(self.parquet_grid_path):
-                # Parquet already exists, will append
-                return
-
-            # Create new Parquet datasource
-            driver = ogr.GetDriverByName("Parquet")
-            ds = driver.CreateDataSource(self.parquet_grid_path)
-            layer = ds.CreateLayer(
-                "study_area_grid",
-                self.target_spatial_ref,
-                geom_type=ogr.wkbPolygon,
-            )
-            field_defn = ogr.FieldDefn("grid_id", ogr.OFTInteger)
-            layer.CreateField(field_defn)
-            field_defn = ogr.FieldDefn("area_name", ogr.OFTString)
-            layer.CreateField(field_defn)
-            ds = None
-            log_message(f"Created Parquet grid file: {self.parquet_grid_path}")
-
-    def _create_gpkg_grid_layer(self, layer_name):
         """Create a GeoPackage grid layer.
 
         Args:
@@ -1899,14 +1726,9 @@ class StudyAreaProcessingTask(QgsTask):
 
         grid_ds = None
         try:
-            # 1) Load the grid from Parquet (if using) or GPKG
-            if self.use_parquet and os.path.exists(self.parquet_grid_path):
-                grid_ds = ogr.Open(self.parquet_grid_path, 0)
-                grid_layer = grid_ds.GetLayer(0)  # Parquet has single layer
-                log_message("Reading grid from Parquet for clip polygon creation")
-            else:
-                grid_ds = ogr.Open(self.gpkg_path, 0)
-                grid_layer = grid_ds.GetLayerByName("study_area_grid")
+            # Load the grid from GeoPackage
+            grid_ds = ogr.Open(self.gpkg_path, 0)
+            grid_layer = grid_ds.GetLayerByName("study_area_grid")
 
             if not grid_layer:
                 raise RuntimeError("Missing study_area_grid layer.")
