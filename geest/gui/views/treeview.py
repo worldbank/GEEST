@@ -62,7 +62,7 @@ class JsonTreeModel(QAbstractItemModel):
             json_data (dict): The JSON data representing the analysis and its hierarchical structure.
         """
         self.beginResetModel()
-        self.rootItem = JsonTreeItem(["GEEST", "Status", "Weight"], "root")
+        self.rootItem = JsonTreeItem(["GeoE3", "Status", "Weight"], "root")
 
         # Create the 'Analysis' parent item
         analysis_name = json_data.get("analysis_name", "Analysis")
