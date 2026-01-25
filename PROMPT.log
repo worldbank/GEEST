@@ -47,3 +47,5 @@ implement full support for geoparquet writing with fallback to gpkg
 2026-01-25 - Bump version to 2.0.0 and write comprehensive changelog
 2026-01-25 - Add unit tests for GHSLDownloader to verify downloads work and output files are not 0 bytes
 2026-01-25 - Remove @unittest.expectedFailure decorators from GHSL processor and native network analysis tests now that CI passes
+2026-01-25 - Add GHSL download fallback to OpportunitiesMaskProcessor when job opportunities mask is missing or 0 bytes
+2026-01-25 - Add GeoPackage fallback for GHSL tile index to support CI environments without parquet driver
