@@ -858,6 +858,10 @@ class TreePanel(QWidget):
             add_job_opportunities_mask.triggered.connect(lambda: self.add_opportunities_mask_to_map(item))
             menu.addAction(add_job_opportunities_mask)
 
+            add_ghsl_settlements = QAction("Add GHSL Settlements to Map")
+            add_ghsl_settlements.triggered.connect(self.add_ghsl_settlements_to_map)
+            menu.addAction(add_ghsl_settlements)
+
             add_study_area_layers_action = QAction("Add Study Area to Map", self)
             add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
             menu.addAction(add_study_area_layers_action)
@@ -1068,6 +1072,84 @@ class TreePanel(QWidget):
             key="opportunities_mask_result_file",
             layer_name="Opportunities Mask",
             group="WEE",
+        )
+
+    def add_ghsl_settlements_to_map(self):
+        """Add the GHSL settlements layer from the study area GeoPackage to the map."""
+        working_dir = self.working_directory
+        if not working_dir:
+            iface.messageBar().pushMessage(
+                "GHSL Settlements",
+                "No working directory set.",
+                level=Qgis.Warning,
+                duration=5,
+            )
+            return
+
+        gpkg_path = os.path.join(working_dir, "study_area", "study_area.gpkg")
+        if not os.path.exists(gpkg_path):
+            iface.messageBar().pushMessage(
+                "GHSL Settlements",
+                "Study area GeoPackage not found. Create a project first.",
+                level=Qgis.Warning,
+                duration=5,
+            )
+            return
+
+        layer_name = "ghsl_settlements"
+        layer_path = f"{gpkg_path}|layername={layer_name}"
+
+        # Check if layer exists in the GeoPackage
+        from osgeo import ogr
+
+        ds = ogr.Open(gpkg_path, 0)
+        if ds is None:
+            iface.messageBar().pushMessage(
+                "GHSL Settlements",
+                "Could not open study area GeoPackage.",
+                level=Qgis.Warning,
+                duration=5,
+            )
+            return
+
+        layer_exists = ds.GetLayerByName(layer_name) is not None
+        ds = None
+
+        if not layer_exists:
+            iface.messageBar().pushMessage(
+                "GHSL Settlements",
+                "GHSL layer not found. It may not have been downloaded during project creation.",
+                level=Qgis.Warning,
+                duration=8,
+            )
+            return
+
+        # Load the layer
+        layer = QgsVectorLayer(layer_path, "GHSL Settlements", "ogr")
+        if not layer.isValid():
+            iface.messageBar().pushMessage(
+                "GHSL Settlements",
+                "Failed to load GHSL settlements layer.",
+                level=Qgis.Warning,
+                duration=5,
+            )
+            return
+
+        # Add to map under Study Area group
+        project = QgsProject.instance()
+        root = project.layerTreeRoot()
+        study_area_group = root.findGroup("Geest Study Area")
+        if study_area_group is None:
+            study_area_group = root.insertGroup(0, "Geest Study Area")
+
+        project.addMapLayer(layer, False)
+        study_area_group.addLayer(layer)
+
+        iface.messageBar().pushMessage(
+            "GHSL Settlements",
+            "Layer added to map.",
+            level=Qgis.Success,
+            duration=3,
         )
 
     def add_aggregates_to_map(self, item):

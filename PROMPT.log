@@ -50,3 +50,7 @@ implement full support for geoparquet writing with fallback to gpkg
 2026-01-25 - Add GHSL download fallback to OpportunitiesMaskProcessor when job opportunities mask is missing or 0 bytes
 2026-01-25 - Add GeoPackage fallback for GHSL tile index to support CI environments without parquet driver
 2026-01-25 - Add diagnostic message bar feedback when adding opportunities mask to map, with GHSL auto-download fallback
+2026-01-25 - Add GHSL download failure warning during project creation with user prompt to continue or abort (using Qt threading with QMutex/QWaitCondition)
+2026-01-25 - Replace all Python threading with Qt threading in study_area_processing_task.py: threading.Lock->QMutex, Queue->QtQueue, Thread->QThread(WriterThread), ThreadPoolExecutor->QThreadPool with ChunkRunnable
+2026-01-25 - Fix GHSL tile selection bug: was passing WGS84 extent to GHSLDownloader but tile index is in Mollweide projection, now correctly passes extent_mollweide
+2026-01-25 - Add robust error handling for GeoPackage access during concurrent writes in add_bboxes_to_map: handle malformed db errors, check file exists and size before opening

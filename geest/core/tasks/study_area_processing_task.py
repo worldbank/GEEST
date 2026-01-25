@@ -8,24 +8,26 @@ import datetime
 import glob
 import os
 import re
-import threading
 import time
 import traceback
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from queue import Queue
-from threading import Thread
 
 # GDAL / OGR / OSR imports
 from osgeo import gdal, ogr, osr
 from qgis.core import (
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
     QgsFeedback,
     QgsProject,
     QgsRectangle,
     QgsTask,
     QgsVectorFileWriter,
     QgsVectorLayer,
+)
+from qgis.PyQt.QtCore import (
+    QMutex,
+    QRunnable,
+    QThread,
+    QThreadPool,
+    QWaitCondition,
+    pyqtSignal,
 )
 
 from geest.core.algorithms import GHSLDownloader, GHSLProcessor
@@ -34,6 +36,222 @@ from geest.utilities import calculate_utm_zone, log_message
 
 from .grid_chunker_task import GridChunkerTask
 from .grid_from_bbox_task import GridFromBboxTask
+
+
+class QtQueue:
+    """Thread-safe queue using Qt primitives.
+
+    A simple bounded queue implementation using QMutex and QWaitCondition
+    to replace Python's queue.Queue for better QGIS compatibility.
+
+    Attributes:
+        maxsize: Maximum number of items in the queue (0 = unbounded).
+    """
+
+    def __init__(self, maxsize=0):
+        """Initialize the queue.
+
+        Args:
+            maxsize: Maximum queue size. 0 means unbounded.
+        """
+        self._queue = []
+        self._maxsize = maxsize
+        self._mutex = QMutex()
+        self._not_empty = QWaitCondition()
+        self._not_full = QWaitCondition()
+
+    def put(self, item, timeout=None):
+        """Add item to queue, blocking if full.
+
+        Args:
+            item: Item to add to queue.
+            timeout: Maximum time to wait in seconds (None = wait forever).
+
+        Returns:
+            True if item was added, False if timeout expired.
+        """
+        self._mutex.lock()
+        try:
+            if self._maxsize > 0:
+                while len(self._queue) >= self._maxsize:
+                    if timeout is not None:
+                        if not self._not_full.wait(self._mutex, int(timeout * 1000)):
+                            return False
+                    else:
+                        self._not_full.wait(self._mutex)
+            self._queue.append(item)
+            self._not_empty.wakeOne()
+            return True
+        finally:
+            self._mutex.unlock()
+
+    def get(self, timeout=None):
+        """Remove and return item from queue, blocking if empty.
+
+        Args:
+            timeout: Maximum time to wait in seconds (None = wait forever).
+
+        Returns:
+            Item from queue.
+
+        Raises:
+            TimeoutError: If timeout expires before item available.
+        """
+        self._mutex.lock()
+        try:
+            while len(self._queue) == 0:
+                if timeout is not None:
+                    if not self._not_empty.wait(self._mutex, int(timeout * 1000)):
+                        raise TimeoutError("Queue get timeout")
+                else:
+                    self._not_empty.wait(self._mutex)
+            item = self._queue.pop(0)
+            self._not_full.wakeOne()
+            return item
+        finally:
+            self._mutex.unlock()
+
+    def empty(self):
+        """Check if queue is empty.
+
+        Returns:
+            True if queue is empty.
+        """
+        self._mutex.lock()
+        try:
+            return len(self._queue) == 0
+        finally:
+            self._mutex.unlock()
+
+    def qsize(self):
+        """Return approximate queue size.
+
+        Returns:
+            Number of items in queue.
+        """
+        self._mutex.lock()
+        try:
+            return len(self._queue)
+        finally:
+            self._mutex.unlock()
+
+
+class WriterThread(QThread):
+    """Qt thread for async batch writing of features to GeoPackage.
+
+    Processes items from a queue and writes them in batches for efficiency.
+
+    Attributes:
+        queue: QtQueue to read items from.
+        layer: OGR layer to write to.
+        flush_token: Special token that triggers immediate batch flush.
+        write_batch_func: Function to call for writing batches.
+        batch_size: Number of items per batch.
+    """
+
+    def __init__(self, queue, layer, flush_token, write_batch_func, parent=None):
+        """Initialize the writer thread.
+
+        Args:
+            queue: QtQueue to read items from.
+            layer: OGR layer to write to.
+            flush_token: Token that triggers batch flush when received.
+            write_batch_func: Callback function for writing batches.
+            parent: Parent QObject.
+        """
+        super().__init__(parent)
+        self.queue = queue
+        self.layer = layer
+        self.flush_token = flush_token
+        self.write_batch_func = write_batch_func
+        self.batch_size = 10000
+        self._stop_requested = False
+
+    def run(self):
+        """Process queue items and write in batches."""
+        batch = []
+
+        while not self._stop_requested:
+            try:
+                item = self.queue.get(timeout=60)
+            except TimeoutError:
+                continue
+
+            if item is None:  # Poison pill signals shutdown
+                if batch:
+                    self.write_batch_func(self.layer, batch)
+                break
+
+            if item is self.flush_token:
+                if batch:
+                    self.write_batch_func(self.layer, batch)
+                batch = []
+                continue
+
+            batch.append(item)
+
+            if len(batch) >= self.batch_size:
+                self.write_batch_func(self.layer, batch)
+                batch = []
+
+    def request_stop(self):
+        """Request the thread to stop."""
+        self._stop_requested = True
+
+
+class ChunkRunnable(QRunnable):
+    """QRunnable for processing a single grid chunk.
+
+    Attributes:
+        chunk: Chunk parameters dictionary.
+        geom: OGR geometry for intersection testing.
+        cell_size: Cell size in meters.
+        feedback: QgsFeedback for progress reporting.
+        result: Tuple of (task, start_time, index) after run completes.
+        error: Exception if processing failed.
+    """
+
+    def __init__(self, chunk, geom, cell_size, feedback):
+        """Initialize the chunk runnable.
+
+        Args:
+            chunk: Dictionary with chunk parameters.
+            geom: OGR geometry for intersection testing.
+            cell_size: Cell size in meters.
+            feedback: QgsFeedback for progress reporting.
+        """
+        super().__init__()
+        self.chunk = chunk
+        self.geom = geom
+        self.cell_size = cell_size
+        self.feedback = feedback
+        self.result = None
+        self.error = None
+        self.setAutoDelete(False)  # We manage lifecycle manually
+
+    def run(self):
+        """Process the chunk."""
+        try:
+            start_time = time.time()
+            index = self.chunk["index"]
+
+            task = GridFromBboxTask(
+                index,
+                (
+                    self.chunk["x_start"],
+                    self.chunk["x_end"],
+                    self.chunk["y_start"],
+                    self.chunk["y_end"],
+                ),
+                self.geom,
+                self.cell_size,
+                self.feedback,
+            )
+            task.run()
+
+            self.result = (task, start_time, index)
+        except Exception as e:
+            self.error = e
 
 
 class StudyAreaProcessingTask(QgsTask):
@@ -60,7 +278,16 @@ class StudyAreaProcessingTask(QgsTask):
 
     Returns:
         _type_: _description_
+
+    Signals:
+        ghsl_download_failed: Emitted when GHSL download fails. Contains error message string.
     """
+
+    # Signal emitted when GHSL download fails - allows UI to prompt user to continue or abort
+    ghsl_download_failed = pyqtSignal(str)
+
+    # Signal emitted when waiting for user response about GHSL failure
+    ghsl_user_response_ready = pyqtSignal()
 
     def __init__(
         self,
@@ -112,10 +339,15 @@ class StudyAreaProcessingTask(QgsTask):
         self.current_geom_cell_count_estimate = 0
         self.error_count = 0
         self.total_cells = 0
-        self.write_lock = threading.Lock()
-        self.gpkg_lock = threading.Lock()
-        self.grid_id_lock = threading.Lock()
-        self.writer_start_lock = threading.Lock()  # Protect writer thread creation
+        # GHSL download synchronization - allows UI to prompt user on failure
+        self._ghsl_mutex = QMutex()
+        self._ghsl_wait_condition = QWaitCondition()
+        self._ghsl_response_received = False
+        self._ghsl_continue_without = False  # Set by UI when user responds
+        self.write_lock = QMutex()
+        self.gpkg_lock = QMutex()
+        self.grid_id_lock = QMutex()
+        self.writer_start_lock = QMutex()  # Protect writer thread creation
         self.write_queue = None
         self.writer_thread = None
         self.writer_layer = None  # Track which layer the writer is using
@@ -124,7 +356,7 @@ class StudyAreaProcessingTask(QgsTask):
         self._writer_flush_token = object()
         # Pending status updates - batched to reduce GPKG open/close cycles
         self._pending_status_updates = []
-        self._status_update_lock = threading.Lock()
+        self._status_update_lock = QMutex()
         # Make sure output directory exists
         self.create_study_area_directory(self.working_dir)
 
@@ -207,6 +439,21 @@ class StudyAreaProcessingTask(QgsTask):
             else:
                 return self.source_layer.GetFeatureCount()
         return parts_count
+
+    def set_ghsl_user_response(self, continue_without: bool):
+        """Set user response for GHSL download failure.
+
+        Called from UI thread when user responds to the GHSL failure prompt.
+
+        Args:
+            continue_without: True if user wants to continue without GHSL,
+                            False if user wants to abort the task.
+        """
+        self._ghsl_mutex.lock()
+        self._ghsl_continue_without = continue_without
+        self._ghsl_response_received = True
+        self._ghsl_wait_condition.wakeAll()
+        self._ghsl_mutex.unlock()
 
     def enable_wal_mode(self):
         """Enable SQLite WAL mode for better concurrent access on Windows."""
@@ -313,16 +560,12 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(f"Study area extent in Mollweide: {extent_mollweide.toString()}")
 
             # Download GHSL using downloader
+            # Note: GHSLDownloader expects extents in Mollweide (ESRI:54009) projection
+            # because the tile index layer is in Mollweide
             log_message("Downloading GHSL tiles...")
-            transform_to_4326 = QgsCoordinateTransform(
-                QgsCoordinateReferenceSystem("ESRI:54009"),
-                QgsCoordinateReferenceSystem("EPSG:4326"),
-                QgsProject.instance(),
-            )
-            extent_4326 = transform_to_4326.transformBoundingBox(extent_mollweide)
 
             downloader = GHSLDownloader(
-                extents=extent_4326,
+                extents=extent_mollweide,  # Must be in Mollweide projection
                 output_path=os.path.join(self.working_dir, "study_area"),
                 filename="ghsl_temp",
                 use_cache=True,
@@ -472,7 +715,34 @@ class StudyAreaProcessingTask(QgsTask):
                 log_message(f"GHSL layer '{ghsl_layer_name}' added to GeoPackage successfully")
                 self.ghsl_layer_name = ghsl_layer_name
             else:
-                log_message("GHSL download failed or no data available, continuing without GHSL", level="WARNING")
+                log_message("GHSL download failed or no data available", level="WARNING")
+                # Emit signal to UI to prompt user - pass error message
+                error_msg = (
+                    "GHSL (Global Human Settlement Layer) data could not be downloaded.\n\n"
+                    "This data is used to filter study areas by population settlements. "
+                    "Without it, all study areas will be processed regardless of settlement status.\n\n"
+                    "Do you want to continue without GHSL data?"
+                )
+                self.ghsl_download_failed.emit(error_msg)
+
+                # Wait for user response (with timeout to prevent deadlock)
+                log_message("Waiting for user response about GHSL download failure...")
+                self._ghsl_mutex.lock()
+                # Wait up to 5 minutes for user response
+                self._ghsl_wait_condition.wait(self._ghsl_mutex, 300000)  # 5 min in ms
+                continue_without = self._ghsl_continue_without
+                response_received = self._ghsl_response_received
+                self._ghsl_mutex.unlock()
+
+                if not response_received:
+                    log_message("No user response received within timeout, aborting task", level="WARNING")
+                    return False
+
+                if not continue_without:
+                    log_message("User chose to abort task due to GHSL download failure")
+                    return False
+
+                log_message("User chose to continue without GHSL data")
                 self.ghsl_layer_name = None
 
             # 3) Process geometries one at a time (memory efficient)
@@ -675,8 +945,11 @@ class StudyAreaProcessingTask(QgsTask):
         Args:
             area_name: Name of study area to track
         """
-        with self._status_update_lock:
+        self._status_update_lock.lock()
+        try:
             self._pending_status_updates.append(("insert", area_name, None, None))
+        finally:
+            self._status_update_lock.unlock()
 
     def set_status_tracking_table_value(self, area_name, field_name, value):
         """Queue a status tracking field update.
@@ -688,16 +961,22 @@ class StudyAreaProcessingTask(QgsTask):
             field_name: Field to update
             value: New value for field
         """
-        with self._status_update_lock:
+        self._status_update_lock.lock()
+        try:
             self._pending_status_updates.append(("update", area_name, field_name, value))
             # Auto-flush if we have accumulated many updates
             if len(self._pending_status_updates) >= 20:
                 self._flush_status_updates_unlocked()
+        finally:
+            self._status_update_lock.unlock()
 
     def _flush_status_updates(self):
         """Flush all pending status updates to the database."""
-        with self._status_update_lock:
+        self._status_update_lock.lock()
+        try:
             self._flush_status_updates_unlocked()
+        finally:
+            self._status_update_lock.unlock()
 
     def _flush_status_updates_unlocked(self):
         """Flush pending status updates (must hold _status_update_lock).
@@ -719,7 +998,8 @@ class StudyAreaProcessingTask(QgsTask):
 
         for attempt in range(max_retries):
             try:
-                with self.gpkg_lock:
+                self.gpkg_lock.lock()
+                try:
                     ds = ogr.Open(self.gpkg_path, 1)
                     if not ds:
                         raise RuntimeError(f"Could not open {self.gpkg_path} for update.")
@@ -774,6 +1054,8 @@ class StudyAreaProcessingTask(QgsTask):
                         raise
 
                     ds = None
+                finally:
+                    self.gpkg_lock.unlock()
 
                 log_message(f"Flushed {len(updates_to_process)} status updates to database")
                 return
@@ -788,8 +1070,11 @@ class StudyAreaProcessingTask(QgsTask):
                     retry_delay *= 2
                 else:
                     # Put updates back for retry later
-                    with self._status_update_lock:
+                    self._status_update_lock.lock()
+                    try:
                         self._pending_status_updates = updates_to_process + self._pending_status_updates
+                    finally:
+                        self._status_update_lock.unlock()
                     raise
 
     ##########################################################################
@@ -1145,7 +1430,8 @@ class StudyAreaProcessingTask(QgsTask):
             RuntimeError: If the layer cannot be opened.
         """
         self.create_layer_if_not_exists(layer_name)
-        with self.gpkg_lock:
+        self.gpkg_lock.lock()
+        try:
             ds = ogr.Open(self.gpkg_path, 1)
             layer = ds.GetLayerByName(layer_name)
             if not layer:
@@ -1166,6 +1452,8 @@ class StudyAreaProcessingTask(QgsTask):
             layer.CreateFeature(feature)
             feature = None
             ds = None
+        finally:
+            self.gpkg_lock.unlock()
 
     def create_layer_if_not_exists(self, layer_name):
         """Create a GPKG layer if it does not exist.
@@ -1173,7 +1461,8 @@ class StudyAreaProcessingTask(QgsTask):
         Args:
             layer_name: Name of the layer to create.
         """
-        with self.gpkg_lock:
+        self.gpkg_lock.lock()
+        try:
             if not os.path.exists(self.gpkg_path):
                 driver = ogr.GetDriverByName("GPKG")
                 driver.CreateDataSource(self.gpkg_path)
@@ -1196,6 +1485,8 @@ class StudyAreaProcessingTask(QgsTask):
                 layer.CreateField(area_field)
 
             ds = None
+        finally:
+            self.gpkg_lock.unlock()
 
     # Helper to update time spent in a named metric block
     def track_time(self, metric_name, start_time):
@@ -1225,10 +1516,11 @@ class StudyAreaProcessingTask(QgsTask):
         Raises:
             RuntimeError: If the grid layer cannot be opened.
         """
-        with self.writer_start_lock:
+        self.writer_start_lock.lock()
+        try:
             self.writer_ref_count += 1
 
-            if self.writer_thread is not None and self.writer_thread.is_alive():
+            if self.writer_thread is not None and self.writer_thread.isRunning():
                 log_message(
                     f"Writer thread already running (ref_count={self.writer_ref_count}), reusing existing thread"
                 )
@@ -1236,7 +1528,7 @@ class StudyAreaProcessingTask(QgsTask):
 
             log_message(f"Starting new writer thread (ref_count={self.writer_ref_count})")
             # Use bounded queue to limit memory usage
-            self.write_queue = Queue(maxsize=self.WRITE_QUEUE_MAX_SIZE)
+            self.write_queue = QtQueue(maxsize=self.WRITE_QUEUE_MAX_SIZE)
 
             # Open persistent connection to GeoPackage
             writer_ds = ogr.Open(self.gpkg_path, 1)
@@ -1247,58 +1539,17 @@ class StudyAreaProcessingTask(QgsTask):
                 raise RuntimeError("Writer thread could not open study_area_grid layer")
             self.writer_ds = writer_ds
 
-            # Store references locally to avoid circular reference with self
-            flush_token = self._writer_flush_token
-            write_queue = self.write_queue
-            writer_layer = self.writer_layer
-            write_batch_func = self._write_batch
-
-            def writer_worker():
-                """Process write queue in batches. Queue items are (geometry, area_name) tuples.
-
-                Note: Uses local references to avoid circular reference with self.
-                """
-                batch = []
-                batch_size = 10000
-                items_in_batch = 0
-
-                while True:
-                    try:
-                        item = write_queue.get(timeout=60)  # Timeout to allow checking for shutdown
-                    except Exception:  # nosec B112 - timeout expected, continue to check for shutdown
-                        # Timeout - check if we should continue
-                        continue
-
-                    if item is None:  # Poison pill signals shutdown
-                        if batch:
-                            write_batch_func(writer_layer, batch)
-                        for _ in range(items_in_batch):
-                            write_queue.task_done()
-                        write_queue.task_done()
-                        break
-                    if item is flush_token:
-                        if batch:
-                            write_batch_func(writer_layer, batch)
-                        for _ in range(items_in_batch):
-                            write_queue.task_done()
-                        batch = []
-                        items_in_batch = 0
-                        write_queue.task_done()
-                        continue
-
-                    batch.append(item)
-                    items_in_batch += 1
-
-                    if len(batch) >= batch_size:
-                        write_batch_func(writer_layer, batch)
-                        for _ in range(items_in_batch):
-                            write_queue.task_done()
-                        batch = []
-                        items_in_batch = 0
-
-            self.writer_thread = Thread(target=writer_worker, daemon=True)
+            # Create and start the writer thread using Qt's QThread
+            self.writer_thread = WriterThread(
+                queue=self.write_queue,
+                layer=self.writer_layer,
+                flush_token=self._writer_flush_token,
+                write_batch_func=self._write_batch,
+            )
             self.writer_thread.start()
             log_message("Writer thread started")
+        finally:
+            self.writer_start_lock.unlock()
 
     def _stop_writer_thread(self):
         """Stop writer thread with ref counting. Only stops when last part finishes.
@@ -1309,9 +1560,10 @@ class StudyAreaProcessingTask(QgsTask):
             bool: True if writer was stopped, False if still in use by other parts
         """
         QUEUE_TIMEOUT = 60  # seconds
-        THREAD_TIMEOUT = 30  # seconds
+        THREAD_TIMEOUT_MS = 30000  # milliseconds
 
-        with self.writer_start_lock:
+        self.writer_start_lock.lock()
+        try:
             self.writer_ref_count -= 1
             log_message(f"Writer thread ref count: {self.writer_ref_count}")
 
@@ -1323,27 +1575,25 @@ class StudyAreaProcessingTask(QgsTask):
             if self.write_queue is not None:
                 try:
                     # Send poison pill with timeout
-                    self.write_queue.put(None, timeout=QUEUE_TIMEOUT)
+                    if not self.write_queue.put(None, timeout=QUEUE_TIMEOUT):
+                        log_message("Warning: timeout putting poison pill in queue", level="WARNING")
                 except Exception as e:
-                    log_message(f"Warning: timeout putting poison pill in queue: {e}", level="WARNING")
+                    log_message(f"Warning: error putting poison pill in queue: {e}", level="WARNING")
 
                 # Wait for queue to drain with timeout
                 try:
-                    # Use a polling approach since Queue.join() doesn't support timeout
-                    import time as time_module
-
-                    start = time_module.time()
+                    start = time.time()
                     while not self.write_queue.empty():
-                        if time_module.time() - start > QUEUE_TIMEOUT:
+                        if time.time() - start > QUEUE_TIMEOUT:
                             log_message("Warning: timeout waiting for queue to drain", level="WARNING")
                             break
-                        time_module.sleep(0.1)
+                        time.sleep(0.1)
                 except Exception as e:
                     log_message(f"Warning: error waiting for queue: {e}", level="WARNING")
 
                 if self.writer_thread is not None:
-                    self.writer_thread.join(timeout=THREAD_TIMEOUT)
-                    if self.writer_thread.is_alive():
+                    self.writer_thread.request_stop()
+                    if not self.writer_thread.wait(THREAD_TIMEOUT_MS):
                         log_message("Warning: writer thread did not terminate within timeout", level="WARNING")
                     else:
                         log_message("Writer thread stopped")
@@ -1359,6 +1609,8 @@ class StudyAreaProcessingTask(QgsTask):
             self.writer_thread = None
             log_message("Writer dataset closed")
             return True
+        finally:
+            self.writer_start_lock.unlock()
 
     def _wait_for_writer_queue(self):
         """Block until the writer queue is flushed."""
@@ -1387,10 +1639,13 @@ class StudyAreaProcessingTask(QgsTask):
             for geometry, area_name in items:
                 feature = ogr.Feature(feat_defn)
 
-                with self.grid_id_lock:
+                self.grid_id_lock.lock()
+                try:
                     feature.SetField("grid_id", self.current_geom_actual_cell_count)
                     self.current_geom_actual_cell_count += 1
                     grid_id = self.current_geom_actual_cell_count
+                finally:
+                    self.grid_id_lock.unlock()
 
                 feature.SetField("area_name", area_name)
                 feature.SetGeometry(geometry)
@@ -1446,8 +1701,11 @@ class StudyAreaProcessingTask(QgsTask):
         retry_delay = 0.5
         for attempt in range(max_retries):
             try:
-                with self.gpkg_lock:
+                self.gpkg_lock.lock()
+                try:
                     chunker.write_chunks_to_gpkg(self.gpkg_path)
+                finally:
+                    self.gpkg_lock.unlock()
                 break
             except RuntimeError as e:
                 if "database is locked" in str(e) and attempt < max_retries - 1:
@@ -1593,7 +1851,7 @@ class StudyAreaProcessingTask(QgsTask):
             self.track_time("Complete chunk", start_time)
 
     def _process_chunks_parallel(self, layer, chunks, geom, cell_size, normalized_name, feedback, worker_count):
-        """Process chunks in parallel using ThreadPoolExecutor.
+        """Process chunks in parallel using QThreadPool.
 
         Args:
             layer: OGR layer for writing grid cells
@@ -1607,60 +1865,45 @@ class StudyAreaProcessingTask(QgsTask):
         total_chunks = len(chunks)
         completed_count = 0
         failed_count = 0
-        progress_lock = threading.Lock()
 
-        def process_single_chunk(chunk):
-            """Process single chunk in worker thread.
+        # Get global thread pool and set max thread count
+        pool = QThreadPool.globalInstance()
+        pool.setMaxThreadCount(worker_count)
 
-            Args:
-                chunk: Dictionary with chunk parameters.
+        # Create runnables for all chunks
+        runnables = []
+        for chunk in chunks:
+            runnable = ChunkRunnable(chunk, geom, cell_size, feedback)
+            runnables.append(runnable)
+            pool.start(runnable)
 
-            Returns:
-                Tuple of (task, start_time, index).
-            """
-            start_time = time.time()
-            index = chunk["index"]
+        # Wait for all to complete and process results
+        pool.waitForDone()
 
-            task = GridFromBboxTask(
-                index,
-                (chunk["x_start"], chunk["x_end"], chunk["y_start"], chunk["y_end"]),
-                geom,
-                cell_size,
-                feedback,
-            )
-            task.run()
+        # Process results from all runnables
+        for runnable in runnables:
+            if runnable.error is not None:
+                failed_count += 1
+                log_message(f"Chunk {runnable.chunk['index']} failed: {str(runnable.error)}", level="WARNING")
+                continue
 
-            return (task, start_time, index)
+            if runnable.result is not None:
+                task, start_time, index = runnable.result
+                self.track_time("Creating chunks", start_time)
 
-        with ThreadPoolExecutor(max_workers=worker_count) as executor:
-            future_to_chunk = {executor.submit(process_single_chunk, chunk): chunk for chunk in chunks}
+                self.write_chunk(layer, task, normalized_name)
 
-            for future in as_completed(future_to_chunk):
-                chunk = future_to_chunk[future]
+                completed_count += 1
                 try:
-                    task, start_time, index = future.result()
-                    self.track_time("Creating chunks", start_time)
+                    current_progress = int((completed_count / total_chunks) * 100)
+                    # Only log every 10 chunks or the last chunk to reduce overhead
+                    if completed_count % 10 == 0 or completed_count == total_chunks:
+                        log_message(f"Chunk progress: {completed_count}/{total_chunks} ({current_progress}%)")
+                    self.feedback.setProgress(current_progress)
+                except ZeroDivisionError:
+                    pass
 
-                    self.write_chunk(layer, task, normalized_name)
-
-                    with progress_lock:
-                        completed_count += 1
-                        try:
-                            current_progress = int((completed_count / total_chunks) * 100)
-                            # Only log every 10 chunks or the last chunk to reduce overhead
-                            if completed_count % 10 == 0 or completed_count == total_chunks:
-                                log_message(f"Chunk progress: {completed_count}/{total_chunks} ({current_progress}%)")
-                            self.feedback.setProgress(current_progress)
-                        except ZeroDivisionError:
-                            pass
-
-                    self.track_time("Complete chunk", start_time)
-
-                except Exception as e:
-                    with progress_lock:
-                        failed_count += 1
-                    log_message(f"Chunk {chunk['index']} failed: {str(e)}", level="WARNING")
-                    log_message(traceback.format_exc(), level="WARNING")
+                self.track_time("Complete chunk", start_time)
 
         if failed_count > 0:
             log_message(f"Grid creation completed with {failed_count} failed chunks", level="WARNING")
@@ -1684,7 +1927,8 @@ class StudyAreaProcessingTask(QgsTask):
         Args:
             layer_name: Name of the layer to create.
         """
-        with self.gpkg_lock:
+        self.gpkg_lock.lock()
+        try:
             if not os.path.exists(self.gpkg_path):
                 driver = ogr.GetDriverByName("GPKG")
                 driver.CreateDataSource(self.gpkg_path)
@@ -1698,6 +1942,8 @@ class StudyAreaProcessingTask(QgsTask):
                 field_defn = ogr.FieldDefn("area_name", ogr.OFTString)
                 layer.CreateField(field_defn)
             ds = None
+        finally:
+            self.gpkg_lock.unlock()
 
     ##########################################################################
     # Create Clip Polygon

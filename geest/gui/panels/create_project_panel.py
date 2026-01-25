@@ -6,9 +6,7 @@ This module contains functionality for create project panel.
 
 import json
 import os
-import platform
 import shutil
-import subprocess  # nosec B404
 import traceback
 
 from qgis.core import (
@@ -23,7 +21,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QPixmap
-from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QMessageBox, QWidget
+from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from geest.core import WorkflowQueueManager
 from geest.core.tasks import StudyAreaProcessingTask, StudyAreaReportTask
@@ -123,7 +121,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.layer_changed(self.layer_combo.currentLayer())
 
     def layer_changed(self, layer):
-        """Slot to be called when the layer in the combo box changes."""
+        """Slot to be called when the layer in the combo box changes.
+
+        Args:
+            layer: The new layer selected in the combo box.
+        """
         log_message(f"Layer changed: {layer.name() if layer else 'None'}")
         if self.crs() is None:
             log_message(
@@ -305,6 +307,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 # Measure overall task progress from the task object itself
                 processor.progressChanged.connect(self.progress_updated)
                 processor.taskCompleted.connect(self.on_task_completed)
+                processor.taskTerminated.connect(self.on_task_terminated)
+                # Connect GHSL download failure signal to prompt user
+                processor.ghsl_download_failed.connect(lambda msg, p=processor: self.on_ghsl_download_failed(msg, p))
                 # Measure subtask progress from the feedback object
                 feedback.progressChanged.connect(self.subtask_progress_updated)
                 self.disable_widgets()
@@ -337,7 +342,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             widget.setEnabled(True)
 
     def reference_layer(self):
-        """Get the admin boundary reference layer."""
+        """Get the admin boundary reference layer.
+
+        Returns:
+            QgsVectorLayer: The currently selected admin boundary layer.
+        """
         return self.layer_combo.currentLayer()
 
     def crs(self, working_directory=None):
@@ -348,6 +357,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
         Args:
             working_directory: Optional working directory path. If not provided, uses self.working_dir
+
+        Returns:
+            QgsCoordinateReferenceSystem: The CRS for the project, or None if unavailable.
         """
         # Use provided working_directory, otherwise fall back to self.working_dir
         work_dir = working_directory or self.working_dir
@@ -389,7 +401,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
     def progress_updated(self, progress: float):
-        """Slot to be called when the task progress is updated."""
+        """Slot to be called when the task progress is updated.
+
+        Args:
+            progress: The current progress value (0-100).
+        """
         log_message(f"\n\n\n\n\n\nProgress: {progress}\n\n\n\n\n\n\n\n")
         self.progress_bar.setVisible(True)
         self.progress_bar.setEnabled(True)
@@ -423,6 +439,20 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # Use the 'setFormat' method to display the exact float:
         float_value_as_string = f"Current geometry : {progress}%"  # noqa: E203
         self.child_progress_bar.setFormat(float_value_as_string)
+
+    def on_task_terminated(self):
+        """Slot to be called when the study area processing task is terminated (aborted or failed)."""
+        log_message(
+            "Study area processing was terminated.",
+            tag="Geest",
+            level=Qgis.Warning,
+        )
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setMaximum(100)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setFormat("Processing aborted")
+        self.child_progress_bar.setVisible(False)
+        self.enable_widgets()
 
     def on_task_completed(self):
         """Slot to be called when the task completes successfully."""
@@ -474,8 +504,41 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.enable_widgets()
         self.switch_to_next_tab.emit()
 
+    def on_ghsl_download_failed(self, error_message, processor):
+        """Slot called when GHSL download fails during study area processing.
+
+        Prompts user to continue without GHSL data or abort the task.
+
+        Args:
+            error_message: Description of what failed and consequences.
+            processor: The StudyAreaProcessingTask instance to send response to.
+        """
+        log_message("GHSL download failed, prompting user for response", tag="Geest", level=Qgis.Warning)
+
+        reply = QMessageBox.warning(
+            self,
+            "GHSL Download Failed",
+            error_message,
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+
+        if reply == QMessageBox.Yes:
+            log_message("User chose to continue without GHSL data", tag="Geest", level=Qgis.Info)
+            processor.set_ghsl_user_response(continue_without=True)
+        else:
+            log_message("User chose to abort due to GHSL failure", tag="Geest", level=Qgis.Info)
+            processor.set_ghsl_user_response(continue_without=False)
+            # Update progress bar to show abort
+            self.progress_bar.setFormat("Aborted - GHSL download failed")
+            self.enable_widgets()
+
     def update_recent_projects(self, directory):
-        """Updates the recent projects list with the new directory."""
+        """Updates the recent projects list with the new directory.
+
+        Args:
+            directory: The directory path to add to the recent projects list.
+        """
         recent_projects = self.settings.value("recent_projects", [])
 
         if directory in recent_projects:
@@ -526,6 +589,8 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         This method is a cut and paste of the same method in tree_panel.py
         but only adds two layers (well one layer and one table) to the map.
 
+        Raises:
+            RuntimeError: If the GeoPackage cannot be opened for an unexpected reason.
         """
         gpkg_path = os.path.join(self.working_dir, "study_area", "study_area.gpkg")
         project = QgsProject.instance()
@@ -541,7 +606,30 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             "study_area_creation_status",
         ]
         for layer_name in layers:
-            # Check if layer exists in GeoPackage first
+            # Check if GeoPackage file exists first
+            if not os.path.exists(gpkg_path):
+                log_message(
+                    f"GeoPackage not yet created: {gpkg_path}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                return
+
+            # Check if file size is stable (not being actively written)
+            # A very small file might still be initializing
+            try:
+                file_size = os.path.getsize(gpkg_path)
+                if file_size < 1024:  # Less than 1KB suggests still initializing
+                    log_message(
+                        f"GeoPackage still initializing (size: {file_size} bytes)",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
+                    return
+            except OSError:
+                return  # File might be locked
+
+            # Check if layer exists in GeoPackage
             from osgeo import ogr
 
             try:
@@ -553,8 +641,14 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 layer_exists = ds.GetLayerByName(layer_name) is not None
                 ds = None
             except RuntimeError as e:
-                if "database is locked" in str(e):
-                    log_message(f"Database busy, skipping map refresh for {layer_name}", tag="Geest", level=Qgis.Info)
+                error_str = str(e).lower()
+                # Skip if database is busy or temporarily corrupted during writes
+                if "database is locked" in error_str or "malformed" in error_str:
+                    log_message(
+                        f"Database busy or being written, skipping map refresh for {layer_name}",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
                     continue
                 raise
 
