@@ -7,17 +7,17 @@
 This module contains functionality for osm downloader factory.
 """
 
-from .osm_download_type import OSMDownloadType
 from .osm_active_transport_downloader import OSMActiveTransportDownloader
-from .osm_public_transport_downloader import OSMPublicTransportDownloader
+from .osm_download_type import OSMDownloadType
 from .osm_education_downloader import OSMEducationDownloader
 from .osm_financial_downloader import OSMFinancialDownloader
-from .osm_kindergarten_downloader import OSMKindergartenDownloader
-from .osm_primary_school_downloader import OSMPrimarySchoolDownloader
-from .osm_pharmacy_downloader import OSMPharmacyDownloader
-from .osm_grocery_downloader import OSMGroceryDownloader
 from .osm_green_space_downloader import OSMGreenSpaceDownloader
+from .osm_grocery_downloader import OSMGroceryDownloader
 from .osm_health_facility_downloader import OSMHealthFacilityDownloader
+from .osm_kindergarten_downloader import OSMKindergartenDownloader
+from .osm_pharmacy_downloader import OSMPharmacyDownloader
+from .osm_primary_school_downloader import OSMPrimarySchoolDownloader
+from .osm_public_transport_downloader import OSMPublicTransportDownloader
 from .osm_water_point_downloader import OSMWaterPointDownloader
 
 

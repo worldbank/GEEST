@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """📦 Wee By Population Score Processor module.
 
-This module contains functionality for wee by population score processor.
+This module contains functionality for geoe3 by population score processor.
 """
 
 import os
@@ -23,13 +23,13 @@ from geest.utilities import log_message, resources_path
 
 class WEEByPopulationScoreProcessingTask(QgsTask):
     """
-    A QgsTask subclass for calculating WEE x Population SCORE using raster algebra.
+    A QgsTask subclass for calculating GeoE3 x Population SCORE using raster algebra.
 
-    It iterates over study areas, calculates the WEE SCORE using aligned input rasters
-    (WEE and POP), combines the resulting rasters into a VRT, and applies a QML style.
+    It iterates over study areas, calculates the GeoE3 Score using aligned input rasters
+    (GeoE3 and POP), combines the resulting rasters into a VRT, and applies a QML style.
 
-    It takes as input a WEE Score layer (output as the result of Analysis level aggregation
-    of GEEST workflow). This WEE Score layer has the following classes:
+    It takes as input a GeoE3 Score layer (output as the result of Analysis level aggregation
+    of GEEST workflow). This GeoE3 Score layer has the following classes:
 
     | Range  | Description               | Color      |
     |--------|---------------------------|------------|
@@ -50,11 +50,11 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     | ![#800000](#) `#800000` | High Population     |
 
 
-    The output WEE x Population Score can be one of 15 classes calculated as
+    The output GeoE3 x Population Score can be one of 15 classes calculated as
 
     ((A - 1) * 3) + B
 
-    Where A is WEE Score and B is Population class. The output classes are as follows:
+    Where A is GeoE3 Score and B is Population class. The output classes are as follows:
 
     | Color      | Description                                 |
     |------------|---------------------------------------------|
@@ -99,15 +99,15 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
         target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         force_clear: bool = False,
     ):
-        super().__init__("WEE Score Processor", QgsTask.CanCancel)
+        super().__init__("GeoE3 Score Processor", QgsTask.CanCancel)
         self.study_area_gpkg_path = study_area_gpkg_path
 
-        self.output_dir = os.path.join(working_directory, "wee_by_population_score")
+        self.output_dir = os.path.join(working_directory, "geoe3_by_population_score")
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the aggregation analysis and population raster processing
         self.population_folder = os.path.join(working_directory, "population")
-        self.wee_folder = os.path.join(working_directory, "wee_score")
+        self.geoe3_folder = os.path.join(working_directory, "geoe3_score")
 
         self.force_clear = force_clear
         if self.force_clear and os.path.exists(self.output_dir):
@@ -125,11 +125,11 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
             del layer
         self.output_rasters: List[str] = []
 
-        log_message("Initialized WEE SCORE Processing Task")
+        log_message("Initialized GeoE3 Score Processing Task")
 
     def run(self) -> bool:
         """
-        Executes the WEE SCORE calculation task.
+        Executes the GeoE3 Score calculation task.
 
         Returns:
             bool: True if the task completed successfully, False otherwise.
@@ -187,29 +187,29 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
 
     def calculate_score(self) -> None:
         """
-        Calculates WEE by POP SCORE using raster algebra and saves the result for each area.
+        Calculates GeoE3 by POP SCORE using raster algebra and saves the result for each area.
         """
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         for index, (_, _, _, _) in enumerate(area_iterator):
             if self.isCanceled():
                 return
 
-            wee_path = os.path.join(self.wee_folder, f"wee_masked_{index}.tif")
+            geoe3_path = os.path.join(self.geoe3_folder, f"geoe3_masked_{index}.tif")
             population_path = os.path.join(self.population_folder, f"reclassified_{index}.tif")
-            wee_layer = QgsRasterLayer(wee_path, "WEE")
+            geoe3_layer = QgsRasterLayer(geoe3_path, "GeoE3")
             pop_layer = QgsRasterLayer(population_path, "POP")
-            self.validate_rasters(wee_layer, pop_layer, dimension_check=False)
+            self.validate_rasters(geoe3_layer, pop_layer, dimension_check=False)
 
-            output_path = os.path.join(self.output_dir, f"wee_by_population_score_{index}.tif")
+            output_path = os.path.join(self.output_dir, f"geoe3_by_population_score_{index}.tif")
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing raster: {output_path}")
                 self.output_rasters.append(output_path)
                 continue
 
-            log_message(f"Calculating WEE by POP SCORE for area {index}")
+            log_message(f"Calculating GeoE3 by POP SCORE for area {index}")
 
             params = {
-                "INPUT_A": wee_layer,
+                "INPUT_A": geoe3_layer,
                 "BAND_A": 1,
                 "INPUT_B": pop_layer,
                 "BAND_B": 1,
@@ -226,15 +226,15 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
             processing.run("gdal:rastercalculator", params)
             self.output_rasters.append(output_path)
 
-            log_message(f"WEE SCORE raster saved to {output_path}")
+            log_message(f"GeoE3 Score raster saved to {output_path}")
 
     def generate_vrt(self) -> None:
         """
-        Combines all WEE SCORE rasters into a single VRT and applies a QML style.
+        Combines all GeoE3 Score rasters into a single VRT and applies a QML style.
         """
-        vrt_path = os.path.join(self.output_dir, "wee_by_population_score.vrt")
-        qml_path = os.path.join(self.output_dir, "wee_by_population_score.qml")
-        source_qml = resources_path("resources", "qml", "wee_by_population_score.qml")
+        vrt_path = os.path.join(self.output_dir, "geoe3_by_population_score.vrt")
+        qml_path = os.path.join(self.output_dir, "geoe3_by_population_score.qml")
+        source_qml = resources_path("resources", "qml", "geoe3_by_population_score.qml")
 
         params = {
             "INPUT": self.output_rasters,
@@ -261,6 +261,6 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
             result (bool): The result of the task execution.
         """
         if result:
-            log_message("WEE SCORE calculation completed successfully.")
+            log_message("GeoE3 Score calculation completed successfully.")
         else:
-            log_message("WEE SCORE calculation failed.")
+            log_message("GeoE3 Score calculation failed.")

@@ -61,7 +61,7 @@ class OpportunitiesMaskProcessor(QgsTask):
     It will create a raster layer where all cells outside the masked areas (defined
     by the input polygons layer) are set to a no data value.
 
-    This is used when you want to represent the WEE Score and WEE x Population Score
+    This is used when you want to represent the GeoE3 Score and GeoE3 x Population Score
     only in areas where there are job opportunities / job creation initiatives.
 
     The input layer should be a polygon layer with the job opportunities. Its attributes
@@ -245,7 +245,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         self.mask_list = []
 
         log_message("---------------------------------------------")
-        log_message("Initialized WEE Opportunities Mask Workflow")
+        log_message("Initialized GeoE3 Opportunities Mask Workflow")
         log_message("---------------------------------------------")
         log_message(f"Item: {self.item.name}")
         log_message(f"Study area GeoPackage path: {self.study_area_gpkg_path}")

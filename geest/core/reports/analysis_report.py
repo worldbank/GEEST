@@ -225,10 +225,10 @@ class AnalysisReport(BaseReport):
         with open(self.model_path, "r", encoding="utf-8") as f:
             model = json.load(f)
 
-        # Print the analysis wee, wee by population etc maps first
-        self.page_descriptions["wee_by_opportunities"] = "WEE By Opportunities Analysis Map"
-        layer_uri = model.get("wee_by_opportunities_mask_result_file")
-        if self._add_map_page("WEE by Opportunities Mask", "wee_by_opportunities", layer_uri, current_page):
+        # Print the analysis geoe3, geoe3 by population etc maps first
+        self.page_descriptions["geoe3_by_opportunities"] = "GeoE3 By Opportunities Analysis Map"
+        layer_uri = model.get("geoe3_by_opportunities_mask_result_file")
+        if self._add_map_page("GeoE3 by Opportunities Mask", "geoe3_by_opportunities", layer_uri, current_page):
             current_page += 1
 
         # Iterate through dimensions, factors, and indicators

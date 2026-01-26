@@ -18,25 +18,25 @@ from geest.utilities import log_message, resources_path
 
 class SubnationalAggregationProcessingTask(QgsTask):
     """
-    A QgsTask subclass for calculating WEE x Population SCORE and or WEE score per aggregation area.
+    A QgsTask subclass for calculating GeoE3 x Population Score and or GeoE3 Score per aggregation area.
 
-    It iterates over subnational boundaries, calculates the majoriy WEE SCORE or WEE x Population Score
+    It iterates over subnational boundaries, calculates the majoriy GeoE3 Score or GeoE3 x Population Score
     into a geopackage with the same polygons as original subnational boundaries but new attributes for
     the majority scores and applies a QML style.
 
     The subnational boundaries will NOT be split bu the study area polygons, so
     containment is not guaranteed between study area polygons and the subnational boundary polygons.
-    Because of this, we will use the VRT combined outputs for the WEE SCORE and WEE x Population Score
+    Because of this, we will use the VRT combined outputs for the GeoE3 Score and GeoE3 x Population Score
     inputs.
 
     It will write 4 columns to the output gpkg:
 
     fid - generic incrementing id for each subnational area
     name - subnational area name
-    wee_score - majority wee score for that subnational area
-    wee_pop_score - majority wee x population score for that subnational area
+    geoe3_score - majority GeoE3 Score for that subnational area
+    geoe3_pop_score - majority geoe3 x population score for that subnational area
 
-    The WEE Score can be one of 5 classes:
+    The GeoE3 Score can be one of 5 classes:
 
     | Range  | Description               | Color      |
     |--------|---------------------------|------------|
@@ -46,7 +46,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
     | 3 - 4  | Enabling                  | ![#90EE90](#) `#90EE90` |
     | 4 - 5  | Highly Enabling           | ![#0000FF](#) `#0000FF` |
 
-    The WEE x Population Score can be one of 15 classes:
+    The GeoE3 x Population Score can be one of 15 classes:
 
     | Color      | Description                                 |
     |------------|---------------------------------------------|
@@ -66,10 +66,10 @@ class SubnationalAggregationProcessingTask(QgsTask):
     | ![#0000FF](#) `#0000FF` | Highly enabling, medium population        |
     | ![#0000FF](#) `#0000FF` | Highly enabling, high population          |
 
-    See the wee_by_population_score_processor.py module for more details on how this is computed.
+    See the geoe3_by_population_score_processor.py module for more details on how this is computed.
 
     📒 The majority score for each subnational area is calculated by counting the
-       number of pixels in each WEE Score and WEE x Population Score class as per the
+       number of pixels in each GeoE3 Score and GeoE3 x Population Score class as per the
        above tables. Then majority pixel count is then allocated to the aggregate area.
        In the unlikely event of there being two or more classes with an equal pixel count,
        the highest enablement and population class is assigned.
@@ -115,35 +115,39 @@ class SubnationalAggregationProcessingTask(QgsTask):
         os.makedirs(self.output_dir, exist_ok=True)
 
         # This folder should already exist from the aggregation analysis and population raster processing
-        self.wee_score_folder = os.path.join(working_directory, "wee_score")
+        self.geoe3_score_folder = os.path.join(working_directory, "geoe3_score")
 
-        if not os.path.exists(self.wee_score_folder):
-            raise Exception(f"WEE folder not found.\n{self.wee_score_folder}\nPlease run WEE raster processing first.")
-        # This folder is optional  - user needs to have configured population layer in analysis properties dialog
-        self.wee_by_population_folder = os.path.join(working_directory, "wee_by_population_score")
-
-        if not os.path.exists(self.wee_by_population_folder):
-            log_message(
-                f"WEE folder not found.\n{self.wee_by_population_folder}\nPlease run WEE raster processing first."
+        if not os.path.exists(self.geoe3_score_folder):
+            raise Exception(
+                f"GeoE3 folder not found.\n{self.geoe3_score_folder}\nPlease run GeoE3 raster processing first."
             )
-            self.wee_by_population_folder = None
+        # This folder is optional  - user needs to have configured population layer in analysis properties dialog
+        self.geoe3_by_population_folder = os.path.join(working_directory, "geoe3_by_population_score")
+
+        if not os.path.exists(self.geoe3_by_population_folder):
+            log_message(
+                f"GeoE3 folder not found.\n{self.geoe3_by_population_folder}\nPlease run GeoE3 raster processing first."
+            )
+            self.geoe3_by_population_folder = None
         # These two folders are optional - will only be set if user configured mask for
         # job opportunities in analysis properties dialog
-        self.opportunities_by_wee_score_folder = os.path.join(working_directory, "opportunities_by_wee_score")
+        self.opportunities_by_geoe3_score_folder = os.path.join(working_directory, "opportunities_by_geoe3_score")
 
-        if not os.path.exists(self.opportunities_by_wee_score_folder):
-            log_message(f"WEE folder not found.\n{self.wee_score_folder}\nPlease run WEE raster processing first.")
-            self.opportunities_by_wee_score_folder = None
+        if not os.path.exists(self.opportunities_by_geoe3_score_folder):
+            log_message(
+                f"GeoE3 folder not found.\n{self.geoe3_score_folder}\nPlease run GeoE3 raster processing first."
+            )
+            self.opportunities_by_geoe3_score_folder = None
 
-        self.opportunities_by_wee_by_population_folder = os.path.join(
-            working_directory, "opportunities_by_wee_score_by_population"
+        self.opportunities_by_geoe3_by_population_folder = os.path.join(
+            working_directory, "opportunities_by_geoe3_score_by_population"
         )
 
-        if not os.path.exists(self.wee_by_population_folder):
+        if not os.path.exists(self.geoe3_by_population_folder):
             log_message(
-                f"WEE folder not found.\n{self.opportunities_by_wee_score_by_population}\nPlease run WEE raster processing first."
+                f"GeoE3 folder not found.\n{self.opportunities_by_geoe3_score_by_population}\nPlease run GeoE3 raster processing first."
             )
-            self.opportunities_by_wee_by_population_folder = None
+            self.opportunities_by_geoe3_by_population_folder = None
 
         self.force_clear = force_clear
         if self.force_clear and os.path.exists(self.output_dir):
@@ -162,51 +166,51 @@ class SubnationalAggregationProcessingTask(QgsTask):
             log_message(f"{self.study_area_gpkg_path}|ayername=study_area_clip_polygon")
             del layer
 
-        log_message("Initialized WEE Subnational Area Aggregation Processing Task")
+        log_message("Initialized GeoE3 Subnational Area Aggregation Processing Task")
 
     def run(self) -> bool:
         """
-        Executes the WEE Subnational Area Aggregation Processing Task calculation task.
+        Executes the GeoE3 Subnational Area Aggregation Processing Task calculation task.
 
         Returns:
             bool: True if the task completed successfully, False otherwise.
         """
         try:
             cleaned_aggregation_layer = self.fix_geometries()
-            if self.wee_score_folder:
-                log_message("Calculating WEE Score Aggregation")
-                layer_name = "wee_score_subnational_aggregation"
-                raster_layer_path = os.path.join(self.wee_score_folder, "WEE_Score_combined.vrt")
+            if self.geoe3_score_folder:
+                log_message("Calculating GeoE3 Score Aggregation")
+                layer_name = "geoe3_score_subnational_aggregation"
+                raster_layer_path = os.path.join(self.geoe3_score_folder, "GeoE3_Score_combined.vrt")
                 output = self.aggregate(
                     cleaned_aggregation_layer,
                     raster_layer_path,
                     layer_name,
                 )
                 self.apply_qml_style(
-                    source_qml=resources_path("resources", "qml", "wee_score_vector.qml"),
+                    source_qml=resources_path("resources", "qml", "geoe3_score_vector.qml"),
                     qml_path=os.path.join(self.output_dir, f"{layer_name}.qml"),
                 )
                 self.item.setAttribute(f"{layer_name}", f"{output}|layername={layer_name}")
-            if self.wee_by_population_folder:
-                log_message("Calculating WEE x Population Score Aggregation")
-                layer_name = "wee_by_population_subnational_aggregation"
-                raster_layer_path = os.path.join(self.wee_by_population_folder, "wee_by_population_score.vrt")
+            if self.geoe3_by_population_folder:
+                log_message("Calculating GeoE3 x Population Score Aggregation")
+                layer_name = "geoe3_by_population_subnational_aggregation"
+                raster_layer_path = os.path.join(self.geoe3_by_population_folder, "geoe3_by_population_score.vrt")
                 output = self.aggregate(
                     cleaned_aggregation_layer,
                     raster_layer_path,
                     layer_name,
                 )
                 self.apply_qml_style(
-                    source_qml=resources_path("resources", "qml", "wee_by_population_vector_score.qml"),
+                    source_qml=resources_path("resources", "qml", "geoe3_by_population_vector_score.qml"),
                     qml_path=os.path.join(self.output_dir, f"{layer_name}.qml"),
                 )
                 self.item.setAttribute(f"{layer_name}", f"{output}|layername={layer_name}")
-            if self.opportunities_by_wee_score_folder:
-                log_message("Calculating Opportunities by WEE Score Aggregation")
-                layer_name = "opportunities_by_wee_score_subnational_aggregation"
+            if self.opportunities_by_geoe3_score_folder:
+                log_message("Calculating Opportunities by GeoE3 Score Aggregation")
+                layer_name = "opportunities_by_geoe3_score_subnational_aggregation"
                 raster_layer_path = os.path.join(
-                    self.opportunities_by_wee_score_folder,
-                    "wee_by_opportunities_mask.vrt",
+                    self.opportunities_by_geoe3_score_folder,
+                    "geoe3_by_opportunities_mask.vrt",
                 )
                 output = self.aggregate(
                     cleaned_aggregation_layer,
@@ -214,16 +218,16 @@ class SubnationalAggregationProcessingTask(QgsTask):
                     layer_name,
                 )
                 self.apply_qml_style(
-                    source_qml=resources_path("resources", "qml", "wee_score_vector.qml"),
+                    source_qml=resources_path("resources", "qml", "geoe3_score_vector.qml"),
                     qml_path=os.path.join(self.output_dir, f"{layer_name}.qml"),
                 )
                 self.item.setAttribute(f"{layer_name}", f"{output}|layername={layer_name}")
-            if self.opportunities_by_wee_by_population_folder:
-                log_message("Calculating Opportunities by WEE x Population Score Aggregation")
-                layer_name = "opportunities_by_wee_score_by_population_subnational_aggregation"
+            if self.opportunities_by_geoe3_by_population_folder:
+                log_message("Calculating Opportunities by GeoE3 x Population Score Aggregation")
+                layer_name = "opportunities_by_geoe3_score_by_population_subnational_aggregation"
                 raster_layer_path = os.path.join(
-                    self.opportunities_by_wee_by_population_folder,
-                    "wee_by_population_by_opportunities_mask.vrt",
+                    self.opportunities_by_geoe3_by_population_folder,
+                    "geoe3_by_population_by_opportunities_mask.vrt",
                 )
                 output = self.aggregate(
                     cleaned_aggregation_layer,
@@ -231,7 +235,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
                     layer_name,
                 )
                 self.apply_qml_style(
-                    source_qml=resources_path("resources", "qml", "wee_by_population_vector_score.qml"),
+                    source_qml=resources_path("resources", "qml", "geoe3_by_population_vector_score.qml"),
                     qml_path=os.path.join(self.output_dir, f"{layer_name}.qml"),
                 )
                 self.item.setAttribute(f"{layer_name}", f"{output}|layername={layer_name}")
@@ -264,7 +268,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
 
     def aggregate(self, aggregation_layer: QgsVectorLayer, raster_layer_path: str, name: str) -> str:
         """
-        Use aggregation vector to calculate the majority WEE SCORE and WEE x Population Score for each valid polygon.
+        Use aggregation vector to calculate the majority GeoE3 Score and GeoE3 x Population Score for each valid polygon.
 
         Args:
             aggregation_layer (QgsVectorLayer): The aggregation layer with fixed geometries.

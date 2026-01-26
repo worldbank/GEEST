@@ -482,7 +482,7 @@ class TreePanel(QWidget):
                     analysis_name = os.path.basename(self.working_directory)
                     analysis_data["analysis_name"] = f"Women's Economic Empowerment - {analysis_name}"
                 # analysis_item.setData(0, analysis_data.get("analysis_name", "Analysis"))
-                analysis_item.setData(0, "WEE Score")
+                analysis_item.setData(0, "GeoE3 Score")
                 settings = QSettings()
                 # This is the top level folder for work files
                 settings.setValue("last_working_directory", self.working_directory)
@@ -829,26 +829,26 @@ class TreePanel(QWidget):
             animate_results_action.triggered.connect(self.animate_results)
             menu.addAction(animate_results_action)
 
-            add_wee_score = QAction("Add WEE Score to Map")
-            add_wee_score.triggered.connect(
-                lambda: add_to_map(item, key="result_file", layer_name="WEE Score", group="WEE")
+            add_geoe3_score = QAction("Add GeoE3 Score to Map")
+            add_geoe3_score.triggered.connect(
+                lambda: add_to_map(item, key="result_file", layer_name="GeoE3 Score", group="GeoE3")
             )
-            menu.addAction(add_wee_score)
+            menu.addAction(add_geoe3_score)
 
-            add_wee_by_population = QAction("Add WEE by Pop to Map")
-            add_wee_by_population.triggered.connect(
+            add_geoe3_by_population = QAction("Add GeoE3 by Pop to Map")
+            add_geoe3_by_population.triggered.connect(
                 lambda: add_to_map(
                     item,
-                    key="wee_by_population",
-                    layer_name="WEE by Population",
-                    group="WEE",
+                    key="geoe3_by_population",
+                    layer_name="GeoE3 by Population",
+                    group="GeoE3",
                 )
             )
-            menu.addAction(add_wee_by_population)
+            menu.addAction(add_geoe3_by_population)
 
-            add_wee_by_population_aggregate = QAction("Add WEE Aggregates to Map")
-            add_wee_by_population_aggregate.triggered.connect(lambda: self.add_aggregates_to_map(item))
-            menu.addAction(add_wee_by_population_aggregate)
+            add_geoe3_by_population_aggregate = QAction("Add GeoE3 Aggregates to Map")
+            add_geoe3_by_population_aggregate.triggered.connect(lambda: self.add_aggregates_to_map(item))
+            menu.addAction(add_geoe3_by_population_aggregate)
 
             add_masked_scores = QAction("Add Masked Scores to Map")
             add_masked_scores.triggered.connect(lambda: self.add_masked_scores_to_map(item))
@@ -1021,15 +1021,15 @@ class TreePanel(QWidget):
         """
         add_to_map(
             item,
-            key="wee_by_opportunities_mask_result_file",
-            layer_name="Masked WEE Score",
-            group="WEE",
+            key="geoe3_by_opportunities_mask_result_file",
+            layer_name="Masked GeoE3 Score",
+            group="GeoE3",
         )
         add_to_map(
             item,
-            key="wee_by_population_by_opportunities_mask_result_file",
-            layer_name="Masked WEE by Population Score",
-            group="WEE",
+            key="geoe3_by_population_by_opportunities_mask_result_file",
+            layer_name="Masked GeoE3 by Population Score",
+            group="GeoE3",
         )
 
     def add_opportunities_mask_to_map(self, item):
@@ -1071,7 +1071,7 @@ class TreePanel(QWidget):
             item,
             key="opportunities_mask_result_file",
             layer_name="Opportunities Mask",
-            group="WEE",
+            group="GeoE3",
         )
 
     def add_ghsl_settlements_to_map(self):
@@ -1160,27 +1160,27 @@ class TreePanel(QWidget):
         """
         add_to_map(
             item,
-            key="wee_score_subnational_aggregation",
-            layer_name="WEE Score Aggregate",
-            group="WEE",
+            key="geoe3_score_subnational_aggregation",
+            layer_name="GeoE3 Score Aggregate",
+            group="GeoE3",
         )
         add_to_map(
             item,
-            key="wee_by_population_subnational_aggregation",
-            layer_name="WEE by Population Aggregate",
-            group="WEE",
+            key="geoe3_by_population_subnational_aggregation",
+            layer_name="GeoE3 by Population Aggregate",
+            group="GeoE3",
         )
         add_to_map(
             item,
-            key="opportunities_by_wee_score_subnational_aggregation",
-            layer_name="WEE Score by Opportunities Aggregate",
-            group="WEE",
+            key="opportunities_by_geoe3_score_subnational_aggregation",
+            layer_name="GeoE3 Score by Opportunities Aggregate",
+            group="GeoE3",
         )
         add_to_map(
             item,
-            key="opportunities_by_wee_score_by_population_subnational_aggregation",
-            layer_name="WEE Score by Population by Opportunities Aggregate",
-            group="WEE",
+            key="opportunities_by_geoe3_score_by_population_subnational_aggregation",
+            layer_name="GeoE3 Score by Population by Opportunities Aggregate",
+            group="GeoE3",
         )
 
     def open_working_directory(self, item: JsonTreeItem = None):
@@ -2018,7 +2018,7 @@ class TreePanel(QWidget):
 
         Here we compute various other insights from the aggregated data:
 
-        - WEE x Population Score
+        - GeoE3 x Population Score
         - Opportunities Mask
         - Subnational Aggregation
 
@@ -2042,19 +2042,19 @@ class TreePanel(QWidget):
             feedback=feedback,
         )
         population_processor.run()
-        wee_processor = WEEByPopulationScoreProcessingTask(
+        geoe3_processor = WEEByPopulationScoreProcessingTask(
             study_area_gpkg_path=gpkg_path,
             working_directory=self.working_directory,
             force_clear=False,
         )
-        wee_processor.run()
-        # Shamelessly hard coded for now, needs to move to the wee processor class
+        geoe3_processor.run()
+        # Shamelessly hard coded for now, needs to move to the geoe3 processor class
         output = os.path.join(
             self.working_directory,
-            "wee_by_population_score",
-            "wee_by_population_score.vrt",
+            "geoe3_by_population_score",
+            "geoe3_by_population_score.vrt",
         )
-        item.setAttribute("wee_by_population", output)
+        item.setAttribute("geoe3_by_population", output)
 
         # Prepare the polygon mask data if provided
 
@@ -2068,12 +2068,12 @@ class TreePanel(QWidget):
         )
         opportunities_mask_workflow.run()
 
-        # Now apply the opportunities mask to the WEE Score and WEE Score x Population
+        # Now apply the opportunities mask to the GeoE3 Score and GeoE3 Score x Population
         # leaving us with 4 potential products:
-        # WEE Score Unmasked (already created above)
-        # WEE Score x Population Unmasked (already created above)
-        # WEE Score Masked by Job Opportunities
-        # WEE Score x Population masked by Job Opportunities
+        # GeoE3 Score Unmasked (already created above)
+        # GeoE3 Score x Population Unmasked (already created above)
+        # GeoE3 Score Masked by Job Opportunities
+        # GeoE3 Score x Population masked by Job Opportunities
         mask_processor = OpportunitiesByWeeScoreProcessingTask(
             item=item,
             study_area_gpkg_path=gpkg_path,
@@ -2091,8 +2091,8 @@ class TreePanel(QWidget):
         mask_processor.run()
         # Now prepare the aggregation layers if an aggregation polygon layer is provided
         # leaving us with 2 potential products:
-        # Subnational Aggregation fpr WEE Score x Population Unmasked
-        # Subnational Aggregation for WEE Score x Population masked by Job Opportunities
+        # Subnational Aggregation fpr GeoE3 Score x Population Unmasked
+        # Subnational Aggregation for GeoE3 Score x Population masked by Job Opportunities
         try:
             subnational_processor = SubnationalAggregationProcessingTask(
                 item,

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""📦 Opportunities By Wee Score Processor module.
+"""📦 Opportunities By GeoE3 Score Processor module.
 
-This module contains functionality for opportunities by wee score processor.
+This module contains functionality for opportunities by GeoE3 Score processor.
 """
 
 import os
@@ -24,13 +24,13 @@ from geest.utilities import log_message, resources_path
 
 class OpportunitiesByWeeScoreProcessingTask(QgsTask):
     """
-    A QgsTask subclass for calculating masked WEE SCORE using raster algebra.
+    A QgsTask subclass for calculating masked GeoE3 Score using raster algebra.
 
-    It iterates over study areas, gets the WEE SCORE and applies the Job Opportunities
+    It iterates over study areas, gets the GeoE3 Score and applies the Job Opportunities
     mask to it. It then combines the resulting rasters into a VRT, and applies a QML style.
 
-    It takes as input a WEE Score layer (output as the result of Analysis level aggregation
-    of GEEST workflow). This WEE Score layer has the following classes:
+    It takes as input a GeoE3 Score layer (output as the result of Analysis level aggregation
+    of GEEST workflow). This GeoE3 Score layer has the following classes:
 
     | Range  | Description               | Color      |
     |--------|---------------------------|------------|
@@ -59,16 +59,16 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         force_clear: bool = False,
     ):
-        super().__init__("Opportunities WEE Score Processor", QgsTask.CanCancel)
+        super().__init__("Opportunities GeoE3 Score Processor", QgsTask.CanCancel)
         self.item = item
         self.study_area_gpkg_path = study_area_gpkg_path
 
-        self.output_dir = os.path.join(working_directory, "opportunities_by_wee_score")
+        self.output_dir = os.path.join(working_directory, "opportunities_by_geoe3_score")
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the analysis and opportunities mask processor
         self.opportunity_masks_folder = os.path.join(working_directory, "opportunity_masks")
-        self.wee_folder = os.path.join(working_directory, "wee_score")
+        self.geoe3_folder = os.path.join(working_directory, "geoe3_score")
 
         self.force_clear = force_clear
         if self.force_clear and os.path.exists(self.output_dir):
@@ -85,13 +85,13 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             self.target_crs = layer.crs()
             del layer
         self.output_rasters: List[str] = []
-        self.result_file_key = "wee_by_opportunities_mask_result_file"
-        self.result_key = "wee_by_opportunities_mask_result"
-        log_message("Initialized Opportunities Mask by WEE SCORE Processing Task")
+        self.result_file_key = "geoe3_by_opportunities_mask_result_file"
+        self.result_key = "geoe3_by_opportunities_mask_result"
+        log_message("Initialized Opportunities Mask by GeoE3 Score Processing Task")
 
     def run(self) -> bool:
         """
-        Executes the Opportunities by WEE SCORE calculation task.
+        Executes the Opportunities by GeoE3 Score calculation task.
 
         Returns:
             bool: True if the task completed successfully, False otherwise.
@@ -100,7 +100,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             self.calculate_score()
             vrt_filepath = self.generate_vrt()
             self.item.setAttribute(self.result_file_key, vrt_filepath)
-            self.item.setAttribute(self.result_key, "WEE Score by Opportunities Mask Created OK")
+            self.item.setAttribute(self.result_key, "GeoE3 Score by Opportunities Mask Created OK")
             return True
         except Exception as e:
             log_message(f"Task failed: {e}")
@@ -111,15 +111,15 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
     def validate_rasters(
         self,
         opportunities_mask_raster: QgsRasterLayer,
-        wee_score_raster: QgsRasterLayer,
+        geoe3_score_raster: QgsRasterLayer,
         dimension_check=False,
     ) -> None:
         """
-        Checks if Opportunities Mask and WEE Score rasters have the same origin, dimensions, and pixel sizes.
+        Checks if Opportunities Mask and GeoE3 Score rasters have the same origin, dimensions, and pixel sizes.
 
         Args:
             opportunities_mask_raster (QgsRasterLayer): The mask raster layer.
-            wee_score_raster (QgsRasterLayer): The WEE Score raster layer.
+            geoe3_score_raster (QgsRasterLayer): The GeoE3 Score raster layer.
             dimension_check (bool): Flag to check if the rasters have the same dimensions. Defaults to False.
 
         Raises:
@@ -127,32 +127,32 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         """
         log_message("Validating input rasters")
         log_message(f"opportunities_mask_raster: {opportunities_mask_raster.source()}")
-        log_message(f"wee_score_raster raster  : {wee_score_raster.source()}")  # noqa: E203
+        log_message(f"geoe3_score_raster raster  : {geoe3_score_raster.source()}")  # noqa: E203
 
-        if not opportunities_mask_raster.isValid() or not wee_score_raster.isValid():
+        if not opportunities_mask_raster.isValid() or not geoe3_score_raster.isValid():
             raise ValueError("One or both input rasters are invalid.")
 
         if not dimension_check:
             return
 
         mask_provider = opportunities_mask_raster.dataProvider()
-        wee_score_provider = wee_score_raster.dataProvider()
+        geoe3_score_provider = geoe3_score_raster.dataProvider()
 
         mask_extent = mask_provider.extent()
-        wee_score_size = wee_score_provider.extent()
-        if mask_extent != wee_score_size:
+        geoe3_score_size = geoe3_score_provider.extent()
+        if mask_extent != geoe3_score_size:
             raise ValueError("Input rasters do not share the same extent.")
 
         mask_size = mask_provider.xSize(), mask_provider.ySize()
-        wee_score_size = wee_score_provider.xSize(), wee_score_provider.ySize()
-        if mask_size != wee_score_size:
+        geoe3_score_size = geoe3_score_provider.xSize(), geoe3_score_provider.ySize()
+        if mask_size != geoe3_score_size:
             raise ValueError("Input rasters do not share the same dimensions.")
 
         log_message("Validation successful: rasters are aligned.")
 
     def calculate_score(self) -> None:
         """
-        Calculates Mask x WEE SCORE using raster algebra and saves the result for each area.
+        Calculates Mask x GeoE3 Score using raster algebra and saves the result for each area.
         """
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         for index, (_, _, _, _) in enumerate(area_iterator):
@@ -160,12 +160,12 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
                 return
 
             mask_path = os.path.join(self.opportunity_masks_folder, f"opportunites_mask_{index}.tif")
-            wee_score_path = os.path.join(self.wee_folder, f"wee_masked_{index}.tif")
-            mask_layer = QgsRasterLayer(mask_path, "WEE")
-            wee_score_layer = QgsRasterLayer(wee_score_path, "POP")
-            self.validate_rasters(mask_layer, wee_score_layer, dimension_check=False)
+            geoe3_score_path = os.path.join(self.geoe3_folder, f"geoe3_masked_{index}.tif")
+            mask_layer = QgsRasterLayer(mask_path, "GeoE3")
+            geoe3_score_layer = QgsRasterLayer(geoe3_score_path, "POP")
+            self.validate_rasters(mask_layer, geoe3_score_layer, dimension_check=False)
 
-            output_path = os.path.join(self.output_dir, f"wee_by_opportunities_mask_{index}.tif")
+            output_path = os.path.join(self.output_dir, f"geoe3_by_opportunities_mask_{index}.tif")
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing raster: {output_path}")
                 self.output_rasters.append(output_path)
@@ -176,7 +176,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             params = {
                 "INPUT_A": mask_layer,
                 "BAND_A": 1,
-                "INPUT_B": wee_score_layer,
+                "INPUT_B": geoe3_score_layer,
                 "BAND_B": 1,
                 "FORMULA": "A * B",
                 "NO_DATA": None,
@@ -191,17 +191,17 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             processing.run("gdal:rastercalculator", params)
             self.output_rasters.append(output_path)
 
-            log_message(f"Masked WEE SCORE raster saved to {output_path}")
+            log_message(f"Masked GeoE3 Score raster saved to {output_path}")
 
     def generate_vrt(self) -> str:
         """
-        Combines all WEE SCORE rasters into a single VRT and applies a QML style.
+        Combines all GeoE3 Score rasters into a single VRT and applies a QML style.
 
         Returns:
             str: Path to the generated VRT file.
         """
-        vrt_path = os.path.join(self.output_dir, "wee_by_opportunities_mask.vrt")
-        qml_path = os.path.join(self.output_dir, "wee_by_opportunities_mask.qml")
+        vrt_path = os.path.join(self.output_dir, "geoe3_by_opportunities_mask.vrt")
+        qml_path = os.path.join(self.output_dir, "geoe3_by_opportunities_mask.qml")
         source_qml = resources_path("resources", "qml", "analysis.qml")
 
         params = {
@@ -230,6 +230,6 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             result (bool): The result of the task execution.
         """
         if result:
-            log_message("Opportunities mask by WEE SCORE calculation completed successfully.")
+            log_message("Opportunities mask by GeoE3 Score calculation completed successfully.")
         else:
-            log_message("Opportunities mask by WEE SCORE calculation failed.")
+            log_message("Opportunities mask by GeoE3 Score calculation failed.")

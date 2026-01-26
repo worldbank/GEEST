@@ -52,7 +52,7 @@ class TestPolygonOpportunitiesMask(unittest.TestCase):
                 "mask_mode": "point",
                 "opportunities_mask_result": "",
                 "opportunities_mask_result_file": "",
-                "output_filename": "WEE_Score",
+                "output_filename": "GeoE3_Score",
                 "point_mask_layer": None,
                 "point_mask_layer_crs": "EPSG:32620",
                 "point_mask_layer_id": "fake_childcare_6a120423_4837_409e_893c_cc06dd1bde8f",

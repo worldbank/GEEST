@@ -4,7 +4,7 @@
 Accessibility Dimension Thresholds.
 
 Provides distance thresholds for accessibility factors based on
-WEE Technical Specifications.
+GeoE3 Technical Specifications.
 
 Following the ACLED pattern - simple dictionaries with scale-specific data.
 """

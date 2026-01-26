@@ -15,9 +15,9 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="1" column="0">
-    <layout class="QGridLayout" name="wee_layout">
+    <layout class="QGridLayout" name="geoe3_layout">
      <item row="0" column="0">
-      <widget class="QLabel" name="wee_title">
+      <widget class="QLabel" name="geoe3_title">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
          <horstretch>0</horstretch>
@@ -30,7 +30,7 @@ color: white;
 padding: 4px;</string>
        </property>
        <property name="text">
-        <string>Women's Enablement Environment (WEE) Aggregation Score</string>
+        <string>GeoE3 Aggregation Score</string>
        </property>
        <property name="textFormat">
         <enum>Qt::PlainText</enum>
@@ -44,7 +44,7 @@ padding: 4px;</string>
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QWidget" name="wee_container" native="true">
+      <widget class="QWidget" name="geoe3_container" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -117,14 +117,14 @@ padding: 4px;</string>
       <number>0</number>
      </property>
      <item row="0" column="1">
-      <widget class="QLabel" name="wee_jobs_title">
+      <widget class="QLabel" name="geoe3_jobs_title">
        <property name="styleSheet">
         <string notr="true">background: #1BA1E2;
 color: white;
 padding: 4px;</string>
        </property>
        <property name="text">
-        <string>WEE by Job Distribution</string>
+        <string>GeoE3 by Job Distribution</string>
        </property>
        <property name="textFormat">
         <enum>Qt::PlainText</enum>
@@ -138,14 +138,14 @@ padding: 4px;</string>
       </widget>
      </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="wee_x_population_title">
+      <widget class="QLabel" name="geoe3_x_population_title">
        <property name="styleSheet">
         <string notr="true">background: #1BA1E2;
 color: white;
 padding: 4px;</string>
        </property>
        <property name="text">
-        <string>WEE by Population</string>
+        <string>GeoE3 by Population</string>
        </property>
        <property name="textFormat">
         <enum>Qt::PlainText</enum>
@@ -159,7 +159,7 @@ padding: 4px;</string>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QWidget" name="wee_jobs_container" native="true">
+      <widget class="QWidget" name="geoe3_jobs_container" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -284,7 +284,7 @@ padding: 4px;</string>
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QLabel" name="wee_x_jobs_description">
+         <widget class="QLabel" name="geoe3_x_jobs_description">
           <property name="font">
            <font>
             <family>Noto Sans [GOOG]</family>
@@ -303,7 +303,7 @@ padding: 4px;</string>
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QWidget" name="wee_x_population_container" native="true">
+      <widget class="QWidget" name="geoe3_x_population_container" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -318,9 +318,9 @@ padding: 4px;</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
-         <widget class="QLabel" name="wee_x_population_description">
+         <widget class="QLabel" name="geoe3_x_population_description">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Optional:&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; You can visualize WEE with respect to female population distribution by age group. Please provide a raster dataset below containing (female) population density and it will be combined with the WEE score to calculate the WEE by Population score. If you have set an aggregation layer above, this will be aggregated per subnational boundary to show the majory WEE by Population score per polygon.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Optional:&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; You can visualize GeoE3 Score with respect to female population distribution by age group. Please provide a raster dataset below containing (female) population density and it will be combined with the GeoE3 Score to calculate the GeoE3 by Population Score. If you have set an aggregation layer above, this will be aggregated per subnational boundary to show the majory GeoE3 by Population Score per polygon.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -378,7 +378,7 @@ padding: 4px;</string>
    <item row="2" column="0">
     <widget class="QLabel" name="aggregation_description">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregation boundaries (optional):&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; You can generate insights from the WEE analysis by providing subnational boundaries. For each boundary, we will calculate the majority WEE score, majority WEE by Population score (if population data is set below) and majority WEE by Job Distribution score (if configured below).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregation boundaries (optional):&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; You can generate insights from the GeoE3 analysis by providing subnational boundaries. For each boundary, we will calculate the majority GeoE3 Score, majority GeoE3 by Population Score (if population data is set below) and majority GeoE3 by Job Distribution Score (if configured below).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

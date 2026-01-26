@@ -80,27 +80,27 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_execution_end_time = json_data.get("execution_end_time", "")
         analysis_error = json_data.get("error", "")
         analysis_error_file = json_data.get("error_file", "")
-        analysis_output_filename = json_data.get("output_filename", "WEE_Score")
+        analysis_output_filename = json_data.get("output_filename", "GeoE3_Score")
         mask_mode = json_data.get("mask_mode", "None")
         buffer_distance_m = json_data.get("buffer_distance_m", 0.0)
         opportunities_mask_result_file = json_data.get("opportunities_mask_result_file", "")
         opportunities_mask_result = json_data.get("opportunities_mask_result", "")
-        wee_by_opportunities_mask_result = json_data.get("wee_by_opportunities_mask_result", "")
-        wee_by_opportunities_mask_result_file = json_data.get("wee_by_opportunities_mask_result_file", "")
-        wee_by_population = json_data.get("wee_by_population", "")
-        wee_by_population_subnational_aggregation = json_data.get("wee_by_population_subnational_aggregation", "")
-        wee_score_subnational_aggregation = json_data.get("wee_score_subnational_aggregation", "")
-        opportunities_by_wee_score_by_population_subnational_aggregation = json_data.get(
-            "opportunities_by_wee_score_by_population_subnational_aggregation", ""
+        geoe3_by_opportunities_mask_result = json_data.get("geoe3_by_opportunities_mask_result", "")
+        geoe3_by_opportunities_mask_result_file = json_data.get("geoe3_by_opportunities_mask_result_file", "")
+        geoe3_by_population = json_data.get("geoe3_by_population", "")
+        geoe3_by_population_subnational_aggregation = json_data.get("geoe3_by_population_subnational_aggregation", "")
+        geoe3_score_subnational_aggregation = json_data.get("geoe3_score_subnational_aggregation", "")
+        opportunities_by_geoe3_score_by_population_subnational_aggregation = json_data.get(
+            "opportunities_by_geoe3_score_by_population_subnational_aggregation", ""
         )
-        opportunities_by_wee_score_subnational_aggregation = json_data.get(
-            "opportunities_by_wee_score_subnational_aggregation", ""
+        opportunities_by_geoe3_score_subnational_aggregation = json_data.get(
+            "opportunities_by_geoe3_score_subnational_aggregation", ""
         )
-        wee_by_population_by_opportunities_mask_result_file = json_data.get(
-            "wee_by_population_by_opportunities_mask_result_file", ""
+        geoe3_by_population_by_opportunities_mask_result_file = json_data.get(
+            "geoe3_by_population_by_opportunities_mask_result_file", ""
         )
-        wee_by_population_by_opportunities_mask_result = json_data.get(
-            "wee_by_population_by_opportunities_mask_result", ""
+        geoe3_by_population_by_opportunities_mask_result = json_data.get(
+            "geoe3_by_population_by_opportunities_mask_result", ""
         )
         # Store special properties in the attributes dictionary
         analysis_attributes = {
@@ -121,15 +121,15 @@ class JsonTreeModel(QAbstractItemModel):
             "buffer_distance_m": buffer_distance_m,
             "opportunities_mask_result_file": opportunities_mask_result_file,
             "opportunities_mask_result": opportunities_mask_result,
-            "wee_by_opportunities_mask_result": wee_by_opportunities_mask_result,
-            "wee_by_opportunities_mask_result_file": wee_by_opportunities_mask_result_file,
-            "wee_by_population": wee_by_population,
-            "wee_by_population_subnational_aggregation": wee_by_population_subnational_aggregation,
-            "wee_score_subnational_aggregation": wee_score_subnational_aggregation,
-            "opportunities_by_wee_score_by_population_subnational_aggregation": opportunities_by_wee_score_by_population_subnational_aggregation,
-            "opportunities_by_wee_score_subnational_aggregation": opportunities_by_wee_score_subnational_aggregation,
-            "wee_by_population_by_opportunities_mask_result_file": wee_by_population_by_opportunities_mask_result_file,
-            "wee_by_population_by_opportunities_mask_result": wee_by_population_by_opportunities_mask_result,
+            "geoe3_by_opportunities_mask_result": geoe3_by_opportunities_mask_result,
+            "geoe3_by_opportunities_mask_result_file": geoe3_by_opportunities_mask_result_file,
+            "geoe3_by_population": geoe3_by_population,
+            "geoe3_by_population_subnational_aggregation": geoe3_by_population_subnational_aggregation,
+            "geoe3_score_subnational_aggregation": geoe3_score_subnational_aggregation,
+            "opportunities_by_geoe3_score_by_population_subnational_aggregation": opportunities_by_geoe3_score_by_population_subnational_aggregation,
+            "opportunities_by_geoe3_score_subnational_aggregation": opportunities_by_geoe3_score_subnational_aggregation,
+            "geoe3_by_population_by_opportunities_mask_result_file": geoe3_by_population_by_opportunities_mask_result_file,
+            "geoe3_by_population_by_opportunities_mask_result": geoe3_by_population_by_opportunities_mask_result,
         }
 
         for prefix in [
@@ -157,7 +157,7 @@ class JsonTreeModel(QAbstractItemModel):
         role = "analysis"
         analysis_item = JsonTreeItem(
             [
-                "WEE Score",
+                "Geo3E Score",
                 status,
                 weighting,
                 analysis_attributes,
