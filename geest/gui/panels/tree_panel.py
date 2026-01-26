@@ -42,6 +42,7 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from qgis.utils import iface
 
 from geest.core import JsonTreeItem, WorkflowQueueManager
 from geest.core.algorithms import (
@@ -126,7 +127,8 @@ class TreePanel(QWidget):
 
         self.configure_network_button = QPushButton("Configure")
         self.configure_network_button.clicked.connect(self._on_configure_clicked)
-        self.configure_network_button.setStyleSheet("""
+        self.configure_network_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #b8dce3, stop:1 #8ec8d0);
@@ -143,12 +145,14 @@ class TreePanel(QWidget):
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #8ec8d0, stop:1 #b8dce3);
             }
-        """)
+        """
+        )
         warning_layout.addWidget(self.configure_network_button)
 
         close_warning_button = QPushButton("✕")
         close_warning_button.setFixedSize(24, 24)
-        close_warning_button.setStyleSheet("""
+        close_warning_button.setStyleSheet(
+            """
             QPushButton {
                 border: none;
                 color: #856404;
@@ -160,17 +164,20 @@ class TreePanel(QWidget):
                 background-color: rgba(0, 0, 0, 0.1);
                 border-radius: 3px;
             }
-        """)
+        """
+        )
         close_warning_button.clicked.connect(self.hide_validation_warning)
         warning_layout.addWidget(close_warning_button)
 
-        self.warning_widget.setStyleSheet("""
+        self.warning_widget.setStyleSheet(
+            """
             QWidget {
                 background-color: #fff3cd;
                 border-left: 4px solid #ffc107;
                 border-radius: 3px;
             }
-        """)
+        """
+        )
 
         layout.addWidget(self.warning_widget)
 
@@ -253,6 +260,13 @@ class TreePanel(QWidget):
 
         # Add the button to the button bar
         button_bar.addWidget(self.prepare_analysis_button)
+
+        # Add a status label to show current operation
+        self.status_label = QLabel("")
+        self.status_label.setStyleSheet("color: #666; font-style: italic;")
+        self.status_label.setFixedWidth(200)
+        self.status_label.setVisible(False)
+        button_bar.addWidget(self.status_label)
 
         self.project_button = QPushButton("Project")
         self.project_button.clicked.connect(self.switch_to_setup_tab)
@@ -468,7 +482,7 @@ class TreePanel(QWidget):
                     analysis_name = os.path.basename(self.working_directory)
                     analysis_data["analysis_name"] = f"Women's Economic Empowerment - {analysis_name}"
                 # analysis_item.setData(0, analysis_data.get("analysis_name", "Analysis"))
-                analysis_item.setData(0, "WEE Score")
+                analysis_item.setData(0, "GeoE3 Score")
                 settings = QSettings()
                 # This is the top level folder for work files
                 settings.setValue("last_working_directory", self.working_directory)
@@ -815,41 +829,38 @@ class TreePanel(QWidget):
             animate_results_action.triggered.connect(self.animate_results)
             menu.addAction(animate_results_action)
 
-            add_wee_score = QAction("Add WEE Score to Map")
-            add_wee_score.triggered.connect(
-                lambda: add_to_map(item, key="result_file", layer_name="WEE Score", group="WEE")
+            add_geoe3_score = QAction("Add GeoE3 Score to Map")
+            add_geoe3_score.triggered.connect(
+                lambda: add_to_map(item, key="result_file", layer_name="GeoE3 Score", group="GeoE3")
             )
-            menu.addAction(add_wee_score)
+            menu.addAction(add_geoe3_score)
 
-            add_wee_by_population = QAction("Add WEE by Pop to Map")
-            add_wee_by_population.triggered.connect(
+            add_geoe3_by_population = QAction("Add GeoE3 by Pop to Map")
+            add_geoe3_by_population.triggered.connect(
                 lambda: add_to_map(
                     item,
-                    key="wee_by_population",
-                    layer_name="WEE by Population",
-                    group="WEE",
+                    key="geoe3_by_population",
+                    layer_name="GeoE3 by Population",
+                    group="GeoE3",
                 )
             )
-            menu.addAction(add_wee_by_population)
+            menu.addAction(add_geoe3_by_population)
 
-            add_wee_by_population_aggregate = QAction("Add WEE Aggregates to Map")
-            add_wee_by_population_aggregate.triggered.connect(lambda: self.add_aggregates_to_map(item))
-            menu.addAction(add_wee_by_population_aggregate)
+            add_geoe3_by_population_aggregate = QAction("Add GeoE3 Aggregates to Map")
+            add_geoe3_by_population_aggregate.triggered.connect(lambda: self.add_aggregates_to_map(item))
+            menu.addAction(add_geoe3_by_population_aggregate)
 
             add_masked_scores = QAction("Add Masked Scores to Map")
             add_masked_scores.triggered.connect(lambda: self.add_masked_scores_to_map(item))
             menu.addAction(add_masked_scores)
 
             add_job_opportunities_mask = QAction("Add Job Opportunities Mask to Map")
-            add_job_opportunities_mask.triggered.connect(
-                lambda: add_to_map(
-                    item,
-                    key="opportunities_mask_result_file",
-                    layer_name="Opportunities Mask",
-                    group="WEE",
-                )
-            )
+            add_job_opportunities_mask.triggered.connect(lambda: self.add_opportunities_mask_to_map(item))
             menu.addAction(add_job_opportunities_mask)
+
+            add_ghsl_settlements = QAction("Add GHSL Settlements to Map")
+            add_ghsl_settlements.triggered.connect(self.add_ghsl_settlements_to_map)
+            menu.addAction(add_ghsl_settlements)
 
             add_study_area_layers_action = QAction("Add Study Area to Map", self)
             add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
@@ -938,19 +949,19 @@ class TreePanel(QWidget):
     def generate_analysis_report(self):
         """Add a report showing analysis results."""
         model_path = os.path.join(self.working_directory, "model.json")
-        report = AnalysisReport(
+        with AnalysisReport(
             model_path=model_path,
             working_directory=self.working_directory,
             report_name="Study Area Summary",
-        )
-        self.overall_progress_bar.setVisible(True)
-        self.overall_progress_bar.setValue(10)
-        report.create_layout()
-        self.overall_progress_bar.setValue(30)
-        report.export_pdf(os.path.join(self.working_directory, "analysis_report.pdf"))
-        self.overall_progress_bar.setValue(60)
-        report.export_qpt(os.path.join(self.working_directory, "analysis_report.qpt"))
-        self.overall_progress_bar.setValue(90)
+        ) as report:
+            self.overall_progress_bar.setVisible(True)
+            self.overall_progress_bar.setValue(10)
+            report.create_layout()
+            self.overall_progress_bar.setValue(30)
+            report.export_pdf(os.path.join(self.working_directory, "analysis_report.pdf"))
+            self.overall_progress_bar.setValue(60)
+            report.export_qpt(os.path.join(self.working_directory, "analysis_report.qpt"))
+            self.overall_progress_bar.setValue(90)
 
         # open the pdf using the system PDF viewer
         # Windows
@@ -979,13 +990,14 @@ class TreePanel(QWidget):
     def generate_study_area_report(self):
         """Add a report showing population information for the study area."""
         gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
-        report = StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary")
-        self.overall_progress_bar.setVisible(True)
-        self.overall_progress_bar.setValue(10)
-        report.create_layout()
-        self.overall_progress_bar.setValue(30)
-        report.export_pdf(os.path.join(self.working_directory, "study_area_report.pdf"))
-        self.overall_progress_bar.setValue(90)
+        with StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary") as report:
+            self.overall_progress_bar.setVisible(True)
+            self.overall_progress_bar.setValue(10)
+            report.create_layout()
+            self.overall_progress_bar.setValue(30)
+            report.export_pdf(os.path.join(self.working_directory, "study_area_report.pdf"))
+            self.overall_progress_bar.setValue(90)
+
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
@@ -1009,15 +1021,135 @@ class TreePanel(QWidget):
         """
         add_to_map(
             item,
-            key="wee_by_opportunities_mask_result_file",
-            layer_name="Masked WEE Score",
-            group="WEE",
+            key="geoe3_by_opportunities_mask_result_file",
+            layer_name="Masked GeoE3 Score",
+            group="GeoE3",
         )
         add_to_map(
             item,
-            key="wee_by_population_by_opportunities_mask_result_file",
-            layer_name="Masked WEE by Population Score",
-            group="WEE",
+            key="geoe3_by_population_by_opportunities_mask_result_file",
+            layer_name="Masked GeoE3 by Population Score",
+            group="GeoE3",
+        )
+
+    def add_opportunities_mask_to_map(self, item):
+        """Add the opportunities mask to the map with diagnostic feedback.
+
+        Args:
+            item: The analysis item containing opportunities mask configuration.
+        """
+        mask_file = item.attribute("opportunities_mask_result_file")
+
+        if not mask_file:
+            iface.messageBar().pushMessage(
+                "Opportunities Mask",
+                "Not configured. Run the opportunities mask processing first.",
+                level=Qgis.Warning,
+                duration=8,
+            )
+            return
+
+        if not os.path.exists(mask_file):
+            iface.messageBar().pushMessage(
+                "Opportunities Mask",
+                f"File not found: {os.path.basename(mask_file)}. Run the mask processing.",
+                level=Qgis.Warning,
+                duration=8,
+            )
+            return
+
+        if os.path.getsize(mask_file) == 0:
+            iface.messageBar().pushMessage(
+                "Opportunities Mask",
+                "File is empty (0 bytes). Run the mask processing again.",
+                level=Qgis.Warning,
+                duration=8,
+            )
+            return
+
+        add_to_map(
+            item,
+            key="opportunities_mask_result_file",
+            layer_name="Opportunities Mask",
+            group="GeoE3",
+        )
+
+    def add_ghsl_settlements_to_map(self):
+        """Add the GHSL settlements layer from the study area GeoPackage to the map."""
+        working_dir = self.working_directory
+        if not working_dir:
+            iface.messageBar().pushMessage(
+                "GHSL Settlements",
+                "No working directory set.",
+                level=Qgis.Warning,
+                duration=5,
+            )
+            return
+
+        gpkg_path = os.path.join(working_dir, "study_area", "study_area.gpkg")
+        if not os.path.exists(gpkg_path):
+            iface.messageBar().pushMessage(
+                "GHSL Settlements",
+                "Study area GeoPackage not found. Create a project first.",
+                level=Qgis.Warning,
+                duration=5,
+            )
+            return
+
+        layer_name = "ghsl_settlements"
+        layer_path = f"{gpkg_path}|layername={layer_name}"
+
+        # Check if layer exists in the GeoPackage
+        from osgeo import ogr
+
+        ds = ogr.Open(gpkg_path, 0)
+        if ds is None:
+            iface.messageBar().pushMessage(
+                "GHSL Settlements",
+                "Could not open study area GeoPackage.",
+                level=Qgis.Warning,
+                duration=5,
+            )
+            return
+
+        layer_exists = ds.GetLayerByName(layer_name) is not None
+        ds = None
+
+        if not layer_exists:
+            iface.messageBar().pushMessage(
+                "GHSL Settlements",
+                "GHSL layer not found. It may not have been downloaded during project creation.",
+                level=Qgis.Warning,
+                duration=8,
+            )
+            return
+
+        # Load the layer
+        layer = QgsVectorLayer(layer_path, "GHSL Settlements", "ogr")
+        if not layer.isValid():
+            iface.messageBar().pushMessage(
+                "GHSL Settlements",
+                "Failed to load GHSL settlements layer.",
+                level=Qgis.Warning,
+                duration=5,
+            )
+            return
+
+        # Add to map under Study Area group
+        project = QgsProject.instance()
+        root = project.layerTreeRoot()
+        study_area_group = root.findGroup("Geest Study Area")
+        if study_area_group is None:
+            study_area_group = root.insertGroup(0, "Geest Study Area")
+
+        project.addMapLayer(layer, False)
+        study_area_group.addLayer(layer)
+
+        iface.messageBar().pushMessage(
+            "GHSL Settlements",
+            "Layer added to map.",
+            level=Qgis.Success,
+            duration=3,
         )
 
     def add_aggregates_to_map(self, item):
@@ -1028,27 +1160,27 @@ class TreePanel(QWidget):
         """
         add_to_map(
             item,
-            key="wee_score_subnational_aggregation",
-            layer_name="WEE Score Aggregate",
-            group="WEE",
+            key="geoe3_score_subnational_aggregation",
+            layer_name="GeoE3 Score Aggregate",
+            group="GeoE3",
         )
         add_to_map(
             item,
-            key="wee_by_population_subnational_aggregation",
-            layer_name="WEE by Population Aggregate",
-            group="WEE",
+            key="geoe3_by_population_subnational_aggregation",
+            layer_name="GeoE3 by Population Aggregate",
+            group="GeoE3",
         )
         add_to_map(
             item,
-            key="opportunities_by_wee_score_subnational_aggregation",
-            layer_name="WEE Score by Opportunities Aggregate",
-            group="WEE",
+            key="opportunities_by_geoe3_score_subnational_aggregation",
+            layer_name="GeoE3 Score by Opportunities Aggregate",
+            group="GeoE3",
         )
         add_to_map(
             item,
-            key="opportunities_by_wee_score_by_population_subnational_aggregation",
-            layer_name="WEE Score by Population by Opportunities Aggregate",
-            group="WEE",
+            key="opportunities_by_geoe3_score_by_population_subnational_aggregation",
+            layer_name="GeoE3 Score by Population by Opportunities Aggregate",
+            group="GeoE3",
         )
 
     def open_working_directory(self, item: JsonTreeItem = None):
@@ -1392,6 +1524,7 @@ class TreePanel(QWidget):
             "study_area_bboxes",
             "study_area_bbox",
             "study_area_creation_status",
+            "chunks",
         ]
         for layer_name in layers:
             gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
@@ -1408,9 +1541,9 @@ class TreePanel(QWidget):
             source_qml = resources_path("resources", "qml", f"{layer_name}.qml")
             result = layer.loadNamedStyle(source_qml)
             if result[0]:  # loadNamedStyle returns (success, error_message)
-                print(f"Successfully applied QML style to layer '{layer_name}'")
+                log_message(f"Successfully applied QML style to layer '{layer_name}'")
             else:
-                print(f"Failed to apply QML style: {result[1]}")
+                log_message(f"Failed to apply QML style: {result[1]}")
 
             # Check if a layer with the same data source exists in the correct group
             existing_layer = None
@@ -1663,6 +1796,8 @@ class TreePanel(QWidget):
         task.job_finished.connect(lambda success: self.on_workflow_completed(item, success))
         # Hook up the QTask feedback signal to the progress bar
         task.progressChanged.connect(self.task_progress_updated)
+        # Hook up the status message signal to the status label
+        task.status_message.connect(self.task_status_updated)
 
     def run_item(self, item, shift_pressed):
         """Run the item and the ones below it.
@@ -1693,6 +1828,9 @@ class TreePanel(QWidget):
             workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
         self.overall_progress_bar.setVisible(True)
         self.workflow_progress_bar.setVisible(True)
+        self.status_label.setVisible(True)
+        self.status_label.setText("Starting...")
+        self.prepare_analysis_button.setVisible(False)
         self.help_button.setVisible(False)
         self.project_button.setVisible(False)
         self.overall_progress_bar.setValue(0)
@@ -1810,6 +1948,19 @@ class TreePanel(QWidget):
         log_message(f"Task progress: {progress}")
         self.workflow_progress_bar.setValue(int(progress))
 
+    def task_status_updated(self, status: str):
+        """Slot to be called when the task status message is updated.
+
+        Args:
+            status: A short description of the current operation.
+        """
+        # Truncate long status messages to fit the label
+        max_len = 35
+        if len(status) > max_len:
+            status = status[: max_len - 3] + "..."
+        self.status_label.setText(status)
+        self.status_label.setToolTip(status)  # Show full text on hover
+
     @pyqtSlot(bool)
     def on_workflow_completed(self, item, success):
         """
@@ -1867,7 +2018,7 @@ class TreePanel(QWidget):
 
         Here we compute various other insights from the aggregated data:
 
-        - WEE x Population Score
+        - GeoE3 x Population Score
         - Opportunities Mask
         - Subnational Aggregation
 
@@ -1891,19 +2042,19 @@ class TreePanel(QWidget):
             feedback=feedback,
         )
         population_processor.run()
-        wee_processor = WEEByPopulationScoreProcessingTask(
+        geoe3_processor = WEEByPopulationScoreProcessingTask(
             study_area_gpkg_path=gpkg_path,
             working_directory=self.working_directory,
             force_clear=False,
         )
-        wee_processor.run()
-        # Shamelessly hard coded for now, needs to move to the wee processor class
+        geoe3_processor.run()
+        # Shamelessly hard coded for now, needs to move to the geoe3 processor class
         output = os.path.join(
             self.working_directory,
-            "wee_by_population_score",
-            "wee_by_population_score.vrt",
+            "geoe3_by_population_score",
+            "geoe3_by_population_score.vrt",
         )
-        item.setAttribute("wee_by_population", output)
+        item.setAttribute("geoe3_by_population", output)
 
         # Prepare the polygon mask data if provided
 
@@ -1917,12 +2068,12 @@ class TreePanel(QWidget):
         )
         opportunities_mask_workflow.run()
 
-        # Now apply the opportunities mask to the WEE Score and WEE Score x Population
+        # Now apply the opportunities mask to the GeoE3 Score and GeoE3 Score x Population
         # leaving us with 4 potential products:
-        # WEE Score Unmasked (already created above)
-        # WEE Score x Population Unmasked (already created above)
-        # WEE Score Masked by Job Opportunities
-        # WEE Score x Population masked by Job Opportunities
+        # GeoE3 Score Unmasked (already created above)
+        # GeoE3 Score x Population Unmasked (already created above)
+        # GeoE3 Score Masked by Job Opportunities
+        # GeoE3 Score x Population masked by Job Opportunities
         mask_processor = OpportunitiesByWeeScoreProcessingTask(
             item=item,
             study_area_gpkg_path=gpkg_path,
@@ -1940,8 +2091,8 @@ class TreePanel(QWidget):
         mask_processor.run()
         # Now prepare the aggregation layers if an aggregation polygon layer is provided
         # leaving us with 2 potential products:
-        # Subnational Aggregation fpr WEE Score x Population Unmasked
-        # Subnational Aggregation for WEE Score x Population masked by Job Opportunities
+        # Subnational Aggregation fpr GeoE3 Score x Population Unmasked
+        # Subnational Aggregation for GeoE3 Score x Population masked by Job Opportunities
         try:
             subnational_processor = SubnationalAggregationProcessingTask(
                 item,
@@ -1997,6 +2148,9 @@ class TreePanel(QWidget):
         self.workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
         self.overall_progress_bar.setVisible(True)
         self.workflow_progress_bar.setVisible(True)
+        self.status_label.setVisible(True)
+        self.status_label.setText("Starting...")
+        self.prepare_analysis_button.setVisible(False)
         self.help_button.setVisible(False)
         self.project_button.setVisible(False)
         self.overall_progress_bar.setValue(0)
@@ -2012,6 +2166,9 @@ class TreePanel(QWidget):
         if len(self.workflow_queue) == 0:
             self.overall_progress_bar.setVisible(False)
             self.workflow_progress_bar.setVisible(False)
+            self.status_label.setVisible(False)
+            self.status_label.setText("")
+            self.prepare_analysis_button.setVisible(True)
             self.help_button.setVisible(True)
             self.project_button.setVisible(True)
             self.workflow_scope_item = None

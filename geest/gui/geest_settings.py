@@ -10,9 +10,9 @@ import os
 
 from qgis.core import QgsApplication
 from qgis.gui import QgsOptionsPageWidget, QgsOptionsWidgetFactory
+from qgis.PyQt.QtCore import QSettings, QThread
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QFileDialog
-from qgis.PyQt.QtCore import QSettings
 
 from geest.core.constants import APPLICATION_NAME
 from geest.core.settings import set_setting, setting
@@ -39,6 +39,8 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         # during rendering. Probably setting to the same number
         # of CPU cores you have would be a good conservative approach
         # You could probably run 100 or more on a decently specced machine
+        cpu_count = QThread.idealThreadCount()
+        self.spin_thread_pool_size.setMaximum(cpu_count)
         self.spin_thread_pool_size.setValue(int(setting(key="concurrent_tasks", default=1)))
 
         # This provides more verbose logging output
@@ -59,7 +61,9 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         self.chunk_size.setValue(chunk_size)
 
         grid_creation_workers = int(setting(key="grid_creation_workers", default=4))
+        self.grid_creation_workers.setMaximum(cpu_count)
         self.grid_creation_workers.setValue(grid_creation_workers)
+        self.label_grid_workers.setText(f"Grid creation workers (1=sequential, 2-{cpu_count}=parallel, default 4)")
 
         zero_default = bool(setting(key="default_raster_to_0", default=0))
         self.default_raster_to_0.setChecked(bool(zero_default))
@@ -161,7 +165,7 @@ class GeestOptionsFactory(QgsOptionsWidgetFactory):
     def __init__(self):  # pylint: disable=useless-super-delegation
         """🏗️ Initialize the instance."""
         super().__init__()
-        self.setTitle("Geest")
+        self.setTitle("GeoE3")
 
     def icon(self):  # pylint: disable=missing-function-docstring
         """⚙️ Icon.

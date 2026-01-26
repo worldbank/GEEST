@@ -17,7 +17,7 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
     """
     Concrete implementation of an 'Analysis Aggregation' workflow.
 
-    It will generate the WEE Score product. Further processing is required to generate the WEE x Population Score.
+    It will generate the GeoE3 Score product. Further processing is required to generate the GeoE3 x Population Score.
     The logic for the latter is implemented in tree_panel.py : calculate_analysis_insights method.
     """
 
@@ -30,14 +30,15 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
-        """
-        Initialize the workflow with attributes and feedback.
-        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
-        :param cell_size_m: Cell size in meters for rasterization.
-        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national
-        :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        """Initialize the workflow with attributes and feedback.
+
+        Args:
+            item: JsonTreeItem representing the analysis, dimension, or factor to process.
+            cell_size_m: Cell size in meters for rasterization.
+            analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
+            feedback: QgsFeedback object for progress reporting and cancellation.
+            context: QgsProcessingContext object for processing.
+            working_directory: Folder containing study_area.gpkg and outputs.
         """
         super().__init__(
             item, cell_size_m, analysis_scale, feedback, context, working_directory
@@ -46,10 +47,10 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         self.id = (
             self.item.attribute("analysis_name").lower().replace(" ", "_").replace("'", "")
         )  # should not be needed any more
-        self.layer_id = "wee"
+        self.layer_id = "geoe3"
         self.weight_key = "analysis_weighting"
         self.workflow_name = "analysis_aggregation"
         # Override the default working directory defined in the base class
-        self.workflow_directory = os.path.join(self.working_directory, "wee_score")
+        self.workflow_directory = os.path.join(self.working_directory, "geoe3_score")
         if not os.path.exists(self.workflow_directory):
             os.makedirs(self.workflow_directory, exist_ok=True)

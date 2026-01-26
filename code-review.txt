@@ -1,0 +1,39 @@
+geest/core/tasks/study_area_processing_task.py:677:CRITICAL:Security: SQL injection - direct string interpolation in SetAttributeFilter()
+geest/core/tasks/study_area_processing_task.py:681:CRITICAL:Security: SQL injection - direct string interpolation in SetAttributeFilter()
+geest/__init__.py:461:CRITICAL:Security: Uncontrolled __import__() with dynamic module names
+geest/core/ors_client.py:49:CRITICAL:Security: API key stored in QSettings without protection - use keyring
+geest/core/tasks/study_area_processing_task.py:1090:CRITICAL:Concurrency: Race condition in writer thread reference counting
+geest/gui/panels/tree_panel.py:381:HIGH:Security: Unsafe subprocess.run with unsanitized path
+geest/gui/panels/tree_panel.py:972:HIGH:Security: Unsafe subprocess.run with unsanitized path
+geest/gui/panels/tree_panel.py:975:HIGH:Security: Unsafe subprocess.run with unsanitized path
+geest/gui/panels/tree_panel.py:997:HIGH:Security: Unsafe subprocess.run with unsanitized path
+geest/gui/panels/tree_panel.py:1000:HIGH:Security: Unsafe subprocess.run with unsanitized path
+geest/gui/panels/tree_panel.py:1091:HIGH:Security: Unsafe subprocess.run with unsanitized path
+geest/gui/panels/tree_panel.py:1104:HIGH:Security: Unsafe subprocess.run with unsanitized path
+geest/core/tasks/study_area_report_task.py:71:HIGH:Security: Unsafe subprocess.run with unsanitized path
+geest/core/tasks/study_area_report_task.py:73:HIGH:Security: Unsafe subprocess.run with unsanitized path
+geest/utilities.py:257:HIGH:ErrorHandling: Bare except Exception with pass - masks errors
+geest/utilities.py:269:HIGH:ErrorHandling: Bare except Exception with pass - masks errors
+geest/utilities.py:284:HIGH:ErrorHandling: Bare except Exception with pass - masks errors
+geest/core/tasks/study_area_processing_task.py:1:HIGH:ResourceMgmt: GDAL/OGR datasets not reliably closed in error paths throughout file
+geest/core/reports/analysis_report.py:66:HIGH:ResourceMgmt: Unreliable __del__() for cleanup - use context manager
+geest/core/reports/base_report.py:62:HIGH:ResourceMgmt: Unreliable __del__() for cleanup - use context manager
+geest/core/reports/study_area_report.py:101:HIGH:ResourceMgmt: Unreliable __del__() for cleanup - use context manager
+geest/core/algorithms/features_per_cell_processor.py:65:HIGH:Performance: N+1 queries - repeated getFeature() calls in loop
+geest/core/tasks/study_area_processing_task.py:1113:MEDIUM:Concurrency: Complex custom threading - use concurrent.futures instead
+geest/core/osm_downloaders/osm_data_downloader_base.py:173:MEDIUM:Performance: Blocking network call blockingPost() on UI thread
+geest/core/ors_client.py:89:MEDIUM:Performance: Blocking network call blockingPost() on UI thread
+geest/gui/panels/tree_panel.py:1:MEDIUM:ResourceMgmt: Signal connections without guaranteed disconnections throughout file
+geest/test_suite.py:46:LOW:Idiomatic: Use log_message() instead of print()
+geest/test_suite.py:47:LOW:Idiomatic: Use log_message() instead of print()
+geest/test_suite.py:48:LOW:Idiomatic: Use log_message() instead of print()
+geest/core/tasks/grid_chunker_task.py:53:LOW:Idiomatic: Use log_message() instead of print()
+geest/core/tasks/grid_chunker_task.py:56:LOW:Idiomatic: Use log_message() instead of print()
+geest/core/json_validator.py:55:LOW:Idiomatic: Use log_message() instead of print()
+geest/core/json_validator.py:56:LOW:Idiomatic: Use log_message() instead of print()
+geest/core/json_validator.py:66:LOW:Idiomatic: Use log_message() instead of print()
+geest/core/json_validator.py:69:LOW:Idiomatic: Use log_message() instead of print()
+geest/gui/dialogs/dimension_aggregation_dialog.py:354:LOW:Maintainability: TODO - Move this to stylesheet
+geest/core/osm_downloaders/downloader.py:48:LOW:Maintainability: TODO - need to handle this to stop the process
+geest/core/algorithms/opportunities_mask_processor.py:206:LOW:Maintainability: TODO - make user configurable
+geest/core/tasks/study_area_processing_task.py:1:LOW:Maintainability: run() method too large - split into smaller methods

@@ -2,6 +2,11 @@
 """📦 Features Per Cell Processor module.
 
 This module contains functionality for features per cell processor.
+
+Performance optimizations:
+- Caches grid geometries upfront to avoid repeated getFeature() calls
+- Uses prepared geometries for faster intersection tests
+- Reduces logging overhead in inner loops
 """
 
 from qgis import processing  # noqa: F401
@@ -13,11 +18,12 @@ from qgis.core import (
     QgsFeedback,
     QgsField,
     QgsFields,
+    QgsGeometry,
+    QgsRectangle,
     QgsSpatialIndex,
     QgsVectorFileWriter,
     QgsVectorLayer,
     QgsWkbTypes,
-    edit,
 )
 from qgis.PyQt.QtCore import QVariant
 
@@ -54,113 +60,170 @@ def select_grid_cells_and_count_features(
         level=Qgis.Info,
     )
 
-    # Create a spatial index for the grid layer to optimize intersection queries
-    grid_index = QgsSpatialIndex(grid_layer.getFeatures())
+    # Initialize variables for cleanup
+    grid_index = None
+    grid_feature_counts = None
+    writer = None
 
-    # Create a dictionary to hold the count of intersecting features for each grid cell ID
-    grid_feature_counts = {}
-    counter = 0
-    feature_count = features_layer.featureCount()
-    # Iterate over each feature and use the spatial index to find the intersecting grid cells
-    for feature in features_layer.getFeatures():
-        feature_geom = feature.geometry()
+    try:
+        # Create a spatial index for the grid layer to optimize intersection queries
+        grid_index = QgsSpatialIndex(grid_layer.getFeatures())
 
-        # Use bounding box only for point geometries; otherwise, use the actual geometry for intersection checks
-        if feature_geom.isEmpty():
-            continue
+        # Create a dictionary to hold the count of intersecting features for each grid cell ID
+        grid_feature_counts = {}
+        counter = 0
+        feature_count = features_layer.featureCount()
+        log_interval = max(1, feature_count // 20)  # Log ~20 times during processing
 
-        if feature_geom.type() == QgsWkbTypes.PointGeometry:
-            # For point geometries, use bounding box to find intersecting grid cells
-            intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
-        else:
-            # For line and polygon geometries, check actual geometry against grid cells
-            intersecting_ids = grid_index.intersects(feature_geom.boundingBox())  # Initial rough filter
-            log_message(
-                f"{len(intersecting_ids)} rough intersections found.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            intersecting_ids = [
-                grid_id
-                for grid_id in intersecting_ids
-                if grid_layer.getFeature(grid_id).geometry().intersects(feature_geom)
-            ]
-            log_message(
-                f"{len(intersecting_ids)} refined intersections found.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
+        # Iterate over each feature and use the spatial index to find the intersecting grid cells
+        for feature in features_layer.getFeatures():
+            feature_geom = feature.geometry()
 
-        # Iterate over the intersecting grid cell IDs and count intersections
-        for grid_id in intersecting_ids:
-            if grid_id in grid_feature_counts:
-                grid_feature_counts[grid_id] += 1
+            # Use bounding box only for point geometries; otherwise, use the actual geometry for intersection checks
+            if feature_geom.isEmpty():
+                continue
+
+            if feature_geom.type() == QgsWkbTypes.PointGeometry:
+                # For point geometries, use bounding box to find intersecting grid cells
+                intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
             else:
-                grid_feature_counts[grid_id] = 1
-        counter += 1
-        feedback.setProgress((counter / feature_count) * 100.0)  # We just use nominal intervals for progress updates
+                # For line and polygon geometries, check actual geometry against grid cells
+                intersecting_ids = grid_index.intersects(feature_geom.boundingBox())  # Initial rough filter
+                rough_count = len(intersecting_ids)
 
-    log_message(f"{len(grid_feature_counts)} intersections found.")
+                # OPTIMIZATION: Use prepared geometry for faster intersection tests
+                # This prepares the feature geometry once, then tests against each grid cell
+                # Memory-efficient: doesn't cache grid geometries, fetches on demand
+                prepared_geom = QgsGeometry.createGeometryEngine(feature_geom.constGet())
+                prepared_geom.prepareGeometry()
 
-    options = QgsVectorFileWriter.SaveVectorOptions()
-    options.driverName = "GPKG"
-    options.fileEncoding = "UTF-8"
-    options.layerName = "grid_with_feature_counts"
+                # Batch fetch grid features for better performance while staying memory-efficient
+                request = QgsFeatureRequest().setFilterFids(intersecting_ids)
+                intersecting_ids = [
+                    grid_feature.id()
+                    for grid_feature in grid_layer.getFeatures(request)
+                    if prepared_geom.intersects(grid_feature.geometry().constGet())
+                ]
 
-    # Define fields for the new layer: only 'id' and 'intersecting_features'
-    fields = QgsFields()
-    fields.append(QgsField("id", QVariant.Int))
-    fields.append(QgsField("intersecting_features", QVariant.Int))
-    # Will be used to hold the scaled value from 0-5
-    fields.append(QgsField("value", QVariant.Int))
+                # Only log occasionally to reduce overhead
+                if counter % log_interval == 0:
+                    log_message(
+                        f"Feature {counter}: {rough_count} rough → {len(intersecting_ids)} refined intersections",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
 
-    writer = QgsVectorFileWriter.create(
-        fileName=output_path,
-        fields=fields,
-        geometryType=grid_layer.wkbType(),
-        srs=grid_layer.crs(),
-        transformContext=QgsCoordinateTransformContext(),
-        options=options,
-    )
-    if writer.hasError() != QgsVectorFileWriter.NoError:
-        raise Exception(f"Failed to create output layer: {writer.errorMessage()}")
+            # Iterate over the intersecting grid cell IDs and count intersections
+            for grid_id in intersecting_ids:
+                if grid_id in grid_feature_counts:
+                    grid_feature_counts[grid_id] += 1
+                else:
+                    grid_feature_counts[grid_id] = 1
+            counter += 1
+            if feedback:
+                feedback.setProgress((counter / feature_count) * 100.0)
 
-    # Select only grid cells based on the keys (grid IDs) in the grid_feature_counts dictionary
-    request = QgsFeatureRequest().setFilterFids(list(grid_feature_counts.keys()))
-    log_message(
-        f"Looping over {len(grid_feature_counts.keys())} grid polygons",
-        tag="Geest",
-        level=Qgis.Info,
-    )
+        len_grid_ids = len(grid_feature_counts)
+        log_message(f"{len_grid_ids} intersections found.")
 
-    for grid_feature in grid_layer.getFeatures(request):
-        log_message(f"Writing Feature #{counter}")
-        counter += 1
-        new_feature = QgsFeature()
-        new_feature.setGeometry(grid_feature.geometry())  # Use the original geometry
+        # OPTIMIZATION: Use batch writing with OGR for much faster GeoPackage creation
+        # Instead of writing 2M features one-by-one, we batch them
+        log_message(
+            f"Writing {len_grid_ids} grid polygons to GeoPackage (batched)...",
+            tag="Geest",
+            level=Qgis.Info,
+        )
 
-        # Set the 'id' and 'intersecting_features' attributes
-        new_feature.setFields(fields)
-        new_feature.setAttribute("id", grid_feature.id())  # Set the grid cell ID
-        new_feature.setAttribute("intersecting_features", grid_feature_counts[grid_feature.id()])
-        new_feature.setAttribute("value", None)
+        options = QgsVectorFileWriter.SaveVectorOptions()
+        options.driverName = "GPKG"
+        options.fileEncoding = "UTF-8"
+        options.layerName = "grid_with_feature_counts"
 
-        # Write the feature to the new layer
-        writer.addFeature(new_feature)
+        # Define fields for the new layer: only 'id' and 'intersecting_features'
+        fields = QgsFields()
+        fields.append(QgsField("id", QVariant.Int))
+        fields.append(QgsField("intersecting_features", QVariant.Int))
+        # Will be used to hold the scaled value from 0-5
+        fields.append(QgsField("value", QVariant.Int))
 
-    del writer  # Finalize the writer and close the file
+        writer = QgsVectorFileWriter.create(
+            fileName=output_path,
+            fields=fields,
+            geometryType=grid_layer.wkbType(),
+            srs=grid_layer.crs(),
+            transformContext=QgsCoordinateTransformContext(),
+            options=options,
+        )
+        if writer.hasError() != QgsVectorFileWriter.NoError:
+            raise Exception(f"Failed to create output layer: {writer.errorMessage()}")
 
-    log_message(
-        f"Grid cells with feature counts saved to {output_path}",
-        tag="Geest",
-        level=Qgis.Info,
-    )
+        # Batch write features for better performance
+        # Process in chunks to balance memory and I/O efficiency
+        grid_ids = list(grid_feature_counts.keys())
+        batch_size = 10000
+        total_batches = (len_grid_ids + batch_size - 1) // batch_size
 
-    return QgsVectorLayer(
-        f"{output_path}|layername=grid_with_feature_counts",
-        "grid_with_feature_counts",
-        "ogr",
-    )
+        for batch_num in range(total_batches):
+            start_idx = batch_num * batch_size
+            end_idx = min(start_idx + batch_size, len_grid_ids)
+            batch_ids = grid_ids[start_idx:end_idx]
+
+            # Fetch batch of grid features
+            request = QgsFeatureRequest().setFilterFids(batch_ids)
+            feature_batch = []
+
+            for grid_feature in grid_layer.getFeatures(request):
+                new_feature = QgsFeature()
+                new_feature.setGeometry(grid_feature.geometry())
+                new_feature.setFields(fields)
+                new_feature.setAttribute("id", grid_feature.id())
+                new_feature.setAttribute("intersecting_features", grid_feature_counts[grid_feature.id()])
+                new_feature.setAttribute("value", None)
+                feature_batch.append(new_feature)
+
+            # Write entire batch at once
+            writer.addFeatures(feature_batch)
+
+            # Update progress bar and log periodically
+            progress = ((batch_num + 1) / total_batches) * 100
+            if feedback:
+                feedback.setProgress(progress)
+            if batch_num % 10 == 0 or batch_num == total_batches - 1:
+                log_message(
+                    f"Writing batch {batch_num + 1}/{total_batches} ({progress:.1f}%)",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+
+            # Clear batch to free memory
+            feature_batch.clear()
+
+        # IMPORTANT: Delete writer BEFORE creating the return layer
+        # to ensure the GeoPackage file is fully closed and unlocked
+        del writer
+        writer = None
+
+        log_message(
+            f"Grid cells with feature counts saved to {output_path}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        return QgsVectorLayer(
+            f"{output_path}|layername=grid_with_feature_counts",
+            "grid_with_feature_counts",
+            "ogr",
+        )
+
+    finally:
+        # Explicit cleanup to release memory
+        if writer:
+            del writer
+        if grid_index:
+            del grid_index
+        if grid_feature_counts:
+            grid_feature_counts.clear()
+            del grid_feature_counts
 
 
 def assign_values_to_grid(grid_layer: QgsVectorLayer, feedback: QgsFeedback = None) -> QgsVectorLayer:
@@ -170,6 +233,9 @@ def assign_values_to_grid(grid_layer: QgsVectorLayer, feedback: QgsFeedback = No
     A value of 3 is assigned to cells that intersect with one feature, and a value of 5 is assigned to
     cells that intersect with more than one feature.
 
+    Uses a single SQL UPDATE statement for maximum performance instead of
+    updating features one-by-one.
+
     Args:
         grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
         feedback (QgsFeedback): Optional feedback object for progress reporting.
@@ -177,19 +243,62 @@ def assign_values_to_grid(grid_layer: QgsVectorLayer, feedback: QgsFeedback = No
     Returns:
         QgsVectorLayer: The grid layer with values assigned to the 'value' field.
     """
+    from osgeo import ogr
+
+    # Extract the GeoPackage path from the layer source
+    # Format is typically: "/path/to/file.gpkg|layername=layer_name"
+    source = grid_layer.source()
+    if "|" in source:
+        gpkg_path = source.split("|")[0]
+    else:
+        gpkg_path = source
+
     feature_count = grid_layer.featureCount()
-    counter = 0
-    with edit(grid_layer):
-        for feature in grid_layer.getFeatures():
-            intersecting_features = feature["intersecting_features"]
-            if intersecting_features == 1:
-                feature["value"] = 3
-            elif intersecting_features > 1:
-                feature["value"] = 5
-            grid_layer.updateFeature(feature)
-            counter += 1
-            if feedback:
-                feedback.setProgress((counter / feature_count) * 100.0)
+    log_message(
+        f"Assigning values to {feature_count} grid cells using SQL...",
+        tag="Geest",
+        level=Qgis.Info,
+    )
+
+    # Use OGR to execute SQL - this has SpatiaLite functions available
+    # for any GeoPackage triggers that need them
+    try:
+        ds = ogr.Open(gpkg_path, update=1)
+        if ds is None:
+            raise Exception(f"Could not open GeoPackage: {gpkg_path}")
+
+        # Single UPDATE statement with CASE expression
+        sql = """
+            UPDATE grid_with_feature_counts
+            SET value = CASE
+                WHEN intersecting_features = 1 THEN 3
+                WHEN intersecting_features > 1 THEN 5
+                ELSE NULL
+            END
+        """
+        ds.ExecuteSQL(sql)
+        ds = None  # Close the datasource
+
+        log_message(
+            "SQL UPDATE completed",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        # Reload the layer to see the changes
+        grid_layer.reload()
+
+        if feedback:
+            feedback.setProgress(100.0)
+
+    except Exception as e:
+        log_message(
+            f"SQL UPDATE failed: {e}",
+            tag="Geest",
+            level=Qgis.Critical,
+        )
+        raise e
+
     return grid_layer
 
 
@@ -237,6 +346,7 @@ def select_grid_cells_and_assign_transport_score(
     counter = 0
     feature_count = features_layer.featureCount()
     verbose_mode = int(setting(key="verbose_mode", default=0))
+    log_interval = max(1, feature_count // 20)  # Log ~20 times during processing
 
     # Build mapping table based on analysis scale (fallback to existing table if not set)
     scale_key = analysis_scale or "national"
@@ -303,28 +413,58 @@ def select_grid_cells_and_assign_transport_score(
                 )
             continue
 
-        # Check actual geometry against grid cells
-        intersecting_ids = grid_index.intersects(feature_geom.boundingBox())  # Initial rough filter
+        # OPTIMIZATION: Segment-based spatial index query for linestrings
+        # Instead of one huge bbox for the whole line, query smaller bboxes per segment
+        # This dramatically reduces false positives for long diagonal roads
+        abstract_geom = feature_geom.constGet()
+        if feature_geom.type() == QgsWkbTypes.LineGeometry and abstract_geom is not None:
+            # Get vertices and query each segment's bbox
+            vertices = list(abstract_geom.vertices())
+            candidate_set = set()
+            for i in range(len(vertices) - 1):
+                v1, v2 = vertices[i], vertices[i + 1]
+                segment_bbox = QgsRectangle(
+                    min(v1.x(), v2.x()), min(v1.y(), v2.y()), max(v1.x(), v2.x()), max(v1.y(), v2.y())
+                )
+                candidate_set.update(grid_index.intersects(segment_bbox))
+            intersecting_ids = list(candidate_set)
+        else:
+            # Fallback for non-line geometries
+            intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
 
-        if verbose_mode:
-            log_message(
-                f"Finding intersections for road type '{road_type}' with score {road_score}.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            log_message(
-                f"{len(intersecting_ids)} rough intersections found.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-        intersecting_ids = [
-            grid_id
-            for grid_id in intersecting_ids
-            if grid_layer.getFeature(grid_id).geometry().intersects(feature_geom)
+        rough_count = len(intersecting_ids)
+
+        # OPTIMIZATION: Skip cells that already have max score (5)
+        # No point checking intersection if we can't improve the score
+        candidates_to_check = [
+            grid_id for grid_id in intersecting_ids if grid_most_beneficial_road_scores.get(grid_id, 0) < road_score
         ]
-        if verbose_mode:
+        skipped_count = rough_count - len(candidates_to_check)
+
+        if not candidates_to_check:
+            # All candidates already have equal or better scores - skip entirely
+            counter += 1
+            if feedback:
+                feedback.setProgress((counter / feature_count) * 100.0)
+            continue
+
+        # OPTIMIZATION: Use prepared geometry for faster intersection tests
+        # Memory-efficient: doesn't cache grid geometries, fetches on demand via batch request
+        prepared_geom = QgsGeometry.createGeometryEngine(feature_geom.constGet())
+        prepared_geom.prepareGeometry()
+
+        # Batch fetch grid features for better performance while staying memory-efficient
+        request = QgsFeatureRequest().setFilterFids(candidates_to_check)
+        intersecting_ids = [
+            grid_feature.id()
+            for grid_feature in grid_layer.getFeatures(request)
+            if prepared_geom.intersects(grid_feature.geometry().constGet())
+        ]
+
+        # Log progress periodically (not every feature to reduce overhead)
+        if counter % log_interval == 0 or verbose_mode:
             log_message(
-                f"{len(intersecting_ids)} refined intersections found.",
+                f"Feature {counter}/{feature_count}: {rough_count} candidates, {skipped_count} skipped, {len(intersecting_ids)} intersect ({road_type})",
                 tag="Geest",
                 level=Qgis.Info,
             )
@@ -358,7 +498,28 @@ def select_grid_cells_and_assign_transport_score(
         counter += 1
         feedback.setProgress((counter / feature_count) * 100.0)  # We just use nominal intervals for progress updates
 
-    log_message(f"{len(grid_most_beneficial_road_scores)} intersections found.")
+    # Summary statistics
+    total_cells = len(grid_most_beneficial_road_scores)
+    score_counts = {}
+    for score in grid_most_beneficial_road_scores.values():
+        score_counts[score] = score_counts.get(score, 0) + 1
+    max_score_cells = score_counts.get(5, 0)
+
+    log_message(f"{total_cells} grid cells scored. Distribution: {score_counts}", tag="Geest", level=Qgis.Info)
+    percent_max = 100 * max_score_cells / max(1, total_cells)
+    log_message(
+        f"Cells with max score (5): {max_score_cells} ({percent_max:.1f}%)",
+        tag="Geest",
+        level=Qgis.Info,
+    )
+
+    # OPTIMIZATION: Use batch writing for much faster GeoPackage creation
+    len_grid_ids = len(grid_most_beneficial_road_scores)
+    log_message(
+        f"Writing {len_grid_ids} grid polygons to GeoPackage (batched)...",
+        tag="Geest",
+        level=Qgis.Info,
+    )
 
     options = QgsVectorFileWriter.SaveVectorOptions()
     options.driverName = "GPKG"
@@ -370,7 +531,7 @@ def select_grid_cells_and_assign_transport_score(
     fields.append(QgsField("id", QVariant.Int))
     # Will be used to hold the scaled value from 0-5
     fields.append(QgsField("value", QVariant.Int))
-    # Will be used to track which road/cycleway type gave the best score (e.g., "highway_residential" or "cycleway_lane")
+    # Will be used to track which road/cycleway type gave the best score
     fields.append(QgsField("road_type", QVariant.String))
 
     writer = QgsVectorFileWriter.create(
@@ -384,29 +545,46 @@ def select_grid_cells_and_assign_transport_score(
     if writer.hasError() != QgsVectorFileWriter.NoError:
         raise Exception(f"Failed to create output layer: {writer.errorMessage()}")
 
-    # Select only grid cells based on the keys (grid IDs) in the grid_feature_counts dictionary
-    request = QgsFeatureRequest().setFilterFids(list(grid_most_beneficial_road_scores.keys()))
-    log_message(
-        f"Looping over {len(grid_most_beneficial_road_scores.keys())} grid polygons",
-        tag="Geest",
-        level=Qgis.Info,
-    )
+    # Batch write features for better performance
+    grid_ids = list(grid_most_beneficial_road_scores.keys())
+    batch_size = 10000
+    total_batches = (len_grid_ids + batch_size - 1) // batch_size
 
-    for grid_feature in grid_layer.getFeatures(request):
-        # log_message(f"Writing Feature #{counter}")
-        counter += 1
-        new_feature = QgsFeature()
-        new_feature.setGeometry(grid_feature.geometry())  # Use the original geometry
+    for batch_num in range(total_batches):
+        start_idx = batch_num * batch_size
+        end_idx = min(start_idx + batch_size, len_grid_ids)
+        batch_ids = grid_ids[start_idx:end_idx]
 
-        # Set the 'id', 'value', and 'road_type' attributes
-        new_feature.setFields(fields)
-        grid_id = grid_feature.id()
-        new_feature.setAttribute("id", grid_id)  # Set the grid cell ID
-        new_feature.setAttribute("value", grid_most_beneficial_road_scores[grid_id])
-        new_feature.setAttribute("road_type", grid_most_beneficial_road_types.get(grid_id, "unknown"))
+        # Fetch batch of grid features
+        request = QgsFeatureRequest().setFilterFids(batch_ids)
+        feature_batch = []
 
-        # Write the feature to the new layer
-        writer.addFeature(new_feature)
+        for grid_feature in grid_layer.getFeatures(request):
+            new_feature = QgsFeature()
+            new_feature.setGeometry(grid_feature.geometry())
+            new_feature.setFields(fields)
+            grid_id = grid_feature.id()
+            new_feature.setAttribute("id", grid_id)
+            new_feature.setAttribute("value", grid_most_beneficial_road_scores[grid_id])
+            new_feature.setAttribute("road_type", grid_most_beneficial_road_types.get(grid_id, "unknown"))
+            feature_batch.append(new_feature)
+
+        # Write entire batch at once
+        writer.addFeatures(feature_batch)
+
+        # Update progress bar and log periodically
+        progress = ((batch_num + 1) / total_batches) * 100
+        if feedback:
+            feedback.setProgress(progress)
+        if batch_num % 10 == 0 or batch_num == total_batches - 1:
+            log_message(
+                f"Writing batch {batch_num + 1}/{total_batches} ({progress:.1f}%)",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+
+        # Clear batch to free memory
+        feature_batch.clear()
 
     del writer  # Finalize the writer and close the file
 

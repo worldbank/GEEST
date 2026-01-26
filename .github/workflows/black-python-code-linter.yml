@@ -24,3 +24,5 @@ jobs:
         with:
           options: "--check --verbose"
           src: "./geest"
+          # Pin to 25.x to match nixpkgs version used in local development
+          version: "~=25.0"

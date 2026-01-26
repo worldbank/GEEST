@@ -11,7 +11,7 @@ Participants will engage with <strong>animated videos, quizzes and interactive c
 </p>
 
 <p align="justify">
-Additionally, the course introduces the <strong>Gender Enabling Environments Spatial Tool (GEEST)</strong>, a <strong>cutting-edge tool</strong> designed to apply this framework in real-world scenarios. Key modules cover the framework's three main dimensions: Contextual, Accessibility and Place-Characterization, culminating in a final exam to evaluate participants' understanding and application of these concepts.
+Additionally, the course introduces the <strong>Geospatial Enabling Environments for Employment Spatial Tool (GEEST)</strong>, a <strong>cutting-edge tool</strong> designed to apply this framework in real-world scenarios. Key modules cover the framework's three main dimensions: Contextual, Accessibility and Place-Characterization, culminating in a final exam to evaluate participants' understanding and application of these concepts.
 </p>
 
 📢 **The course is open to everyone** and is available for enrollment on the **[WBG Institute](https://wbginstitute.learnworlds.com/home)**. Stay tuned for updates!
@@ -34,7 +34,7 @@ This course is ideal for urban planners, policymakers, gender specialists, resea
 - 📍 How **infrastructure, frameworks and accessibility** impact women's employment and business opportunities.
 - 🌍 The **GeoWEAF framework** and its role in analyzing employment opportunities.
 - ⚖️ How **geography and gender** intersect to shape women's economic empowerment globally.
-- 🛠️ Gain insights into the **Gender Enabling Environments Spatial Tool (GEEST)** and the types of results it can produce.
+- 🛠️ Gain insights into the **Geospatial Enabling Environments for Employment Spatial Tool (GEEST)** and the types of results it can produce.
 
 ### 🏛️ Course Format
 - ⏳ **Duration:** 2 hours

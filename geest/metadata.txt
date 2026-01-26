@@ -1,5 +1,5 @@
 [general]
-name=GEEST
+name=GeoE3
 icon=icon.svg
 description=Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector
 about=Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector

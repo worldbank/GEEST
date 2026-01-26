@@ -89,9 +89,11 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
                 </tr>
             </table>
             """
-            self.info_label = QLabel("""
+            self.info_label = QLabel(
+                """
                 Each point from the ACLED CSV file will be buffered by a
-                specified distance based on the following event types. """)
+                specified distance based on the following event types. """
+            )
             self.info_label.setWordWrap(True)
             self.internal_layout.addWidget(self.info_label)
             self.html_table_label = QLabel()
@@ -105,16 +107,20 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
             log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def get_data(self) -> dict:
-        """
-        Return the data as a dictionary, updating attributes with current value.
+        """Return the data as a dictionary, updating attributes with current value.
+
+        Returns:
+            Dictionary of attributes or None if not checked.
         """
         if not self.isChecked():
             return None
         return self.attributes
 
     def set_internal_widgets_enabled(self, enabled: bool) -> None:
-        """
-        Enables or disables the internal widgets based on the state of the radio button.
+        """Enable or disable the internal widgets based on the state of the radio button.
+
+        Args:
+            enabled: Whether to enable or disable the internal widgets.
         """
         try:
             pass
@@ -126,10 +132,12 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
             )
 
     def update_widgets(self, attributes: dict) -> None:
-        """
-        Updates the internal widgets with the current attributes.
+        """Update the internal widgets with the current attributes.
 
         Only needed in cases where a) there are internal widgets and b)
         the attributes may change externally e.g. in the datasource widget.
+
+        Args:
+            attributes: Dictionary of attributes to update widgets with.
         """
         pass

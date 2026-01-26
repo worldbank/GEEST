@@ -3,7 +3,7 @@
 """
 Scale Mappings Module.
 
-Provides centralized, scale-specific configurations for WEE indicator analysis.
+Provides centralized, scale-specific configurations for GeoE3 indicator analysis.
 
 Usage:
     from geest.core.workflows.mappings import WOMENS_TRAVEL_PATTERNS, MAPPING_REGISTRY
@@ -21,22 +21,22 @@ Usage:
 
 # Accessibility mappings
 from .accessibility import (
-    WOMENS_TRAVEL_PATTERNS,
-    PUBLIC_TRANSPORT_ACCESS,
-    HEALTH_FACILITIES_ACCESS,
     EDUCATION_FACILITIES_ACCESS,
     FINANCIAL_FACILITIES_ACCESS,
+    HEALTH_FACILITIES_ACCESS,
+    PUBLIC_TRANSPORT_ACCESS,
+    WOMENS_TRAVEL_PATTERNS,
 )
-from .water_sanitation import WATER_SANITATION_ACCESS
-
-# Safety mappings
-from .safety import STREETLIGHTS_SAFETY, NIGHTTIME_LIGHTS_SAFETY
 
 # ACLED mappings
 from .acled import ACLED_CONFLICT
 
 # Active transport mappings
-from .active_transport import HIGHWAY_CLASSIFICATION, CYCLEWAY_CLASSIFICATION
+from .active_transport import CYCLEWAY_CLASSIFICATION, HIGHWAY_CLASSIFICATION
+
+# Safety mappings
+from .safety import NIGHTTIME_LIGHTS_SAFETY, STREETLIGHTS_SAFETY
+from .water_sanitation import WATER_SANITATION_ACCESS
 
 # Registry for lookup by factor ID (matches model.json factor IDs)
 MAPPING_REGISTRY = {

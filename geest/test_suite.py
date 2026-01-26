@@ -17,6 +17,8 @@ import unittest
 import qgis  # pylint: disable=unused-import # noqa F401
 from osgeo import gdal
 
+from geest.utilities import log_message
+
 try:
     from pip import main as pipmain
 except ImportError:
@@ -43,10 +45,10 @@ def _run_tests(test_suite, package_name, with_coverage=False):
         with_coverage: Whether to run with coverage tracking.
     """
     count = test_suite.countTestCases()
-    print("########")
-    print("%s tests has been discovered in %s" % (count, package_name))
-    print("Python GDAL : %s" % gdal.VersionInfo("VERSION_NUM"))
-    print("########")
+    log_message("########")
+    log_message("%s tests has been discovered in %s" % (count, package_name))
+    log_message("Python GDAL : %s" % gdal.VersionInfo("VERSION_NUM"))
+    log_message("########")
     if with_coverage:
         cov = coverage.Coverage(
             source=["/vector_correction"],
@@ -66,7 +68,7 @@ def _run_tests(test_suite, package_name, with_coverage=False):
         # cov.html_report()
         report.close()
         with open(report.name, "r", encoding="utf8") as fin:
-            print(fin.read())
+            log_message(fin.read())
 
 
 def test_package(package="animation_workbench"):

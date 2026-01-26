@@ -1,7 +1,7 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <plugins>
-<pyqgis_plugin name="Gender Enabling Environments Spatial Tool (GEEST)" version="0.5.5">
-                <description><![CDATA[Gender Enabling Environments Spatial Tool]]></description>
+<pyqgis_plugin name="Geospatial Enabling Environments for Employment Spatial Tool (GEEST)" version="0.5.5">
+                <description><![CDATA[Geospatial Enabling Environments for Employment Spatial Tool]]></description>
                 <about><![CDATA[GEEST was built for the practical implementation of the Geospatial Women’s Employment Analytical Framework (GeoWEAF), developed by the World Bank, which identifies the location-specific factors affecting women's access to jobs. This framework categorizes regions based on their level of support for enabling women’s access to employment. It identifies 15 critical, spatially varying factors that influence women’s job prospects, divided into three main dimensions: Contextual, Accessibility, and Place Characterization.]]></about>
                 <version>0.5.5</version>
                 <qgis_minimum_version>3.0</qgis_minimum_version>

@@ -12,10 +12,13 @@ from urllib.parse import unquote
 from qgis import processing
 from qgis.core import (
     Qgis,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
     QgsFeedback,
     QgsGeometry,
     QgsProcessingContext,
     QgsProcessingFeedback,
+    QgsProject,
     QgsRasterLayer,
     QgsRectangle,
     QgsTask,
@@ -26,6 +29,8 @@ from geest.core import JsonTreeItem
 from geest.utilities import log_message, resources_path
 
 from .area_iterator import AreaIterator
+from .ghsl_downloader import GHSLDownloader
+from .ghsl_processor import GHSLProcessor
 from .utilities import (
     check_and_reproject_layer,
     combine_rasters_to_vrt,
@@ -56,7 +61,7 @@ class OpportunitiesMaskProcessor(QgsTask):
     It will create a raster layer where all cells outside the masked areas (defined
     by the input polygons layer) are set to a no data value.
 
-    This is used when you want to represent the WEE Score and WEE x Population Score
+    This is used when you want to represent the GeoE3 Score and GeoE3 x Population Score
     only in areas where there are job opportunities / job creation initiatives.
 
     The input layer should be a polygon layer with the job opportunities. Its attributes
@@ -169,23 +174,51 @@ class OpportunitiesMaskProcessor(QgsTask):
         elif self.mask_mode == "ghsl":
             # Use the global human settlements layer defined in the project settings
             log_message("Loading global human settlements layer for mask")
-            layer_source = self.workflow_directory = os.path.join(
-                working_directory, "study_area", "ghsl_settlements_layer.parquet"
-            )
+            layer_source = os.path.join(working_directory, "study_area", "ghsl_settlements_layer.parquet")
             provider_type = "ogr"
-            if not layer_source:
+
+            # Check if file exists and is not empty (0 bytes)
+            needs_download = False
+            if not os.path.exists(layer_source):
+                log_message(f"GHSL parquet file not found: {layer_source}", level=Qgis.Warning)
+                needs_download = True
+            elif os.path.getsize(layer_source) == 0:
+                log_message(f"GHSL parquet file is 0 bytes: {layer_source}", level=Qgis.Warning)
+                needs_download = True
+
+            if needs_download:
+                log_message("Attempting to download and process GHSL data...")
+                if not self._download_ghsl_data(working_directory):
+                    log_message(
+                        "Failed to download GHSL data for mask",
+                        tag="Geest",
+                        level=Qgis.Critical,
+                    )
+                    raise Exception("Failed to download GHSL data for mask")
+
+            # Try loading the layer again after potential download
+            if not os.path.exists(layer_source):
                 log_message(
-                    f"{self.mask_mode} parquet file not found",
+                    f"{self.mask_mode} parquet file not found after download attempt",
                     tag="Geest",
                     level=Qgis.Critical,
                 )
                 raise Exception(f"{self.mask_mode} parquet file not found")
+
+            if os.path.getsize(layer_source) == 0:
+                log_message(
+                    f"{self.mask_mode} parquet file is 0 bytes after download attempt",
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
+                raise Exception(f"{self.mask_mode} parquet file is 0 bytes")
+
             self.features_layer = QgsVectorLayer(layer_source, self.mask_mode, provider_type)
             if not self.features_layer.isValid():
                 log_message(f"{self.mask_mode} parquet file not valid", level=Qgis.Critical)
                 log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
                 raise Exception(f"{self.mask_mode} parquet file not valid")
-                # Check the crs of the layer, if it is not in the target crs, reproject it
+            # Check the crs of the layer, if it is not in the target crs, reproject it
             if self.features_layer.crs() != self.target_crs:
                 log_message("Reprojecting features layer to match target crs")
                 # Note that the layer returned will be a memory layer
@@ -212,7 +245,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         self.mask_list = []
 
         log_message("---------------------------------------------")
-        log_message("Initialized WEE Opportunities Mask Workflow")
+        log_message("Initialized GeoE3 Opportunities Mask Workflow")
         log_message("---------------------------------------------")
         log_message(f"Item: {self.item.name}")
         log_message(f"Study area GeoPackage path: {self.study_area_gpkg_path}")
@@ -285,6 +318,105 @@ class OpportunitiesMaskProcessor(QgsTask):
             log_message("Opportunities mask processing completed successfully.")
         else:
             log_message("Opportunities mask processing failed.")
+
+    def _download_ghsl_data(self, working_directory: str) -> bool:
+        """Download and process GHSL data for the study area if not already present.
+
+        This method downloads GHSL tiles that intersect the study area,
+        processes them, and saves the results to ghsl_settlements_layer.parquet.
+
+        Args:
+            working_directory: The project working directory.
+
+        Returns:
+            True if GHSL data was successfully downloaded/processed, False otherwise.
+        """
+        try:
+            log_message("Downloading GHSL data for opportunities mask...")
+
+            # Get study area extent for GHSL download
+            study_area_dir = os.path.join(working_directory, "study_area")
+            study_area_path = os.path.join(study_area_dir, "study_area.gpkg")
+
+            if not os.path.exists(study_area_path):
+                log_message(f"Study area not found: {study_area_path}", level=Qgis.Critical)
+                return False
+
+            # Load study area to get extent
+            study_layer = QgsVectorLayer(study_area_path, "study_area", "ogr")
+            if not study_layer.isValid():
+                log_message("Study area layer is invalid", level=Qgis.Critical)
+                return False
+
+            extent = study_layer.extent()
+            src_crs = study_layer.crs()
+
+            # Transform extent to Mollweide (ESRI:54009) for GHSL
+            dst_crs = QgsCoordinateReferenceSystem("ESRI:54009")
+            transform = QgsCoordinateTransform(src_crs, dst_crs, QgsProject.instance())
+            extent_mollweide = transform.transformBoundingBox(extent)
+
+            log_message(f"Study area extent in Mollweide: {extent_mollweide.toString()}")
+
+            # Download GHSL tiles
+            downloader = GHSLDownloader(
+                extents=extent_mollweide,
+                output_path=study_area_dir,
+                filename="ghsl_temp",
+                use_cache=True,
+                delete_existing=False,
+                feedback=self.feedback,
+            )
+
+            tiles = downloader.tiles_intersecting_bbox()
+            if not tiles:
+                log_message("No GHSL tiles intersect study area", level=Qgis.Warning)
+                return False
+
+            log_message(f"Downloading {len(tiles)} GHSL tiles...")
+            tile_paths = []
+            for tile_id in tiles:
+                paths = downloader.download_and_unpack_tile(tile_id)
+                # Filter to only .tif files
+                tif_paths = [p for p in paths if p.endswith(".tif")]
+                tile_paths.extend(tif_paths)
+
+            if not tile_paths:
+                log_message("No GHSL tiles downloaded", level=Qgis.Warning)
+                return False
+
+            log_message(f"Downloaded {len(tile_paths)} GHSL .tif files")
+
+            # Process tiles
+            log_message("Processing GHSL tiles...")
+            processor = GHSLProcessor(input_raster_paths=tile_paths)
+
+            # Reclassify
+            reclassified = processor.reclassify_rasters(suffix="reclass")
+
+            # Polygonize
+            polygonized = processor.polygonize_rasters(reclassified)
+
+            # Combine vectors
+            output_parquet = os.path.join(study_area_dir, "ghsl_settlements_layer.parquet")
+            result = processor.combine_vectors(polygonized, output_parquet, extent_mollweide)
+
+            if result and os.path.exists(output_parquet):
+                file_size = os.path.getsize(output_parquet)
+                if file_size > 0:
+                    log_message(f"GHSL data downloaded and processed: {output_parquet} ({file_size} bytes)")
+                    return True
+                else:
+                    log_message("GHSL output file is 0 bytes", level=Qgis.Warning)
+                    return False
+            else:
+                log_message("Failed to combine GHSL vectors", level=Qgis.Warning)
+                return False
+
+        except Exception as e:
+            log_message(f"Error downloading GHSL data: {str(e)}", level=Qgis.Warning)
+            log_message(traceback.format_exc(), level=Qgis.Warning)
+            return False
 
     def _process_features_for_area(
         self,

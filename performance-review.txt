@@ -1,0 +1,429 @@
+# GEEST Study Area Creation - Performance Review
+# Generated: 2026-01-23
+# Focus: Study Area Processing Workflows
+
+================================================================================
+EXECUTIVE SUMMARY
+================================================================================
+
+The study area creation workflow has several performance bottlenecks, primarily
+in I/O patterns, redundant geometry operations, and suboptimal parallelization.
+This review identifies specific optimizations that could significantly improve
+processing speed for large study areas.
+
+================================================================================
+CRITICAL PERFORMANCE ISSUES (High Impact)
+================================================================================
+
+1. REDUNDANT GEOMETRY INTERSECTION CHECKS
+   File: geest/core/tasks/grid_from_bbox_task.py:99-104
+   Severity: CRITICAL
+
+   Problem:
+   - Every cell performs an Intersects() call against the study area geometry
+   - For chunks NOT fully inside geometry, this means millions of OGR intersection checks
+   - Each check is O(n) where n is complexity of the study area polygon
+
+   Current Code:
+   ```python
+   if not skip_intersection_check:
+       if self.geom.Intersects(cell_polygon):
+           self.features_out.append(cell_polygon)
+   ```
+
+   Fix: Use PreparedGeometry pattern
+   ```python
+   # At task init, prepare the geometry once:
+   from osgeo import ogr
+   self.prepared_geom = self.geom.Clone()
+   self.prepared_geom.FlattenTo2D()  # Ensure 2D for faster checks
+
+   # OGR doesn't have PreparedGeometry, but GEOS does via ogr.Geometry.Prepare()
+   # Alternative: Use shapely with prepared geometry or GEOS directly
+   ```
+
+   Impact: 10-50x speedup for intersection-heavy chunks
+
+--------------------------------------------------------------------------------
+
+2. EXCESSIVE GPKG OPEN/CLOSE CYCLES
+   File: geest/core/tasks/study_area_processing_task.py:642-728
+   Severity: CRITICAL
+
+   Problem:
+   - add_row_to_status_tracking_table() opens/closes GPKG for EACH status update
+   - set_status_tracking_table_value() also opens/closes GPKG per call
+   - For a study area with 100 parts, this creates 1000+ open/close cycles
+
+   Current Pattern (repeated 10+ times per geometry):
+   ```python
+   def set_status_tracking_table_value(self, area_name, field_name, value):
+       with self.gpkg_lock:
+           ds = ogr.Open(self.gpkg_path, 1)  # Open
+           # ... single update ...
+           ds = None  # Close
+   ```
+
+   Fix: Batch status updates or use persistent connection
+   ```python
+   def _batch_status_updates(self, updates: list):
+       """Update multiple status fields in single transaction."""
+       with self.gpkg_lock:
+           ds = ogr.Open(self.gpkg_path, 1)
+           ds.ExecuteSQL("PRAGMA busy_timeout = 5000")
+           layer = ds.GetLayerByName(self.status_table_name)
+           layer.StartTransaction()
+           for area_name, field_name, value in updates:
+               layer.SetAttributeFilter(f"area_name = '{area_name}'")
+               for feature in layer:
+                   feature.SetField(field_name, value)
+                   layer.SetFeature(feature)
+               layer.ResetReading()
+           layer.CommitTransaction()
+           ds = None
+   ```
+
+   Impact: 50-100x fewer GPKG open/close operations
+
+--------------------------------------------------------------------------------
+
+3. CHUNKER WRITES CHUNKS TO GPKG SYNCHRONOUSLY
+   File: geest/core/tasks/grid_chunker_task.py:159-188
+   Severity: HIGH
+
+   Problem:
+   - write_chunks_to_gpkg() iterates ALL chunks and writes them synchronously
+   - This blocks grid cell processing while chunk metadata is written
+   - For large areas with 1000+ chunks, this is significant overhead
+
+   Fix: Make chunk metadata writing async or defer until end
+   ```python
+   # Option 1: Write chunk metadata in parallel with grid processing
+   # Option 2: Skip chunk writing during processing, write at end
+   # Option 3: Use INSERT ... SELECT batch operation
+   ```
+
+   Impact: Removes blocking I/O from critical path
+
+--------------------------------------------------------------------------------
+
+4. GRID CELLS CREATED ONE-BY-ONE IN MEMORY
+   File: geest/core/tasks/grid_from_bbox_task.py:78-107
+   Severity: HIGH
+
+   Problem:
+   - Each cell creates 5 ring points + polygon object
+   - For a chunk with 2500 cells (50x50), this creates 12,500 point operations
+   - Python object overhead is significant
+
+   Current Code:
+   ```python
+   while x < x_end:
+       while y < y_end:
+           ring = ogr.Geometry(ogr.wkbLinearRing)
+           ring.AddPoint(x, y)  # 5x per cell
+           # ...
+   ```
+
+   Fix: Use numpy for coordinate generation, batch create geometries
+   ```python
+   import numpy as np
+
+   # Generate all coordinates at once
+   xs = np.arange(x_start, x_end, cell_size)
+   ys = np.arange(y_start, y_end, cell_size)
+
+   # Create WKT batch or use GDAL VRT grid generation
+   # Or use GDAL's native grid creation functions
+   ```
+
+   Impact: 5-10x speedup for cell generation
+
+================================================================================
+HIGH PERFORMANCE ISSUES (Medium-High Impact)
+================================================================================
+
+5. GHSL FEATURE-BY-FEATURE REPROJECTION
+   File: geest/core/tasks/study_area_processing_task.py:365-383
+   Severity: HIGH
+
+   Problem:
+   - Each GHSL feature is transformed individually
+   - WKB conversion happens per-feature
+   - Transaction contains potentially thousands of features
+
+   Current Code:
+   ```python
+   for qgs_feature in temp_layer.getFeatures():
+       geom_wkb = qgs_feature.geometry().asWkb()
+       ogr_geom = ogr.CreateGeometryFromWkb(bytes(geom_wkb))
+       ogr_geom.Transform(transform_from_mollweide)
+       # ... create feature ...
+   ```
+
+   Fix: Use ogr2ogr with -t_srs or GDAL VRT with coordinate transformation
+   ```python
+   # Use GDAL's built-in reprojection which is optimized
+   from osgeo import gdal
+   gdal.VectorTranslate(
+       output_path,
+       temp_parquet,
+       options=gdal.VectorTranslateOptions(
+           reproject=True,
+           srcSRS='EPSG:54009',
+           dstSRS=f'EPSG:{self.epsg_code}',
+       )
+   )
+   ```
+
+   Impact: 3-5x speedup for GHSL processing
+
+--------------------------------------------------------------------------------
+
+6. CLIP POLYGON BOUNDARY INTERSECTION CHECK
+   File: geest/core/tasks/study_area_processing_task.py:1620-1627
+   Severity: MEDIUM-HIGH
+
+   Problem:
+   - For each grid cell, checks boundary.Intersects(cell_geom)
+   - boundary is a LineString from GetBoundary()
+   - This is expensive for complex boundaries
+
+   Current Code:
+   ```python
+   boundary = geom.GetBoundary()
+   for f in grid_layer:
+       cell_geom = f.GetGeometryRef()
+       if cell_geom and boundary.Intersects(cell_geom):
+           current_batch.append(cell_geom.Clone())
+   ```
+
+   Fix: Use spatial index on grid cells, filter by buffered boundary
+   ```python
+   # Create spatial index on grid layer
+   # Use envelope/bbox filter first
+   # Only check precise intersection for candidates
+
+   # Or: buffer boundary slightly, use Contains instead of Intersects
+   buffered_boundary = boundary.Buffer(cell_size * 0.1)
+   # Then use spatial filter on grid layer
+   grid_layer.SetSpatialFilter(buffered_boundary)
+   ```
+
+   Impact: 3-10x speedup for clip polygon creation
+
+--------------------------------------------------------------------------------
+
+7. DUPLICATE GEOMETRY OPERATIONS IN AREA ITERATOR
+   File: geest/core/algorithms/area_iterator.py:131-135
+   Severity: MEDIUM
+
+   Problem:
+   - First pass: loads ALL features to get areas
+   - Calls feature.geometry().area() for each
+   - Then re-fetches features one-by-one
+
+   Current Code:
+   ```python
+   feature_areas = []
+   for feature in self.polygon_layer.getFeatures():
+       geom = feature.geometry()
+       if geom and not geom.isEmpty():
+           feature_areas.append((feature.id(), geom.area()))
+   ```
+
+   Fix: Use SQL ORDER BY with geometry function or store area as attribute
+   ```python
+   # Option 1: If area is stored as attribute, use SQL
+   request = QgsFeatureRequest()
+   request.addOrderBy('area_field', ascending=True)
+
+   # Option 2: Use memory layer with computed area
+   # Option 3: Store area during study area creation
+   ```
+
+   Impact: 2x speedup for iteration setup
+
+================================================================================
+MEDIUM PERFORMANCE ISSUES (Moderate Impact)
+================================================================================
+
+8. EXCESSIVE LOGGING IN HOT LOOPS
+   File: geest/core/tasks/grid_chunker_task.py:202-235
+   Severity: MEDIUM
+
+   Problem:
+   - log_message() called for EVERY chunk
+   - String formatting overhead
+   - I/O to log destination
+
+   Current Code:
+   ```python
+   for x_block_start in x_blocks:
+       log_message(f"Processing chunk (x) {x_block_start} of {self.x_range_count}")
+       for y_block_start in y_blocks:
+           log_message(f"Processing chunk (y) {y_block_start} of {self.y_range_count}")
+   ```
+
+   Fix: Log only on intervals or use debug level
+   ```python
+   if x_block_start % 10 == 0:  # Log every 10th chunk
+       log_message(f"Processing chunks {x_block_start}-{x_block_start+10}...")
+   ```
+
+   Impact: Minor but noticeable for large grids
+
+--------------------------------------------------------------------------------
+
+9. THREAD POOL SIZE NOT OPTIMIZED
+   File: geest/core/tasks/study_area_processing_task.py:1378-1379
+   Severity: MEDIUM
+
+   Problem:
+   - worker_count capped at 8 regardless of system
+   - For I/O bound GDAL operations, more workers may help
+   - For CPU bound geometry checks, fewer may be better
+
+   Current Code:
+   ```python
+   worker_count = int(setting(key="grid_creation_workers", default=4))
+   worker_count = max(1, min(8, worker_count))
+   ```
+
+   Fix: Adaptive worker count based on task type
+   ```python
+   import os
+   cpu_count = os.cpu_count() or 4
+
+   # For I/O bound (writing): more workers
+   # For CPU bound (geometry checks): match CPU count
+   if chunk_type == "inside":  # No geometry checks needed
+       worker_count = min(cpu_count * 2, 16)  # I/O bound
+   else:
+       worker_count = cpu_count  # CPU bound
+   ```
+
+   Impact: 10-30% improvement with proper tuning
+
+--------------------------------------------------------------------------------
+
+10. RASTER MASK CREATED ONE-BY-ONE
+    File: geest/core/tasks/study_area_processing_task.py:1759-1830
+    Severity: MEDIUM
+
+    Problem:
+    - Each geometry part creates a separate raster mask
+    - For multipart geometries with 100+ parts, this is 100+ rasterize calls
+    - Each call has GDAL overhead
+
+    Fix: Batch rasterization or create single multi-feature mask
+    ```python
+    # Collect all geometries in memory layer
+    # Single RasterizeLayer call with all features
+    # Then split VRT if needed
+    ```
+
+    Impact: 2-5x speedup for mask creation
+
+================================================================================
+LOWER PRIORITY OPTIMIZATIONS
+================================================================================
+
+11. Writer Queue Batching
+    File: study_area_processing_task.py:1274
+    - Current batch_size = 10000 is reasonable
+    - Could experiment with adaptive sizing based on geometry complexity
+
+12. GHSL Tile Parallel Download
+    File: study_area_processing_task.py:314-317
+    - Downloads tiles sequentially
+    - Could parallelize tile downloads
+
+13. VRT Building
+    File: study_area_processing_task.py:1835-1858
+    - BuildVRT is already efficient
+    - Could pre-sort files to improve VRT access patterns
+
+================================================================================
+RECOMMENDED IMPLEMENTATION ORDER
+================================================================================
+
+Phase 1 (Quick Wins - Implement First):
+1. Fix GPKG open/close cycles (#2) - Easy, high impact
+2. Add logging throttling (#8) - Easy, moderate impact
+3. Remove redundant status updates - batch them
+
+Phase 2 (Core Algorithm Improvements):
+4. Implement prepared geometry for intersection checks (#1)
+5. Use numpy for grid coordinate generation (#4)
+6. Optimize clip polygon boundary intersection (#6)
+
+Phase 3 (I/O Optimizations):
+7. Use ogr2ogr for GHSL reprojection (#5)
+8. Batch raster mask creation (#10)
+9. Make chunk metadata writing async (#3)
+
+Phase 4 (Fine Tuning):
+10. Adaptive thread pool sizing (#9)
+11. Store area as attribute during creation (#7)
+12. Parallel GHSL tile download
+
+================================================================================
+ESTIMATED PERFORMANCE GAINS
+================================================================================
+
+Current baseline for typical study area (100km², 100m cells, ~10 parts):
+- Estimated time: ~15-30 minutes
+
+After Phase 1 optimizations:
+- Estimated improvement: 30-40%
+- New estimated time: ~10-20 minutes
+
+After Phase 2 optimizations:
+- Estimated improvement: 50-70% from baseline
+- New estimated time: ~5-10 minutes
+
+After all optimizations:
+- Estimated improvement: 70-85% from baseline
+- New estimated time: ~3-7 minutes
+
+Note: Actual gains depend on study area complexity, system specs, and I/O speed.
+
+================================================================================
+PROFILING RECOMMENDATIONS
+================================================================================
+
+To validate these findings and measure actual impact:
+
+1. Add timing decorators to key methods:
+   ```python
+   import functools
+   import time
+
+   def timed(func):
+       @functools.wraps(func)
+       def wrapper(*args, **kwargs):
+           start = time.perf_counter()
+           result = func(*args, **kwargs)
+           elapsed = time.perf_counter() - start
+           log_message(f"{func.__name__} took {elapsed:.2f}s")
+           return result
+       return wrapper
+   ```
+
+2. Use cProfile for detailed analysis:
+   ```bash
+   python -m cProfile -o profile.stats your_script.py
+   python -m pstats profile.stats
+   ```
+
+3. Monitor memory with memory_profiler:
+   ```bash
+   pip install memory_profiler
+   mprof run your_script.py
+   mprof plot
+   ```
+
+================================================================================
+END OF PERFORMANCE REVIEW
+================================================================================

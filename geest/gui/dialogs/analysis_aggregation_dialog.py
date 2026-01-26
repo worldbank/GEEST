@@ -149,7 +149,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         help_layout.addWidget(self.help_label_icon)
 
         self.help_label = QLabel(
-            "For detailed instructions on how to use this tool, please refer to the <a href='https://worldbank.github.io/GEEST/docs/user_guide.html'>GEEST User Guide</a>."
+            "For detailed instructions on how to use this tool, please refer to the <a href='https://worldbank.github.io/GEEST/docs/user_guide.html'>GeoE3 User Guide</a>."
         )
         self.help_label.setOpenExternalLinks(True)
         self.help_label.setAlignment(Qt.AlignCenter)
@@ -317,9 +317,9 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             + 4  # noqa W503
         )  # Add 2 pixels to prevent scrollbar showing
         self.table.setFrameStyle(QTableWidget.NoFrame)
-        parent_layout = self.wee_container.parent().layout()
-        parent_layout.replaceWidget(self.wee_container, self.table)
-        self.wee_container.deleteLater()
+        parent_layout = self.geoe3_container.parent().layout()
+        parent_layout.replaceWidget(self.geoe3_container, self.table)
+        self.geoe3_container.deleteLater()
         parent_layout.update()
 
     def aggregation_selected(self):
@@ -423,7 +423,11 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.raster_combo.setCurrentIndex(0)
 
     def open_link_in_browser(self, url: str):
-        """Open the given URL in the user's default web browser using QDesktopServices."""
+        """Open the given URL in the user's default web browser.
+
+        Args:
+            url: The URL to open in the browser.
+        """
         QDesktopServices.openUrl(QUrl(url))
 
     def toggle_guid_column(self):
@@ -433,8 +437,14 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.table.setColumnHidden(4, not self.guid_column_visible)
 
     def create_checkbox_widget(self, row: int, analysis_weighting: float) -> QWidget:
-        """
-        Create a QWidget containing a QCheckBox for a specific row and center it.
+        """Create a QWidget containing a QCheckBox for a specific row and center it.
+
+        Args:
+            row: The row index for which to create the checkbox.
+            analysis_weighting: The weighting value to determine initial checked state.
+
+        Returns:
+            A QWidget containing a centered QCheckBox.
         """
         checkbox = QCheckBox()
         if analysis_weighting > 0:
@@ -454,8 +464,11 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         return container
 
     def toggle_row_widgets(self, row: int, state: int):
-        """
-        Enable or disable widgets in the row based on the checkbox state.
+        """Enable or disable widgets in the row based on checkbox state.
+
+        Args:
+            row: The row index containing the widgets to toggle.
+            state: The checkbox state (Qt.Checked or Qt.Unchecked).
         """
         is_enabled = state == Qt.Checked
         for col in range(self.table.columnCount()):
@@ -503,20 +516,26 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.validate_weightings()
 
     def is_checkbox_checked(self, row: int) -> bool:
-        """
-        Check if the checkbox in the specified row is checked.
-        :param row: The row index to check.
-        :return: True if the checkbox is checked, False otherwise.
+        """Check if the checkbox in the specified row is checked.
+
+        Args:
+            row: The row index to check.
+
+        Returns:
+            True if the checkbox is checked, False otherwise.
         """
         log_message(f"Checking checkbox state for row: {row}")
         checkbox = self.get_checkbox_in_row(row)  # Assuming the checkbox is in column 2
         return checkbox.isChecked()
 
     def get_checkbox_in_row(self, row: int) -> QCheckBox:
-        """
-        Retrieve the checkbox widget in the specified row.
-        :param row: The row index to retrieve the checkbox from.
-        :return: The QCheckBox widget, or None if not found.
+        """Retrieve the checkbox widget in the specified row.
+
+        Args:
+            row: The row index to retrieve the checkbox from.
+
+        Returns:
+            The QCheckBox widget, or None if not found.
         """
         container = self.table.cellWidget(row, 2)  # Assuming the checkbox is in column 2
         if container and isinstance(container, QWidget):
@@ -595,7 +614,9 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         """Save the state of a QgsMapLayerComboBox to the json tree item.
 
         Args:
-            combo (_type_): _description_
+            combo: The QgsMapLayerComboBox containing the selected layer.
+            lineedit: The QLineEdit containing the layer path.
+            prefix: The prefix for attribute keys in the tree item.
         """
         item = self.tree_item
         layer = combo.currentLayer()
@@ -618,7 +639,9 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         """Load the state of a QgsMapLayerComboBox from the json tree item.
 
         Args:
-            combo (_type_): _description_
+            combo: The QgsMapLayerComboBox to populate with the layer.
+            lineedit: The QLineEdit to populate with the layer path.
+            prefix: The prefix for attribute keys in the tree item.
         """
         item = self.tree_item
         layer_id = item.attribute(f"{prefix}_layer_id", None)

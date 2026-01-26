@@ -54,12 +54,14 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
-        :param cell_size_m: Cell size in meters for rasterization.
-        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'
-        :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+
+        Args:
+            item: JsonTreeItem representing the analysis, dimension, or factor to process.
+            cell_size_m: Cell size in meters for rasterization.
+            analysis_scale: Scale of the analysis, e.g., 'local', 'national'
+            feedback: QgsFeedback object for progress reporting and cancellation.
+            context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+            working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         log_message("\n\n\n\n")
         log_message("--------------------------------------------")
@@ -80,10 +82,21 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         self.study_area_bbox = self._study_area_bbox_4326()
 
         self.ghsl_layer_path = f"{self.gpkg_path}|layername=ghsl_settlements"
-        ghsl_layer = QgsVectorLayer(self.ghsl_layer_path, "ghsl_layer", "ogr")
-        if not ghsl_layer.isValid():
-            log_message("ERROR: GHSL coverage layer not found in study_area.gpkg")
-            raise IndexScoreWithGHSLException("GHSL coverage layer not found in study_area.gpkg")
+
+        # Check if GHSL layer exists, try to download if not
+        if not self.ensure_ghsl_data():
+            log_message(
+                "GHSL data could not be obtained. Workflow will continue but may use full clip areas.",
+                level="WARNING",
+            )
+        else:
+            # Verify the layer is valid after ensuring data exists
+            ghsl_layer = QgsVectorLayer(self.ghsl_layer_path, "ghsl_layer", "ogr")
+            if not ghsl_layer.isValid():
+                log_message(
+                    "GHSL layer exists but is not valid. Workflow will continue but may use full clip areas.",
+                    level="WARNING",
+                )
 
     def _process_features_for_area(
         self,
@@ -97,12 +110,15 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         Executes the actual workflow logic for a single area
         Must be implemented by sub classes.
 
-        :current_area: Current polygon from our study area.
-        :current_bbox: Bounding box of the above area.
-        :area_features: A vector layer of features to analyse that includes only features in the study area.
-        :index: Iteration / number of area being processed.
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Current area but expanded to coincide with grid cell boundaries.
+            current_bbox: Bounding box of the above area.
+            area_features: A vector layer of features to analyse that includes only features in the study area.
+            index: Iteration / number of area being processed.
 
-        :return: Raster file path of the output.
+        Returns:
+            Raster file path of the output.
         """
         _ = area_features  # unused
         log_message(f"Processing area {index} with index score {self.index_score}")
@@ -156,8 +172,12 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         """
         Create a scored boundary layer, filtering features by the current_area.
 
-        :param index: The index of the current processing area.
-        :return: A vector layer with a 'score' attribute.
+        Args:
+            clip_area: The clipping area geometry.
+            index: The index of the current processing area.
+
+        Returns:
+            A vector layer with a 'score' attribute.
         """
         output_prefix = f"{self.layer_id}_area_{index}"
 
@@ -209,15 +229,17 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         """
         Executes the actual workflow logic for a single area using a raster.
 
-        :current_area: Current polygon from our study area.
-        :clip_area: Polygon to clip the raster to which is aligned to cell edges.
-        :current_bbox: Bounding box of the above area.
-        :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
-        :index: Index of the current area.
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Polygon to clip the raster to which is aligned to cell edges.
+            current_bbox: Bounding box of the above area.
+            area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
+            index: Index of the current area.
 
-        :return: Path to the reclassified raster.
+        Returns:
+            Path to the reclassified raster.
         """
-        pass
+        return None
 
     def _process_aggregate_for_area(
         self,
@@ -227,6 +249,15 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         index: int,
     ):
         """
-        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
+        Executes the actual workflow logic for a single area using an aggregate.
+
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Polygon to clip the raster to which is aligned to cell edges.
+            current_bbox: Bounding box of the above area.
+            index: Index of the current area.
+
+        Returns:
+            Path to the reclassified raster.
         """
-        pass
+        return None

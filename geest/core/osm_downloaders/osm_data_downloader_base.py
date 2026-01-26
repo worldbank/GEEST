@@ -23,6 +23,7 @@ from abc import ABC
 from osgeo import ogr
 from qgis import processing  # QGIS processing API
 from qgis.core import (
+    Qgis,
     QgsCoordinateReferenceSystem,
     QgsFeature,
     QgsFeedback,
@@ -63,11 +64,19 @@ class OSMDataDownloaderBase(ABC):
         delete_gpkg: bool = True,
         feedback: QgsFeedback = None,
     ):
-        """
-        Initialize the OSMDataDownloaderBase class.
+        """Initialize the OSMDataDownloaderBase class.
 
         Args:
-            QgsRectangle: A QgsRectangle object containing the bounding box coordinates.
+            extents: A QgsRectangle object containing the bounding box coordinates.
+            output_path: The output path for the GeoPackage file.
+            output_crs: The coordinate reference system for the output.
+            filename: The filename (also sets the layer name in the gpkg).
+            use_cache: Whether to use cached data if available.
+            delete_gpkg: Whether to delete existing GeoPackage before writing.
+            feedback: QgsFeedback object for progress reporting.
+
+        Raises:
+            ValueError: If extents or output_path is not set.
         """
         self.base_url = "https://overpass-api.de/api/interpreter?info=QgisQuickOSMPlugin"
         self.network_manager = QgsNetworkAccessManager()
@@ -102,7 +111,11 @@ class OSMDataDownloaderBase(ABC):
             raise ValueError("Output path not set.")
 
     def check_results(self) -> bool:
-        """Check if the xml contains busy or error messages."""
+        """Check if the xml contains busy or error messages.
+
+        Returns:
+            bool: True if the results are valid, False if they contain errors.
+        """
         # Stream the file in case it is large
         with open(self.output_xml_path, "r", encoding="utf-8") as xml_file:
             for line in xml_file:
@@ -112,6 +125,9 @@ class OSMDataDownloaderBase(ABC):
                 if "error" in line:
                     log_message("OSM xml file indicates an error...")
                     return False
+        # delete the existing xml file if it exists
+        os.remove(self.output_xml_path)
+
         return True  # No issues found
 
     def set_osm_query(self, query: str) -> None:
@@ -121,10 +137,11 @@ class OSMDataDownloaderBase(ABC):
         coordinates substituted.
 
         Args:
-            query (str): The Overpass API query string. Use string
-                formatting to substitute the bounding box coordinates.
-                e.g. "node["highway"="motorway"]({S},{E},{N},{W});"
+            query: The Overpass API query string. Use string formatting to substitute
+                the bounding box coordinates. e.g. "node["highway"="motorway"]({S},{E},{N},{W});"
 
+        Raises:
+            ValueError: If extents or query is not set.
         """
         if self.extents is None:
             raise ValueError("Bounding box extents not set.")
@@ -141,7 +158,10 @@ class OSMDataDownloaderBase(ABC):
         """Set the output type for the data.
 
         Args:
-            output_type (str): The type of output data ('point', 'line', 'polygon', 'mixed_to_point').
+            output_type: The type of output data ('point', 'line', 'polygon', 'mixed_to_point').
+
+        Raises:
+            ValueError: If output_type is not a valid type.
         """
         if output_type not in ["point", "line", "polygon", "mixed_to_point"]:
             raise ValueError("Invalid output type. Must be 'point', 'line', 'polygon', or 'mixed_to_point'.")
@@ -150,10 +170,9 @@ class OSMDataDownloaderBase(ABC):
     def submit_query(self) -> None:
         """Download OSM data using the Overpass API and save it as a shapefile.
 
-        :return: None
-        :raises ValueError: If the query or output path is not set.
-        :raises RuntimeError: If the request fails or if the response is not valid.
-        :raises Exception: If the request fails or if the response is not valid.
+        Raises:
+            ValueError: If the query or output path is not set.
+            RuntimeError: If the request fails or if the response is not valid.
         """
         if self.use_cache and os.path.exists(self.output_xml_path):
             log_message(f"Using cached data from {self.output_xml_path}")
@@ -169,6 +188,10 @@ class OSMDataDownloaderBase(ABC):
 
         # Send the request and connect the finished signal
         log_message("Sending request to Overpass API...")
+        # delete the existing xml file if it exists
+        if os.path.exists(self.output_xml_path):
+            os.remove(self.output_xml_path)
+
         with open(self.output_xml_path, "wb") as output_file:
             response = self.network_manager.blockingPost(request, QByteArray(f"data={self.formatted_query}".encode()))
             output_file.write(response.content().data())
@@ -178,7 +201,13 @@ class OSMDataDownloaderBase(ABC):
         status_code = response.attribute(QNetworkRequest.HttpStatusCodeAttribute)
         log_message(f"HTTP Status Code: {status_code}")
         if status_code is None:
-            raise RuntimeError("No status code received. Network issue?")
+            # Get more detailed error information
+            error_code = response.error()
+            error_string = response.errorString()
+            log_message(f"Network error code: {error_code}, message: {error_string}", level=Qgis.Critical)
+            raise RuntimeError(
+                f"Network error: {error_string}. " "Please check your internet connection and try again."
+            )
 
         if status_code == 404:
             raise RuntimeError(f"Error 404: Endpoint {self.base_url} not found.")
@@ -196,11 +225,13 @@ class OSMDataDownloaderBase(ABC):
             raise RuntimeError(f"Request failed with error: {response.errorMessage()}")
 
     def process_response(self) -> bool:
-        """ "Process the downloaded OSM data and save it as a GeoPackage.
+        """Process the downloaded OSM data and save it as a GeoPackage.
 
         This method will call the appropriate processing method based on the output type.
 
-        :return: bool True if processing was successful, False otherwise.
+        Raises:
+            ValueError: If output_type is invalid.
+            Exception: If processing fails.
         """
         if self.output_type == "point":
             log_message("Processing point data...")
@@ -395,9 +426,6 @@ class OSMDataDownloaderBase(ABC):
         The output includes a 'geom_type' field to track the original geometry type:
         - 'point': Original point feature from OSM
         - 'polygon_centroid': Centroid of a polygon feature
-
-        Raises:
-            Exception: If XML parsing or layer creation fails.
         """
         log_message("Processing mixed geometry types (points + polygon centroids)...")
 

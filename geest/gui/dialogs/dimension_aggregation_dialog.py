@@ -188,7 +188,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
         help_layout.addWidget(self.help_label_icon)
 
         self.help_label = QLabel(
-            "For detailed instructions on how to use this tool, please refer to the <a href='https://worldbank.github.io/GEEST/docs/user_guide.html'>GEEST User Guide</a>."
+            "For detailed instructions on how to use this tool, please refer to the <a href='https://worldbank.github.io/GEEST/docs/user_guide.html'>GeoE3 User Guide</a>."
         )
         self.help_label.setOpenExternalLinks(True)
         self.help_label.setAlignment(Qt.AlignCenter)

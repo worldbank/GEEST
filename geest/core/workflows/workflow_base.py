@@ -29,6 +29,8 @@ from qgis.PyQt.QtCore import QObject, QSettings, pyqtSignal
 from geest.core import JsonTreeItem, setting
 from geest.core.algorithms import (
     AreaIterator,
+    GHSLDownloader,
+    GHSLProcessor,
     check_and_reproject_layer,
     combine_rasters_to_vrt,
     geometry_to_memory_layer,
@@ -46,6 +48,8 @@ class WorkflowBase(QObject):
 
     # Signal for progress changes - will be propagated to the task that owns this workflow
     progressChanged = pyqtSignal(float)
+    # Signal for status message changes - shows what step is currently running
+    statusChanged = pyqtSignal(str)
 
     def __init__(
         self,
@@ -60,12 +64,15 @@ class WorkflowBase(QObject):
         Initialize the workflow with attributes and feedback.
 
         Args:
-            :param item: JsonTreeItem object representing the task.
-            :param cell_size_m: The cell size in meters for the analysis.
-            :param analysis_scale: Analysis scale string to determine the workflow e.g. local, national.
-            :param feedback: QgsFeedback object for progress reporting and cancellation.
-            :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-            :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+            item: JsonTreeItem object representing the task.
+            cell_size_m: The cell size in meters for the analysis.
+            analysis_scale: Analysis scale string to determine the workflow e.g. local, national.
+            feedback: QgsFeedback object for progress reporting and cancellation.
+            context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+            working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+
+        Raises:
+            ValueError: If working directory is not set or study area geopackage is not found.
         """
         super().__init__()
         log_layer_count()  # For performance tuning, write the number of open layers to a log file
@@ -129,7 +136,8 @@ class WorkflowBase(QObject):
         """
         Get the study area bounding box geometry.
 
-        :return: The bounding box QgsRectangle.
+        Returns:
+            The bounding box QgsRectangle.
         """
 
         bbox = self.bbox_layer.extent()
@@ -140,7 +148,8 @@ class WorkflowBase(QObject):
         """
         Get the study area bounding box geometry in EPSG:4326.
 
-        :return: The bounding box QgsRectangle.
+        Returns:
+            The bounding box QgsRectangle.
         """
         transform = QgsCoordinateTransform(
             self.bbox_layer.crs(),
@@ -151,13 +160,175 @@ class WorkflowBase(QObject):
         bbox = QgsCoordinateTransform.transformBoundingBox(transform, bbox)
         return bbox
 
+    def _check_ghsl_layer_exists(self) -> bool:
+        """Check if the GHSL settlements layer exists in the study area GeoPackage.
+
+        Returns:
+            True if GHSL layer exists and has features, False otherwise.
+        """
+        ghsl_layer_path = f"{self.gpkg_path}|layername=ghsl_settlements"
+        ghsl_layer = QgsVectorLayer(ghsl_layer_path, "ghsl_check", "ogr")
+        if ghsl_layer.isValid() and ghsl_layer.featureCount() > 0:
+            log_message(f"GHSL layer found with {ghsl_layer.featureCount()} features")
+            return True
+        log_message("GHSL layer not found or empty in study_area.gpkg", level="WARNING")
+        return False
+
+    def _download_ghsl_data(self) -> bool:
+        """Download and process GHSL data for the study area if not already present.
+
+        This method will download GHSL tiles that intersect the study area,
+        process them, and add the results to the study_area.gpkg.
+
+        Returns:
+            True if GHSL data was successfully downloaded/processed, False otherwise.
+        """
+        try:
+            log_message("Attempting to download GHSL data...")
+
+            # Get study area extent in EPSG:4326 for GHSL download
+            extent_4326 = self._study_area_bbox_4326()
+            log_message(f"Study area extent (EPSG:4326): {extent_4326.toString()}")
+
+            study_area_dir = os.path.join(self.working_directory, "study_area")
+
+            # Download GHSL tiles
+            downloader = GHSLDownloader(
+                extents=extent_4326,
+                output_path=study_area_dir,
+                filename="ghsl_temp",
+                use_cache=True,
+                delete_existing=False,  # Don't delete if already exists
+                feedback=self.feedback,
+            )
+
+            tiles = downloader.tiles_intersecting_bbox()
+            if not tiles:
+                log_message("No GHSL tiles intersect study area", level="WARNING")
+                return False
+
+            log_message(f"Downloading {len(tiles)} GHSL tiles...")
+            tile_paths = []
+            for tile_id in tiles:
+                paths = downloader.download_and_unpack_tile(tile_id)
+                tile_paths.extend(paths)
+
+            if not tile_paths:
+                log_message("No GHSL tiles downloaded", level="WARNING")
+                return False
+
+            # Process tiles
+            log_message("Processing GHSL tiles...")
+            processor = GHSLProcessor(input_raster_paths=tile_paths)
+
+            # Reclassify
+            reclassified = processor.reclassify_rasters(suffix="reclass")
+
+            # Polygonize
+            polygonized = processor.polygonize_rasters(reclassified)
+
+            # Get extent in Mollweide for combining
+            transform_to_mollweide = QgsCoordinateTransform(
+                QgsCoordinateReferenceSystem("EPSG:4326"),
+                QgsCoordinateReferenceSystem("ESRI:54009"),
+                QgsProject.instance(),
+            )
+            extent_mollweide = transform_to_mollweide.transformBoundingBox(extent_4326)
+
+            # Combine to temporary file
+            temp_parquet = os.path.join(study_area_dir, "ghsl_temp.parquet")
+            processor.combine_vectors(polygonized, temp_parquet, extent=extent_mollweide)
+
+            # Import to GeoPackage using GDAL
+            from osgeo import gdal, ogr
+
+            ghsl_layer_name = "ghsl_settlements"
+            translate_options = gdal.VectorTranslateOptions(
+                format="GPKG",
+                accessMode="append",
+                srcSRS="ESRI:54009",
+                dstSRS=self.target_crs.authid(),
+                layerName=ghsl_layer_name,
+                geometryType="PROMOTE_TO_MULTI",
+            )
+
+            result = gdal.VectorTranslate(
+                self.gpkg_path,
+                temp_parquet,
+                options=translate_options,
+            )
+
+            if result is None:
+                log_message("GDAL VectorTranslate failed for GHSL", level="WARNING")
+                return False
+
+            result = None  # Close to flush
+
+            # Cleanup temp file
+            try:
+                if os.path.exists(temp_parquet):
+                    os.remove(temp_parquet)
+            except OSError:
+                pass
+
+            # Verify layer was created
+            ds = ogr.Open(self.gpkg_path, 0)
+            if ds:
+                layer = ds.GetLayerByName(ghsl_layer_name)
+                if layer:
+                    feature_count = layer.GetFeatureCount()
+                    log_message(f"Successfully added {feature_count} GHSL features to GeoPackage")
+                    ds = None
+                    return True
+                ds = None
+
+            return False
+
+        except Exception as e:
+            log_message(f"Error downloading GHSL data: {str(e)}", level="WARNING")
+            log_message(traceback.format_exc(), level="WARNING")
+            return False
+
+    def ensure_ghsl_data(self) -> bool:
+        """Ensure GHSL data is available, downloading if necessary.
+
+        This is a public method that workflows can call to ensure GHSL data
+        is present before processing.
+
+        Returns:
+            True if GHSL data is available, False otherwise.
+        """
+        if self._check_ghsl_layer_exists():
+            return True
+
+        log_message("GHSL data not found, attempting to download...")
+        self.updateStatus("Downloading GHSL settlement data...")
+
+        if self._download_ghsl_data():
+            return self._check_ghsl_layer_exists()
+
+        log_message("Could not obtain GHSL data", level="WARNING")
+        return False
+
     def updateProgress(self, progress: float):
         """
         Used by the workflow to set the progress of the task.
-        :param progress: The progress value
+
+        Args:
+            progress: The progress value
         """
         log_message(f"Progress in workflow is : {progress}")  # noqa E203
         self.progressChanged.emit(progress)
+
+    def updateStatus(self, status: str):
+        """
+        Used by the workflow to set the status message for the task.
+
+        Args:
+            status: A short description of the current operation
+        """
+        log_message(f"Status: {status}")
+        self.statusChanged.emit(status)
 
     #
     # Every concrete subclass needs to implement these three methods
@@ -176,13 +347,15 @@ class WorkflowBase(QObject):
         Executes the actual workflow logic for a single area
         Must be implemented by subclasses.
 
-        :current_area: Current polygon from our study area.
-        :clip_area: Current area but expanded to coincide with grid cell boundaries.
-        :current_bbox: Bounding box of the above area.
-        :area_features: A vector layer of features to analyse that includes only features in the study area.
-        :index: Iteration / number of area being processed.
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Current area but expanded to coincide with grid cell boundaries.
+            current_bbox: Bounding box of the above area.
+            area_features: A vector layer of features to analyse that includes only features in the study area.
+            index: Iteration / number of area being processed.
 
-        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
+        Returns:
+            A raster layer file path if processing completes successfully, False if canceled or failed.
         """
         pass
 
@@ -198,13 +371,15 @@ class WorkflowBase(QObject):
         """
         Executes the actual workflow logic for a single area using a raster.
 
-        :current_area: Current polygon from our study area.
-        :clip_area: Polygon to clip the raster to which is aligned to cell edges.
-        :current_bbox: Bounding box of the above area.
-        :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
-        :index: Index of the current area.
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Polygon to clip the raster to which is aligned to cell edges.
+            current_bbox: Bounding box of the above area.
+            area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
+            index: Index of the current area.
 
-        :return: Path to the reclassified raster.
+        Returns:
+            Path to the reclassified raster.
         """
         pass
 
@@ -219,11 +394,14 @@ class WorkflowBase(QObject):
         """
         Executes the actual workflow logic for a single area using an aggregate.
 
-        :current_area: Current polygon from our study area.
-        :current_bbox: Bounding box of the above area.
-        :index: Index of the current area.
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Polygon to clip the raster to which is aligned to cell edges.
+            current_bbox: Bounding box of the above area.
+            index: Index of the current area.
 
-        :return: Path to the reclassified raster.
+        Returns:
+            Path to the reclassified raster.
         """
         pass
 
@@ -236,9 +414,6 @@ class WorkflowBase(QObject):
         This function processes areas (defined by polygons and bounding boxes) from the GeoPackage using
         the provided input layers (features, grid). It applies the steps of selecting intersecting
         features, then passes them to process area for further processing.
-
-        Raises:
-            QgsProcessingException: If any processing step fails during the execution.
 
         Returns:
             True if the workflow completes successfully, False if canceled or failed.
@@ -258,12 +433,14 @@ class WorkflowBase(QObject):
         self.attributes["execution_start_time"] = datetime.datetime.now().isoformat()
 
         log_message("Processing Started")
+        self.updateStatus(f"Starting {self.workflow_name}")
 
         feedback = QgsProcessingFeedback()
         output_rasters = []
 
         try:
             if self.features_layer and type(self.features_layer) is QgsVectorLayer:
+                self.updateStatus("Reprojecting features layer...")
                 log_message(f"Features layer for {self.workflow_name} is {self.features_layer.source()}")
                 self.features_layer = check_and_reproject_layer(self.features_layer, self.target_crs)
         except Exception as e:
@@ -299,9 +476,11 @@ class WorkflowBase(QObject):
         areas_processed = 0
 
         try:
+            total_areas = area_iterator.area_count()
             for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
                 areas_processed += 1
                 message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"  # noqa E231
+                self.updateStatus(f"Processing area {index + 1}/{total_areas}")
                 feedback.pushInfo(message)
                 log_message(message)
                 if self.feedback.isCanceled():
@@ -357,19 +536,23 @@ class WorkflowBase(QObject):
                     )
 
                 # clip the area by its matching mask layer in study_area geopackage
+                self.updateStatus(f"Masking area {index + 1}...")
                 masked_layer = self._mask_raster(
                     raster_path=raster_output,
                     area_geometry=clip_area,
                     index=index,
                 )
                 output_rasters.append(masked_layer)
-                log_message("Iterator progress for workflow")
-                self.progressChanged.emit(progress)  # float please
+                # Note: We don't emit area iterator progress here because it would
+                # override the sub-task progress in the Task Progress bar.
+                # The sub-task progress (0-100%) is more useful to the user.
             # Combine all area rasters into a VRT
+            self.updateStatus("Combining area rasters...")
             vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
             self.attributes[self.result_file_key] = vrt_filepath
             self.attributes[self.result_key] = f"{self.workflow_name} Workflow Completed"
 
+            self.updateStatus(f"{self.workflow_name} complete")
             log_message(
                 f"{self.workflow_name} Completed. Output VRT: {vrt_filepath}",
                 tag="Geest",
@@ -422,7 +605,8 @@ class WorkflowBase(QObject):
         Creates the directory for this workflow if it doesn't already exist.
         It will be in the scheme of working_dir/dimension/factor/indicator
 
-        :return: The path to the workflow directory
+        Returns:
+            The path to the workflow directory
         """
         paths = self.item.getPaths()
         directory = os.path.join(self.working_directory, *paths)
@@ -454,14 +638,41 @@ class WorkflowBase(QObject):
         return layer
 
     def _subset_raster_layer(self, bbox: QgsGeometry, index: int):
-        """
-        Reproject and clip the raster to the bounding box of the current area.
+        """Reproject and clip the raster to the bounding box of the current area.
 
-        :param bbox: The bounding box of the current area.
-        :param index: The index of the current area.
+        Args:
+            bbox: The bounding box of the current area.
+            index: The index of the current area.
 
-        :return: The path to the reprojected and clipped raster.
+        Returns:
+            The path to the reprojected and clipped raster.
+
+        Raises:
+            QgsProcessingException: If raster layer is None or invalid.
         """
+        # Validate raster layer before processing
+        if self.raster_layer is None:
+            raise QgsProcessingException(
+                f"Raster layer is not set for workflow '{self.workflow_name}'. "
+                "Please configure the raster layer in the workflow settings."
+            )
+
+        # Check if raster layer is valid (either QgsRasterLayer or path string)
+        from qgis.core import QgsRasterLayer
+
+        if isinstance(self.raster_layer, QgsRasterLayer):
+            if not self.raster_layer.isValid():
+                raise QgsProcessingException(
+                    f"Raster layer '{self.raster_layer.source()}' is not valid for workflow '{self.workflow_name}'. "
+                    "Please check that the file exists and is a valid raster format."
+                )
+        elif isinstance(self.raster_layer, str):
+            if not os.path.exists(self.raster_layer):
+                raise QgsProcessingException(
+                    f"Raster file '{self.raster_layer}' does not exist for workflow '{self.workflow_name}'. "
+                    "Please check the file path in the workflow settings."
+                )
+
         # Convert the bbox to QgsRectangle
         bbox = bbox.boundingBox()
 
@@ -574,12 +785,15 @@ class WorkflowBase(QObject):
         Multiply the raster by the area geometry to mask the raster to the area.
 
         Args:
-            Raster_path (str): The path to the raster file.
-            Area_geometry (QgsGeometry): The geometry to use as a mask.
-            Index (int): The index of the current area.
+            raster_path: The path to the raster file.
+            area_geometry: The geometry to use as a mask.
+            index: The index of the current area.
 
         Returns:
-            str: The path to the masked raster or None if there is an error.
+            The path to the masked raster or None if there is an error.
+
+        Raises:
+            QgsProcessingException: If the raster file is not found at the specified path.
         """
         if not raster_path:
             return None

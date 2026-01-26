@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Transport Analysis Workflow - GeoE3</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        h4 { color: #95a5a6; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #e1e1e1;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th { background: #3498db; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .mermaid {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .highlight { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
+        @media print {
+            body { max-width: 100%; }
+            .mermaid { page-break-inside: avoid; }
+            h2 { page-break-before: always; }
+            h2:first-of-type { page-break-before: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Active Transport Analysis Workflow</h1>
+    <p><strong>GeoE3 - Geospatial Enabling Environments for Employment Spatial Tool</strong></p>
+
+    <h2>Overview</h2>
+    <p>The Active Transport analysis evaluates walkability and cycling infrastructure by:</p>
+    <ol>
+        <li><strong>Scoring road/cycleway types</strong> based on pedestrian/cycling suitability (1-5 scale)</li>
+        <li><strong>Assigning scores to grid cells</strong> based on intersecting road segments</li>
+        <li><strong>Rasterizing results</strong> for spatial analysis</li>
+    </ol>
+
+    <h2>High-Level Architecture</h2>
+    <div class="mermaid">
+flowchart TB
+    subgraph Input["Input Data"]
+        OSM["OSM Active Transport Network\n(roads + cycleways)"]
+        Grid["Study Area Grid\n(100m cells)"]
+        StudyArea["Study Area Polygons"]
+    end
+
+    subgraph Workflow["OsmTransportPolylinePerCellWorkflow"]
+        direction TB
+        Init["Initialize Workflow"]
+        AreaLoop["For Each Study Area Polygon"]
+
+        subgraph PerArea["Process Each Area"]
+            Subset["Subset Features to Area"]
+            ScoreAssign["Assign Transport Scores\nto Grid Cells"]
+            Rasterize["Rasterize Grid to TIF"]
+            Mask["Mask to Study Area Boundary"]
+        end
+
+        Combine["Combine All Area Rasters\ninto VRT"]
+    end
+
+    subgraph Output["Output"]
+        VRT["Combined VRT File\n(Likert Scale 0-5)"]
+    end
+
+    OSM --> Init
+    Grid --> Init
+    StudyArea --> Init
+    Init --> AreaLoop
+    AreaLoop --> Subset
+    Subset --> ScoreAssign
+    ScoreAssign --> Rasterize
+    Rasterize --> Mask
+    Mask --> AreaLoop
+    AreaLoop --> Combine
+    Combine --> VRT
+    </div>
+
+    <h2>Detailed Processing Steps</h2>
+
+    <h3>Step 1: Workflow Initialization</h3>
+    <div class="mermaid">
+flowchart LR
+    subgraph Init["Initialization"]
+        LoadConfig["Load Factor Configuration"]
+        LoadNetwork["Load OSM Network Layer"]
+        LoadGrid["Load Study Area Grid"]
+        ValidateCRS["Validate/Reproject CRS"]
+    end
+
+    LoadConfig --> LoadNetwork
+    LoadNetwork --> LoadGrid
+    LoadGrid --> ValidateCRS
+    </div>
+
+    <p>The workflow begins by:</p>
+    <ul>
+        <li>Loading the factor configuration from the model JSON</li>
+        <li>Loading the OSM active transport network (combined roads and cycleways)</li>
+        <li>Loading the study area grid (typically 100m cells)</li>
+        <li>Validating and reprojecting all layers to a common CRS</li>
+    </ul>
+
+    <h3>Step 2: Features Per Cell Processing (Core Algorithm)</h3>
+    <p>This is the core algorithm where road segments are scored and assigned to grid cells.</p>
+
+    <div class="mermaid">
+flowchart TB
+    subgraph FeaturesPerCell["select_grid_cells_and_assign_transport_score()"]
+        direction TB
+
+        BuildIndex["Build Spatial Index\non Grid Layer"]
+
+        subgraph FeatureLoop["For Each Road/Cycleway Feature"]
+            GetGeom["Get Feature Geometry"]
+            CheckEmpty{"Is Geometry\nEmpty?"}
+
+            subgraph ScoreCalc["Calculate Best Score"]
+                CheckHighway["Check highway attribute"]
+                CheckCycleway["Check cycleway attribute"]
+                LookupScore["Lookup score from\nclassification tables"]
+                SelectBest["Select highest score"]
+            end
+
+            subgraph Intersection["Find Intersecting Grid Cells"]
+                BBoxFilter["Bounding Box Filter\n(Spatial Index)"]
+                PrepareGeom["Prepare Geometry\n(GEOS optimization)"]
+                BatchFetch["Batch Fetch Grid Features\n(setFilterFids)"]
+                RefineIntersect["Refine Intersections\n(actual geometry test)"]
+            end
+
+            UpdateScores["Update Grid Cell Scores\n(keep highest)"]
+        end
+
+        WriteOutput["Write Output GeoPackage"]
+    end
+
+    BuildIndex --> FeatureLoop
+    GetGeom --> CheckEmpty
+    CheckEmpty -->|No| ScoreCalc
+    CheckEmpty -->|Yes| FeatureLoop
+    ScoreCalc --> Intersection
+    BBoxFilter --> PrepareGeom
+    PrepareGeom --> BatchFetch
+    BatchFetch --> RefineIntersect
+    RefineIntersect --> UpdateScores
+    UpdateScores --> FeatureLoop
+    FeatureLoop --> WriteOutput
+    </div>
+
+    <h3>Step 3: Road Classification Scoring</h3>
+    <p>Roads and cycleways are scored based on their suitability for walking and cycling:</p>
+
+    <h4>Highway Classification</h4>
+    <table>
+        <tr><th>Score</th><th>Suitability</th><th>Road Types</th></tr>
+        <tr><td>5</td><td>Excellent</td><td>residential, living_street, pedestrian, footway, steps</td></tr>
+        <tr><td>4</td><td>Good</td><td>tertiary, tertiary_link, cycleway, path</td></tr>
+        <tr><td>3</td><td>Moderate</td><td>secondary, secondary_link, unclassified, road, service, bridleway</td></tr>
+        <tr><td>2</td><td>Poor</td><td>primary, primary_link, track</td></tr>
+        <tr><td>1</td><td>Very Poor</td><td>motorway, trunk, motorway_link, trunk_link</td></tr>
+        <tr><td>0</td><td>Unsuitable</td><td>bus_guideway, escape, raceway, construction, proposed</td></tr>
+    </table>
+
+    <h4>Cycleway Classification (National Scale)</h4>
+    <table>
+        <tr><th>Score</th><th>Cycleway Types</th></tr>
+        <tr><td>4</td><td>lane, shared_lane, share_busway, track, separate, crossing, shoulder, link</td></tr>
+    </table>
+
+    <h4>Cycleway Classification (Local Scale)</h4>
+    <table>
+        <tr><th>Score</th><th>Cycleway Types</th></tr>
+        <tr><td>5</td><td>lane, track, separate, crossing</td></tr>
+        <tr><td>4</td><td>shared_lane</td></tr>
+        <tr><td>3</td><td>link</td></tr>
+        <tr><td>2</td><td>share_busway, shoulder</td></tr>
+    </table>
+
+    <div class="highlight">
+        <strong>Note:</strong> The algorithm checks <strong>both</strong> highway and cycleway attributes on each feature and assigns the <strong>highest score</strong> from either.
+    </div>
+
+    <h3>Step 4: Memory-Efficient Intersection Algorithm</h3>
+    <p>The intersection algorithm is optimized for large datasets:</p>
+
+    <div class="mermaid">
+sequenceDiagram
+    participant F as Feature Loop
+    participant SI as Spatial Index
+    participant GL as Grid Layer
+    participant PG as Prepared Geometry
+    participant Scores as Score Dictionary
+
+    F->>SI: Get candidate grid IDs<br/>(bounding box filter)
+    SI-->>F: [id1, id2, id3, ... idN]<br/>(rough candidates)
+
+    F->>PG: Create prepared geometry<br/>(GEOS optimization)
+
+    F->>GL: Batch fetch features<br/>(setFilterFids)
+
+    loop For each grid feature
+        GL-->>F: Grid geometry
+        F->>PG: Test intersection
+        PG-->>F: true/false
+        alt Intersects
+            F->>Scores: Update if score > existing
+        end
+    end
+
+    Note over F,Scores: Memory efficient:<br/>Grid geometries not cached,<br/>fetched on demand
+    </div>
+
+    <h4>Key Optimizations</h4>
+    <ol>
+        <li><strong>Spatial Index</strong>: O(log n) bounding box queries instead of O(n) full scans</li>
+        <li><strong>Prepared Geometry</strong>: GEOS pre-processes feature geometry for faster repeated intersection tests</li>
+        <li><strong>Batch Feature Request</strong>: <code>setFilterFids()</code> fetches only candidate grid cells</li>
+        <li><strong>On-demand Loading</strong>: Grid geometries are not cached, keeping memory usage low</li>
+    </ol>
+
+    <h3>Step 5: Rasterization and Masking</h3>
+    <p>After scoring, the grid is converted to a raster:</p>
+
+    <div class="mermaid">
+flowchart TB
+    subgraph Rasterize["Rasterization"]
+        GridVector["Grid with Scores\n(Vector)"]
+        GDALRasterize["gdal:rasterize\nvalue_field='value'"]
+        RasterTIF["Area Raster TIF\n(100m cells)"]
+    end
+
+    subgraph Mask["Masking"]
+        ClipGeom["Clip Polygon\n(aligned to grid)"]
+        GDALClip["gdal:cliprasterbymasklayer"]
+        MaskedTIF["Masked Raster TIF"]
+    end
+
+    GridVector --> GDALRasterize
+    GDALRasterize --> RasterTIF
+    RasterTIF --> GDALClip
+    ClipGeom --> GDALClip
+    GDALClip --> MaskedTIF
+    </div>
+
+    <h3>Step 6: Final Combination</h3>
+    <p>All area rasters are combined into a single VRT:</p>
+
+    <div class="mermaid">
+flowchart TB
+    subgraph Areas["Study Area Results"]
+        A1["Area 1 Masked TIF"]
+        A2["Area 2 Masked TIF"]
+        A3["Area N Masked TIF"]
+    end
+
+    Combine["gdal:buildvrt"]
+
+    VRT["Combined VRT\n+ QML Styling"]
+
+    A1 --> Combine
+    A2 --> Combine
+    A3 --> Combine
+    Combine --> VRT
+    </div>
+
+    <h2>Performance Optimizations</h2>
+    <table>
+        <tr><th>Optimization</th><th>Description</th><th>Memory Impact</th></tr>
+        <tr><td><strong>Prepared Geometry</strong></td><td>GEOS pre-processes feature geometry for faster repeated intersection tests</td><td>Minimal</td></tr>
+        <tr><td><strong>Batch Feature Request</strong></td><td><code>setFilterFids()</code> fetches only needed grid cells</td><td>Low (on-demand)</td></tr>
+        <tr><td><strong>Reduced Logging</strong></td><td>Log every ~5% instead of every feature</td><td>None</td></tr>
+        <tr><td><strong>Spatial Index</strong></td><td><code>QgsSpatialIndex</code> for O(log n) bounding box queries</td><td>Moderate (required)</td></tr>
+    </table>
+
+    <h2>Data Flow Summary</h2>
+    <pre>
+OSM Network (lines with highway/cycleway attributes)
+    |
+    v
+Spatial Index Query (bounding box filter)
+    |
+    v
+Prepared Geometry Intersection (refined filter)
+    |
+    v
+Score Assignment (highest wins per cell)
+    |
+    v
+Grid GeoPackage (cells with 'value' field)
+    |
+    v
+Rasterization (100m TIF)
+    |
+    v
+Masking (clip to study area)
+    |
+    v
+VRT Combination (all areas merged)
+    </pre>
+
+    <h2>Output Interpretation</h2>
+    <table>
+        <tr><th>Score</th><th>Meaning</th><th>Example Road Types</th></tr>
+        <tr><td>5</td><td>Excellent for walking/cycling</td><td>residential, pedestrian, footway</td></tr>
+        <tr><td>4</td><td>Good</td><td>tertiary, cycleway, path</td></tr>
+        <tr><td>3</td><td>Moderate</td><td>secondary, unclassified, service</td></tr>
+        <tr><td>2</td><td>Poor</td><td>primary, track</td></tr>
+        <tr><td>1</td><td>Very poor</td><td>motorway, trunk</td></tr>
+        <tr><td>0</td><td>Unsuitable/No data</td><td>bus_guideway, construction, or no roads</td></tr>
+    </table>
+
+    <h2>File Locations</h2>
+    <table>
+        <tr><th>Component</th><th>File Path</th></tr>
+        <tr><td>Workflow Class</td><td><code>geest/core/workflows/osm_transport_polyline_per_cell_workflow.py</code></td></tr>
+        <tr><td>Score Assignment</td><td><code>geest/core/algorithms/features_per_cell_processor.py</code></td></tr>
+        <tr><td>Classification Tables</td><td><code>geest/core/workflows/mappings/active_transport.py</code></td></tr>
+        <tr><td>Base Workflow</td><td><code>geest/core/workflows/workflow_base.py</code></td></tr>
+    </table>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from qgis.core import Qgis
-from qgis.PyQt.QtWidgets import QLabel, QPushButton, QHBoxLayout
+from qgis.PyQt.QtWidgets import QHBoxLayout, QLabel, QPushButton
 from qgis.utils import iface
 
 from geest.utilities import log_message
@@ -44,14 +44,18 @@ class IndexScoreWithOOKLAConfigurationWidget(BaseConfigurationWidget):
             log_message(f"Error opening Ookla settings: {e}", level=Qgis.Critical)
 
     def get_data(self) -> dict:
-        """
-        Return the data as a dictionary, updating attributes with current value.
+        """Return the data as a dictionary, updating attributes with current value.
+
+        Returns:
+            Dictionary containing the widget attributes.
         """
         return self.attributes
 
     def set_internal_widgets_enabled(self, enabled: bool) -> None:
-        """
-        Enables or disables the internal widgets based on the state of the radio button.
+        """Enable or disable internal widgets based on radio button state.
+
+        Args:
+            enabled: Whether to enable or disable the widgets.
         """
         try:
             self.info_label.setEnabled(enabled)
@@ -64,10 +68,12 @@ class IndexScoreWithOOKLAConfigurationWidget(BaseConfigurationWidget):
             )
 
     def update_widgets(self, attributes: dict) -> None:
-        """
-        Updates the internal widgets with the current attributes.
+        """Update internal widgets with the current attributes.
 
         Only needed in cases where a) there are internal widgets and b)
         the attributes may change externally e.g. in the datasource widget.
+
+        Args:
+            attributes: Dictionary of attributes to update the widgets with.
         """
         pass

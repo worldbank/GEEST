@@ -18,5 +18,5 @@ __revision__ = "$Format:%H$"
 # ---------------------------------------------------------------------
 
 # Scope in QSettings
-APPLICATION_NAME = "Geest"
+APPLICATION_NAME = "GeoE3"
 GDAL_OUTPUT_DATA_TYPE = 6  # Float32

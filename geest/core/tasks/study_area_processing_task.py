@@ -8,24 +8,26 @@ import datetime
 import glob
 import os
 import re
-import threading
 import time
 import traceback
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from queue import Queue
-from threading import Thread
 
 # GDAL / OGR / OSR imports
 from osgeo import gdal, ogr, osr
 from qgis.core import (
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
     QgsFeedback,
     QgsProject,
     QgsRectangle,
     QgsTask,
     QgsVectorFileWriter,
     QgsVectorLayer,
+)
+from qgis.PyQt.QtCore import (
+    QMutex,
+    QRunnable,
+    QThread,
+    QThreadPool,
+    QWaitCondition,
+    pyqtSignal,
 )
 
 from geest.core.algorithms import GHSLDownloader, GHSLProcessor
@@ -34,6 +36,222 @@ from geest.utilities import calculate_utm_zone, log_message
 
 from .grid_chunker_task import GridChunkerTask
 from .grid_from_bbox_task import GridFromBboxTask
+
+
+class QtQueue:
+    """Thread-safe queue using Qt primitives.
+
+    A simple bounded queue implementation using QMutex and QWaitCondition
+    to replace Python's queue.Queue for better QGIS compatibility.
+
+    Attributes:
+        maxsize: Maximum number of items in the queue (0 = unbounded).
+    """
+
+    def __init__(self, maxsize=0):
+        """Initialize the queue.
+
+        Args:
+            maxsize: Maximum queue size. 0 means unbounded.
+        """
+        self._queue = []
+        self._maxsize = maxsize
+        self._mutex = QMutex()
+        self._not_empty = QWaitCondition()
+        self._not_full = QWaitCondition()
+
+    def put(self, item, timeout=None):
+        """Add item to queue, blocking if full.
+
+        Args:
+            item: Item to add to queue.
+            timeout: Maximum time to wait in seconds (None = wait forever).
+
+        Returns:
+            True if item was added, False if timeout expired.
+        """
+        self._mutex.lock()
+        try:
+            if self._maxsize > 0:
+                while len(self._queue) >= self._maxsize:
+                    if timeout is not None:
+                        if not self._not_full.wait(self._mutex, int(timeout * 1000)):
+                            return False
+                    else:
+                        self._not_full.wait(self._mutex)
+            self._queue.append(item)
+            self._not_empty.wakeOne()
+            return True
+        finally:
+            self._mutex.unlock()
+
+    def get(self, timeout=None):
+        """Remove and return item from queue, blocking if empty.
+
+        Args:
+            timeout: Maximum time to wait in seconds (None = wait forever).
+
+        Returns:
+            Item from queue.
+
+        Raises:
+            TimeoutError: If timeout expires before item available.
+        """
+        self._mutex.lock()
+        try:
+            while len(self._queue) == 0:
+                if timeout is not None:
+                    if not self._not_empty.wait(self._mutex, int(timeout * 1000)):
+                        raise TimeoutError("Queue get timeout")
+                else:
+                    self._not_empty.wait(self._mutex)
+            item = self._queue.pop(0)
+            self._not_full.wakeOne()
+            return item
+        finally:
+            self._mutex.unlock()
+
+    def empty(self):
+        """Check if queue is empty.
+
+        Returns:
+            True if queue is empty.
+        """
+        self._mutex.lock()
+        try:
+            return len(self._queue) == 0
+        finally:
+            self._mutex.unlock()
+
+    def qsize(self):
+        """Return approximate queue size.
+
+        Returns:
+            Number of items in queue.
+        """
+        self._mutex.lock()
+        try:
+            return len(self._queue)
+        finally:
+            self._mutex.unlock()
+
+
+class WriterThread(QThread):
+    """Qt thread for async batch writing of features to GeoPackage.
+
+    Processes items from a queue and writes them in batches for efficiency.
+
+    Attributes:
+        queue: QtQueue to read items from.
+        layer: OGR layer to write to.
+        flush_token: Special token that triggers immediate batch flush.
+        write_batch_func: Function to call for writing batches.
+        batch_size: Number of items per batch.
+    """
+
+    def __init__(self, queue, layer, flush_token, write_batch_func, parent=None):
+        """Initialize the writer thread.
+
+        Args:
+            queue: QtQueue to read items from.
+            layer: OGR layer to write to.
+            flush_token: Token that triggers batch flush when received.
+            write_batch_func: Callback function for writing batches.
+            parent: Parent QObject.
+        """
+        super().__init__(parent)
+        self.queue = queue
+        self.layer = layer
+        self.flush_token = flush_token
+        self.write_batch_func = write_batch_func
+        self.batch_size = 10000
+        self._stop_requested = False
+
+    def run(self):
+        """Process queue items and write in batches."""
+        batch = []
+
+        while not self._stop_requested:
+            try:
+                item = self.queue.get(timeout=60)
+            except TimeoutError:
+                continue
+
+            if item is None:  # Poison pill signals shutdown
+                if batch:
+                    self.write_batch_func(self.layer, batch)
+                break
+
+            if item is self.flush_token:
+                if batch:
+                    self.write_batch_func(self.layer, batch)
+                batch = []
+                continue
+
+            batch.append(item)
+
+            if len(batch) >= self.batch_size:
+                self.write_batch_func(self.layer, batch)
+                batch = []
+
+    def request_stop(self):
+        """Request the thread to stop."""
+        self._stop_requested = True
+
+
+class ChunkRunnable(QRunnable):
+    """QRunnable for processing a single grid chunk.
+
+    Attributes:
+        chunk: Chunk parameters dictionary.
+        geom: OGR geometry for intersection testing.
+        cell_size: Cell size in meters.
+        feedback: QgsFeedback for progress reporting.
+        result: Tuple of (task, start_time, index) after run completes.
+        error: Exception if processing failed.
+    """
+
+    def __init__(self, chunk, geom, cell_size, feedback):
+        """Initialize the chunk runnable.
+
+        Args:
+            chunk: Dictionary with chunk parameters.
+            geom: OGR geometry for intersection testing.
+            cell_size: Cell size in meters.
+            feedback: QgsFeedback for progress reporting.
+        """
+        super().__init__()
+        self.chunk = chunk
+        self.geom = geom
+        self.cell_size = cell_size
+        self.feedback = feedback
+        self.result = None
+        self.error = None
+        self.setAutoDelete(False)  # We manage lifecycle manually
+
+    def run(self):
+        """Process the chunk."""
+        try:
+            start_time = time.time()
+            index = self.chunk["index"]
+
+            task = GridFromBboxTask(
+                index,
+                (
+                    self.chunk["x_start"],
+                    self.chunk["x_end"],
+                    self.chunk["y_start"],
+                    self.chunk["y_end"],
+                ),
+                self.geom,
+                self.cell_size,
+                self.feedback,
+            )
+            task.run()
+
+            self.result = (task, start_time, index)
+        except Exception as e:
+            self.error = e
 
 
 class StudyAreaProcessingTask(QgsTask):
@@ -60,7 +278,16 @@ class StudyAreaProcessingTask(QgsTask):
 
     Returns:
         _type_: _description_
+
+    Signals:
+        ghsl_download_failed: Emitted when GHSL download fails. Contains error message string.
     """
+
+    # Signal emitted when GHSL download fails - allows UI to prompt user to continue or abort
+    ghsl_download_failed = pyqtSignal(str)
+
+    # Signal emitted when waiting for user response about GHSL failure
+    ghsl_user_response_ready = pyqtSignal()
 
     def __init__(
         self,
@@ -71,14 +298,29 @@ class StudyAreaProcessingTask(QgsTask):
         feedback: QgsFeedback = None,
         crs=None,
     ):
-        """
-        :param input_vector_path: Path to an OGR-readable vector file (e.g. .gpkg or .shp).
-        :param field_name: Name of the field that holds the study area name.
-        :param cell_size_m: Cell size for grid spacing (in meters).
-        :param working_dir: Directory path where outputs will be saved.
-        :param crs_epsg: EPSG code for target CRS. If None, a UTM zone will be computed.
+        """Initialize the study area processing task.
+
+        Args:
+            layer: The input vector layer containing study area polygons.
+            field_name: Name of the field that holds the study area name.
+            cell_size_m: Cell size for grid spacing (in meters).
+            working_dir: Directory path where outputs will be saved.
+            feedback: QgsFeedback object for progress reporting.
+            crs: Target CRS. If None, a UTM zone will be computed.
+
+        Raises:
+            RuntimeError: If the input layer cannot be opened with OGR.
+            Exception: If the CRS is not EPSG-based.
         """
         super().__init__("Study Area Preparation", QgsTask.CanCancel)
+
+        # Configure GDAL for optimized GeoPackage writes
+        # These settings trade crash safety for performance - acceptable for processing tasks
+        gdal.SetConfigOption("OGR_SQLITE_JOURNAL", "MEMORY")
+        gdal.SetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF")
+        gdal.SetConfigOption("SQLITE_USE_OGR_VFS", "YES")
+        log_message("Using optimized GeoPackage write settings")
+
         self.input_vector_path = self.export_qgs_layer_to_shapefile(layer, working_dir)
         self.field_name = field_name
         self.cell_size_m = cell_size_m
@@ -97,16 +339,24 @@ class StudyAreaProcessingTask(QgsTask):
         self.current_geom_cell_count_estimate = 0
         self.error_count = 0
         self.total_cells = 0
-        self.write_lock = threading.Lock()
-        self.gpkg_lock = threading.Lock()
-        self.grid_id_lock = threading.Lock()
-        self.writer_start_lock = threading.Lock()  # Protect writer thread creation
+        # GHSL download synchronization - allows UI to prompt user on failure
+        self._ghsl_mutex = QMutex()
+        self._ghsl_wait_condition = QWaitCondition()
+        self._ghsl_response_received = False
+        self._ghsl_continue_without = False  # Set by UI when user responds
+        self.write_lock = QMutex()
+        self.gpkg_lock = QMutex()
+        self.grid_id_lock = QMutex()
+        self.writer_start_lock = QMutex()  # Protect writer thread creation
         self.write_queue = None
         self.writer_thread = None
         self.writer_layer = None  # Track which layer the writer is using
         self.writer_ds = None  # Writer's own dataset connection
         self.writer_ref_count = 0  # Reference count for parts using the writer
         self._writer_flush_token = object()
+        # Pending status updates - batched to reduce GPKG open/close cycles
+        self._pending_status_updates = []
+        self._status_update_lock = QMutex()
         # Make sure output directory exists
         self.create_study_area_directory(self.working_dir)
 
@@ -172,10 +422,10 @@ class StudyAreaProcessingTask(QgsTask):
         self.status_table_name = "study_area_creation_status"
 
     def count_layer_parts(self):
-        """
-        Returns the number of parts in the layer.
+        """Return the number of parts in the layer.
 
-        :return: The number of parts in the layer.
+        Returns:
+            The number of parts in the layer.
         """
         self.source_layer.ResetReading()
         parts_count = 0
@@ -190,6 +440,21 @@ class StudyAreaProcessingTask(QgsTask):
                 return self.source_layer.GetFeatureCount()
         return parts_count
 
+    def set_ghsl_user_response(self, continue_without: bool):
+        """Set user response for GHSL download failure.
+
+        Called from UI thread when user responds to the GHSL failure prompt.
+
+        Args:
+            continue_without: True if user wants to continue without GHSL,
+                            False if user wants to abort the task.
+        """
+        self._ghsl_mutex.lock()
+        self._ghsl_continue_without = continue_without
+        self._ghsl_response_received = True
+        self._ghsl_wait_condition.wakeAll()
+        self._ghsl_mutex.unlock()
+
     def enable_wal_mode(self):
         """Enable SQLite WAL mode for better concurrent access on Windows."""
         try:
@@ -203,9 +468,17 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(f"Could not enable WAL mode: {str(e)}", level="WARNING")
 
     def export_qgs_layer_to_shapefile(self, layer, output_dir):
-        """
-        Exports a QgsVectorLayer to a Shapefile in output_dir.
-        Returns the full path to the .shp (main file).
+        """Export a QgsVectorLayer to a Shapefile in output_dir.
+
+        Args:
+            layer: The QgsVectorLayer to export.
+            output_dir: Directory where the shapefile will be saved.
+
+        Returns:
+            Full path to the .shp (main file).
+
+        Raises:
+            RuntimeError: If the export fails.
         """
         # ensure the study area directory exists
         if not os.path.exists(os.path.join(output_dir, "study_area")):
@@ -256,10 +529,10 @@ class StudyAreaProcessingTask(QgsTask):
             extent = bbox_layer.GetExtent()  # (xmin, xmax, ymin, ymax)
             study_area_ds = None
 
-            # Transform extent to Mollweide
+            # Transform extent to Mollweide (ESRI:54009, not EPSG)
             source_srs = self.target_spatial_ref
             mollweide_srs = osr.SpatialReference()
-            mollweide_srs.ImportFromEPSG(54009)
+            mollweide_srs.SetFromUserInput("ESRI:54009")
 
             transform_to_mollweide = osr.CoordinateTransformation(source_srs, mollweide_srs)
 
@@ -287,16 +560,12 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(f"Study area extent in Mollweide: {extent_mollweide.toString()}")
 
             # Download GHSL using downloader
+            # Note: GHSLDownloader expects extents in Mollweide (ESRI:54009) projection
+            # because the tile index layer is in Mollweide
             log_message("Downloading GHSL tiles...")
-            transform_to_4326 = QgsCoordinateTransform(
-                QgsCoordinateReferenceSystem("EPSG:54009"),
-                QgsCoordinateReferenceSystem("EPSG:4326"),
-                QgsProject.instance(),
-            )
-            extent_4326 = transform_to_4326.transformBoundingBox(extent_mollweide)
 
             downloader = GHSLDownloader(
-                extents=extent_4326,
+                extents=extent_mollweide,  # Must be in Mollweide projection
                 output_path=os.path.join(self.working_dir, "study_area"),
                 filename="ghsl_temp",
                 use_cache=True,
@@ -334,67 +603,62 @@ class StudyAreaProcessingTask(QgsTask):
             temp_parquet = os.path.join(self.working_dir, "study_area", "ghsl_temp.parquet")
             processor.combine_vectors(polygonized, temp_parquet, extent=extent_mollweide)
 
-            # Reproject and save to GeoPackage
-            log_message("Reprojecting GHSL to study area CRS and saving to GeoPackage...")
+            # Reproject and save to GeoPackage using GDAL VectorTranslate
+            # This is much faster than feature-by-feature reprojection
+            log_message("Reprojecting GHSL to study area CRS using GDAL VectorTranslate...")
 
-            # Read temp parquet
-            temp_layer = QgsVectorLayer(temp_parquet, "ghsl_temp", "ogr")
-            if not temp_layer.isValid():
-                log_message("Could not load temporary GHSL layer", level="WARNING")
-                return None
-
-            # Create layer in GeoPackage
             ghsl_layer_name = "ghsl_settlements"
-            self.create_ghsl_layer_if_not_exists(ghsl_layer_name)
 
-            # Reproject and write features
-            ds = ogr.Open(self.gpkg_path, 1)
-            ghsl_layer = ds.GetLayerByName(ghsl_layer_name)
-
-            if not ghsl_layer:
-                log_message("Could not create GHSL layer in GeoPackage", level="WARNING")
-                ds = None
-                return None
-
-            # Transform from Mollweide to target CRS
-            transform_from_mollweide = osr.CoordinateTransformation(mollweide_srs, self.target_spatial_ref)
-
-            ghsl_layer.StartTransaction()
-            feature_count = 0
-
-            for qgs_feature in temp_layer.getFeatures():
-                geom_wkb = qgs_feature.geometry().asWkb()
-                ogr_geom = ogr.CreateGeometryFromWkb(bytes(geom_wkb))
-
-                # Transform geometry
-                ogr_geom.Transform(transform_from_mollweide)
-
-                # Create feature
-                feat_defn = ghsl_layer.GetLayerDefn()
-                feature = ogr.Feature(feat_defn)
-                feature.SetField("pixel_value", qgs_feature["pixel_value"])
-                feature.SetGeometry(ogr_geom)
-
-                ghsl_layer.CreateFeature(feature)
-                feature = None
-                feature_count += 1
-
-            ghsl_layer.CommitTransaction()
-            ds = None
-
-            log_message(f"Successfully added {feature_count} GHSL features to GeoPackage")
-
-            # Clean up temporary file - must release QgsVectorLayer first (Windows file locking)
-            del temp_layer
-            temp_layer = None
             try:
-                if os.path.exists(temp_parquet):
-                    os.remove(temp_parquet)
-            except OSError as cleanup_error:
-                # Don't fail if we can't delete - GHSL data is already in GeoPackage
-                log_message(f"Could not remove temp parquet file: {cleanup_error}", level="INFO")
+                # Use GDAL VectorTranslate for efficient batch reprojection
+                # This handles the entire operation in one optimized call
+                translate_options = gdal.VectorTranslateOptions(
+                    format="GPKG",
+                    accessMode="append",  # Append to existing GPKG
+                    srcSRS="ESRI:54009",  # Mollweide
+                    dstSRS=f"EPSG:{self.epsg_code}",
+                    layerName=ghsl_layer_name,
+                    geometryType="PROMOTE_TO_MULTI",  # Handle mixed geometry types
+                )
 
-            return ghsl_layer_name
+                # Ensure GPKG exists
+                if not os.path.exists(self.gpkg_path):
+                    driver = ogr.GetDriverByName("GPKG")
+                    ds = driver.CreateDataSource(self.gpkg_path)
+                    ds = None
+
+                result = gdal.VectorTranslate(
+                    self.gpkg_path,
+                    temp_parquet,
+                    options=translate_options,
+                )
+
+                if result is None:
+                    log_message("GDAL VectorTranslate failed", level="WARNING")
+                    return None
+
+                # Close result to flush writes
+                result = None
+
+                # Get feature count for logging
+                ds = ogr.Open(self.gpkg_path, 0)
+                if ds:
+                    layer = ds.GetLayerByName(ghsl_layer_name)
+                    if layer:
+                        feature_count = layer.GetFeatureCount()
+                        log_message(f"Successfully added {feature_count} GHSL features to GeoPackage")
+                    ds = None
+
+                return ghsl_layer_name
+
+            finally:
+                # Clean up temporary parquet file
+                try:
+                    if os.path.exists(temp_parquet):
+                        os.remove(temp_parquet)
+                except OSError as cleanup_error:
+                    # Don't fail if we can't delete - GHSL data is already in GeoPackage
+                    log_message(f"Could not remove temp parquet file: {cleanup_error}", level="INFO")
 
         except Exception as e:
             log_message(f"Error downloading/processing GHSL: {str(e)}", level="WARNING")
@@ -402,8 +666,10 @@ class StudyAreaProcessingTask(QgsTask):
             return None
 
     def create_ghsl_layer_if_not_exists(self, layer_name):
-        """
-        Create GHSL layer in GeoPackage if it doesn't exist.
+        """Create GHSL layer in GeoPackage if it doesn't exist.
+
+        Args:
+            layer_name: Name of the layer to create.
         """
         if not os.path.exists(self.gpkg_path):
             driver = ogr.GetDriverByName("GPKG")
@@ -422,8 +688,10 @@ class StudyAreaProcessingTask(QgsTask):
         ds = None
 
     def run(self):
-        """
-        Main entry point (mimics process_study_area from QGIS code).
+        """Main entry point (mimics process_study_area from QGIS code).
+
+        Returns:
+            True if processing completed successfully, False otherwise.
         """
         try:
             # 1) Create the bounding box as a single polygon feature
@@ -447,21 +715,54 @@ class StudyAreaProcessingTask(QgsTask):
                 log_message(f"GHSL layer '{ghsl_layer_name}' added to GeoPackage successfully")
                 self.ghsl_layer_name = ghsl_layer_name
             else:
-                log_message("GHSL download failed or no data available, continuing without GHSL", level="WARNING")
+                log_message("GHSL download failed or no data available", level="WARNING")
+                # Emit signal to UI to prompt user - pass error message
+                error_msg = (
+                    "GHSL (Global Human Settlement Layer) data could not be downloaded.\n\n"
+                    "This data is used to filter study areas by population settlements. "
+                    "Without it, all study areas will be processed regardless of settlement status.\n\n"
+                    "Do you want to continue without GHSL data?"
+                )
+                self.ghsl_download_failed.emit(error_msg)
+
+                # Wait for user response (with timeout to prevent deadlock)
+                log_message("Waiting for user response about GHSL download failure...")
+                self._ghsl_mutex.lock()
+                # Wait up to 5 minutes for user response
+                self._ghsl_wait_condition.wait(self._ghsl_mutex, 300000)  # 5 min in ms
+                continue_without = self._ghsl_continue_without
+                response_received = self._ghsl_response_received
+                self._ghsl_mutex.unlock()
+
+                if not response_received:
+                    log_message("No user response received within timeout, aborting task", level="WARNING")
+                    return False
+
+                if not continue_without:
+                    log_message("User chose to abort task due to GHSL download failure")
+                    return False
+
+                log_message("User chose to continue without GHSL data")
                 self.ghsl_layer_name = None
 
-            # 3) Collect all valid geometries first
+            # 3) Process geometries one at a time (memory efficient)
             self.setProgress(5)  # Reserve 0-5% for GHSL, 5-95% for features
             invalid_feature_count = 0
             self.valid_feature_count = 0
             fixed_feature_count = 0
 
-            # Collect all geometries to process
-            geometries_to_process = []
+            # First pass: count total features for progress calculation
             self.source_layer.ResetReading()
+            total_feature_count = self.source_layer.GetFeatureCount()
+            log_message(f"Total features to process: {total_feature_count}")
+
+            # Second pass: process geometries one at a time (memory efficient)
+            self.source_layer.ResetReading()
+            processed_count = 0
             for feature in self.source_layer:
                 geom_ref = feature.GetGeometryRef()
                 if not geom_ref:
+                    processed_count += 1
                     continue
 
                 area_name = feature.GetField(self.field_name)
@@ -485,30 +786,42 @@ class StudyAreaProcessingTask(QgsTask):
                                 f"Could not fix geometry for feature {feature.GetFID()}. Skipping.",
                                 level="CRITICAL",
                             )
+                            processed_count += 1
                             continue
                         else:
                             fixed_feature_count += 1
                     except Exception as e:
                         invalid_feature_count += 1
                         log_message(f"Geometry fix error: {str(e)}", level="CRITICAL")
+                        processed_count += 1
                         continue
 
                 self.valid_feature_count += 1
 
+                # Clone geometry for processing, then release after processing
                 geom_clone = geom_ref.Clone()
                 geom_type = ogr.GT_Flatten(geom_clone.GetGeometryType())
+                is_multipart = geom_type == ogr.wkbMultiPolygon
 
-                geometries_to_process.append(
-                    {
-                        "geometry": geom_clone,
-                        "normalized_name": normalized_name,
-                        "area_name": area_name,
-                        "is_multipart": geom_type == ogr.wkbMultiPolygon,
-                    }
-                )
+                # Process this geometry immediately (memory efficient - one at a time)
+                try:
+                    if is_multipart:
+                        log_message(f"Processing multipart geometry: {normalized_name}")
+                        self.process_multipart_geometry(geom_clone, normalized_name, area_name)
+                    else:
+                        log_message(f"Processing singlepart geometry: {normalized_name}")
+                        self.process_singlepart_geometry(geom_clone, normalized_name, area_name)
+                finally:
+                    # Explicitly release geometry reference after processing
+                    geom_clone = None
 
-            log_message(f"Collected {len(geometries_to_process)} geometries to process")
-            self._process_geometries(geometries_to_process)
+                processed_count += 1
+                # Update progress (5-95% range for geometry processing)
+                if total_feature_count > 0:
+                    progress = 5 + int((processed_count / total_feature_count) * 90)
+                    self.setProgress(min(95, progress))
+
+            log_message(f"Processed {self.valid_feature_count} geometries")
 
             self.setProgress(100)  # Trigger the UI to update with completion value
             log_message(
@@ -528,43 +841,62 @@ class StudyAreaProcessingTask(QgsTask):
                 f.write(traceback.format_exc())
             return False
 
+        finally:
+            # Explicit cleanup of GDAL resources to prevent memory leaks
+            self._cleanup_gdal_resources()
+
         return True
 
-    def _process_geometries(self, geometries_to_process):
-        """Process study area geometries sequentially.
+    def _cleanup_gdal_resources(self):
+        """Clean up GDAL/OGR resources to prevent memory leaks and file handle issues."""
+        try:
+            # Flush any pending status updates before cleanup
+            try:
+                self._flush_status_updates()
+            except Exception as e:
+                log_message(f"Warning: could not flush status updates: {e}", level="WARNING")
 
-        Args:
-            geometries_to_process: List of dicts with 'geometry', 'normalized_name', 'area_name', 'is_multipart'
-        """
-        total_areas = len(geometries_to_process)
-        log_message(f"Processing {total_areas} study areas sequentially")
-        self._process_geometries_sequential(geometries_to_process)
+            # Clean up source dataset
+            if hasattr(self, "source_layer") and self.source_layer:
+                self.source_layer = None
+            if hasattr(self, "source_ds") and self.source_ds:
+                self.source_ds = None
 
-    def _process_geometries_sequential(self, geometries_to_process):
-        """Process study area geometries sequentially.
+            # Clean up writer resources
+            if hasattr(self, "writer_layer") and self.writer_layer:
+                self.writer_layer = None
+            if hasattr(self, "writer_ds") and self.writer_ds:
+                try:
+                    self.writer_ds.FlushCache()
+                except Exception:  # nosec B110 - intentional cleanup, ignore errors
+                    pass
+                self.writer_ds = None
 
-        Args:
-            geometries_to_process: List of geometry dicts to process
-        """
-        for geom_data in geometries_to_process:
-            if geom_data["is_multipart"]:
-                log_message(f"Processing multipart geometry: {geom_data['normalized_name']}")
-                self.process_multipart_geometry(
-                    geom_data["geometry"], geom_data["normalized_name"], geom_data["area_name"]
-                )
-            else:
-                log_message(f"Processing singlepart geometry: {geom_data['normalized_name']}")
-                self.process_singlepart_geometry(
-                    geom_data["geometry"], geom_data["normalized_name"], geom_data["area_name"]
-                )
+            # Clean up any queues
+            if hasattr(self, "write_queue") and self.write_queue:
+                try:
+                    # Drain the queue
+                    while not self.write_queue.empty():
+                        try:
+                            self.write_queue.get_nowait()
+                        except Exception:  # nosec B110 - queue drain, break on any error
+                            break
+                except Exception:  # nosec B110 - intentional cleanup, ignore errors
+                    pass
+                self.write_queue = None
+
+            log_message("GDAL resources cleaned up successfully")
+        except Exception as e:
+            log_message(f"Error during GDAL cleanup: {e}", level="WARNING")
 
     ##########################################################################
     # Table creation logic
     ##########################################################################
     def create_status_tracking_table(self):
-        """
-        Create a table in the GeoPackage to track processing status,
-        similar to the QGIS version.
+        """Create a table in the GeoPackage to track processing status.
+
+        Raises:
+            RuntimeError: If the GeoPackage cannot be created or opened.
         """
         if not os.path.exists(self.gpkg_path):
             # Just create it if no GPKG
@@ -606,66 +938,68 @@ class StudyAreaProcessingTask(QgsTask):
             ds = None
 
     def add_row_to_status_tracking_table(self, area_name):
-        """Add new status tracking row with retry logic for SQLite lock handling.
+        """Queue a new status tracking row to be added.
+
+        Uses batched writes to reduce GPKG open/close cycles.
 
         Args:
             area_name: Name of study area to track
         """
-        max_retries = 5
-        retry_delay = 0.5
-
-        for attempt in range(max_retries):
-            try:
-                with self.gpkg_lock:
-                    ds = ogr.Open(self.gpkg_path, 1)
-                    if not ds:
-                        raise RuntimeError(f"Could not open {self.gpkg_path} for update.")
-                    ds.ExecuteSQL("PRAGMA busy_timeout = 5000")
-                    layer = ds.GetLayerByName(self.status_table_name)
-                    if not layer:
-                        raise RuntimeError(f"Missing status table layer: {self.status_table_name}")
-
-                    feat_defn = layer.GetLayerDefn()
-                    feat = ogr.Feature(feat_defn)
-                    feat.SetField("area_name", area_name)
-                    feat.SetField("timestamp_start", None)
-                    feat.SetField("timestamp_end", None)
-                    feat.SetField("geometry_processed", 0)
-                    feat.SetField("clip_geometry_processed", 0)
-                    feat.SetField("grid_processed", 0)
-                    feat.SetField("mask_processed", 0)
-                    feat.SetField("grid_creation_duration_secs", 0.0)
-                    feat.SetField("clip_geom_creation_duration_secs", 0.0)
-                    feat.SetField("geom_total_duration_secs", 0.0)
-                    layer.CreateFeature(feat)
-                    feat = None
-                    ds = None
-                return
-            except RuntimeError as e:
-                if "database is locked" in str(e) and attempt < max_retries - 1:
-                    log_message(
-                        f"Database locked, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})",
-                        level="WARNING",
-                    )
-                    time.sleep(retry_delay)
-                    retry_delay *= 2
-                else:
-                    raise
+        self._status_update_lock.lock()
+        try:
+            self._pending_status_updates.append(("insert", area_name, None, None))
+        finally:
+            self._status_update_lock.unlock()
 
     def set_status_tracking_table_value(self, area_name, field_name, value):
-        """Update status tracking field with retry logic for SQLite lock handling.
+        """Queue a status tracking field update.
+
+        Uses batched writes to reduce GPKG open/close cycles.
 
         Args:
             area_name: Name of study area
             field_name: Field to update
             value: New value for field
         """
+        self._status_update_lock.lock()
+        try:
+            self._pending_status_updates.append(("update", area_name, field_name, value))
+            # Auto-flush if we have accumulated many updates
+            if len(self._pending_status_updates) >= 20:
+                self._flush_status_updates_unlocked()
+        finally:
+            self._status_update_lock.unlock()
+
+    def _flush_status_updates(self):
+        """Flush all pending status updates to the database."""
+        self._status_update_lock.lock()
+        try:
+            self._flush_status_updates_unlocked()
+        finally:
+            self._status_update_lock.unlock()
+
+    def _flush_status_updates_unlocked(self):
+        """Flush pending status updates (must hold _status_update_lock).
+
+        Performs all pending inserts and updates in a single database transaction.
+
+        Raises:
+            RuntimeError: If the GeoPackage cannot be opened.
+            Exception: If all retry attempts fail.
+        """
+        if not self._pending_status_updates:
+            return
+
+        updates_to_process = self._pending_status_updates[:]
+        self._pending_status_updates = []
+
         max_retries = 5
         retry_delay = 0.5
 
         for attempt in range(max_retries):
             try:
-                with self.gpkg_lock:
+                self.gpkg_lock.lock()
+                try:
                     ds = ogr.Open(self.gpkg_path, 1)
                     if not ds:
                         raise RuntimeError(f"Could not open {self.gpkg_path} for update.")
@@ -674,23 +1008,73 @@ class StudyAreaProcessingTask(QgsTask):
                     if not layer:
                         raise RuntimeError(f"Missing status table layer: {self.status_table_name}")
 
-                    layer.SetAttributeFilter(f"area_name = '{area_name}'")
-                    for feature in layer:
-                        feature.SetField(field_name, value)
-                        layer.SetFeature(feature)
-                    layer.ResetReading()
+                    layer.StartTransaction()
+                    try:
+                        # Group updates by area_name for efficiency
+                        inserts = []
+                        updates_by_area = {}
+
+                        for op_type, area_name, field_name, value in updates_to_process:
+                            if op_type == "insert":
+                                inserts.append(area_name)
+                            else:  # update
+                                if area_name not in updates_by_area:
+                                    updates_by_area[area_name] = {}
+                                updates_by_area[area_name][field_name] = value
+
+                        # Process inserts
+                        feat_defn = layer.GetLayerDefn()
+                        for area_name in inserts:
+                            feat = ogr.Feature(feat_defn)
+                            feat.SetField("area_name", area_name)
+                            feat.SetField("geometry_processed", 0)
+                            feat.SetField("clip_geometry_processed", 0)
+                            feat.SetField("grid_processed", 0)
+                            feat.SetField("mask_processed", 0)
+                            feat.SetField("grid_creation_duration_secs", 0.0)
+                            feat.SetField("clip_geom_creation_duration_secs", 0.0)
+                            feat.SetField("geom_total_duration_secs", 0.0)
+                            layer.CreateFeature(feat)
+                            feat = None
+
+                        # Process updates grouped by area
+                        for area_name, fields in updates_by_area.items():
+                            layer.SetAttributeFilter(f"area_name = '{area_name}'")
+                            for feature in layer:
+                                for field_name, value in fields.items():
+                                    feature.SetField(field_name, value)
+                                layer.SetFeature(feature)
+                            layer.ResetReading()
+
+                        layer.SetAttributeFilter(None)
+                        layer.CommitTransaction()
+
+                    except Exception:
+                        layer.RollbackTransaction()
+                        raise
+
                     ds = None
-                log_message(f"Updated {field_name} for {area_name} to {value}")
+                finally:
+                    self.gpkg_lock.unlock()
+
+                log_message(f"Flushed {len(updates_to_process)} status updates to database")
                 return
+
             except RuntimeError as e:
                 if "database is locked" in str(e) and attempt < max_retries - 1:
                     log_message(
-                        f"Database locked, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})",
+                        f"Database locked during flush, retrying in {retry_delay}s",
                         level="WARNING",
                     )
                     time.sleep(retry_delay)
                     retry_delay *= 2
                 else:
+                    # Put updates back for retry later
+                    self._status_update_lock.lock()
+                    try:
+                        self._pending_status_updates = updates_to_process + self._pending_status_updates
+                    finally:
+                        self._status_update_lock.unlock()
                     raise
 
     ##########################################################################
@@ -821,6 +1205,9 @@ class StudyAreaProcessingTask(QgsTask):
             geom: OGR multi-part geometry
             normalized_name: Base name for the area
             area_name: Original area name
+
+        Raises:
+            RuntimeError: If the grid layer cannot be opened for writing.
         """
         count = geom.GetGeometryCount()
         log_message(f"Processing {count} parts for {normalized_name} with shared writer thread")
@@ -835,8 +1222,10 @@ class StudyAreaProcessingTask(QgsTask):
         grid_layer_name = "study_area_grid"
         self.create_grid_layer_if_not_exists(grid_layer_name)
 
+        # Open GeoPackage for writing
         ds = ogr.Open(self.gpkg_path, 1)  # read-write
         layer = ds.GetLayerByName(grid_layer_name)
+
         if not layer:
             raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
 
@@ -884,10 +1273,13 @@ class StudyAreaProcessingTask(QgsTask):
     # BBox handling
     ##########################################################################
     def transform_and_align_bbox(self, bbox):
-        """
-        BBox is (xmin, xmax, ymin, ymax). Transform to target CRS if possible,
-        then align to cell_size_m grid.
-        Returns new (xmin, xmax, ymin, ymax) in target CRS.
+        """Transform and align a bounding box to the target CRS and grid.
+
+        Args:
+            bbox: Bounding box tuple (xmin, xmax, ymin, ymax) in source CRS.
+
+        Returns:
+            New bounding box (xmin, xmax, ymin, ymax) aligned to grid in target CRS.
         """
         xmin, xmax, ymin, ymax = bbox
 
@@ -953,17 +1345,22 @@ class StudyAreaProcessingTask(QgsTask):
         return (x_min_snap, x_max_snap, y_min_snap, y_max_snap)
 
     def save_bbox_polygon(self, layer_name, bbox, area_name):
-        """
-        Save a bounding-box polygon to the specified layer (creating it if needed).
+        """Save a bounding-box polygon to the specified layer (creating it if needed).
+
+        Args:
+            layer_name: Name of the layer to save to.
+            bbox: Bounding box tuple (xmin, xmax, ymin, ymax).
+            area_name: Name of the area for the feature.
         """
         # BBox is (xmin, xmax, ymin, ymax)
         xmin, xmax, ymin, ymax = bbox
         ring = ogr.Geometry(ogr.wkbLinearRing)
-        ring.AddPoint(xmin, ymin)
-        ring.AddPoint(xmin, ymax)
-        ring.AddPoint(xmax, ymax)
-        ring.AddPoint(xmax, ymin)
-        ring.AddPoint(xmin, ymin)
+        # Use AddPoint_2D to create 2D geometry (not 2.5D with Z=0)
+        ring.AddPoint_2D(xmin, ymin)
+        ring.AddPoint_2D(xmin, ymax)
+        ring.AddPoint_2D(xmax, ymax)
+        ring.AddPoint_2D(xmax, ymin)
+        ring.AddPoint_2D(xmin, ymin)
         polygon = ogr.Geometry(ogr.wkbPolygon)
         polygon.AddGeometry(ring)
         self.save_geometry_to_geopackage(layer_name, polygon, area_name)
@@ -1028,9 +1425,13 @@ class StudyAreaProcessingTask(QgsTask):
             geom: OGR geometry
             area_name: Name of the area
             intersects_ghsl: Whether geometry intersects GHSL
+
+        Raises:
+            RuntimeError: If the layer cannot be opened.
         """
         self.create_layer_if_not_exists(layer_name)
-        with self.gpkg_lock:
+        self.gpkg_lock.lock()
+        try:
             ds = ogr.Open(self.gpkg_path, 1)
             layer = ds.GetLayerByName(layer_name)
             if not layer:
@@ -1040,18 +1441,28 @@ class StudyAreaProcessingTask(QgsTask):
             feature = ogr.Feature(feat_defn)
             feature.SetField("area_name", area_name)
 
-            # Set intersects_ghsl field if this is study_area_polygons layer
+            # Set intersects_ghsl field and computed area if this is study_area_polygons layer
             if layer_name == "study_area_polygons":
                 feature.SetField("intersects_ghsl", 1 if intersects_ghsl else 0)
+                # Store computed area to avoid recalculation during iteration
+                geom_area = geom.GetArea()
+                feature.SetField("geom_area", geom_area)
 
             feature.SetGeometry(geom)
             layer.CreateFeature(feature)
             feature = None
             ds = None
+        finally:
+            self.gpkg_lock.unlock()
 
     def create_layer_if_not_exists(self, layer_name):
-        """Create a GPKG layer if it does not exist."""
-        with self.gpkg_lock:
+        """Create a GPKG layer if it does not exist.
+
+        Args:
+            layer_name: Name of the layer to create.
+        """
+        self.gpkg_lock.lock()
+        try:
             if not os.path.exists(self.gpkg_path):
                 driver = ogr.GetDriverByName("GPKG")
                 driver.CreateDataSource(self.gpkg_path)
@@ -1069,8 +1480,13 @@ class StudyAreaProcessingTask(QgsTask):
             if layer_name == "study_area_polygons":
                 intersects_field = ogr.FieldDefn("intersects_ghsl", ogr.OFTInteger)
                 layer.CreateField(intersects_field)
+                # Store computed area to avoid recalculation during iteration
+                area_field = ogr.FieldDefn("geom_area", ogr.OFTReal)
+                layer.CreateField(area_field)
 
             ds = None
+        finally:
+            self.gpkg_lock.unlock()
 
     # Helper to update time spent in a named metric block
     def track_time(self, metric_name, start_time):
@@ -1085,21 +1501,36 @@ class StudyAreaProcessingTask(QgsTask):
     ##########################################################################
     # Write Queue Management
     ##########################################################################
+    # Maximum queue size to limit memory (~100k items * ~1KB = ~100MB max)
+    WRITE_QUEUE_MAX_SIZE = 100000
+
     def _start_writer_thread(self, layer, normalized_name):
-        """Start dedicated writer thread for async writing (thread-safe singleton with ref counting)."""
-        with self.writer_start_lock:
+        """Start dedicated writer thread for async writing (thread-safe singleton with ref counting).
+
+        Uses bounded queue to limit memory usage and avoids circular references.
+
+        Args:
+            layer: OGR layer to write to (may be None, writer opens its own connection).
+            normalized_name: Name of the area being processed.
+
+        Raises:
+            RuntimeError: If the grid layer cannot be opened.
+        """
+        self.writer_start_lock.lock()
+        try:
             self.writer_ref_count += 1
 
-            if self.writer_thread is not None and self.writer_thread.is_alive():
+            if self.writer_thread is not None and self.writer_thread.isRunning():
                 log_message(
                     f"Writer thread already running (ref_count={self.writer_ref_count}), reusing existing thread"
                 )
                 return
 
             log_message(f"Starting new writer thread (ref_count={self.writer_ref_count})")
-            self.write_queue = Queue()
+            # Use bounded queue to limit memory usage
+            self.write_queue = QtQueue(maxsize=self.WRITE_QUEUE_MAX_SIZE)
 
-            # Open persistent connection to prevent invalidation when parts close their datasets
+            # Open persistent connection to GeoPackage
             writer_ds = ogr.Open(self.gpkg_path, 1)
             if not writer_ds:
                 raise RuntimeError(f"Writer thread could not open {self.gpkg_path}")
@@ -1108,55 +1539,31 @@ class StudyAreaProcessingTask(QgsTask):
                 raise RuntimeError("Writer thread could not open study_area_grid layer")
             self.writer_ds = writer_ds
 
-            flush_token = self._writer_flush_token
-
-            def writer_worker():
-                """Process write queue in batches. Queue items are (geometry, area_name) tuples."""
-                batch = []
-                batch_size = 10000
-                items_in_batch = 0
-
-                while True:
-                    item = self.write_queue.get()
-
-                    if item is None:  # Poison pill signals shutdown
-                        if batch:
-                            self._write_batch(self.writer_layer, batch)
-                        for _ in range(items_in_batch):
-                            self.write_queue.task_done()
-                        self.write_queue.task_done()
-                        break
-                    if item is flush_token:
-                        if batch:
-                            self._write_batch(self.writer_layer, batch)
-                        for _ in range(items_in_batch):
-                            self.write_queue.task_done()
-                        batch = []
-                        items_in_batch = 0
-                        self.write_queue.task_done()
-                        continue
-
-                    batch.append(item)
-                    items_in_batch += 1
-
-                    if len(batch) >= batch_size:
-                        self._write_batch(self.writer_layer, batch)
-                        for _ in range(items_in_batch):
-                            self.write_queue.task_done()
-                        batch = []
-                        items_in_batch = 0
-
-            self.writer_thread = Thread(target=writer_worker, daemon=False)
+            # Create and start the writer thread using Qt's QThread
+            self.writer_thread = WriterThread(
+                queue=self.write_queue,
+                layer=self.writer_layer,
+                flush_token=self._writer_flush_token,
+                write_batch_func=self._write_batch,
+            )
             self.writer_thread.start()
             log_message("Writer thread started")
+        finally:
+            self.writer_start_lock.unlock()
 
     def _stop_writer_thread(self):
         """Stop writer thread with ref counting. Only stops when last part finishes.
 
+        Uses timeouts to prevent deadlocks.
+
         Returns:
             bool: True if writer was stopped, False if still in use by other parts
         """
-        with self.writer_start_lock:
+        QUEUE_TIMEOUT = 60  # seconds
+        THREAD_TIMEOUT_MS = 30000  # milliseconds
+
+        self.writer_start_lock.lock()
+        try:
             self.writer_ref_count -= 1
             log_message(f"Writer thread ref count: {self.writer_ref_count}")
 
@@ -1166,18 +1573,44 @@ class StudyAreaProcessingTask(QgsTask):
 
             log_message("All parts finished, stopping writer thread")
             if self.write_queue is not None:
-                self.write_queue.put(None)
-                self.write_queue.join()
+                try:
+                    # Send poison pill with timeout
+                    if not self.write_queue.put(None, timeout=QUEUE_TIMEOUT):
+                        log_message("Warning: timeout putting poison pill in queue", level="WARNING")
+                except Exception as e:
+                    log_message(f"Warning: error putting poison pill in queue: {e}", level="WARNING")
+
+                # Wait for queue to drain with timeout
+                try:
+                    start = time.time()
+                    while not self.write_queue.empty():
+                        if time.time() - start > QUEUE_TIMEOUT:
+                            log_message("Warning: timeout waiting for queue to drain", level="WARNING")
+                            break
+                        time.sleep(0.1)
+                except Exception as e:
+                    log_message(f"Warning: error waiting for queue: {e}", level="WARNING")
+
                 if self.writer_thread is not None:
-                    self.writer_thread.join()
-                log_message("Writer thread stopped")
+                    self.writer_thread.request_stop()
+                    if not self.writer_thread.wait(THREAD_TIMEOUT_MS):
+                        log_message("Warning: writer thread did not terminate within timeout", level="WARNING")
+                    else:
+                        log_message("Writer thread stopped")
 
             if self.writer_ds:
-                self.writer_ds.FlushCache()
+                try:
+                    self.writer_ds.FlushCache()
+                except Exception as e:
+                    log_message(f"Warning: error flushing writer dataset: {e}", level="WARNING")
                 self.writer_ds = None
             self.writer_layer = None
+            self.write_queue = None
+            self.writer_thread = None
             log_message("Writer dataset closed")
             return True
+        finally:
+            self.writer_start_lock.unlock()
 
     def _wait_for_writer_queue(self):
         """Block until the writer queue is flushed."""
@@ -1189,7 +1622,15 @@ class StudyAreaProcessingTask(QgsTask):
         log_message("Grid writer queue flushed.")
 
     def _write_batch(self, layer, items):
-        """Write batch of (geometry, area_name) tuples in single transaction."""
+        """Write batch of (geometry, area_name) tuples in single transaction.
+
+        Args:
+            layer: OGR layer to write to.
+            items: List of (geometry, area_name) tuples.
+
+        Raises:
+            Exception: If the batch write fails.
+        """
         start_time = time.time()
         feat_defn = layer.GetLayerDefn()
 
@@ -1198,10 +1639,13 @@ class StudyAreaProcessingTask(QgsTask):
             for geometry, area_name in items:
                 feature = ogr.Feature(feat_defn)
 
-                with self.grid_id_lock:
+                self.grid_id_lock.lock()
+                try:
                     feature.SetField("grid_id", self.current_geom_actual_cell_count)
                     self.current_geom_actual_cell_count += 1
                     grid_id = self.current_geom_actual_cell_count
+                finally:
+                    self.grid_id_lock.unlock()
 
                 feature.SetField("area_name", area_name)
                 feature.SetGeometry(geometry)
@@ -1234,10 +1678,13 @@ class StudyAreaProcessingTask(QgsTask):
             normalized_name: Name of study area
             geom: OGR geometry defining area boundary
             bbox: Tuple of (xmin, xmax, ymin, ymax) for grid extent
+
+        Raises:
+            RuntimeError: If there is an error processing the grid chunks.
         """
         xmin, xmax, ymin, ymax = bbox
         cell_size = self.cell_size_m
-        chunk_size = int(setting(key="chunk_size", default=50))
+        chunk_size = int(setting(key="chunk_size", default=100))
 
         chunker = GridChunkerTask(
             xmin,
@@ -1254,8 +1701,11 @@ class StudyAreaProcessingTask(QgsTask):
         retry_delay = 0.5
         for attempt in range(max_retries):
             try:
-                with self.gpkg_lock:
+                self.gpkg_lock.lock()
+                try:
                     chunker.write_chunks_to_gpkg(self.gpkg_path)
+                finally:
+                    self.gpkg_lock.unlock()
                 break
             except RuntimeError as e:
                 if "database is locked" in str(e) and attempt < max_retries - 1:
@@ -1324,12 +1774,17 @@ class StudyAreaProcessingTask(QgsTask):
             normalized_name: Name of study area
             geom: OGR geometry defining area boundary
             bbox: Tuple of (xmin, xmax, ymin, ymax) for grid extent
+
+        Raises:
+            RuntimeError: If the grid layer cannot be opened for writing.
         """
         grid_layer_name = "study_area_grid"
         self.create_grid_layer_if_not_exists(grid_layer_name)
 
+        # Open GeoPackage for writing
         ds = ogr.Open(self.gpkg_path, 1)  # read-write
         layer = ds.GetLayerByName(grid_layer_name)
+
         if not layer:
             raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
 
@@ -1396,7 +1851,7 @@ class StudyAreaProcessingTask(QgsTask):
             self.track_time("Complete chunk", start_time)
 
     def _process_chunks_parallel(self, layer, chunks, geom, cell_size, normalized_name, feedback, worker_count):
-        """Process chunks in parallel using ThreadPoolExecutor.
+        """Process chunks in parallel using QThreadPool.
 
         Args:
             layer: OGR layer for writing grid cells
@@ -1410,53 +1865,45 @@ class StudyAreaProcessingTask(QgsTask):
         total_chunks = len(chunks)
         completed_count = 0
         failed_count = 0
-        progress_lock = threading.Lock()
 
-        def process_single_chunk(chunk):
-            """Process single chunk in worker thread."""
-            start_time = time.time()
-            index = chunk["index"]
+        # Get global thread pool and set max thread count
+        pool = QThreadPool.globalInstance()
+        pool.setMaxThreadCount(worker_count)
 
-            task = GridFromBboxTask(
-                index,
-                (chunk["x_start"], chunk["x_end"], chunk["y_start"], chunk["y_end"]),
-                geom,
-                cell_size,
-                feedback,
-            )
-            task.run()
+        # Create runnables for all chunks
+        runnables = []
+        for chunk in chunks:
+            runnable = ChunkRunnable(chunk, geom, cell_size, feedback)
+            runnables.append(runnable)
+            pool.start(runnable)
 
-            return (task, start_time, index)
+        # Wait for all to complete and process results
+        pool.waitForDone()
 
-        with ThreadPoolExecutor(max_workers=worker_count) as executor:
-            future_to_chunk = {executor.submit(process_single_chunk, chunk): chunk for chunk in chunks}
+        # Process results from all runnables
+        for runnable in runnables:
+            if runnable.error is not None:
+                failed_count += 1
+                log_message(f"Chunk {runnable.chunk['index']} failed: {str(runnable.error)}", level="WARNING")
+                continue
 
-            for future in as_completed(future_to_chunk):
-                chunk = future_to_chunk[future]
+            if runnable.result is not None:
+                task, start_time, index = runnable.result
+                self.track_time("Creating chunks", start_time)
+
+                self.write_chunk(layer, task, normalized_name)
+
+                completed_count += 1
                 try:
-                    task, start_time, index = future.result()
-                    self.track_time("Creating chunks", start_time)
+                    current_progress = int((completed_count / total_chunks) * 100)
+                    # Only log every 10 chunks or the last chunk to reduce overhead
+                    if completed_count % 10 == 0 or completed_count == total_chunks:
+                        log_message(f"Chunk progress: {completed_count}/{total_chunks} ({current_progress}%)")
+                    self.feedback.setProgress(current_progress)
+                except ZeroDivisionError:
+                    pass
 
-                    self.write_chunk(layer, task, normalized_name)
-
-                    with progress_lock:
-                        completed_count += 1
-                        try:
-                            current_progress = int((completed_count / total_chunks) * 100)
-                            log_message(
-                                f"XXXXXX Chunk {index} completed ({completed_count}/{total_chunks}): {current_progress}% XXXXXX"
-                            )
-                            self.feedback.setProgress(current_progress)
-                        except ZeroDivisionError:
-                            pass
-
-                    self.track_time("Complete chunk", start_time)
-
-                except Exception as e:
-                    with progress_lock:
-                        failed_count += 1
-                    log_message(f"Chunk {chunk['index']} failed: {str(e)}", level="WARNING")
-                    log_message(traceback.format_exc(), level="WARNING")
+                self.track_time("Complete chunk", start_time)
 
         if failed_count > 0:
             log_message(f"Grid creation completed with {failed_count} failed chunks", level="WARNING")
@@ -1469,18 +1916,19 @@ class StudyAreaProcessingTask(QgsTask):
             task: GridFromBboxTask with generated features
             normalized_name: Area name for this chunk
         """
-        log_message(f"Queueing {len(task.features_out)} features for writing (area: {normalized_name})")
         self.track_time("Preparing chunks", task.run_time)
 
         for geometry in task.features_out:
             self.write_queue.put((geometry, normalized_name))
 
     def create_grid_layer_if_not_exists(self, layer_name):
+        """Create a GeoPackage grid layer.
+
+        Args:
+            layer_name: Name of the layer to create.
         """
-        Create a grid layer with 'grid_id' as integer field
-        and a polygon geometry if it does not exist.
-        """
-        with self.gpkg_lock:
+        self.gpkg_lock.lock()
+        try:
             if not os.path.exists(self.gpkg_path):
                 driver = ogr.GetDriverByName("GPKG")
                 driver.CreateDataSource(self.gpkg_path)
@@ -1494,119 +1942,179 @@ class StudyAreaProcessingTask(QgsTask):
                 field_defn = ogr.FieldDefn("area_name", ogr.OFTString)
                 layer.CreateField(field_defn)
             ds = None
+        finally:
+            self.gpkg_lock.unlock()
 
     ##########################################################################
     # Create Clip Polygon
     ##########################################################################
     def create_clip_polygon(self, geom, aligned_box, normalized_name):
+        """Create a polygon that includes geometry plus all grid cells that intersect boundary.
+
+        Uses optimized spatial filtering with buffered boundary to reduce intersection checks.
+        Memory-efficient batched processing limits memory usage to ~500MB max.
+
+        Performance optimizations:
+        - Buffered boundary spatial filter reduces candidate cells by ~90%
+        - Two-phase check: fast Contains() then precise Intersects()
+        - Batched UnionCascaded for efficient geometry merging
+
+        Args:
+            geom: OGR geometry to create clip polygon for.
+            aligned_box: Aligned bounding box (unused, kept for API compatibility).
+            normalized_name: Name of the area.
+
+        Raises:
+            RuntimeError: If the grid layer is missing.
         """
-        Creates a polygon that includes the original geometry plus all grid cells
-        that intersect the boundary of the geometry. Then dissolves them into one polygon.
-        """
-        # 1) We load the grid from GPKG
-        grid_ds = ogr.Open(self.gpkg_path, 0)
-        grid_layer = grid_ds.GetLayerByName("study_area_grid")
-        if not grid_layer:
-            raise RuntimeError("Missing study_area_grid layer.")
+        # Memory-efficient batch size - roughly 50k geometries at ~10KB each = ~500MB
+        BATCH_SIZE = 50000
 
-        # We'll do a bounding box filter for performance
-        xmin, xmax, ymin, ymax = aligned_box
-        grid_layer.SetSpatialFilterRect(xmin, ymin, xmax, ymax)
+        grid_ds = None
+        try:
+            # Load the grid from GeoPackage
+            grid_ds = ogr.Open(self.gpkg_path, 0)
+            grid_layer = grid_ds.GetLayerByName("study_area_grid")
 
-        # Count features for progress updates
-        total_features = grid_layer.GetFeatureCount()
-        log_message(f"Processing {total_features} grid cells for clip polygon creation.")
+            if not grid_layer:
+                raise RuntimeError("Missing study_area_grid layer.")
 
-        boundary = geom.GetBoundary()
-        log_message(f"Finding grid cells that intersect boundary for {normalized_name}")
-        # Count features for progress updates
-        total_features = grid_layer.GetFeatureCount()
-        log_message(f"Processing {total_features} grid cells for clip polygon creation.")
+            # Get boundary for intersection testing
+            boundary = geom.GetBoundary()
 
-        # 2) We'll gather all grid cells that intersect *the boundary* of geom
-        #    In OGR, we can do:
-        boundary = geom.GetBoundary()  # line geometry for polygon boundary
+            # OPTIMIZATION: Buffer the boundary by cell_size to create a narrow band
+            # that we use as a spatial filter. This dramatically reduces the number
+            # of cells we need to check for intersection.
+            buffer_distance = self.cell_size_m * 1.5  # Slightly larger than cell diagonal
+            buffered_boundary = boundary.Buffer(buffer_distance)
 
-        union_geom = ogr.Geometry(ogr.wkbPolygon)
-        union_geom.Destroy()  # We'll handle it differently—see below.
+            # Use buffered boundary as spatial filter instead of full bbox
+            # This can reduce cells to check by 90%+ for large study areas
+            grid_layer.SetSpatialFilter(buffered_boundary)
 
-        # For union accumulation, start with a null geometry
-        dissolved_geom = None
+            # Count features for progress updates
+            total_features = grid_layer.GetFeatureCount()
+            log_message(
+                f"Processing {total_features} candidate cells for clip polygon "
+                f"(filtered from bbox using {buffer_distance}m buffer)"
+            )
 
-        # For clarity, transform boundary to the same SRS if needed (already is).
-        # We'll just do an Intersects check with each cell.
+            # Process in batches to limit memory usage
+            # We accumulate intersecting cells and periodically union them
+            dissolved_geom = None
+            intersecting_count = 0
+            skipped_inside = 0
+            count = 0
+            current_batch = []
 
-        all_cells = []
-        count = 0
-        grid_layer.ResetReading()
-        for f in grid_layer:
-            cell_geom = f.GetGeometryRef()
-            if cell_geom:
-                all_cells.append(cell_geom.Clone())
-            count += 1
-            if count % 1000 == 0:
-                log_message(f"Processed {count} grid cells.")
-                if total_features > 0:
-                    progress = min(100, int((count / total_features) * 100))
-                    self.feedback.setProgress(progress)
-        grid_layer.ResetReading()
-        grid_layer.SetSpatialFilter(None)  # Clear filter
+            # Log interval for progress - reduce logging frequency for performance
+            log_interval = max(1, total_features // 10)  # Log ~10 times
 
-        total_cells = len(all_cells)
-        log_message(f"Checking {total_cells} grid cells for intersection with boundary")
+            grid_layer.ResetReading()
+            for f in grid_layer:
+                cell_geom = f.GetGeometryRef()
+                if cell_geom:
+                    # OPTIMIZATION: Two-phase check
+                    # Phase 1: If cell is fully inside geometry, skip it (not on boundary)
+                    if geom.Contains(cell_geom):
+                        skipped_inside += 1
+                    # Phase 2: Check if cell intersects the boundary
+                    elif boundary.Intersects(cell_geom):
+                        # Only clone cells that actually intersect boundary
+                        current_batch.append(cell_geom.Clone())
+                        intersecting_count += 1
 
-        def check_intersection(cell_geom):
-            if boundary.Intersects(cell_geom):
-                return cell_geom
-            return None
+                count += 1
+                if count % log_interval == 0:
+                    if total_features > 0:
+                        progress = min(100, int((count / total_features) * 100))
+                        self.feedback.setProgress(progress)
 
-        intersecting_cells = []
-        worker_count = min(4, total_cells)
+                # When batch is full, union and release memory
+                if len(current_batch) >= BATCH_SIZE:
+                    log_message(f"Processing batch of {len(current_batch)} intersecting cells...")
+                    batch_union = self._union_geometries(current_batch)
+                    if dissolved_geom is None:
+                        dissolved_geom = batch_union
+                    else:
+                        dissolved_geom = dissolved_geom.Union(batch_union)
+                        batch_union = None  # Release reference
+                    # Clear batch to free memory
+                    current_batch = []
 
-        if worker_count > 1 and total_cells > 100:
-            log_message(f"Using parallel intersection checking with {worker_count} workers")
-            with ThreadPoolExecutor(max_workers=worker_count) as executor:
-                results = executor.map(check_intersection, all_cells)
-                intersecting_cells = [cell for cell in results if cell is not None]
-        else:
-            log_message("Using sequential intersection checking")
-            for cell_geom in all_cells:
-                if boundary.Intersects(cell_geom):
-                    intersecting_cells.append(cell_geom)
+            # Process remaining cells in final batch
+            if current_batch:
+                log_message(f"Processing final batch of {len(current_batch)} intersecting cells...")
+                batch_union = self._union_geometries(current_batch)
+                if dissolved_geom is None:
+                    dissolved_geom = batch_union
+                else:
+                    dissolved_geom = dissolved_geom.Union(batch_union)
+                    batch_union = None
+                current_batch = []  # Clear for GC
 
-        log_message(f"Found {len(intersecting_cells)} cells intersecting boundary, performing batch union")
+            grid_layer.SetSpatialFilter(None)  # Clear filter
 
-        intersecting_cells.append(geom.Clone())
+            log_message(
+                f"Found {intersecting_count} boundary cells, skipped {skipped_inside} interior cells "
+                f"(from {count} candidates)"
+            )
 
-        if len(intersecting_cells) == 0:
-            dissolved_geom = geom.Clone()
-        elif len(intersecting_cells) == 1:
-            dissolved_geom = intersecting_cells[0]
-        else:
-            multi_geom = ogr.Geometry(ogr.wkbMultiPolygon)
-            for cell in intersecting_cells:
-                geom_type = cell.GetGeometryType()
-                if geom_type in (ogr.wkbPolygon, ogr.wkbPolygon25D):
-                    multi_geom.AddGeometry(cell)
-                elif geom_type in (ogr.wkbMultiPolygon, ogr.wkbMultiPolygon25D):
-                    for i in range(cell.GetGeometryCount()):
-                        part = cell.GetGeometryRef(i)
-                        if part and part.GetGeometryType() in (ogr.wkbPolygon, ogr.wkbPolygon25D):
-                            multi_geom.AddGeometry(part)
-
-            if multi_geom.GetGeometryCount() == 0:
-                log_message("No polygon geometries to union; using original geometry.", level="WARNING")
+            # Add the original geometry to the dissolved result
+            if dissolved_geom is None:
                 dissolved_geom = geom.Clone()
             else:
-                dissolved_geom = multi_geom.UnionCascaded()
-                log_message(f"Batch union completed for {len(intersecting_cells)} geometries")
+                dissolved_geom = dissolved_geom.Union(geom)
 
-        if dissolved_geom is None or dissolved_geom.IsEmpty():
-            log_message("Clip polygon result empty; falling back to original geometry.", level="WARNING")
-            dissolved_geom = geom.Clone()
+            if dissolved_geom is None or dissolved_geom.IsEmpty():
+                log_message(
+                    "Clip polygon result empty; falling back to original geometry.",
+                    level="WARNING",
+                )
+                dissolved_geom = geom.Clone()
 
-        self.save_geometry_to_geopackage("study_area_clip_polygons", dissolved_geom, normalized_name)
-        log_message(f"Created clip polygon: {normalized_name}")
+            self.save_geometry_to_geopackage("study_area_clip_polygons", dissolved_geom, normalized_name)
+            log_message(f"Created clip polygon: {normalized_name}")
+
+        finally:
+            # Explicit cleanup
+            if grid_ds:
+                grid_ds = None
+
+    def _union_geometries(self, geometries):
+        """
+        Union a list of geometries efficiently using UnionCascaded.
+
+        Args:
+            geometries: List of OGR geometry objects
+
+        Returns:
+            Union of all geometries, or None if empty
+        """
+        if not geometries:
+            return None
+
+        if len(geometries) == 1:
+            return geometries[0]
+
+        multi_geom = ogr.Geometry(ogr.wkbMultiPolygon)
+        for cell in geometries:
+            geom_type = cell.GetGeometryType()
+            if geom_type in (ogr.wkbPolygon, ogr.wkbPolygon25D):
+                multi_geom.AddGeometry(cell)
+            elif geom_type in (ogr.wkbMultiPolygon, ogr.wkbMultiPolygon25D):
+                for i in range(cell.GetGeometryCount()):
+                    part = cell.GetGeometryRef(i)
+                    if part and part.GetGeometryType() in (
+                        ogr.wkbPolygon,
+                        ogr.wkbPolygon25D,
+                    ):
+                        multi_geom.AddGeometry(part)
+
+        if multi_geom.GetGeometryCount() == 0:
+            return None
+
+        return multi_geom.UnionCascaded()
 
     def chunk_bbox(self, xmin, xmax, ymin, ymax, cell_size, chunk_size=1000):
         """Generate bounding box chunks for grid processing.
@@ -1648,85 +2156,116 @@ class StudyAreaProcessingTask(QgsTask):
     # Create Raster Mask
     ##########################################################################
     def create_raster_mask(self, geom, aligned_box, mask_name):
-        """
-        Creates a 1-bit raster mask for a single geometry using gdal.Rasterize.
+        """Create a 1-bit raster mask for a single geometry using gdal.Rasterize.
+
+        Uses optimized TIFF creation options for better I/O performance:
+        DEFLATE compression, tiled output, NBITS=1.
+
+        Args:
+            geom: OGR geometry to rasterize.
+            aligned_box: Aligned bounding box (xmin, xmax, ymin, ymax).
+            mask_name: Name for the output mask file.
+
+        Returns:
+            Path to the created mask file, or None if mask is too small.
+
+        Raises:
+            RuntimeError: If rasterization fails.
         """
         mask_filepath = os.path.join(self.working_dir, "study_area", f"{mask_name}.tif")
 
-        driver_mem = ogr.GetDriverByName("Memory")
-        mem_ds = driver_mem.CreateDataSource("temp")
-        mem_lyr = mem_ds.CreateLayer("temp_mask_layer", self.target_spatial_ref, geom_type=ogr.wkbPolygon)
-
-        # Create a field to burn
-        field_def = ogr.FieldDefn("burnval", ogr.OFTInteger)
-        mem_lyr.CreateField(field_def)
-
-        # Create feature
-        feat_defn = mem_lyr.GetLayerDefn()
-        feat = ogr.Feature(feat_defn)
-        feat.SetField("burnval", 1)
-        feat.SetGeometry(geom.Clone())
-        mem_lyr.CreateFeature(feat)
-        feat = None
-
-        # Now call gdal.Rasterize
-        x_res = self.cell_size_m
-        y_res = self.cell_size_m
-
-        xmin, xmax, ymin, ymax = aligned_box
-
-        # For pixel width/height, we can compute:
-        # width in coordinate space: (xmax - xmin)
-        width = int((xmax - xmin) / x_res)
-        height = int((ymax - ymin) / y_res)
-        if width < 1 or height < 1:
-            log_message("Extent is too small for raster creation. Skipping mask.")
-            return
-
-        # Create the raster
-        # NB: gdal.GetDriverByName('GTiff').Create() expects col, row order
-        target_ds = gdal.GetDriverByName("GTiff").Create(
-            mask_filepath,
-            width,
-            height,
-            1,  # 1 band
-            gdal.GDT_Byte,
-            options=["NBITS=1"],  # 1-bit
-        )
-        if not target_ds:
-            raise RuntimeError(f"Could not create raster {mask_filepath}")
-
-        # Set geotransform (origin x, pixel width, rotation, origin y, rotation, pixel height)
-        # Note y_res is negative if north-up. We'll use negative for correct alignment in typical north-up data
-        geotransform = (xmin, x_res, 0.0, ymax, 0.0, -y_res)
-        target_ds.SetGeoTransform(geotransform)
-        target_ds.SetProjection(self.target_spatial_ref.ExportToWkt())
-
-        # Rasterize
-        err = gdal.RasterizeLayer(
-            target_ds,
-            [1],  # bands
-            mem_lyr,  # layer
-            burn_values=[1],  # burn value for the feature
-            options=["ALL_TOUCHED=TRUE"],
-        )
-        if err != 0:
-            log_message(f"Error in RasterizeLayer: {err}", level="CRITICAL")
-
-        target_ds.FlushCache()
-        target_ds = None
         mem_ds = None
+        target_ds = None
+        try:
+            driver_mem = ogr.GetDriverByName("MEM")
+            mem_ds = driver_mem.CreateDataSource("temp")
+            mem_lyr = mem_ds.CreateLayer("temp_mask_layer", self.target_spatial_ref, geom_type=ogr.wkbPolygon)
 
-        log_message(f"Created raster mask: {mask_filepath}")
-        return mask_filepath
+            # Create a field to burn
+            field_def = ogr.FieldDefn("burnval", ogr.OFTInteger)
+            mem_lyr.CreateField(field_def)
+
+            # Create feature
+            feat_defn = mem_lyr.GetLayerDefn()
+            feat = ogr.Feature(feat_defn)
+            feat.SetField("burnval", 1)
+            feat.SetGeometry(geom.Clone())
+            mem_lyr.CreateFeature(feat)
+            feat = None
+
+            # Now call gdal.Rasterize
+            x_res = self.cell_size_m
+            y_res = self.cell_size_m
+
+            xmin, xmax, ymin, ymax = aligned_box
+
+            # For pixel width/height, we can compute:
+            # width in coordinate space: (xmax - xmin)
+            width = int((xmax - xmin) / x_res)
+            height = int((ymax - ymin) / y_res)
+            if width < 1 or height < 1:
+                log_message("Extent is too small for raster creation. Skipping mask.")
+                return None
+
+            # Create the raster with optimized options
+            # - DEFLATE compression for smaller files
+            # - Tiled output for better VRT performance
+            # - NBITS=1 for minimal storage
+            creation_options = [
+                "NBITS=1",
+                "COMPRESS=DEFLATE",
+                "TILED=YES",
+                "BLOCKXSIZE=256",
+                "BLOCKYSIZE=256",
+            ]
+
+            target_ds = gdal.GetDriverByName("GTiff").Create(
+                mask_filepath,
+                width,
+                height,
+                1,  # 1 band
+                gdal.GDT_Byte,
+                options=creation_options,
+            )
+            if not target_ds:
+                raise RuntimeError(f"Could not create raster {mask_filepath}")
+
+            # Set geotransform (origin x, pixel width, rotation, origin y, rotation, pixel height)
+            # Note y_res is negative if north-up
+            geotransform = (xmin, x_res, 0.0, ymax, 0.0, -y_res)
+            target_ds.SetGeoTransform(geotransform)
+            target_ds.SetProjection(self.target_spatial_ref.ExportToWkt())
+
+            # Rasterize
+            err = gdal.RasterizeLayer(
+                target_ds,
+                [1],  # bands
+                mem_lyr,  # layer
+                burn_values=[1],  # burn value for the feature
+                options=["ALL_TOUCHED=TRUE"],
+            )
+            if err != 0:
+                log_message(f"Error in RasterizeLayer: {err}", level="CRITICAL")
+
+            target_ds.FlushCache()
+            log_message(f"Created raster mask: {mask_filepath}")
+            return mask_filepath
+
+        finally:
+            # Explicit cleanup
+            if target_ds:
+                target_ds = None
+            if mem_ds:
+                mem_ds = None
 
     ##########################################################################
     # Create VRT
     ##########################################################################
     def create_raster_vrt(self, output_vrt_name="combined_mask.vrt"):
-        """
-        Creates a VRT file from all .tif masks in the 'study_area' dir using
-        gdal.BuildVRT (Python API) or gdalbuildvrt approach.
+        """Create a VRT file from all .tif masks in the study_area directory.
+
+        Args:
+            output_vrt_name: Name for the output VRT file.
         """
         raster_dir = os.path.join(self.working_dir, "study_area")
         raster_files = glob.glob(os.path.join(raster_dir, "*.tif"))
@@ -1752,8 +2291,10 @@ class StudyAreaProcessingTask(QgsTask):
     # Directory creation
     ##########################################################################
     def create_study_area_directory(self, working_dir):
-        """
-        Create 'study_area' subdir if not exist
+        """Create 'study_area' subdirectory if it doesn't exist.
+
+        Args:
+            working_dir: Parent directory for the study_area subdirectory.
         """
         study_area_dir = os.path.join(working_dir, "study_area")
         if not os.path.exists(study_area_dir):

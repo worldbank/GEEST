@@ -99,15 +99,18 @@ class PolylinePerCellWorkflow(WorkflowBase):
             tag="Geest",
             level=Qgis.Info,
         )
+
         # Step 1: Select grid cells that intersect with features
+        self.updateStatus(f"Counting intersections ({area_features_count} features)...")
         output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
         area_grid = select_grid_cells_and_count_features(self.grid_layer, area_features, output_path, self.feedback)
 
         # Step 2: Assign values to grid cells
+        self.updateStatus("Assigning scores to grid cells...")
         grid = assign_values_to_grid(area_grid, feedback=self.feedback)
 
         # Step 3: Rasterize the grid layer using the assigned values
-        # Create a scored boundary layer
+        self.updateStatus("Rasterizing grid...")
         raster_output = self._rasterize(
             grid,
             current_bbox,

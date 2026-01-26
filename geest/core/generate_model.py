@@ -22,9 +22,10 @@ class SpreadsheetToJsonParser:
     """
 
     def __init__(self, spreadsheet_path):
-        """
-        Constructor for SpreadsheetToJsonParser class.
-        Takes in the path to an ODS spreadsheet file.
+        """Initialize SpreadsheetToJsonParser with path to ODS spreadsheet.
+
+        Args:
+            spreadsheet_path: Path to an ODS spreadsheet file.
         """
         self.spreadsheet_path = spreadsheet_path
         self.dataframe = None
@@ -35,14 +36,14 @@ class SpreadsheetToJsonParser:
             "accessibility": "Accessibility_score",
             "active_transport": "AT_output",
             "place_characterization": "Place_score",
-            "analysis_dimension": "WEE",
-            "level_of_enablement_classification": "WEE_score",
+            "analysis_dimension": "GeoE3",
+            "level_of_enablement_classification": "GeoE3_score",
             "relative_population_count": "Population",
-            "combined_level_of_enablement_and_relative_population_count": "WEE_pop_score",
-            "enablement": "WEE_pop_adm_score",
-            "jobs_raster_locations": "AOI_WEE_score",  # Tim propoposes to change to something more generic e.g. Opportunities_WEE_Score
-            "jobs_point_locations": "POI_WEE_score",  # Tim propoposes to change to something more generic e.g. Opportunities_WEE_Score
-            "jobs_polygon_locations": "POA_WEE_score",  # Tim propoposes to change to something more generic e.g. Opportunities_WEE_Score
+            "combined_level_of_enablement_and_relative_population_count": "GeoE3_pop_score",
+            "enablement": "GeoE3_pop_adm_score",
+            "jobs_raster_locations": "AOI_GeoE3_score",  # Tim propoposes to change to something more generic e.g. Opportunities_GeoE3_Score
+            "jobs_point_locations": "POI_GeoE3_score",  # Tim propoposes to change to something more generic e.g. Opportunities_GeoE3_Score
+            "jobs_polygon_locations": "POA_GeoE3_score",  # Tim propoposes to change to something more generic e.g. Opportunities_GeoE3_Score
         }
 
     def load_spreadsheet(self):
@@ -88,8 +89,13 @@ class SpreadsheetToJsonParser:
         self.dataframe["Factor"] = self.dataframe["Factor"].ffill()
 
     def create_id(self, name):
-        """
-        Helper method to create a lowercase, underscore-separated id from the name.
+        """Create a lowercase, underscore-separated id from the name.
+
+        Args:
+            name: The name to convert to an id.
+
+        Returns:
+            Lowercase, underscore-separated id string.
         """
         return name.lower().replace(" ", "_").replace("'", "_")
 
@@ -235,14 +241,18 @@ class SpreadsheetToJsonParser:
             factor_map[factor]["indicators"].append(indicator_data)
 
     def get_json(self):
-        """
-        Return the parsed JSON structure.
+        """Return the parsed JSON structure.
+
+        Returns:
+            The parsed JSON structure as a dictionary.
         """
         return self.result
 
     def save_json_to_file(self, output_json_path="model.json"):
-        """
-        Save the parsed JSON structure to a file.
+        """Save the parsed JSON structure to a file.
+
+        Args:
+            output_json_path: Path to save the JSON file. Defaults to model.json.
         """
         with open(output_json_path, "w") as json_file:
             json.dump(self.result, json_file, indent=4)

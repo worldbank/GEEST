@@ -32,8 +32,8 @@ from geest.core.workflows import (
 )
 from geest.utilities import log_message
 
-from .settings import setting
 from .json_tree_item import JsonTreeItem
+from .settings import setting
 
 
 class WorkflowFactory:

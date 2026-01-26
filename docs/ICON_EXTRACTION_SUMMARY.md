@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully extracted all base64-encoded images from the Gender Enabling Environments Spatial Tool User Manual and replaced them with file references.
+Successfully extracted all base64-encoded images from the Geospatial Enabling Environments for Employment Spatial Tool User Manual and replaced them with file references.
 
 ## What was done
 

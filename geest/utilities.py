@@ -90,7 +90,7 @@ def theme_stylesheet() -> str:
             color: #000000;
         }}
         QDockWidget, QDialog {{
-            background-image: url({resources_path("resources", "images", "background-light.png")});
+            background-image: url({resources_path("resources", "images", "background.png")});
             background-repeat: no-repeat;
             background-position: center;
         }}

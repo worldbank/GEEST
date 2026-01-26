@@ -184,7 +184,7 @@ class GeestPlugin:
         Initialize the GUI elements of the plugin.
         """
         icon = QIcon(resources_path("resources", "geest-main.svg"))
-        self.run_action = QAction(icon, "GEEST Settings", self.iface.mainWindow())
+        self.run_action = QAction(icon, "GeoE3 Settings", self.iface.mainWindow())
         self.run_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.run_action)
         self.debug_running = False
@@ -303,12 +303,14 @@ class GeestPlugin:
                         shell.runCommand("test_runner = unittest.TextTestRunner(verbosity=2)")
                         shell.runCommand("test_runner.run(test_suite)")
                         # Unload test modules
-                        shell.runCommand("""
+                        shell.runCommand(
+                            """
 for module_name in list(sys.modules.keys()):
     if module_name.startswith("test_") or module_name.startswith("utilities_for_testing"):
         del sys.modules[module_name]
 
-                            """)  # noqa: E241, E272
+                            """
+                        )  # noqa: E241, E272
 
                         log_message("Test modules unloaded")
                         break
@@ -494,11 +496,13 @@ for module_name in list(sys.modules.keys()):
                         shell.runCommand("test_case = unittest.defaultTestLoader.loadTestsFromName(test_name)")
                         shell.runCommand("runner = unittest.TextTestRunner(verbosity=2)")
                         shell.runCommand("runner.run(test_case)")
-                        shell.runCommand("""
+                        shell.runCommand(
+                            """
 for module_name in list(sys.modules.keys()):
     if module_name.startswith("test_") or module_name.startswith("utilities_for_testing"):
         del sys.modules[module_name]
-                        """)
+                        """
+                        )
                         break
 
     def save_geometry(self) -> None:
@@ -803,7 +807,7 @@ for module_name in list(sys.modules.keys()):
         """
         self.kill_debug()
         self.display_information_message_box(
-            title="GEEST",
+            title="GeoE3",
             message="Close this dialog then open VSCode and start your debug client.",
         )
         import multiprocessing  # pylint: disable=import-outside-toplevel
@@ -814,7 +818,7 @@ for module_name in list(sys.modules.keys()):
             debugpy.listen(("127.0.0.1", self.DEBUG_PORT))  # nosec B104 - localhost only for debug
             debugpy.wait_for_client()
             self.display_information_message_bar(
-                title="GEEST",
+                title="GeoE3",
                 message=f"Visual Studio Code debugger is now attached on port {self.DEBUG_PORT}",
             )
             self.debug_action.setEnabled(False)  # prevent user starting it twice
@@ -826,11 +830,11 @@ for module_name in list(sys.modules.keys()):
         """
         if self.dock_widget.isVisible():
             self.dock_widget.hide()
-            self.run_action.setText("Show GEEST Panel")
+            self.run_action.setText("Show GeoE3 Panel")
         else:
             self.dock_widget.show()
             self.dock_widget.raise_()
-            self.run_action.setText("Hide GEEST Panel")
+            self.run_action.setText("Hide GeoE3 Panel")
 
     def display_information_message_bar(
         self,

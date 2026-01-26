@@ -47,7 +47,7 @@ class JsonTreeModel(QAbstractItemModel):
         """
         super().__init__(parent)
         guid = str(uuid.uuid4())
-        self.rootItem = JsonTreeItem(["GEEST", "Status", "Weight"], role="root", guid=guid)
+        self.rootItem = JsonTreeItem(["GeoE3", "Status", "Weight"], role="root", guid=guid)
         self.original_value = None  # To store the original value before editing
         self.loadJsonData(json_data)
 
@@ -62,7 +62,7 @@ class JsonTreeModel(QAbstractItemModel):
             json_data (dict): The JSON data representing the analysis and its hierarchical structure.
         """
         self.beginResetModel()
-        self.rootItem = JsonTreeItem(["GEEST", "Status", "Weight"], "root")
+        self.rootItem = JsonTreeItem(["GeoE3", "Status", "Weight"], "root")
 
         # Create the 'Analysis' parent item
         analysis_name = json_data.get("analysis_name", "Analysis")
@@ -80,27 +80,27 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_execution_end_time = json_data.get("execution_end_time", "")
         analysis_error = json_data.get("error", "")
         analysis_error_file = json_data.get("error_file", "")
-        analysis_output_filename = json_data.get("output_filename", "WEE_Score")
+        analysis_output_filename = json_data.get("output_filename", "GeoE3_Score")
         mask_mode = json_data.get("mask_mode", "None")
         buffer_distance_m = json_data.get("buffer_distance_m", 0.0)
         opportunities_mask_result_file = json_data.get("opportunities_mask_result_file", "")
         opportunities_mask_result = json_data.get("opportunities_mask_result", "")
-        wee_by_opportunities_mask_result = json_data.get("wee_by_opportunities_mask_result", "")
-        wee_by_opportunities_mask_result_file = json_data.get("wee_by_opportunities_mask_result_file", "")
-        wee_by_population = json_data.get("wee_by_population", "")
-        wee_by_population_subnational_aggregation = json_data.get("wee_by_population_subnational_aggregation", "")
-        wee_score_subnational_aggregation = json_data.get("wee_score_subnational_aggregation", "")
-        opportunities_by_wee_score_by_population_subnational_aggregation = json_data.get(
-            "opportunities_by_wee_score_by_population_subnational_aggregation", ""
+        geoe3_by_opportunities_mask_result = json_data.get("geoe3_by_opportunities_mask_result", "")
+        geoe3_by_opportunities_mask_result_file = json_data.get("geoe3_by_opportunities_mask_result_file", "")
+        geoe3_by_population = json_data.get("geoe3_by_population", "")
+        geoe3_by_population_subnational_aggregation = json_data.get("geoe3_by_population_subnational_aggregation", "")
+        geoe3_score_subnational_aggregation = json_data.get("geoe3_score_subnational_aggregation", "")
+        opportunities_by_geoe3_score_by_population_subnational_aggregation = json_data.get(
+            "opportunities_by_geoe3_score_by_population_subnational_aggregation", ""
         )
-        opportunities_by_wee_score_subnational_aggregation = json_data.get(
-            "opportunities_by_wee_score_subnational_aggregation", ""
+        opportunities_by_geoe3_score_subnational_aggregation = json_data.get(
+            "opportunities_by_geoe3_score_subnational_aggregation", ""
         )
-        wee_by_population_by_opportunities_mask_result_file = json_data.get(
-            "wee_by_population_by_opportunities_mask_result_file", ""
+        geoe3_by_population_by_opportunities_mask_result_file = json_data.get(
+            "geoe3_by_population_by_opportunities_mask_result_file", ""
         )
-        wee_by_population_by_opportunities_mask_result = json_data.get(
-            "wee_by_population_by_opportunities_mask_result", ""
+        geoe3_by_population_by_opportunities_mask_result = json_data.get(
+            "geoe3_by_population_by_opportunities_mask_result", ""
         )
         # Store special properties in the attributes dictionary
         analysis_attributes = {
@@ -121,15 +121,15 @@ class JsonTreeModel(QAbstractItemModel):
             "buffer_distance_m": buffer_distance_m,
             "opportunities_mask_result_file": opportunities_mask_result_file,
             "opportunities_mask_result": opportunities_mask_result,
-            "wee_by_opportunities_mask_result": wee_by_opportunities_mask_result,
-            "wee_by_opportunities_mask_result_file": wee_by_opportunities_mask_result_file,
-            "wee_by_population": wee_by_population,
-            "wee_by_population_subnational_aggregation": wee_by_population_subnational_aggregation,
-            "wee_score_subnational_aggregation": wee_score_subnational_aggregation,
-            "opportunities_by_wee_score_by_population_subnational_aggregation": opportunities_by_wee_score_by_population_subnational_aggregation,
-            "opportunities_by_wee_score_subnational_aggregation": opportunities_by_wee_score_subnational_aggregation,
-            "wee_by_population_by_opportunities_mask_result_file": wee_by_population_by_opportunities_mask_result_file,
-            "wee_by_population_by_opportunities_mask_result": wee_by_population_by_opportunities_mask_result,
+            "geoe3_by_opportunities_mask_result": geoe3_by_opportunities_mask_result,
+            "geoe3_by_opportunities_mask_result_file": geoe3_by_opportunities_mask_result_file,
+            "geoe3_by_population": geoe3_by_population,
+            "geoe3_by_population_subnational_aggregation": geoe3_by_population_subnational_aggregation,
+            "geoe3_score_subnational_aggregation": geoe3_score_subnational_aggregation,
+            "opportunities_by_geoe3_score_by_population_subnational_aggregation": opportunities_by_geoe3_score_by_population_subnational_aggregation,
+            "opportunities_by_geoe3_score_subnational_aggregation": opportunities_by_geoe3_score_subnational_aggregation,
+            "geoe3_by_population_by_opportunities_mask_result_file": geoe3_by_population_by_opportunities_mask_result_file,
+            "geoe3_by_population_by_opportunities_mask_result": geoe3_by_population_by_opportunities_mask_result,
         }
 
         for prefix in [
@@ -157,7 +157,7 @@ class JsonTreeModel(QAbstractItemModel):
         role = "analysis"
         analysis_item = JsonTreeItem(
             [
-                "WEE Score",
+                "Geo3E Score",
                 status,
                 weighting,
                 analysis_attributes,
@@ -277,15 +277,11 @@ class JsonTreeModel(QAbstractItemModel):
         return factor_item
 
     def _create_indicator_item(self, indicator, parent_item):
-        """
-        Creates a new Indicator (layer) item under the specified Factor item and populates it with custom attributes.
+        """Create a new Indicator item under the specified Factor item.
 
         Args:
-            indicator (dict): The indicator (layer) data to be added to the tree.
-            parent_item (JsonTreeItem): The parent item (Factor) under which the indicator is added.
-
-        Returns:
-            None
+            indicator: The indicator (layer) data to be added to the tree.
+            parent_item: The parent item (Factor) under which the indicator is added.
         """
         status = ""  # Use item.getStatus to get after constructing the item
         guid = indicator.get("guid", str(uuid.uuid4()))  # Deserialize UUID
@@ -444,12 +440,16 @@ class JsonTreeModel(QAbstractItemModel):
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled
 
     def to_json(self):
-        """
-        Converts the tree structure back into a JSON document, recursively traversing the tree and including
-        the custom attributes stored in `attributes` for each item. UUIDs are serialized for all items.
+        """Convert the tree structure back into a JSON document.
+
+        Recursively traverses the tree and includes the custom attributes stored in
+        `attributes` for each item. UUIDs are serialized for all items.
 
         Returns:
             dict: The JSON representation of the tree structure.
+
+        Raises:
+            Exception: If an error occurs during conversion.
         """
 
         def recurse_tree(item):
@@ -518,15 +518,12 @@ class JsonTreeModel(QAbstractItemModel):
             raise e
 
     def clear_factor_weightings(self, dimension_item):
-        """
-        Clears all weightings for factors under the given dimension item, setting them to "0.00".
-        Also updates the dimension's total weighting and font color to red.
+        """Clear all weightings for factors under the given dimension item.
+
+        Sets them to "0.00" and updates the dimension's total weighting and font color to red.
 
         Args:
-            dimension_item (JsonTreeItem): The dimension item whose factors will have their weightings cleared.
-
-        Returns:
-            None
+            dimension_item: The dimension item whose factors will have their weightings cleared.
         """
         for i in range(dimension_item.childCount()):
             factor_item = dimension_item.child(i)
@@ -560,15 +557,12 @@ class JsonTreeModel(QAbstractItemModel):
         self.layoutChanged.emit()
 
     def clear_layer_weightings(self, factor_item):
-        """
-        Clears all weightings for layers (indicators) under the given factor item, setting them to "0.00".
-        Also updates the factor's total weighting and font color to red.
+        """Clear all weightings for layers (indicators) under the given factor item.
+
+        Sets them to "0.00" and updates the factor's total weighting and font color to red.
 
         Args:
-            factor_item (JsonTreeItem): The factor item whose layers will have their weightings cleared.
-
-        Returns:
-            None
+            factor_item: The factor item whose layers will have their weightings cleared.
         """
         for i in range(factor_item.childCount()):
             layer_item = factor_item.child(i)
@@ -602,42 +596,32 @@ class JsonTreeModel(QAbstractItemModel):
         self.layoutChanged.emit()
 
     def add_factor(self, dimension_item):
-        """
-        Adds a new Factor item under the given Dimension item, allowing the user to define a new factor.
+        """Add a new Factor item under the given Dimension item.
 
         Args:
-            dimension_item (JsonTreeItem): The dimension item to which the new factor will be added.
-
-        Returns:
-            None
+            dimension_item: The dimension item to which the new factor will be added.
         """
         new_factor = JsonTreeItem(["New Factor", "x", ""], "factor", dimension_item)
         dimension_item.appendChild(new_factor)
         self.layoutChanged.emit()
 
     def add_indicator(self, factor_item):
-        """
-        Adds a new Indicator item under the given Factor item, allowing the user to define a new item.
+        """Add a new Indicator item under the given Factor item.
 
         Args:
-            factor_item (JsonTreeItem): The factor item to which the new layer will be added.
-
-        Returns:
-            None
+            factor_item: The factor item to which the new layer will be added.
         """
         indicator = JsonTreeItem(["New Layer", "x", "1.00"], "indicator", factor_item)
         factor_item.appendChild(indicator)
         self.layoutChanged.emit()
 
     def remove_item(self, item):
-        """
-        Removes the given item from its parent. If the item has children, they are also removed.
+        """Remove the given item from its parent.
+
+        If the item has children, they are also removed.
 
         Args:
-            item (JsonTreeItem): The item to be removed from the tree.
-
-        Returns:
-            None
+            item: The item to be removed from the tree.
         """
         parent = item.parent()
         if parent:
@@ -787,29 +771,23 @@ class JsonTreeModel(QAbstractItemModel):
         return None
 
     def add_dimension(self, name="New Dimension"):
-        """
-        Adds a new Dimension item to the root (under "Analysis") and allows the user to define a new dimension.
+        """Add a new Dimension item to the root (under "Analysis").
 
         Args:
-            name (str): The name of the new dimension.
-
-        Returns:
-            None
+            name: The name of the new dimension.
         """
         new_dimension = JsonTreeItem([name, "x", ""], "dimension", self.rootItem)
         self.rootItem.appendChild(new_dimension)
         self.layoutChanged.emit()
 
     def removeRow(self, row, parent=QModelIndex()):
-        """
-        Removes the specified row from the model. This is primarily used for removing dimensions.
+        """Remove the specified row from the model.
+
+        This is primarily used for removing dimensions.
 
         Args:
-            row (int): The row to be removed.
-            parent (QModelIndex): The parent index.
-
-        Returns:
-            bool: True if the row was successfully removed, False otherwise.
+            row: The row to be removed.
+            parent: The parent index.
         """
         parentItem = self.rootItem if not parent.isValid() else parent.internalPointer()
         parentItem.childItems.pop(row)
@@ -817,7 +795,7 @@ class JsonTreeModel(QAbstractItemModel):
 
 
 class JsonTreeView(QTreeView):
-    """Custom QTreeView for Geest."""
+    """Custom QTreeView for GeoE3."""
 
     def __init__(self, parent=None):
         """🏗️ Initialize the instance.
@@ -873,7 +851,11 @@ class JsonTreeView(QTreeView):
         self.model().toggle_indicator_visibility(not indicators_visible)
 
     def _indicators_only_child(self):
-        """Checks if indicators are currently the only one under the parent."""
+        """Check if indicators are currently the only child under their parent.
+
+        Returns:
+            bool: True if indicators are only children, False otherwise.
+        """
         model = self.model()
         analysis_item = model.get_analysis_item()
         for dimension in analysis_item.childItems:

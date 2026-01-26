@@ -54,23 +54,12 @@ class GHSLDownloader:
         Initializes the GHSLDownloader with the specified parameters.
 
         Args:
-            extents (QgsRectangle): The spatial extents for the download, must be in Mollweide ESRI:54009 projection.
-            output_path (str, optional): The output path for the GeoPackage. Defaults to None.
-            filename (str, optional): The filename for the output, also used as the layer name in the GeoPackage. Defaults to "".
-            use_cache (bool, optional): Whether to use cached data if available. Defaults to False.
-            delete_existing (bool, optional): Whether to delete existing files at the output path. Defaults to True.
-            feedback (QgsFeedback, optional): Feedback object for progress reporting and cancellation. Defaults to None.
-
-        Attributes:
-            extents (QgsRectangle): The spatial extents for the download.
-            output_path (str): The output path for the GeoPackage.
-            filename (str): The filename and layer name for the output.
-            use_cache (bool): Indicates if cache should be used.
-            delete_existing (bool): Indicates if existing files should be deleted.
-            network_manager (QgsNetworkAccessManager): Network manager for handling requests.
-            feedback (QgsFeedback): Feedback object for progress and cancellation.
-            layer: The indexed layer for processing.
-            base_url (str): The base URL for data download.
+            extents: The spatial extents for the download, must be in Mollweide ESRI:54009 projection.
+            output_path: The output path for the GeoPackage. Defaults to None.
+            filename: The filename for the output, also used as the layer name in the GeoPackage. Defaults to "".
+            use_cache: Whether to use cached data if available. Defaults to False.
+            delete_existing: Whether to delete existing files at the output path. Defaults to True.
+            feedback: Feedback object for progress reporting and cancellation. Defaults to None.
         """
         # These are required
         self.extents = extents  # must be specified in the Mollweide ESRI:54009 projection
@@ -103,19 +92,29 @@ class GHSLDownloader:
     # ---------------- Tile grid ----------------
     def _index_layer(self) -> QgsVectorLayer:
         """
-        Create an index layer using the geoparquet file
-        in the resources/gsh folder.
+        Create an index layer using the tile scheme file in the resources/ghsl folder.
 
-        This layer can be used to find which tiles intersect
-        the study area so that we can download GSH data for
-        the area of interest.
+        This layer can be used to find which tiles intersect the study area
+        so that we can download GHSL data for the area of interest.
+
+        Tries parquet format first, then falls back to GeoPackage for
+        environments without parquet support (e.g., CI).
 
         Returns:
             QgsVectorLayer: The index layer.
         """
+        # Try parquet first (more efficient)
         layer_path = resources_path("resources", "ghsl", "ghs-mod-2023-tile-scheme.parquet")
         log_message(f"Loading tile index layer from {layer_path}")
         layer = QgsVectorLayer(layer_path, "tiles", "ogr")
+
+        if not layer.isValid():
+            # Fall back to GeoPackage for environments without parquet support
+            log_message("Parquet layer not valid, trying GeoPackage fallback")
+            layer_path = resources_path("resources", "ghsl", "ghs-mod-2023-tile-scheme.gpkg")
+            log_message(f"Loading tile index layer from {layer_path}")
+            layer = QgsVectorLayer(layer_path, "tiles", "ogr")
+
         # Set the layer crs to mollweide
         layer.setCrs(QgsCoordinateReferenceSystem("ESRI:54009"))
 

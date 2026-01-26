@@ -8,8 +8,8 @@ import os
 
 from qgis.core import (
     Qgis,
-    QgsFeedback,
     QgsFeature,
+    QgsFeedback,
     QgsField,
     QgsFields,
     QgsGeometry,
@@ -42,15 +42,15 @@ class EPLEXWorkflow(WorkflowBase):
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
-        """
-        Initialize the EPLEX workflow with attributes and feedback.
+        """Initialize the EPLEX workflow with attributes and feedback.
 
-        :param item: JsonTreeItem representing the indicator to process.
-        :param cell_size_m: Cell size in meters for rasterization.
-        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'
-        :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :param context: QgsProcessingContext object for processing.
-        :param working_directory: Folder containing study_area.gpkg and where outputs will be placed.
+        Args:
+            item: JsonTreeItem representing the indicator to process.
+            cell_size_m: Cell size in meters for rasterization.
+            analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
+            feedback: QgsFeedback object for progress reporting and cancellation.
+            context: QgsProcessingContext object for processing.
+            working_directory: Folder containing study_area.gpkg and outputs.
         """
         super().__init__(item, cell_size_m, analysis_scale, feedback, context, working_directory)
 
@@ -73,18 +73,19 @@ class EPLEXWorkflow(WorkflowBase):
         area_features,
         index: int,
     ) -> str:
-        """
-        Creates a raster filled with EPLEX score for the study area.
+        """Create a raster filled with EPLEX score for the study area.
 
         Uses the grid layer directly and rasterizes it with the EPLEX score value.
 
-        :param current_area: Current polygon from our study area.
-        :param clip_area: Polygon to clip the raster to which is aligned to cell edges.
-        :param current_bbox: Bounding box of the above area.
-        :param area_features: Not used in this workflow.
-        :param index: Iteration / number of area being processed.
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Polygon to clip the raster to, aligned to cell edges.
+            current_bbox: Bounding box of the above area.
+            area_features: Not used in this workflow.
+            index: Iteration / number of area being processed.
 
-        :return: Raster file path of the output.
+        Returns:
+            Raster file path of the output.
         """
         log_message(f"Processing area {index} for EPLEX score workflow", tag="Geest", level=Qgis.Info)
 
@@ -147,7 +148,15 @@ class EPLEXWorkflow(WorkflowBase):
         area_raster: str,
         index: int,
     ):
-        """Not used in EPLEX workflow."""
+        """Not used in EPLEX workflow.
+
+        Args:
+            current_area: Current polygon from study area.
+            clip_area: Polygon to clip the raster to.
+            current_bbox: Bounding box of the area.
+            area_raster: Path to the raster file.
+            index: Area index being processed.
+        """
         pass
 
     def _process_aggregate_for_area(
@@ -157,5 +166,12 @@ class EPLEXWorkflow(WorkflowBase):
         current_bbox: QgsGeometry,
         index: int,
     ):
-        """Not used in EPLEX workflow."""
+        """Not used in EPLEX workflow.
+
+        Args:
+            current_area: Current polygon from study area.
+            clip_area: Polygon to clip the raster to.
+            current_bbox: Bounding box of the area.
+            index: Area index being processed.
+        """
         pass

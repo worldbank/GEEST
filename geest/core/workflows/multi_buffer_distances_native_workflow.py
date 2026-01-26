@@ -3,7 +3,6 @@
 
 This module contains functionality for multi buffer distances native workflow.
 """
-
 import os
 from urllib.parse import unquote
 
@@ -55,14 +54,18 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
-        """
-        Initialize the workflow with attributes and feedback.
-        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
-        :param cell_size_m: Cell size in meters for rasterization.
-        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national',
-        :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        """Initialize the workflow with attributes and feedback.
+
+        Args:
+            item: JsonTreeItem representing the analysis, dimension, or factor to process.
+            cell_size_m: Cell size in meters for rasterization.
+            analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
+            feedback: QgsFeedback object for progress reporting and cancellation.
+            context: QgsProcessingContext object for processing.
+            working_directory: Folder containing study_area.gpkg and outputs.
+
+        Raises:
+            Exception: If travel distances, points layer, or network layer are invalid.
         """
         super().__init__(
             item, cell_size_m, analysis_scale, feedback, context, working_directory
@@ -161,16 +164,17 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         area_features: QgsVectorLayer,
         index: int,
     ) -> str:
-        """
-        Executes the actual workflow logic for a single area.
-        Must be implemented by subclasses.
+        """Execute the actual workflow logic for a single area.
 
-        :current_area: Current polygon from our study area.
-        :current_bbox: Bounding box of the above area.
-        :area_features: A vector layer of features to analyse that includes only features in the study area.
-        :index: Iteration / number of area being processed.
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Polygon to clip the features to.
+            current_bbox: Bounding box of the above area.
+            area_features: A vector layer of features to analyse.
+            index: Iteration / number of area being processed.
 
-        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
+        Returns:
+            A raster layer file path if processing completes successfully, False otherwise.
         """
 
         # Step 1: Process these areas in batches and create buffers
@@ -212,16 +216,17 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         point_layer: QgsVectorLayer,
         area_index: int = 0,
     ):
-        """
-        Create multiple buffers (isochrones) for each point in the input point layer using network analysis.
+        """Create multiple buffers (isochrones) for each point using network analysis.
 
         This method processes the point features using a QgsVectorLayer iterator, uses
-        QGIS native routing analysis, and merges the results
-        into a final output layer.
+        QGIS native routing analysis, and merges the results into a final output layer.
 
-        :param point_layer: QgsVectorLayer containing point features to process.
-        :param index: Index of the current area being processed.
-        :return: Path to the GeoPackage.
+        Args:
+            point_layer: QgsVectorLayer containing point features to process.
+            area_index: Index of the current area being processed.
+
+        Returns:
+            Path to the GeoPackage, or False if no features to process.
         """
         # verbose_mode = int(setting(key="verbose_mode", default=0))
 
@@ -271,16 +276,21 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         return isochrone_layer_path
 
     def _create_bands(self, isochrones_gpkg_path, index):
-        """
-        Create bands by computing differences between isochrone ranges.
+        """Create bands by computing differences between isochrone ranges.
 
         This method computes the differences between isochrone ranges to create bands
         of non overlapping polygons. The bands are then merged into a final output layer.
 
-        :param isochrones_gpkg_path: Path to the GeoPackage containing the isochrones.
+        Args:
+            isochrones_gpkg_path: Path to the GeoPackage containing the isochrones.
+            index: Index of the current area being processed.
 
         Returns:
-            QgsVectoryLayer: The final output QgsVectorLayer layer path containing the bands.
+            The final output QgsVectorLayer containing the bands.
+
+        Raises:
+            ValueError: If the isochrone layer cannot be loaded.
+            KeyError: If the value field does not exist in the isochrone layer.
         """
         isochrone_layer_path = f"{isochrones_gpkg_path}|layername=isochrones"
 
@@ -374,14 +384,13 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         return final_layer
 
     def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
-        """
-        Assign values to buffered polygons based 5 for presence of a polygon.
+        """Assign values to buffered polygons based on presence of a polygon.
 
         Args:
-            layer QgsVectorLayer: The buffered features layer.
+            layer: The buffered features layer.
 
         Returns:
-            QgsVectorLayer: The same layer with a "value" field containing the assigned scores.
+            The same layer with a "value" field containing the assigned scores.
         """
         if not layer or not layer.isValid():
             return False
@@ -429,16 +438,16 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         area_raster: str,
         index: int,
     ):
-        """
-        Executes the actual workflow logic for a single area using a raster.
+        """Execute the actual workflow logic for a single area using a raster.
 
-        :current_area: Current polygon from our study area.
-        :clip_area: Polygon to clip the raster to which is aligned to cell edges.
-        :current_bbox: Bounding box of the above area.
-        :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
-        :index: Index of the current area.
+        Not used in this workflow - default implementation.
 
-        :return: Path to the reclassified raster.
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Polygon to clip the raster to which is aligned to cell edges.
+            current_bbox: Bounding box of the above area.
+            area_raster: A raster layer of features to analyse.
+            index: Index of the current area.
         """
         pass
 
@@ -449,7 +458,12 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         current_bbox: QgsGeometry,
         index: int,
     ):
-        """
-        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
+        """Execute the workflow, reporting progress and checking for cancellation.
+
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Polygon to clip to.
+            current_bbox: Bounding box of the above area.
+            index: Index of the current area.
         """
         pass

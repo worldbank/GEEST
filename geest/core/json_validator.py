@@ -23,6 +23,8 @@ import json
 import jsonschema
 from jsonschema import validate
 
+from geest.utilities import log_message
+
 
 class JSONValidator:
     """🎯 J S O N Validator.
@@ -52,8 +54,8 @@ class JSONValidator:
             with open(file_path, "r") as file:
                 return json.load(file)
         except Exception as e:
-            print(f"Error loading JSON file: {file_path}")
-            print(f"Details: {e}")
+            log_message(f"Error loading JSON file: {file_path}")
+            log_message(f"Details: {e}")
             return None
 
     def validate_json(self):
@@ -63,10 +65,10 @@ class JSONValidator:
         try:
             # Perform validation
             validate(instance=self.json_data, schema=self.json_schema)
-            print("Validation successful: The JSON document is valid.")
+            log_message("Validation successful: The JSON document is valid.")
         except jsonschema.exceptions.ValidationError as err:
-            print("Validation error: The JSON document is invalid.")
-            print(f"Error details: {err.message}")
+            log_message("Validation error: The JSON document is invalid.")
+            log_message(f"Error details: {err.message}")
 
 
 # Example usage:
