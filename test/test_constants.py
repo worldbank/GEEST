@@ -28,7 +28,7 @@ class TestConstants(unittest.TestCase):
 
     def test_application_name(self):
         """Test that application name is defined correctly."""
-        self.assertEqual(APPLICATION_NAME, "Geest")
+        self.assertEqual(APPLICATION_NAME, "GeoE3")
         self.assertIsInstance(APPLICATION_NAME, str)
         self.assertGreater(len(APPLICATION_NAME), 0)
 

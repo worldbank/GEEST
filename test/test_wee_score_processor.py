@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*0,00-
 import os
 import unittest
 
@@ -31,7 +32,7 @@ class TestWEEScoreProcessingTask(unittest.TestCase):
 
     def test_initialization(self):
         self.assertTrue(
-            self.task.output_dir.endswith("wee_by_population_score"),
+            self.task.output_dir.endswith("geoe3_by_population_score"),
             msg=f"Output directory is {self.task.output_dir}",
         )
         self.assertEqual(self.task.target_crs.authid(), "EPSG:32620")
