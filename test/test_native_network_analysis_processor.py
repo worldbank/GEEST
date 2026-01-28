@@ -6,6 +6,7 @@ isochrones using QGIS native algorithms.
 """
 
 import os
+import shutil
 import tempfile
 import unittest
 
@@ -69,11 +70,9 @@ class TestNativeNetworkAnalysisProcessingTask(unittest.TestCase):
 
     def tearDown(self):
         """Clean up after each test method."""
-        # Clean up temporary files
-        if os.path.exists(self.output_gpkg_path):
-            os.remove(self.output_gpkg_path)
+        # Clean up temporary directory and all contents
         if os.path.exists(self.working_directory):
-            os.rmdir(self.working_directory)
+            shutil.rmtree(self.working_directory)
 
     def test_initialization(self):
         """Test that the task initializes correctly with valid parameters."""
