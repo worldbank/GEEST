@@ -1,15 +1,5 @@
 # -*- coding: utf-8 -*-
-"""📦 Native Network Analysis Processing Task module.
-
-This module provides batch network analysis functionality using QGIS native algorithms.
-Processes all points simultaneously per distance value for optimal performance.
-
-Performance: 10-50x speedup compared to sequential per-point processing by reusing
-the network graph construction across all points for each distance.
-
-Note: Progress updates are reported at distance-level granularity (not per-operation)
-to maximize performance and avoid signal/slot overhead.
-"""
+"""Batch network analysis using QGIS native algorithms."""
 
 import os
 from typing import List, Optional
@@ -27,39 +17,18 @@ from geest.utilities import log_message
 
 
 class NativeNetworkAnalysisProcessingTask(QgsTask):
-    """
-    🚀 QgsTask for high-performance batch network analysis using QGIS native algorithms.
+    """Batch network analysis task for generating isochrones.
 
-    This task generates isochrones (service areas) by processing all points
-    simultaneously for each distance value, providing 10-50x performance improvement
-    over sequential per-point processing.
-
-    The task:
-    1. Takes a road network and set of starting points
-    2. For each distance value, computes service areas for ALL points in one batch
-    3. Converts service area line geometries to concave hull polygons
-    4. Stores results in a GeoPackage with proper spatial indexing
-
-    Key performance optimization: The network graph is built once per distance value
-    instead of once per point, dramatically reducing computation time.
-
-    Example:
-        >>> task = NativeNetworkAnalysisProcessingTask(
-        ...     point_layer=points,
-        ...     distances=[1000, 2000, 3000],
-        ...     road_network_path="roads.gpkg",
-        ...     output_gpkg_path="isochrones.gpkg",
-        ...     target_crs=crs
-        ... )
-        >>> QgsApplication.taskManager().addTask(task)
+    Processes all points simultaneously per distance value for performance.
+    Outputs concave hull polygons to GeoPackage with spatial indexing.
 
     Attributes:
-        point_layer: QgsVectorLayer containing starting point features.
-        distances: List of distance values in meters.
-        road_network_path: Path to road network layer (should be pre-clipped to AOI).
-        output_gpkg_path: Path where output GeoPackage will be created.
-        target_crs: Coordinate reference system for output geometries.
-        result_path: Path to created GeoPackage (set after successful run).
+        point_layer: Starting point features.
+        distances: Distance values in meters.
+        road_network_path: Path to road network.
+        output_gpkg_path: Output GeoPackage path.
+        target_crs: Coordinate reference system.
+        result_path: Created GeoPackage path (set after run).
     """
 
     # Network analysis configuration (hardcoded for consistency)
@@ -79,18 +48,14 @@ class NativeNetworkAnalysisProcessingTask(QgsTask):
         output_gpkg_path: str,
         target_crs: QgsCoordinateReferenceSystem,
     ):
-        """
-        Initialize the network analysis processing task.
+        """Initialize the task.
 
         Args:
-            point_layer: QgsVectorLayer containing starting point features.
-            distances: List of distance values in meters (e.g., [1000, 2000, 3000]).
-            road_network_path: Path to road network layer (pre-clipped to study area).
-            output_gpkg_path: Path where output GeoPackage will be created.
-            target_crs: Coordinate reference system for output geometries.
-
-        Raises:
-            ValueError: If required parameters are empty or None.
+            point_layer: Starting point features.
+            distances: Distance values in meters.
+            road_network_path: Path to road network.
+            output_gpkg_path: Output path.
+            target_crs: Coordinate reference system.
         """
         super().__init__("Native Network Analysis (Batch Isochrones)", QgsTask.CanCancel)
 
@@ -109,20 +74,33 @@ class NativeNetworkAnalysisProcessingTask(QgsTask):
         self.result_path: Optional[str] = None
         self.error_message: Optional[str] = None
 
+        # Verify CRS compatibility
+        point_crs = point_layer.crs()
+        log_message(
+            f"NativeNetworkAnalysisProcessingTask - Point layer CRS: {point_crs.authid()}, "
+            f"Target CRS: {target_crs.authid()}",
+            level=Qgis.Info,
+        )
+
+        if point_crs != target_crs:
+            error_msg = (
+                f"CRS mismatch in NativeNetworkAnalysisProcessingTask! "
+                f"Point layer CRS ({point_crs.authid()}) does not match target CRS ({target_crs.authid()}). "
+                f"This will cause incorrect distance calculations and 'point too far' errors."
+            )
+            log_message(error_msg, level=Qgis.Critical)
+            raise ValueError(error_msg)
+
         log_message(
             f"Initialized NativeNetworkAnalysisProcessingTask with network: {road_network_path}",
             level=Qgis.Info,
         )
 
     def run(self) -> bool:
-        """
-        🏗️ Execute the batch isochrone generation task.
-
-        This method is called automatically by the QGIS task manager when the task runs.
-        It processes all points in batches for each distance value.
+        """Execute batch isochrone generation.
 
         Returns:
-            True if processing completed successfully, False if failed or cancelled.
+            True if successful, False if failed/cancelled.
         """
         try:
             total_features = self.point_layer.featureCount()
@@ -162,28 +140,25 @@ class NativeNetworkAnalysisProcessingTask(QgsTask):
                 )
 
                 try:
-                    # 🚀 BATCH: Process all points at once for this distance
                     service_area_result = processing.run(
                         "native:serviceareafromlayer",
                         {
-                            "INPUT": self.road_network_path,  # Network already clipped to AOI
-                            "START_POINTS": self.point_layer,  # ALL points processed together
-                            "STRATEGY": self.STRATEGY,  # Shortest path
+                            "INPUT": self.road_network_path,
+                            "START_POINTS": self.point_layer,
+                            "STRATEGY": self.STRATEGY,
                             "DIRECTION_FIELD": "",
                             "VALUE_FORWARD": "",
                             "VALUE_BACKWARD": "",
                             "VALUE_BOTH": "",
-                            "DEFAULT_DIRECTION": self.DEFAULT_DIRECTION,  # Both directions
+                            "DEFAULT_DIRECTION": self.DEFAULT_DIRECTION,
                             "SPEED_FIELD": "",
                             "DEFAULT_SPEED": self.DEFAULT_SPEED,
-                            "TOLERANCE": self.NETWORK_TOLERANCE,  # Network topology tolerance
+                            "TOLERANCE": self.NETWORK_TOLERANCE,
                             "TRAVEL_COST2": distance_value,
-                            "POINT_TOLERANCE": self.POINT_TOLERANCE,  # Max distance from point to network
+                            "POINT_TOLERANCE": self.POINT_TOLERANCE,
                             "INCLUDE_BOUNDS": self.INCLUDE_BOUNDS,
                             "OUTPUT_LINES": "TEMPORARY_OUTPUT",
                         },
-                        # Note: Not passing feedback here for maximum performance
-                        # Progress is updated at distance-level granularity instead
                     )
 
                     service_area_layer = service_area_result["OUTPUT_LINES"]
@@ -196,29 +171,26 @@ class NativeNetworkAnalysisProcessingTask(QgsTask):
                         )
                         continue
 
-                    # 🏗️ BATCH: Compute concave hulls for all service areas
                     self._process_service_areas(service_area_layer, distance_value)
 
                     log_message(
-                        f"✅ Completed distance {distance_value}m: "
+                        f"Completed distance {distance_value}m: "
                         f"{service_area_layer.featureCount()} service areas processed",
                         level=Qgis.Info,
                     )
 
                 except Exception as e:
                     log_message(
-                        f"❌ Error processing distance {distance_value}m: {e}",
+                        f"Error processing distance {distance_value}m: {e}",
                         level=Qgis.Warning,
                     )
-                    # Continue with other distances rather than failing completely
                     continue
 
-                # Update progress to completion of this distance
                 progress = ((distance_idx + 1) / total_distances) * 100.0
                 self.setProgress(progress)
 
             log_message(
-                f"✅ Batch isochrone generation complete: {self.output_gpkg_path}",
+                f"Batch isochrone generation complete: {self.output_gpkg_path}",
                 level=Qgis.Info,
             )
             self.result_path = self.output_gpkg_path
@@ -226,37 +198,34 @@ class NativeNetworkAnalysisProcessingTask(QgsTask):
 
         except Exception as e:
             log_message(
-                f"❌ Fatal error in network analysis task: {e}",
+                f"Fatal error in network analysis task: {e}",
                 level=Qgis.Critical,
             )
             self.error_message = str(e)
             return False
 
     def finished(self, result: bool) -> None:
-        """
-        Called when the task completes (success or failure).
+        """Called when task completes.
 
         Args:
-            result: True if run() returned True, False otherwise.
+            result: True if successful, False otherwise.
         """
         if result:
             log_message(
-                f"✅ Network analysis task completed successfully: {self.result_path}",
+                f"Network analysis task completed successfully: {self.result_path}",
                 level=Qgis.Info,
             )
         else:
             error_msg = self.error_message or "Unknown error"
             log_message(
-                f"❌ Network analysis task failed: {error_msg}",
+                f"Network analysis task failed: {error_msg}",
                 level=Qgis.Critical,
             )
 
     def cancel(self) -> None:
-        """
-        Called when the task is cancelled.
-        """
+        """Called when task is cancelled."""
         log_message(
-            "⚠️ Network analysis task cancelled",
+            "Network analysis task cancelled",
             level=Qgis.Warning,
         )
         super().cancel()

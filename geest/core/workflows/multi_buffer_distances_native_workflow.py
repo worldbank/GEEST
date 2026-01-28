@@ -1,18 +1,12 @@
 # -*- coding: utf-8 -*-
-"""📦 Multi Buffer Distances Native Workflow module.
-
-This module contains functionality for multi buffer distances native workflow
-using QGIS batch network analysis for optimal performance.
-
-Performance: Processes all points simultaneously per distance value, providing
-10-50x speedup compared to sequential per-point processing.
-"""
+"""Multi-buffer distances workflow using native QGIS network analysis."""
 import os
 from urllib.parse import unquote
 
 from qgis import processing
 from qgis.core import (
     Qgis,
+    QgsFeature,
     QgsFeatureRequest,
     QgsFeedback,
     QgsField,
@@ -32,21 +26,10 @@ from .workflow_base import WorkflowBase
 
 
 class MultiBufferDistancesNativeWorkflow(WorkflowBase):
-    """
-    Concrete implementation of a 'multi_buffer_distances' workflow.
+    """Multi-buffer workflow using native QGIS network analysis.
 
-    This uses native QGIS network analysis on a roads layer to calculate the distances
-    around the selected points of interest.
-
-    It will create concentric buffers (isochrones) around the points and calculate
-    the distances to the points of interest.
-
-    The isochrones will be calcuated either using travel time or travel distance.
-
-    The results will be stored as a collection of tif files scaled to the likert scale.
-
-    These results will be be combined into a VRT file and added to the QGIS map.
-
+    Creates concentric isochrones around points using road network distances.
+    Results are rasterized and combined into a VRT.
     """
 
     def __init__(
@@ -58,22 +41,17 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
-        """Initialize the workflow with attributes and feedback.
+        """Initialize the workflow.
 
         Args:
-            item: JsonTreeItem representing the analysis, dimension, or factor to process.
+            item: JsonTreeItem representing the analysis/dimension/factor.
             cell_size_m: Cell size in meters for rasterization.
-            analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
-            feedback: QgsFeedback object for progress reporting and cancellation.
-            context: QgsProcessingContext object for processing.
-            working_directory: Folder containing study_area.gpkg and outputs.
-
-        Raises:
-            Exception: If travel distances, points layer, or network layer are invalid.
+            analysis_scale: Analysis scale ('local' or 'national').
+            feedback: QgsFeedback for progress reporting.
+            context: QgsProcessingContext for processing.
+            working_directory: Folder containing study_area.gpkg.
         """
-        super().__init__(
-            item, cell_size_m, analysis_scale, feedback, context, working_directory
-        )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
+        super().__init__(item, cell_size_m, analysis_scale, feedback, context, working_directory)
         self.workflow_name = "use_multi_buffer_point"
         self.distances = self.attributes.get("multi_buffer_travel_distances", None)
         if not self.distances:
@@ -168,27 +146,28 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         area_features: QgsVectorLayer,
         index: int,
     ) -> str:
-        """Execute the actual workflow logic for a single area.
+        """Process a single area.
 
         Args:
-            current_area: Current polygon from our study area.
-            clip_area: Polygon to clip the features to.
-            current_bbox: Bounding box of the above area.
-            area_features: A vector layer of features to analyse.
-            index: Iteration / number of area being processed.
+            current_area: Polygon from study area.
+            clip_area: Polygon to clip features to.
+            current_bbox: Bounding box.
+            area_features: Features to analyze.
+            index: Area number being processed.
 
         Returns:
-            A raster layer file path if processing completes successfully, False otherwise.
+            Raster file path, or False if failed.
         """
+        log_message(
+            f"Starting network analysis for area {index + 1}",
+            level=Qgis.Info,
+        )
 
-        # Step 1: Process these areas in batches and create buffers
         isochrones_gpkg = self.create_isochrones(
             point_layer=area_features,
+            clip_geometry=current_area,
             area_index=index,
         )
-        # A return of false does not neccessarily indicate an error -
-        # there may be no coincident points in a given area in which case
-        # we just skip it
         if not isochrones_gpkg:
             log_message(
                 f"No isochrones created for area {index}.",
@@ -196,16 +175,14 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                 level=Qgis.Warning,
             )
             return False
-        # Step 2: Merge all isochrone layers into one final output, removing any overlaps
-        bands = self._create_bands(isochrones_gpkg_path=isochrones_gpkg, index=index)
 
-        # Step 3: Assign scores to the buffers based on the distances
+        bands = self._create_bands(isochrones_gpkg_path=isochrones_gpkg, index=index)
         scored_buffers = self._assign_scores(bands)
 
         if scored_buffers is False:
             log_message("No scored buffers were created.", level=Qgis.Warning)
             return False
-        # Step 4: Rasterize the scored buffers
+
         raster_output = self._rasterize(
             input_layer=scored_buffers,
             bbox=current_bbox,
@@ -215,47 +192,177 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
         return raster_output
 
+    def _clip_network_to_area(
+        self,
+        clip_geometry: QgsGeometry,
+        area_index: int,
+    ) -> str:
+        """Clip road network to area with buffer for spatial isolation.
+
+        Args:
+            clip_geometry: Area geometry to clip to.
+            area_index: Area index for file naming.
+
+        Returns:
+            Path to clipped network GeoPackage, or None if failed.
+        """
+        buffer_distance = max(self.distances) if self.distances else 5000
+        buffered_geometry = clip_geometry.buffer(buffer_distance, 5)
+        bbox = buffered_geometry.boundingBox()
+
+        clipped_network_path = os.path.join(self.workflow_directory, f"clipped_network_area_{area_index}.gpkg")
+
+        if os.path.exists(clipped_network_path):
+            os.remove(clipped_network_path)
+
+        try:
+            road_network_layer = QgsVectorLayer(self.road_network_layer_path, "network", "ogr")
+            if not road_network_layer.isValid():
+                log_message(
+                    f"ERROR: Cannot load road network from {self.road_network_layer_path}",
+                    level=Qgis.Critical,
+                )
+                return None
+
+            road_crs = road_network_layer.crs()
+            log_message(
+                f"Area {area_index}: Road network CRS: {road_crs.authid()}, Target CRS: {self.target_crs.authid()}",
+                level=Qgis.Info,
+            )
+
+            if road_crs != self.target_crs:
+                log_message(
+                    f"WARNING: Road network CRS mismatch for area {area_index}! "
+                    f"Network is in {road_crs.authid()} but expected {self.target_crs.authid()}",
+                    level=Qgis.Warning,
+                )
+
+            log_message(
+                f"Clipping road network to area {area_index} with {buffer_distance}m buffer",
+                level=Qgis.Info,
+            )
+
+            temp_layer = QgsVectorLayer(f"Polygon?crs={self.target_crs.authid()}", "clip_geometry", "memory")
+            temp_provider = temp_layer.dataProvider()
+
+            temp_feature = QgsFeature()
+            temp_feature.setGeometry(buffered_geometry)
+            temp_provider.addFeatures([temp_feature])
+            temp_layer.updateExtents()
+
+            result = processing.run(
+                "native:clip",
+                {
+                    "INPUT": self.road_network_layer_path,
+                    "OVERLAY": temp_layer,
+                    "OUTPUT": clipped_network_path,
+                },
+                context=self.context,
+            )
+
+            clipped_layer = result["OUTPUT"]
+
+            if isinstance(clipped_layer, str):
+                check_layer = QgsVectorLayer(clipped_layer, "check", "ogr")
+                feature_count = check_layer.featureCount()
+            else:
+                feature_count = clipped_layer.featureCount()
+
+            if feature_count == 0:
+                log_message(
+                    f"Warning: Clipped network for area {area_index} has no features. "
+                    f"This area may have no roads within {buffer_distance}m.",
+                    level=Qgis.Warning,
+                )
+                return None
+
+            log_message(
+                f"Successfully clipped network to area {area_index}: {feature_count} road segments",
+                level=Qgis.Info,
+            )
+
+            return clipped_network_path
+
+        except Exception as e:
+            log_message(
+                f"Error clipping network for area {area_index}: {e}",
+                level=Qgis.Warning,
+            )
+            return None
+
     def create_isochrones(
         self,
         point_layer: QgsVectorLayer,
+        clip_geometry: QgsGeometry,
         area_index: int = 0,
     ):
-        """Create isochrones using batch network analysis task.
-
-        Creates and runs a NativeNetworkAnalysisProcessingTask for high-performance batch
-        processing of all points simultaneously per distance value.
+        """Create isochrones using batch network analysis.
 
         Args:
-            point_layer: QgsVectorLayer containing point features to process.
-            area_index: Index of the current area being processed.
+            point_layer: Starting point features.
+            clip_geometry: Geometry to clip network to.
+            area_index: Current area index.
 
         Returns:
-            Path to the GeoPackage, or False if no features to process.
+            Path to GeoPackage, or False if no features.
         """
         total_features = point_layer.featureCount()
         if total_features == 0:
             log_message(f"No features to process for area {area_index}.")
             return False
 
+        point_crs = point_layer.crs()
+        log_message(
+            f"Area {area_index}: Point layer CRS: {point_crs.authid()}, Target CRS: {self.target_crs.authid()}",
+            level=Qgis.Info,
+        )
+
+        if point_crs != self.target_crs:
+            log_message(
+                f"ERROR: CRS mismatch for area {area_index}! "
+                f"Point layer is in {point_crs.authid()} but expected {self.target_crs.authid()}. "
+                f"This will cause incorrect distance calculations.",
+                level=Qgis.Critical,
+            )
+            return False
+
         isochrone_layer_path = os.path.join(self.workflow_directory, f"isochrones_area_{area_index}.gpkg")
 
-        # Create the network analysis task
+        clipped_network_path = self._clip_network_to_area(
+            clip_geometry=clip_geometry,
+            area_index=area_index,
+        )
+
+        if not clipped_network_path:
+            log_message(
+                f"No road network available for area {area_index}. Skipping network analysis.",
+                level=Qgis.Warning,
+            )
+            return False
+
         task = NativeNetworkAnalysisProcessingTask(
             point_layer=point_layer,
             distances=self.distances,
-            road_network_path=self.road_network_layer_path,
+            road_network_path=clipped_network_path,
             output_gpkg_path=isochrone_layer_path,
             target_crs=self.target_crs,
         )
 
-        # Connect task progress to workflow feedback
-        # This ensures progress updates are visible in the parent workflow
         task.progressChanged.connect(lambda progress: self.feedback.setProgress(progress))
-
-        # Run the task synchronously (within the workflow's execution context)
-        # Note: We call run() directly instead of submitting to task manager
-        # because the workflow needs to wait for completion before continuing
         success = task.run()
+
+        if os.path.exists(clipped_network_path):
+            try:
+                os.remove(clipped_network_path)
+                log_message(
+                    f"Cleaned up temporary clipped network for area {area_index}",
+                    level=Qgis.Info,
+                )
+            except Exception as e:
+                log_message(
+                    f"Warning: Failed to clean up clipped network {clipped_network_path}: {e}",
+                    level=Qgis.Warning,
+                )
 
         if not success:
             error_msg = task.error_message or "Unknown error"
