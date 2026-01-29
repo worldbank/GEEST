@@ -170,7 +170,7 @@
             "name": "Accessibility",
             "default_analysis_weighting": 0.45,
             "analysis_weighting": 0.45,
-            "description": "The Accessibility Dimension evaluates women’s daily mobility by examining their access to essential services. Levels of enablement for work access in this dimension are determined by service areas, which represent the geographic zones that facilities like childcare, supermarkets, universities, banks, and clinics can serve based on proximity. The nearer these facilities are to where women live, the more supportive and enabling the environment becomes for their participation in the workforce.",
+            "description": "The Accessibility Dimension evaluates daily mobility by examining access to essential services. Levels of enablement for work access in this dimension are determined by service areas, which represent the geographic zones that facilities like childcare, supermarkets, universities, banks, and clinics can serve based on proximity. The nearer these facilities are to where people live, the more supportive and enabling the environment becomes for their participation in the workforce.",
             "factors": [
                 {
                     "id": "women_s_travel_patterns",
@@ -438,7 +438,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Access to Education and Training Facilities assesses the proximity to higher education institutions and training centers, influencing women's ability to gain necessary qualifications."
+                    "description": "Access to Education and Training Facilities assesses the proximity to higher education institutions and training centers, influencing the ability to gain necessary qualifications."
                 },
                 {
                     "id": "access_to_financial_facilities",
@@ -477,7 +477,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Access to Financial Facilities focuses on the proximity of banks and financial institutions, which is essential for women’s economic empowerment and ability to access credit."
+                    "description": "Access to Financial Facilities focuses on the proximity of banks and financial institutions, which is essential for economic empowerment and the ability to access credit."
                 }
             ]
         },
@@ -487,7 +487,7 @@
             "name": "Place Characterization",
             "default_analysis_weighting": 0.45,
             "analysis_weighting": 0.45,
-            "description": "The Place-Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence women’s ability to participate in the workforce.",
+            "description": "The Place-Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence the ability to participate in the workforce.",
             "factors": [
                 {
                     "id": "active_transport",
@@ -602,7 +602,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Fragility, Conflict, and Violence (FCV) considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase women’s vulnerability and limit their access to employment and essential services."
+                    "description": "Fragility, Conflict, and Violence (FCV) considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase vulnerability and limit access to employment and essential services."
                 },
                 {
                     "id": "education",
@@ -613,7 +613,7 @@
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
                         {
-                            "indicator": "Percentage of the labor force comprising women with university degrees",
+                            "indicator": "Percentage of the labor force with university degrees",
                             "id": "Education",
                             "output_filename": "EDU_output",
                             "description": "",
@@ -640,7 +640,7 @@
                             "analysis_mode": "Do Not Use"
                         }
                     ],
-                    "description": "Education refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector."
+                    "description": "Education refers to the proportion of people in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of the general education level and workforce qualifications in that sector."
                 },
                 {
                     "id": "digital_inclusion",
