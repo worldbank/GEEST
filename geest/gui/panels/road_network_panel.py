@@ -60,15 +60,20 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.working_directory = ""
         self.settings = QSettings()  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
-        self.setupUi(self)
-        log_message("Loading setup panel")
-        self.initUI()
         self._reference_layer = None
         self._crs = None
         self._message_bar = None  # Will be set by parent dock
+        self.setupUi(self)
+        log_message("Loading setup panel")
+        self.initUI()
 
     def show_error_message(self, message, details=None):
-        """Show an error message box when workflow queue manager reports an error."""
+        """Show an error message box when workflow queue manager reports an error.
+
+        Args:
+            message: The error message to display.
+            details: Optional detailed error information.
+        """
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Critical)
         msg_box.setWindowTitle("Error")
@@ -80,12 +85,23 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
 
     @pyqtSlot(str)
     def working_directory_changed(self, new_directory):
-        """Change the working directory and load the model.json if available."""
+        """Change the working directory and load the model.json if available.
+
+        Args:
+            new_directory: The new working directory path.
+        """
         log_message(f"Working directory changed to {new_directory}")
         self.working_directory = new_directory
 
     def set_working_directory(self, working_directory):
-        """Set the working directory for the task."""
+        """Set the working directory for the task.
+
+        Args:
+            working_directory: The working directory path.
+
+        Raises:
+            Exception: If the working directory is invalid.
+        """
         log_message(f"Setting the working directory to {working_directory}")
         if working_directory is None or working_directory == "":
             raise Exception("Invalid working directory: None or empty string")
@@ -447,7 +463,11 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
 
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
     def osm_download_progress_updated(self, progress: float):
-        """Slot to be called when the download task progress is updated."""
+        """Slot to be called when the download task progress is updated.
+
+        Args:
+            progress: The download progress value.
+        """
         log_message(f"\n\n\n\n\n\nProgress: {progress}\n\n\n\n\n\n\n\n")
         self.progress_bar.setVisible(True)
         self.progress_bar.setEnabled(True)
