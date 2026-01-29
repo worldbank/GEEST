@@ -501,7 +501,7 @@ class BaseReport:
          <p>This plugin is built with support from the <strong>Canada Clean Energy and
          Forest Climate Facility (CCEFCF)</strong>, the <strong>Geospatial Operational
          Support Team (GOST, DECSC)</strong> for the project Geospatial Assessment of
-         Women Employment and Business Opportunities in the Renewable Energy Sector.
+         Employment and Business Opportunities in the Renewable Energy Sector.
          This project is open source; you can download the code at
          <a href="https://github.com/worldbank/GEEST">https://github.com/worldbank/GEEST</a>.</p>
 """
