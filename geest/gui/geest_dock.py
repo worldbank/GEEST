@@ -389,6 +389,12 @@ class GeestDock(QDockWidget):
             self.road_network_widget.set_working_directory(working_directory)
             self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer())
             self.road_network_widget.set_crs(self.create_project_widget.crs(working_directory=working_directory))
+
+            # Restore saved road network layer from model
+            saved_path = self.tree_widget.road_network_layer_path()
+            if saved_path:
+                log_message(f"Restoring road network layer from model: {saved_path}")
+                self.road_network_widget.restore_layer_from_path(saved_path)
         elif index == TREE_PANEL:
             log_message("Switched to Tree panel")
             # self.tree_widget.set_working_directory(self.setup_widget.working_dir)
