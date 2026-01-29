@@ -8,7 +8,7 @@ This module contains functionality for algorithms.
 """
 
 from .area_iterator import AreaIterator
-from .native_network_analysis_processor import NativeNetworkAnalysisProcessor
+from .native_network_analysis_processor import NativeNetworkAnalysisProcessingTask
 from .opportunities_by_wee_score_population_processor import (
     OpportunitiesByWeeScorePopulationProcessingTask,
 )

@@ -17,16 +17,21 @@ class AreaIterator:
     An iterator to yield sets of geometries from polygon, study_area_clip_polygons and bbox layers
     found in a GeoPackage file, along with a progress percentage.
 
+    This iterator matches features across layers using the 'area_name' field rather than
+    Feature IDs (FIDs), ensuring correct pairing across layers.
+
     Attributes:
         gpkg_path (str): The path to the GeoPackage file.
 
     Precondition:
-        study_area_polygons (QgsVectorLayer): The vector layer containing polygons.
+        study_area_polygons (QgsVectorLayer): The vector layer containing polygons with 'area_name' field.
         study_area_clip_polygons (QgsVectorLayer): The vector layer containing polygons expanded to
-            completely include the intersecting grid cells along the boundary.
-        study_area_bboxes (QgsVectorLayer): The vector layer containing bounding boxes.
+            completely include the intersecting grid cells along the boundary, with matching 'area_name' field.
+        study_area_bboxes (QgsVectorLayer): The vector layer containing bounding boxes with matching 'area_name' field.
 
-        There should be a one-to-one correspondence between the polygons and bounding boxes.
+        All three layers must have the 'area_name' attribute for matching.
+        There should be a one-to-one correspondence between polygons and bounding boxes.
+        Clip polygons may be missing for some areas; in such cases, the polygon geometry is used as a fallback.
 
     Example usage:
         To use the iterator, simply pass the path to the GeoPackage:
@@ -39,7 +44,7 @@ class AreaIterator:
             area_iterator
         ):
 
-            log_message(f"Polygon ID: {id}")
+            log_message(f"Area Name: {area_name}")
             log_message(f"Polygon Geometry: {polygon_geometry.asWkt()}")
             log_message(f"Clip Polygon Geometry: {clip_geometry.asWkt()}")
             log_message(f"BBox Geometry: {bbox_geometry.asWkt()}")
@@ -162,22 +167,40 @@ class AreaIterator:
                 polygon_feature = next(self.polygon_layer.getFeatures(request), None)
                 if polygon_feature is None:
                     continue
-                polygon_id: int = polygon_feature.id()
-                # Request the corresponding bbox feature based on the polygon's ID
-                feature_request: QgsFeatureRequest = QgsFeatureRequest().setFilterFid(polygon_id)
-                clip_feature = next(self.clip_polygon_layer.getFeatures(feature_request), None)
-                bbox_feature = next(self.bbox_layer.getFeatures(feature_request), None)
 
-                if bbox_feature and clip_feature:
+                # Get the area_name from the polygon feature for matching
+                # This is more reliable than FID matching
+                area_name = polygon_feature["area_name"]
+
+                # Query clip_polygon and bbox by area_name instead of FID
+                # This ensures correct matching even when feature IDs don't align
+                clip_request = QgsFeatureRequest().setFilterExpression(f"area_name = '{area_name}'")
+                bbox_request = QgsFeatureRequest().setFilterExpression(f"area_name = '{area_name}'")
+
+                clip_feature = next(self.clip_polygon_layer.getFeatures(clip_request), None)
+                bbox_feature = next(self.bbox_layer.getFeatures(bbox_request), None)
+
+                # Require bbox_feature but allow clip_feature to be missing
+                if bbox_feature:
                     # Calculate the progress as the percentage of features processed
                     progress_percent: float = ((index + 1) / self.total_features) * 100
 
-                    # Yield a tuple with polygon geometry, bbox geometry, and progress percentage
-                    yield polygon_feature.geometry(), clip_feature.geometry(), bbox_feature.geometry(), progress_percent
+                    # Use clip_feature geometry if available, otherwise fall back to polygon geometry
+                    clip_geom = clip_feature.geometry() if clip_feature else polygon_feature.geometry()
+
+                    if not clip_feature:
+                        log_message(
+                            f"Info: No clip_polygon found for area '{area_name}', using polygon geometry as fallback",
+                            tag="Geest",
+                            level=Qgis.Info,
+                        )
+
+                    # Yield a tuple with polygon geometry, clip geometry, bbox geometry, and progress percentage
+                    yield polygon_feature.geometry(), clip_geom, bbox_feature.geometry(), progress_percent
 
                 else:
                     log_message(
-                        f"Warning: No matching bbox or clip feature found for polygon ID {polygon_id}",
+                        f"Warning: No matching bbox feature found for area '{area_name}'",
                         tag="Geest",
                         level=Qgis.Warning,
                     )
