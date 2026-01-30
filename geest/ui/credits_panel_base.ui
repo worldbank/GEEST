@@ -196,11 +196,11 @@
          <property name="styleSheet">
           <string notr="true"/>
          </property>
-         <property name="text">
-          <string>This plugin was build with support from the Canada Clean Energy and Forest Climate Facility (CCEFCF) and the Global Development Fund (GDF), by the Geospatial Team in the Development Economics Data Group (DECDG).
+          <property name="text">
+           <string>This plugin was built with support from the Canada Clean Energy and Forest Climate Facility (CCEFCF) and the Global Development Fund (GDF), by the Geospatial Team in the Development Economics Data Group (DECDG).
 
 The project is open-source and you can access the code here: https://github.com/worldbank/GEEST</string>
-         </property>
+          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
          </property>
