@@ -558,6 +558,10 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.layer_combo.setFont(QFont("Arial", font_size))
         self.field_combo.setFont(QFont("Arial", font_size))
 
+        # Women's considerations section
+        self.women_considerations_checkbox.setFont(QFont("Arial", font_size))
+        self.women_considerations_description.setFont(QFont("Arial", font_size))
+
     def add_bboxes_to_map(self):
         """Add the study area layers to the map.
 
