@@ -103,7 +103,6 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.field_combo.setLayer(self.layer_combo.currentLayer())
 
         self.create_project_directory_button.clicked.connect(self.create_new_project_folder)
-        self.project_crs = QgsProject.instance().crs()
         # We only allow the user to select a CRS based on the admin layer
         # if the admin CRS is not WGS84
         self.use_boundary_crs.setChecked(False)
@@ -328,16 +327,18 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         return self.layer_combo.currentLayer()
 
     def crs(self, working_directory=None):
-        """Get the crs for the Geest project.
+        """Get the CRS for the GEEST study area (NOT QGIS project CRS).
 
-        If study area already exists, return its CRS.
-        Otherwise, calculate CRS from the boundary layer.
+        If study area already exists, return its CRS from study_area.gpkg.
+        Otherwise, calculate CRS from the boundary layer (UTM zone or boundary layer CRS).
+
+        IMPORTANT: This returns the study area CRS, not QgsProject.instance().crs()
 
         Args:
             working_directory: Optional working directory path. If not provided, uses self.working_dir
 
         Returns:
-            QgsCoordinateReferenceSystem: The CRS for the project, or None if unavailable.
+            QgsCoordinateReferenceSystem: The study area CRS, or None if unavailable.
         """
         # Use provided working_directory, otherwise fall back to self.working_dir
         work_dir = working_directory or self.working_dir
