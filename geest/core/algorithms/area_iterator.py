@@ -102,6 +102,35 @@ class AreaIterator:
         # Get the total number of polygon features for progress calculation
         self.total_features: int = self.polygon_layer.featureCount()
 
+    def __enter__(self):
+        """
+        Context manager entry point.
+
+        Usage:
+            with AreaIterator(gpkg_path) as iterator:
+                for area, clip, bbox, progress in iterator:
+                    # process area
+
+        Returns:
+            self: The AreaIterator instance.
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Context manager exit point.
+
+        Args:
+            exc_type: Exception type if an exception occurred, None otherwise.
+            exc_val: Exception value if an exception occurred, None otherwise.
+            exc_tb: Exception traceback if an exception occurred, None otherwise.
+
+        Returns:
+            False: Does not suppress exceptions.
+        """
+        # Return False to propagate any exceptions that occurred
+        return False
+
     def area_count(self) -> int:
         """
         Return the total number of areas to be processed.

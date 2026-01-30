@@ -94,8 +94,9 @@ class TreePanel(QWidget):
 
         # Initialize the QueueManager
         self.working_directory = None
-        pool_size = int(setting(key="concurrent_tasks", default=1))
-        self.queue_manager = WorkflowQueueManager(pool_size=pool_size)
+        # Pass None to enable dynamic reading of concurrent_tasks setting.
+        # This allows users to change the setting without restarting QGIS.
+        self.queue_manager = WorkflowQueueManager(pool_size=None)
         self.json_file = json_file
         self.tree_view_visible = True
         self.run_only_incomplete = True  # saves time by not running models that have already been run

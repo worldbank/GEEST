@@ -457,7 +457,7 @@ class WorkflowJob(QgsTask):
         :param success: True if the task was completed successfully, False otherwise
         """
         log_message(
-            "0000000000000 🏁 Job Finished 000000000000000000",
+            "🏁 Job Finished",
             tag="Geest",
             level=Qgis.Info,
         )
