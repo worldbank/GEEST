@@ -321,71 +321,9 @@ When this option is **not selected**, the analysis focuses on generic employment
             <property name="wordWrap">
              <bool>true</bool>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="eplex_label">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="visible">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>EPLEX Score (Employment Protection Legislation Index)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="eplex_description">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
-            <property name="visible">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>The Employment Protection Legislation Index refers to indicators developed by the International Labour Organization (ILO) to measure the strictness and coverage of laws protecting workers from dismissal, covering areas like fixed-term contracts, probationary periods, unfair dismissal grounds, and severance pay, helping to compare labor market regulations across countries.</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignJustify|Qt::AlignTop</set>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QDoubleSpinBox" name="eplex_score_spinbox">
-            <property name="font">
-             <font>
-              <pointsize>16</pointsize>
-             </font>
-            </property>
-            <property name="visible">
-             <bool>false</bool>
-            </property>
-            <property name="minimum">
-             <double>0.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>5.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="value">
-             <double>0.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
+            </widget>
+           </item>
+          </layout>
         </widget>
        </item>
        <item row="1" column="0">
