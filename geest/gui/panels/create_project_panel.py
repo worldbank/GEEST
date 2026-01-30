@@ -172,19 +172,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             self.cell_size_spinbox.setSuffix(" m")
 
     def women_considerations_changed(self):
-        """Slot to be called when the women considerations checkbox changes.
-
-        When unchecked, shows EPLEX score input.
-        When checked, hides EPLEX score input.
-        """
+        """Slot to be called when the women considerations checkbox changes."""
         is_checked = self.women_considerations_checkbox.isChecked()
         log_message(f"Women considerations changed: {is_checked}")
-
-        # Show EPLEX widgets when women considerations is NOT selected
-        show_eplex = not is_checked
-        self.eplex_label.setVisible(show_eplex)
-        self.eplex_description.setVisible(show_eplex)
-        self.eplex_score_spinbox.setVisible(show_eplex)
 
     def update_crs(self):
         """Update the CRS label based on the checkbox state."""
@@ -275,18 +265,6 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     model["analysis_scale"] = "national"
                 # Save women considerations settings
                 model["women_considerations_enabled"] = self.women_considerations_checkbox.isChecked()
-
-                # Save EPLEX score to the EPLEX indicator in the Contextual dimension
-                for dimension in model.get("dimensions", []):
-                    if dimension.get("id") == "contextual":
-                        for factor in dimension.get("factors", []):
-                            if factor.get("id") == "eplex":
-                                for indicator in factor.get("indicators", []):
-                                    if indicator.get("id") == "eplex_score_indicator":
-                                        indicator["eplex_score"] = self.eplex_score_spinbox.value()
-                                        break
-                                break
-                        break
             with open(model_path, "w") as f:
                 json.dump(model, f, indent=2)
 
