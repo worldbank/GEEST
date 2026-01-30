@@ -9,7 +9,9 @@ from typing import List
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from qgis.core import QgsApplication
+from qgis.PyQt.QtCore import QMutex, QMutexLocker
 
+from geest.core import setting
 from geest.utilities import log_message
 
 from .workflow_job import WorkflowJob
@@ -41,14 +43,42 @@ class WorkflowQueue(QObject):
         # cannot be because the job queue is full.
         self.job_queue: List[WorkflowJob] = []
         self.active_tasks = {}
+        # Mutex to protect active_tasks dictionary from concurrent access
+        self._active_tasks_mutex = QMutex()
 
         # Overall queue statistics
         self.total_queue_size = 0
         self.total_completed = 0
 
+    def get_effective_pool_size(self) -> int:
+        """
+        Get the effective pool size, reading from settings if not set.
+
+        This allows the pool size to be changed dynamically without restarting QGIS.
+        If thread_pool_size was set during initialization, that value is used.
+        Otherwise, reads from the 'concurrent_tasks' setting.
+
+        Returns:
+            The pool size to use for concurrent tasks.
+        """
+        if self.thread_pool_size is None:
+            return int(setting(key="concurrent_tasks", default=1))
+        return self.thread_pool_size
+
     def active_queue_size(self) -> int:
         """
-        Returns the number of currently active tasks
+        Returns the number of currently active tasks (thread-safe).
+
+        This is a PUBLIC method that acquires the lock.
+        """
+        locker = QMutexLocker(self._active_tasks_mutex)
+        return len(self.active_tasks)
+
+    def _active_queue_size_unsafe(self) -> int:
+        """
+        Returns the number of currently active tasks WITHOUT locking.
+
+        INTERNAL USE ONLY - caller must hold _active_tasks_mutex lock.
         """
         return len(self.active_tasks)
 
@@ -57,22 +87,33 @@ class WorkflowQueue(QObject):
         Resets the queue
         """
         self.job_queue.clear()
+        locker = QMutexLocker(self._active_tasks_mutex)
         self.active_tasks.clear()
+        locker = None  # Release lock
         self.total_queue_size = 0
         self.total_completed = 0
         self.update_status()
 
     def cancel_processing(self):
         """
-        Cancels any in-progress operation
+        Cancels any in-progress operation.
+
+        Best practice: Copy task list while locked, cancel outside lock.
         """
         self.job_queue.clear()
         self.total_queue_size = 0
         self.total_completed = 0
 
-        for _, task in self.active_tasks.items():
+        # Step 1: Acquire lock, copy task list, release lock
+        locker = QMutexLocker(self._active_tasks_mutex)
+        tasks_to_cancel = list(self.active_tasks.values())
+        locker = None  # Release lock
+
+        # Step 2: Cancel tasks outside of lock (task.cancel() might trigger callbacks)
+        for task in tasks_to_cancel:
             task.cancel()
 
+        # Step 3: Emit signals (no locks held)
         self.status_message.emit("Cancelling...")
         self.update_status()
 
@@ -90,9 +131,17 @@ class WorkflowQueue(QObject):
 
     def process_queue(self):
         """
-        Feed the QgsTaskManager with the next task in the queue
+        Feed the QgsTaskManager with the next task in the queue.
+
+        Best practice: Read all locked values first, release lock, then compute.
         """
-        if not self.job_queue and not self.active_tasks:
+        # Step 1: Acquire lock once, read all necessary values, then release
+        locker = QMutexLocker(self._active_tasks_mutex)
+        active_count = self._active_queue_size_unsafe()
+        locker = None  # Release lock immediately
+
+        # Step 2: Check completion condition (no locks held)
+        if not self.job_queue and active_count == 0:
             # All tasks are done
             self.update_status()
             self.processing_completed.emit(True)
@@ -103,17 +152,25 @@ class WorkflowQueue(QObject):
             self.update_status()
             return
 
-        # Determine how many threads are free to take new jobs
-        free_threads = self.thread_pool_size - self.active_queue_size()
+        # Step 3: Calculate free threads (no locks held)
+        pool_size = self.get_effective_pool_size()
+        free_threads = pool_size - active_count
+
+        # Step 4: Process jobs (acquire lock only when modifying active_tasks)
         for _ in range(free_threads):
             if not self.job_queue:
                 break
             job = self.job_queue.pop(0)
 
+            # Emit signal before acquiring lock
             self.status_message.emit(f"Starting workflow task: {job.description()}")
 
+            # Acquire lock only for dictionary modification
+            locker = QMutexLocker(self._active_tasks_mutex)
             self.active_tasks[job.description()] = job
+            locker = None  # Release lock immediately
 
+            # Connect signals and add task (no locks held)
             job.taskCompleted.connect(partial(self.task_completed, job_name=job.description()))
             job.taskTerminated.connect(partial(self.finalize_task, job_name=job.description()))
             # Connect to error signal - this assumes your WorkflowJob has an error_occurred signal
@@ -125,6 +182,7 @@ class WorkflowQueue(QObject):
                 log_message("######################################################")
             QgsApplication.taskManager().addTask(job)
 
+        # Emit status update (no locks held)
         self.update_status()
 
     def task_completed(self, job_name: str):
@@ -137,8 +195,11 @@ class WorkflowQueue(QObject):
         """
         Finalizes a task -- called for both successful and non-successful tasks
         """
+        locker = QMutexLocker(self._active_tasks_mutex)
         if job_name in self.active_tasks:
             del self.active_tasks[job_name]
+        locker = None  # Release lock
+
         self.total_completed += 1
 
         self.status_changed.emit()

@@ -6,6 +6,7 @@ This module contains functionality for workflow queue manager.
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from qgis.core import Qgis, QgsProcessingContext, QgsProject, QgsTask
+from typing import Optional
 
 from geest.utilities import log_message
 
@@ -24,12 +25,14 @@ class WorkflowQueueManager(QObject):
     processing_completed = pyqtSignal()
     processing_error = pyqtSignal(str)  # error message as payload
 
-    def __init__(self, pool_size: int, parent=None):
+    def __init__(self, pool_size: Optional[int] = None, parent=None):
         """
         Initialize the WorkflowQueueManager with a thread pool size and a workflow factory.
 
         Args:
-            pool_size: Maximum number of concurrent tasks.
+            pool_size: Maximum number of concurrent tasks. If None, will read from
+                      'concurrent_tasks' setting dynamically for each batch of workflows.
+                      This allows settings changes without restarting QGIS.
             parent: Optional parent QObject.
         """
         super().__init__(parent=parent)

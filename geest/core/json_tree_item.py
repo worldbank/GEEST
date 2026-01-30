@@ -6,10 +6,11 @@ This module contains functionality for json tree item.
 
 import traceback
 import uuid
+from contextlib import contextmanager
 from typing import Optional
 
 from qgis.core import Qgis
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, QReadWriteLock, QReadLocker, QWriteLocker
 from qgis.PyQt.QtGui import QColor, QFont, QIcon
 
 from geest.core.settings import setting
@@ -47,6 +48,10 @@ class JsonTreeItem:
         else:
             self.guid = str(uuid.uuid4())  # Generate a unique identifier for this item
 
+        # Thread safety: Read-write lock for protecting mutable state
+        # Multiple threads can read simultaneously, but writes are exclusive
+        self._lock = QReadWriteLock()
+
         if is_qgis_dark_theme_active():
             # Define icons for each role
             self.dimension_icon = QIcon(resources_path("resources", "icons", "dimension-light.svg"))
@@ -67,6 +72,58 @@ class JsonTreeItem:
 
         self._visible = True
         self._enabled = True
+
+    @contextmanager
+    def atomicAttributeUpdate(self):
+        """
+        Context manager for atomic attribute updates.
+
+        Usage:
+            with item.atomicAttributeUpdate() as attrs:
+                attrs["key1"] = "value1"
+                attrs["key2"] = "value2"
+
+        This ensures all attribute updates happen atomically with a write lock.
+        """
+        self._lock.lockForWrite()
+        try:
+            yield self.itemData[3] if len(self.itemData) > 3 else {}
+        finally:
+            self._lock.unlock()
+
+    def getAttribute(self, key, default=None):
+        """
+        Thread-safe getter for a single attribute.
+
+        Args:
+            key: The attribute key to retrieve
+            default: Default value if key doesn't exist
+
+        Returns:
+            The attribute value or default
+        """
+        self._lock.lockForRead()
+        try:
+            if len(self.itemData) > 3:
+                return self.itemData[3].get(key, default)
+            return default
+        finally:
+            self._lock.unlock()
+
+    def attributesSnapshot(self):
+        """
+        Thread-safe method to get a shallow copy of attributes.
+
+        Returns:
+            A dict copy of current attributes (snapshot at call time)
+        """
+        self._lock.lockForRead()
+        try:
+            if len(self.itemData) > 3:
+                return dict(self.itemData[3])
+            return {}
+        finally:
+            self._lock.unlock()
 
     def set_visibility(self, visible: bool):
         """Sets the visibility of this item."""
@@ -100,7 +157,11 @@ class JsonTreeItem:
         Args:
             item: Item.
         """
-        self.childItems.append(item)
+        self._lock.lockForWrite()
+        try:
+            self.childItems.append(item)
+        finally:
+            self._lock.unlock()
 
     def child(self, row):
         """⚙️ Child.
@@ -163,10 +224,14 @@ class JsonTreeItem:
         Returns:
             The result of the operation.
         """
-        if column < len(self.itemData):
-            self.itemData[column] = value
-            return True
-        return False
+        self._lock.lockForWrite()
+        try:
+            if column < len(self.itemData):
+                self.itemData[column] = value
+                return True
+            return False
+        finally:
+            self._lock.unlock()
 
     def parent(self):
         """⚙️ Parent.
@@ -538,7 +603,11 @@ class JsonTreeItem:
 
     def setAttribute(self, attribute_name, attribute_value):
         """Set the attribute of the item."""
-        self.itemData[3][attribute_name] = attribute_value
+        self._lock.lockForWrite()
+        try:
+            self.itemData[3][attribute_name] = attribute_value
+        finally:
+            self._lock.unlock()
 
     def attributesAsMarkdown(self):
         """Return the attributes as a markdown formatted string."""

@@ -119,12 +119,13 @@ class WorkflowBase(QObject):
         self.result_file_key = "result_file"
         self.result_key = "result"
 
-        # Will be populated by the workflow
+        # Will be populated by the workflow - use atomic update for thread safety
         self.attributes = self.item.attributes()
-        self.attributes["error"] = None
-        self.attributes["error_file"] = None
-        self.attributes["execution_start_time"] = None
-        self.attributes["execution_end_time"] = None
+        with self.item.atomicAttributeUpdate() as attrs:
+            attrs["error"] = None
+            attrs["error_file"] = None
+            attrs["execution_start_time"] = None
+            attrs["execution_end_time"] = None
         self.layer_id = self.attributes.get("id", "").lower().replace(" ", "_")
         self.aggregation = False
         self.analysis_mode = self.item.attribute("analysis_mode", "")
@@ -430,7 +431,8 @@ class WorkflowBase(QObject):
             log_message(self.item.attributesAsMarkdown())
             log_message("----------------------------------")
 
-        self.attributes["execution_start_time"] = datetime.datetime.now().isoformat()
+        with self.item.atomicAttributeUpdate() as attrs:
+            attrs["execution_start_time"] = datetime.datetime.now().isoformat()
 
         log_message("Processing Started")
         self.updateStatus(f"Starting {self.workflow_name}")
@@ -463,142 +465,147 @@ class WorkflowBase(QObject):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            self.attributes[self.result_key] = f"{self.workflow_name} Workflow Error"
-            self.attributes[self.result_file_key] = ""
-            self.attributes["error_file"] = error_path
-            self.attributes["error"] = f"Failed to reproject features layer for {self.workflow_name}: {e}"
+            with self.item.atomicAttributeUpdate() as attrs:
+                attrs[self.result_key] = f"{self.workflow_name} Workflow Error"
+                attrs[self.result_file_key] = ""
+                attrs["error_file"] = error_path
+                attrs["error"] = f"Failed to reproject features layer for {self.workflow_name}: {e}"
             return False
 
-        area_iterator = AreaIterator(self.gpkg_path)
+        # Use AreaIterator as context manager to ensure cleanup
+        with AreaIterator(self.gpkg_path) as area_iterator:
+            log_layer_count()  # For performance tuning, write the number of open layers to a log file
 
-        log_layer_count()  # For performance tuning, write the number of open layers to a log file
+            areas_processed = 0
 
-        areas_processed = 0
-
-        try:
-            total_areas = area_iterator.area_count()
-            for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
-                areas_processed += 1
-                message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"  # noqa E231
-                self.updateStatus(f"Processing area {index + 1}/{total_areas}")
-                feedback.pushInfo(message)
-                log_message(message)
-                if self.feedback.isCanceled():
-                    log_message(
-                        f"{self.class_name} Processing was canceled by the user.",
-                        tag="Geest",
-                        level=Qgis.Warning,
-                    )
-                raster_output = None
-                # Step 1: Select features that intersect with the current area
-                if self.features_layer:  # we are processing a vector input
-                    area_features = self._subset_vector_layer(
-                        current_area,
-                        output_prefix=f"{self.layer_id}_area_features_{index}",
-                    )
-                    # Some workflows do not take in vector data (a features layer)
-                    # but are not raster based. e.g. index_score_workflow
-                    # Logic below is a check for that
-                    if (
-                        not isinstance(self.features_layer, bool)  # noqa W503
-                        and area_features.featureCount() == 0  # noqa W503
-                    ):
+            try:
+                total_areas = area_iterator.area_count()
+                for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
+                    areas_processed += 1
+                    message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"  # noqa E231
+                    self.updateStatus(f"Processing area {index + 1}/{total_areas}")
+                    feedback.pushInfo(message)
+                    log_message(message)
+                    if self.feedback.isCanceled():
                         log_message(
-                            "No area features ... skipping",
+                            f"{self.class_name} Processing was canceled by the user.",
                             tag="Geest",
                             level=Qgis.Warning,
                         )
-                        continue
+                    raster_output = None
+                    # Step 1: Select features that intersect with the current area
+                    if self.features_layer:  # we are processing a vector input
+                        area_features = self._subset_vector_layer(
+                            current_area,
+                            output_prefix=f"{self.layer_id}_area_features_{index}",
+                        )
+                        # Some workflows do not take in vector data (a features layer)
+                        # but are not raster based. e.g. index_score_workflow
+                        # Logic below is a check for that
+                        if (
+                            not isinstance(self.features_layer, bool)  # noqa W503
+                            and area_features.featureCount() == 0  # noqa W503
+                        ):
+                            log_message(
+                                "No area features ... skipping",
+                                tag="Geest",
+                                level=Qgis.Warning,
+                            )
+                            continue
 
-                    # Step 2: Process the area features - work happens in concrete class
-                    raster_output = self._process_features_for_area(
-                        current_area=current_area,
-                        clip_area=clip_area,
-                        current_bbox=current_bbox,
-                        area_features=area_features,
+                        # Step 2: Process the area features - work happens in concrete class
+                        raster_output = self._process_features_for_area(
+                            current_area=current_area,
+                            clip_area=clip_area,
+                            current_bbox=current_bbox,
+                            area_features=area_features,
+                            index=index,
+                        )
+                    elif not self.aggregation:  # assumes we are processing a raster input
+                        area_raster = self._subset_raster_layer(bbox=current_bbox, index=index)
+                        raster_output = self._process_raster_for_area(
+                            current_area=current_area,
+                            clip_area=clip_area,
+                            current_bbox=current_bbox,
+                            area_raster=area_raster,
+                            index=index,
+                        )
+                    elif self.aggregation:  # we are processing an aggregate
+                        raster_output = self._process_aggregate_for_area(
+                            current_area=current_area,
+                            clip_area=clip_area,
+                            current_bbox=current_bbox,
+                            index=index,
+                        )
+
+                    # clip the area by its matching mask layer in study_area geopackage
+                    self.updateStatus(f"Masking area {index + 1}...")
+                    masked_layer = self._mask_raster(
+                        raster_path=raster_output,
+                        area_geometry=clip_area,
                         index=index,
                     )
-                elif not self.aggregation:  # assumes we are processing a raster input
-                    area_raster = self._subset_raster_layer(bbox=current_bbox, index=index)
-                    raster_output = self._process_raster_for_area(
-                        current_area=current_area,
-                        clip_area=clip_area,
-                        current_bbox=current_bbox,
-                        area_raster=area_raster,
-                        index=index,
-                    )
-                elif self.aggregation:  # we are processing an aggregate
-                    raster_output = self._process_aggregate_for_area(
-                        current_area=current_area,
-                        clip_area=clip_area,
-                        current_bbox=current_bbox,
-                        index=index,
-                    )
+                    output_rasters.append(masked_layer)
+                    # Note: We don't emit area iterator progress here because it would
+                    # override the sub-task progress in the Task Progress bar.
+                    # The sub-task progress (0-100%) is more useful to the user.
+                # Combine all area rasters into a VRT
+                self.updateStatus("Combining area rasters...")
+                vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
+                with self.item.atomicAttributeUpdate() as attrs:
+                    attrs[self.result_file_key] = vrt_filepath
+                    attrs[self.result_key] = f"{self.workflow_name} Workflow Completed"
 
-                # clip the area by its matching mask layer in study_area geopackage
-                self.updateStatus(f"Masking area {index + 1}...")
-                masked_layer = self._mask_raster(
-                    raster_path=raster_output,
-                    area_geometry=clip_area,
-                    index=index,
-                )
-                output_rasters.append(masked_layer)
-                # Note: We don't emit area iterator progress here because it would
-                # override the sub-task progress in the Task Progress bar.
-                # The sub-task progress (0-100%) is more useful to the user.
-            # Combine all area rasters into a VRT
-            self.updateStatus("Combining area rasters...")
-            vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
-            self.attributes[self.result_file_key] = vrt_filepath
-            self.attributes[self.result_key] = f"{self.workflow_name} Workflow Completed"
-
-            self.updateStatus(f"{self.workflow_name} complete")
-            log_message(
-                f"{self.workflow_name} Completed. Output VRT: {vrt_filepath}",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-
-            # Log processing summary
-            if areas_processed > 0:
+                self.updateStatus(f"{self.workflow_name} complete")
                 log_message(
-                    f"Processing Summary - Areas processed: {areas_processed}",
+                    f"{self.workflow_name} Completed. Output VRT: {vrt_filepath}",
                     tag="Geest",
                     level=Qgis.Info,
                 )
-            self.attributes["execution_end_time"] = datetime.datetime.now().isoformat()
-            self.attributes["error_file"] = None
-            log_layer_count()  # For performance tuning, write the number of open layers to a log file
-            return True
 
-        except Exception as e:
-            # remove error.txt if it exists
-            error_file = os.path.join(self.workflow_directory, "error.txt")
-            if os.path.exists(error_file):
-                os.remove(error_file)
+                # Log processing summary
+                if areas_processed > 0:
+                    log_message(
+                        f"Processing Summary - Areas processed: {areas_processed}",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
+                with self.item.atomicAttributeUpdate() as attrs:
+                    attrs["execution_end_time"] = datetime.datetime.now().isoformat()
+                    attrs["error_file"] = None
+                log_layer_count()  # For performance tuning, write the number of open layers to a log file
+                return True
 
-            log_message(
-                f"Failed to process {self.workflow_name}: {e}",
-                tag="Geest",
-                level=Qgis.Critical,
-            )
-            log_message(
-                traceback.format_exc(),
-                tag="Geest",
-                level=Qgis.Critical,
-            )
-            self.attributes[self.result_key] = f"{self.workflow_name} Workflow Error"
-            self.attributes[self.result_file_key] = ""
+            except Exception as e:
+                # remove error.txt if it exists
+                error_file = os.path.join(self.workflow_directory, "error.txt")
+                if os.path.exists(error_file):
+                    os.remove(error_file)
 
-            # Write the traceback to error.txt in the workflow_directory
-            error_path = os.path.join(self.workflow_directory, "error.txt")
-            with open(error_path, "w") as f:
-                f.write(f"Failed to process {self.workflow_name}: {e}\n")
-                f.write(traceback.format_exc())
-            self.attributes["error_file"] = error_path
-            self.attributes["error"] = f"Failed to process {self.workflow_name}: {e}"
-            log_layer_count()  # For performance tuning, write the number of open layers to a log file
-            return False
+                log_message(
+                    f"Failed to process {self.workflow_name}: {e}",
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
+                log_message(
+                    traceback.format_exc(),
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
+                with self.item.atomicAttributeUpdate() as attrs:
+                    attrs[self.result_key] = f"{self.workflow_name} Workflow Error"
+                    attrs[self.result_file_key] = ""
+
+                # Write the traceback to error.txt in the workflow_directory
+                error_path = os.path.join(self.workflow_directory, "error.txt")
+                with open(error_path, "w") as f:
+                    f.write(f"Failed to process {self.workflow_name}: {e}\n")
+                    f.write(traceback.format_exc())
+                with self.item.atomicAttributeUpdate() as attrs:
+                    attrs["error_file"] = error_path
+                    attrs["error"] = f"Failed to process {self.workflow_name}: {e}"
+                log_layer_count()  # For performance tuning, write the number of open layers to a log file
+                return False
 
     def _create_workflow_directory(self) -> str:
         """
