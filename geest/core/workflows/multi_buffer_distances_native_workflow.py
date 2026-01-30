@@ -230,12 +230,44 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                 level=Qgis.Info,
             )
 
+            # Auto-reproject road network if CRS mismatch detected
             if road_crs != self.target_crs:
                 log_message(
-                    f"WARNING: Road network CRS mismatch for area {area_index}! "
-                    f"Network is in {road_crs.authid()} but expected {self.target_crs.authid()}",
-                    level=Qgis.Warning,
+                    f"Road network CRS mismatch detected. Auto-reprojecting from "
+                    f"{road_crs.authid()} to {self.target_crs.authid()}",
+                    level=Qgis.Info,
                 )
+
+                # Reproject to target CRS in memory (consistent with check_and_reproject_layer behavior)
+                try:
+                    reproject_result = processing.run(
+                        "native:reprojectlayer",
+                        {
+                            "INPUT": road_network_layer,
+                            "TARGET_CRS": self.target_crs,
+                            "OUTPUT": "memory:",
+                        },
+                        context=self.context,
+                    )
+                    road_network_layer = reproject_result["OUTPUT"]
+
+                    if not road_network_layer.isValid():
+                        log_message(
+                            f"ERROR: Failed to reproject road network for area {area_index}",
+                            level=Qgis.Critical,
+                        )
+                        return None
+
+                    log_message(
+                        f"Successfully reprojected road network to {self.target_crs.authid()}",
+                        level=Qgis.Info,
+                    )
+                except Exception as e:
+                    log_message(
+                        f"ERROR: Exception during road network reprojection for area {area_index}: {e}",
+                        level=Qgis.Critical,
+                    )
+                    return None
 
             log_message(
                 f"Clipping road network to area {area_index} with {buffer_distance}m buffer",
@@ -250,10 +282,11 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             temp_provider.addFeatures([temp_feature])
             temp_layer.updateExtents()
 
+            # Use road_network_layer (potentially reprojected) instead of path
             result = processing.run(
                 "native:clip",
                 {
-                    "INPUT": self.road_network_layer_path,
+                    "INPUT": road_network_layer,  # Use layer object (handles reprojection)
                     "OVERLAY": temp_layer,
                     "OUTPUT": clipped_network_path,
                 },
