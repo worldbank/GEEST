@@ -277,7 +277,11 @@ class GpkgOperation:
         return cls(cls.CREATE_LAYER, layer_name=layer_name, geom_type=geom_type, extra_fields=extra_fields or [])
 
     def __repr__(self):
-        """String representation for debugging."""
+        """String representation for debugging.
+
+        Returns:
+            str: Human-readable representation of the operation.
+        """
         return f"GpkgOperation({self.op_type}, {self.data})"
 
 
@@ -386,6 +390,9 @@ class UnifiedWriterThread(QThread):
 
         Args:
             batch: List of GpkgOperation instances
+
+        Raises:
+            Exception: If any batch operation fails.
         """
         if not batch:
             return
@@ -479,6 +486,9 @@ class UnifiedWriterThread(QThread):
 
         Args:
             operations: List of GpkgOperation instances with WRITE_GRID_CELL type
+
+        Raises:
+            Exception: If the transaction fails.
         """
         layer = self._get_layer("study_area_grid")
         feat_defn = layer.GetLayerDefn()
@@ -508,6 +518,9 @@ class UnifiedWriterThread(QThread):
 
         Args:
             operations: List of GpkgOperation instances with WRITE_GEOMETRY type
+
+        Raises:
+            Exception: If any layer transaction fails.
         """
         # Group by layer name
         by_layer = {}
@@ -549,6 +562,9 @@ class UnifiedWriterThread(QThread):
 
         Args:
             operations: List of GpkgOperation instances with INSERT_STATUS type
+
+        Raises:
+            Exception: If the transaction fails.
         """
         layer = self._get_layer("study_area_creation_status")
         feat_defn = layer.GetLayerDefn()
@@ -583,6 +599,9 @@ class UnifiedWriterThread(QThread):
 
         Args:
             operations: List of GpkgOperation instances with UPDATE_STATUS type
+
+        Raises:
+            Exception: If the transaction fails.
         """
         layer = self._get_layer("study_area_creation_status")
 
@@ -618,6 +637,9 @@ class UnifiedWriterThread(QThread):
 
         Args:
             operations: List of GpkgOperation instances with CREATE_LAYER type
+
+        Raises:
+            Exception: If layer creation fails.
         """
         for op in operations:
             layer_name = op.data["layer_name"]
@@ -654,6 +676,11 @@ class UnifiedWriterThread(QThread):
 class ChunkRunnable(QRunnable):
     """QRunnable for processing a single grid chunk.
 
+    When a write_callback is provided, the runnable writes and frees
+    cell geometries immediately upon chunk completion, keeping memory
+    bounded. Without a callback it falls back to storing results for
+    the caller to consume (legacy behaviour).
+
     Attributes:
         chunk: Chunk parameters dictionary.
         geom: OGR geometry for intersection testing.
@@ -663,7 +690,7 @@ class ChunkRunnable(QRunnable):
         error: Exception if processing failed.
     """
 
-    def __init__(self, chunk, geom, cell_size, feedback):
+    def __init__(self, chunk, geom, cell_size, feedback, write_callback=None):
         """Initialize the chunk runnable.
 
         Args:
@@ -671,18 +698,21 @@ class ChunkRunnable(QRunnable):
             geom: OGR geometry for intersection testing.
             cell_size: Cell size in meters.
             feedback: QgsFeedback for progress reporting.
+            write_callback: Optional callable(task, start_time) that queues
+                the chunk's geometries to the write queue and frees them.
         """
         super().__init__()
         self.chunk = chunk
         self.geom = geom
         self.cell_size = cell_size
         self.feedback = feedback
+        self.write_callback = write_callback
         self.result = None
         self.error = None
         self.setAutoDelete(False)  # We manage lifecycle manually
 
     def run(self):
-        """Process the chunk."""
+        """Process the chunk and write results immediately if callback set."""
         try:
             start_time = time.time()
             index = self.chunk["index"]
@@ -701,7 +731,13 @@ class ChunkRunnable(QRunnable):
             )
             task.run()
 
-            self.result = (task, start_time, index)
+            if self.write_callback:
+                self.write_callback(task, start_time)
+                # Free geometries immediately after queuing to write thread
+                task.features_out = []
+                self.result = (None, start_time, index)
+            else:
+                self.result = (task, start_time, index)
         except Exception as e:
             self.error = e
 
@@ -1297,8 +1333,8 @@ class StudyAreaProcessingTask(QgsTask):
                             self.write_queue.get_nowait()
                         except Exception:
                             break
-                except Exception:
-                    pass
+                except Exception:  # nosec B110
+                    pass  # Best-effort drain during cleanup
                 self.write_queue = None
 
             log_message("GDAL resources cleaned up successfully")
@@ -1381,6 +1417,9 @@ class StudyAreaProcessingTask(QgsTask):
 
         Args:
             area_name: Name of study area
+
+        Raises:
+            RuntimeError: If the GeoPackage or status table cannot be opened.
         """
         self.gpkg_lock.lock()
         try:
@@ -1415,6 +1454,9 @@ class StudyAreaProcessingTask(QgsTask):
             area_name: Name of study area
             field_name: Field to update
             value: New value
+
+        Raises:
+            RuntimeError: If the GeoPackage or status table cannot be opened.
         """
         self.gpkg_lock.lock()
         try:
@@ -1576,9 +1618,6 @@ class StudyAreaProcessingTask(QgsTask):
             geom: OGR multi-part geometry
             normalized_name: Base name for the area
             area_name: Original area name
-
-        Raises:
-            RuntimeError: If the writer thread cannot be started.
         """
         count = geom.GetGeometryCount()
         log_message(f"Processing {count} parts for {normalized_name} with unified writer thread")
@@ -1823,6 +1862,9 @@ class StudyAreaProcessingTask(QgsTask):
             geom: OGR geometry
             area_name: Name of the area
             **extra_fields: Additional fields to set
+
+        Raises:
+            RuntimeError: If the GeoPackage or target layer cannot be opened.
         """
         self.gpkg_lock.lock()
         try:
@@ -1911,9 +1953,6 @@ class StudyAreaProcessingTask(QgsTask):
 
         Args:
             normalized_name: Name of the area being processed.
-
-        Raises:
-            RuntimeError: If the writer thread cannot be initialized.
         """
         self.writer_start_lock.lock()
         try:
@@ -2118,9 +2157,6 @@ class StudyAreaProcessingTask(QgsTask):
             normalized_name: Name of study area
             geom: OGR geometry defining area boundary
             bbox: Tuple of (xmin, xmax, ymin, ymax) for grid extent
-
-        Raises:
-            RuntimeError: If the unified writer cannot be started.
         """
         grid_layer_name = "study_area_grid"
         self.create_grid_layer_if_not_exists(grid_layer_name)
@@ -2192,6 +2228,11 @@ class StudyAreaProcessingTask(QgsTask):
     def _process_chunks_parallel(self, layer, chunks, geom, cell_size, normalized_name, feedback, worker_count):
         """Process chunks in parallel using QThreadPool.
 
+        Each worker writes its results to the unified write queue as soon as
+        it finishes a chunk, then frees the geometries. This keeps peak memory
+        proportional to (worker_count * chunk_size^2) rather than
+        (total_chunks * chunk_size^2).
+
         Args:
             layer: OGR layer for writing grid cells
             chunks: List of chunk dictionaries to process
@@ -2204,45 +2245,53 @@ class StudyAreaProcessingTask(QgsTask):
         total_chunks = len(chunks)
         completed_count = 0
         failed_count = 0
+        progress_lock = QMutex()
 
         # Get global thread pool and set max thread count
         pool = QThreadPool.globalInstance()
         pool.setMaxThreadCount(worker_count)
 
-        # Create runnables for all chunks
+        def _write_callback(task, start_time):
+            """Called from worker threads to queue results immediately.
+
+            Args:
+                task: The completed GridFromBboxTask with features_out.
+                start_time: When the chunk started processing.
+            """
+            nonlocal completed_count
+            self.track_time("Creating chunks", start_time)
+            self.write_chunk(layer, task, normalized_name)
+            self.track_time("Complete chunk", start_time)
+
+            progress_lock.lock()
+            try:
+                completed_count += 1
+                count = completed_count
+            finally:
+                progress_lock.unlock()
+
+            try:
+                current_progress = int((count / total_chunks) * 100)
+                if count % 10 == 0 or count == total_chunks:
+                    log_message(f"Chunk progress: {count}/{total_chunks} ({current_progress}%)")
+                self.feedback.setProgress(current_progress)
+            except ZeroDivisionError:
+                pass
+
+        # Submit all chunks but each writes+frees immediately on completion
         runnables = []
         for chunk in chunks:
-            runnable = ChunkRunnable(chunk, geom, cell_size, feedback)
+            runnable = ChunkRunnable(chunk, geom, cell_size, feedback, write_callback=_write_callback)
             runnables.append(runnable)
             pool.start(runnable)
 
-        # Wait for all to complete and process results
         pool.waitForDone()
 
-        # Process results from all runnables
+        # Check for errors (results already written)
         for runnable in runnables:
             if runnable.error is not None:
                 failed_count += 1
                 log_message(f"Chunk {runnable.chunk['index']} failed: {str(runnable.error)}", level="WARNING")
-                continue
-
-            if runnable.result is not None:
-                task, start_time, index = runnable.result
-                self.track_time("Creating chunks", start_time)
-
-                self.write_chunk(layer, task, normalized_name)
-
-                completed_count += 1
-                try:
-                    current_progress = int((completed_count / total_chunks) * 100)
-                    # Only log every 10 chunks or the last chunk to reduce overhead
-                    if completed_count % 10 == 0 or completed_count == total_chunks:
-                        log_message(f"Chunk progress: {completed_count}/{total_chunks} ({current_progress}%)")
-                    self.feedback.setProgress(current_progress)
-                except ZeroDivisionError:
-                    pass
-
-                self.track_time("Complete chunk", start_time)
 
         if failed_count > 0:
             log_message(f"Grid creation completed with {failed_count} failed chunks", level="WARNING")
@@ -2269,6 +2318,9 @@ class StudyAreaProcessingTask(QgsTask):
             # Queue grid cell write operation
             op = GpkgOperation.write_grid_cell(geometry=geometry, area_name=normalized_name, grid_id=grid_id)
             self.write_queue.put(op)
+
+        # Free geometries after queuing to release memory
+        task.features_out = []
 
     def create_grid_layer_if_not_exists(self, layer_name):
         """Create a GeoPackage grid layer.
