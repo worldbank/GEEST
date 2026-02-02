@@ -142,6 +142,7 @@
             ps.gdal
             ps.httpx
             ps.jsonschema
+            ps.matplotlib
             ps.mypy
             ps.numpy
             ps.odfpy
