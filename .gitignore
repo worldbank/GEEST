@@ -102,3 +102,4 @@ test_osm_roads_output.xml
 docs/presentations/*.html
 docs/presentations/*.pdf
 .claude
+qgis_memory_chart.png
