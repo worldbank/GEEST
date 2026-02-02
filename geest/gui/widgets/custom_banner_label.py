@@ -61,11 +61,13 @@ class CustomBannerLabel(QLabel):
         # Scale the font size to fit the text in the available space
         font_size = 16
         threshold = 430
+
         # log_message(f"Banner Label Width: {self.rect().width()}")
         if self.rect().width() < threshold:
             font_size = int(14 * (self.rect().width() / threshold))
         # log_message(f"Font Size: {font_size}")
         painter.setFont(QFont("Arial", font_size))
-        painter.drawText(text_rect, Qt.AlignCenter | Qt.AlignBottom, self.text)
+
+        painter.drawText(text_rect, Qt.AlignHCenter | Qt.AlignBottom | Qt.TextWordWrap, self.text)
 
         painter.end()
