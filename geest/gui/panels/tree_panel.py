@@ -15,6 +15,7 @@ from logging import getLogger
 
 from qgis.core import (
     Qgis,
+    QgsApplication,
     QgsFeedback,
     QgsLayerTreeGroup,
     QgsProcessingContext,
@@ -54,6 +55,7 @@ from geest.core.algorithms import (
     WEEByPopulationScoreProcessingTask,
 )
 from geest.core.reports import AnalysisReport, StudyAreaReport
+from geest.core.tasks import AnalysisReportTask
 from geest.core.settings import set_setting, setting
 from geest.core.utilities import add_to_map, validate_network_layer
 from geest.gui.dialogs import (
@@ -949,43 +951,52 @@ class TreePanel(QWidget):
 
     def generate_analysis_report(self):
         """Add a report showing analysis results."""
+        if not self.working_directory:
+            log_message(
+                "No working directory set, cannot generate analysis report.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
+
+        # Show progress bar in indeterminate mode
+        self.overall_progress_bar.setVisible(True)
+        self.overall_progress_bar.setMinimum(0)
+        self.overall_progress_bar.setMaximum(0)  # Indeterminate/bouncing
+        self.overall_progress_bar.setFormat("Generating analysis report...")
+
+        # Start report generation in background
         model_path = os.path.join(self.working_directory, "model.json")
-        with AnalysisReport(
-            model_path=model_path,
-            working_directory=self.working_directory,
-            report_name="Study Area Summary",
-        ) as report:
-            self.overall_progress_bar.setVisible(True)
-            self.overall_progress_bar.setValue(10)
-            report.create_layout()
-            self.overall_progress_bar.setValue(30)
-            report.export_pdf(os.path.join(self.working_directory, "analysis_report.pdf"))
-            self.overall_progress_bar.setValue(60)
-            report.export_qpt(os.path.join(self.working_directory, "analysis_report.qpt"))
-            self.overall_progress_bar.setValue(90)
+        self.analysis_report_task = AnalysisReportTask(self.working_directory, model_path)
+        self.analysis_report_task.taskCompleted.connect(self.on_analysis_report_completed)
+        self.analysis_report_task.taskTerminated.connect(self.on_analysis_report_failed)
 
-        # open the pdf using the system PDF viewer
-        # Windows
-        if os.name == "nt":  # Windows
-            os.startfile(os.path.join(self.working_directory, "analysis_report.pdf"))  # nosec B606
-        else:  # macOS and Linux
-            system = platform.system().lower()
-            if system == "darwin":  # macOS
-                working_directory = self.working_directory
-                if not working_directory:
-                    log_message(
-                        "No working directory set, cannot open analysis report.",
-                        tag="Geest",
-                        level=Qgis.Warning,
-                    )
-                    return
+        QgsApplication.taskManager().addTask(self.analysis_report_task)
 
-                pdf_path = os.path.join(working_directory, "analysis_report.pdf")
-                subprocess.run(["open", pdf_path], check=False)  # nosec B603 B607
-            else:  # Linux
-                pdf_path = os.path.join(self.working_directory, "analysis_report.pdf")
-                subprocess.run(["xdg-open", pdf_path], check=False)  # nosec B603 B607
+    def on_analysis_report_completed(self):
+        """Slot called when analysis report generation completes successfully."""
+        log_message("Analysis report generated successfully.", tag="Geest", level=Qgis.Info)
+
+        self.overall_progress_bar.setMinimum(0)
+        self.overall_progress_bar.setMaximum(100)
         self.overall_progress_bar.setValue(100)
+        self.overall_progress_bar.setFormat("Report generated successfully!")
+        self.overall_progress_bar.setVisible(False)
+
+    def on_analysis_report_failed(self):
+        """Slot called when analysis report generation fails."""
+        error_msg = (
+            str(self.analysis_report_task.exception)
+            if hasattr(self.analysis_report_task, "exception") and self.analysis_report_task.exception
+            else "Unknown error"
+        )
+
+        log_message(f"Analysis report generation failed: {error_msg}", tag="Geest", level=Qgis.Critical)
+
+        self.overall_progress_bar.setMinimum(0)
+        self.overall_progress_bar.setMaximum(100)
+        self.overall_progress_bar.setValue(0)
+        self.overall_progress_bar.setFormat(f"Error: {error_msg}")
         self.overall_progress_bar.setVisible(False)
 
     def generate_study_area_report(self):

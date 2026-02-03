@@ -12,4 +12,5 @@ from .ors_checker_task import OrsCheckerTask
 from .osm_downloader_task import OSMDownloaderTask
 from .study_area_processing_task import StudyAreaProcessingTask
 from .study_area_report_task import StudyAreaReportTask
+from .analysis_report_task import AnalysisReportTask
 from .ghsl_downloader_task import GHSLDownloaderTask
