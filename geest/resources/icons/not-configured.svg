@@ -14,21 +14,11 @@
   <g
      id="layer1">
     <ellipse
-       style="fill:#FF7700;fill-opacity:1;stroke:none;stroke-width:10.9268;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#FFBA00;fill-opacity:1;stroke:none;stroke-width:10.9268;stroke-dasharray:none;stroke-opacity:1"
        id="path4"
        cx="34.139038"
        cy="34.100826"
        rx="33.01112"
        ry="33.059422" />
-    <text
-       x="34.139038"
-       y="52"
-       font-size="65"
-       font-weight="bold"
-       text-anchor="middle"
-       fill="#ffffff"
-       style="font-family: Arial, sans-serif;">
-      c
-    </text>
   </g>
 </svg>
