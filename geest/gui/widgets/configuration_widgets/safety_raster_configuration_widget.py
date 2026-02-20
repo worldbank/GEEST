@@ -45,23 +45,30 @@ class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
 
             data_source = NIGHTTIME_LIGHTS_SAFETY.get("data_source", "Nighttime Lights")
             classes = NIGHTTIME_LIGHTS_SAFETY.get("classes", [])
+            example_note = NIGHTTIME_LIGHTS_SAFETY.get("example_note", "")
+            note = NIGHTTIME_LIGHTS_SAFETY.get("note", "")
             rows = []
             for entry in classes:
-                min_value = entry.get("min_value", "")
-                max_value = entry.get("max_value", None)
                 score = entry.get("score", "")
-                if max_value is None:
-                    value_range = f"> {min_value}"
-                else:
-                    value_range = f"{min_value}-{max_value}"
-                rows.append(f"<tr><td>{value_range}</td><td>{score}</td></tr>")
+                label = entry.get("label", "")
+                value_range = entry.get("range", "")
+                example = entry.get("example", "")
+                rows.append(f"<tr><td>{score}</td><td>{label}</td><td>{value_range}</td><td>{example}</td></tr>")
 
             html = f"""
             <p><b>Nighttime Lights ({data_source})</b></p>
+            <p><i>Method: Fisher-Jenks Natural Breaks</i></p>
             <table border='1' cellpadding='4' cellspacing='0'>
-                <tr><th>Raster Cell Value</th><th>Score</th></tr>
+                <tr>
+                    <th>GEEST Class</th>
+                    <th>Description</th>
+                    <th>NTL Value Range</th>
+                    <th>Example</th>
+                </tr>
                 {''.join(rows)}
             </table>
+            <p style='margin-top: 10px;'><small><i>{example_note}</i></small></p>
+            <p style='margin-top: 5px;'><small>{note}</small></p>
             """
 
             self.mapping_table_label = QLabel()
