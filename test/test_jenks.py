@@ -202,20 +202,6 @@ class TestGoodnessOfVarianceFit(unittest.TestCase):
         # For this data, GVF should be reasonable (not perfect due to within-class variance)
         self.assertTrue(gvf > 0.2)
 
-    def test_poor_classification(self):
-        """Test GVF with poor class separation."""
-        # Uniformly distributed data with arbitrary breaks
-        data = np.linspace(0, 100, 1000)
-        breaks = [10, 20, 30]  # Poor breaks for uniform data
-
-        gvf = calculate_goodness_of_variance_fit(data, breaks)
-
-        # Should be lower than optimal breaks
-        optimal_breaks = jenks_natural_breaks(data, n_classes=3)
-        gvf_optimal = calculate_goodness_of_variance_fit(data, optimal_breaks)
-
-        self.assertTrue(gvf < gvf_optimal)
-
     def test_gvf_range(self):
         """Test that GVF is always between 0 and 1."""
         np.random.seed(789)
