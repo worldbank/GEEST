@@ -20,6 +20,7 @@ from qgis.core import (
 )
 
 from geest.core import JsonTreeItem
+from geest.core.jenks import jenks_natural_breaks
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
@@ -45,8 +46,10 @@ class SafetyRasterWorkflow(WorkflowBase):
         :param cell_size_m: Cell size in meters
         :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass
+            objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will
+            be placed. If not set will be taken from QSettings.
         """
         super().__init__(
             item, cell_size_m, analysis_scale, feedback, context, working_directory
@@ -91,14 +94,23 @@ class SafetyRasterWorkflow(WorkflowBase):
         """
         _ = current_area  # Unused in this analysis
 
-        max_val, median, percentile_75 = self.calculate_raster_stats(area_raster)
+        max_val, median, percentile_75, valid_data = self.calculate_raster_stats(area_raster)
 
-        # Dynamically build the reclassification table using the max value
-        reclass_table = self._build_reclassification_table(max_val, median, percentile_75)
+        # Check if we got valid statistics
+        if valid_data is None or len(valid_data) == 0:
+            log_message(
+                f"No valid data for area {index}, skipping reclassification",
+                tag="Geest",
+                level=1,
+            )
+            return None
+
+        # Dynamically build the reclassification table using Jenks Natural Breaks
+        reclass_table = self._build_reclassification_table(max_val, median, valid_data)
         log_message(
             f"Reclassification table for area {index}: {reclass_table}",
             tag="Geest",
-            level=Qgis.Info,
+            level=0,
         )
 
         # Apply the reclassification rules
@@ -153,14 +165,18 @@ class SafetyRasterWorkflow(WorkflowBase):
 
     def calculate_raster_stats(self, raster_path):
         """
-        Calculate statistics (max, median, 75th percentile) from a QGIS raster layer using as_numpy.
+        Calculate statistics from a QGIS raster layer using NumPy.
+
+        Returns:
+            Tuple of (max_value, median, percentile_75, valid_data)
+            Returns (None, None, None, None) if raster cannot be read
         """
         raster_layer = QgsRasterLayer(raster_path, "Input Raster")
 
         # Check if the raster layer loaded successfully
         if not raster_layer.isValid():
-            log_message("Raster layer failed to load", "Geest", level=Qgis.Warning)
-            return None, None, None
+            log_message("Raster layer failed to load", tag="Geest", level=1)
+            return None, None, None, None
 
         provider = raster_layer.dataProvider()
         extent = raster_layer.extent()
@@ -188,8 +204,8 @@ class SafetyRasterWorkflow(WorkflowBase):
             dtype = np.uint8
 
         if dtype is None:
-            log_message("Unsupported data type", "Geest", level=Qgis.Warning)
-            return None, None, None
+            log_message("Unsupported data type", tag="Geest", level=1)
+            return None, None, None, None
 
         # Convert QByteArray to a numpy array with the correct dtype
         raster_array = np.frombuffer(byte_array, dtype=dtype).reshape((height, width))
@@ -204,22 +220,62 @@ class SafetyRasterWorkflow(WorkflowBase):
             median = np.median(valid_data).astype(dtype)
             percentile_75 = np.percentile(valid_data, 75).astype(dtype)
 
-            return max_value, median, percentile_75
+            return max_value, median, percentile_75, valid_data
         else:
             # Handle case with no valid data
-            log_message("No valid data in the raster", "Geest", level=Qgis.Warning)
-            return None, None, None
+            log_message("No valid data in the raster", tag="Geest", level=1)
+            return None, None, None, None
 
-    def _build_reclassification_table(self, max_val: float, median: float, percentile_75: float):
+    def _build_reclassification_table(self, max_val: float, median: float, valid_data: np.ndarray) -> list:
         """
-        Build a reclassification table dynamically using the max value from the raster.
+        Build a reclassification table using Jenks Natural Breaks algorithm.
+
+        The table maps nighttime lights intensity values to 6 safety classes:
+        - 0: No Access (very dark)
+        - 1: Very Low
+        - 2: Low
+        - 3: Moderate
+        - 4: High
+        - 5: Very High (well-lit)
+
+        Uses two classification schemes based on data characteristics:
+        - Low-light mode: When max_value <= 0.05 OR low variance detected
+        - Standard mode: When max_value > 0.05 AND good variance
+
+        Args:
+            max_val: Maximum value in the raster
+            median: Median value in the raster
+            valid_data: Array of all valid (non-NoData) raster values
+
+        Returns:
+            Reclassification table as list of [min, max, class, min, max, class, ...]
+            formatted as strings for QGIS native:reclassifybytable algorithm
+
+        Example:
+            >>> table = [0.0, 0.5, 0, 0.5, 1.2, 1, 1.2, 2.5, 2, ...]
+            >>> # Means: [0.0-0.5] -> class 0, [0.5-1.2] -> class 1, etc.
         """
-        # Low NTL Classification Scheme
-        if max_val < 0.05:
+        n_classes = 6  # Fixed: 0=No Access, 1-5=Safety levels
+
+        # Determine if we should use low-light classification mode
+        # Low-light mode triggers when:
+        # 1. Max value is very low (<= 0.05), OR
+        # 2. Variance is very low (data is too homogeneous for meaningful Jenks breaks)
+        variance = np.var(valid_data)
+        use_low_light_mode = (max_val <= 0.05) or (variance < 1e-6)
+
+        if use_low_light_mode:
+            log_message(
+                f"🌙 Using low-light classification mode (max={max_val:.6f}, var={variance:.6f})",
+                tag="Geest",
+                level=0,
+            )
+            # For very low light areas, use simple percentile-based breaks
+            # This avoids Jenks issues with near-zero variance data
             reclass_table = [
                 0,
                 0,
-                0,  # No Light
+                0,  # No Light (exactly 0)
                 0.01,
                 max_val * 0.2,
                 1,  # Very Low
@@ -238,10 +294,69 @@ class SafetyRasterWorkflow(WorkflowBase):
             ]
             reclass_table = list(map(str, reclass_table))
             return reclass_table
-        else:
-            # Standard Classification Scheme
+
+        # Standard mode: Use Jenks Natural Breaks for optimal classification
+        log_message(
+            f"📊 Using Jenks Natural Breaks classification (max={max_val:.6f}, "
+            f"median={median:.6f}, n={len(valid_data)})",
+            tag="Geest",
+            level=0,
+        )
+
+        try:
+            # Calculate Jenks breaks for n_classes
+            # Returns: [break₁, break₂, break₃, break₄, break₅, max_value]
+            breaks = jenks_natural_breaks(valid_data, n_classes=n_classes)
+
+            # Build QGIS reclassification table format
+            # Format: [min₁, max₁, class₁, min₂, max₂, class₂, ...]
+            reclass_table = []
+
+            # Class 0: From 0 to first break
+            reclass_table.extend([0.0, breaks[0], 0])
+
+            # Classes 1-5: Between consecutive breaks
+            for i in range(len(breaks) - 1):
+                class_num = i + 1
+                min_val = breaks[i]
+                max_val_class = breaks[i + 1]
+                reclass_table.extend([min_val, max_val_class, class_num])
+
+            # Convert all values to strings for QGIS processing
+            reclass_table = list(map(str, reclass_table))
+
+            # Calculate GVF for quality assessment
+            from geest.core.jenks import calculate_goodness_of_variance_fit
+
+            gvf = calculate_goodness_of_variance_fit(valid_data, breaks)
+
+            log_message(
+                f"✅ Jenks Natural Breaks computed:\n"
+                f"   Class 0 (No Access):  0.000 - {breaks[0]:.3f}\n"
+                f"   Class 1 (Very Low):   {breaks[0]:.3f} - {breaks[1]:.3f}\n"
+                f"   Class 2 (Low):        {breaks[1]:.3f} - {breaks[2]:.3f}\n"
+                f"   Class 3 (Moderate):   {breaks[2]:.3f} - {breaks[3]:.3f}\n"
+                f"   Class 4 (High):       {breaks[3]:.3f} - {breaks[4]:.3f}\n"
+                f"   Class 5 (Very High):  {breaks[4]:.3f} - {breaks[5]:.3f}\n"
+                f"   Quality (GVF): {gvf:.4f}",
+                tag="Geest",
+                level=0,
+            )
+
+            return reclass_table
+
+        except Exception as e:
+            # Fallback to percentile-based if Jenks fails
+            log_message(
+                f"⚠️ Jenks classification failed ({e}), falling back to percentile-based",
+                tag="Geest",
+                level=1,
+            )
+
+            # Fallback: Use percentile-based breaks similar to original implementation
             quarter_median = 0.25 * median
             half_median = 0.5 * median
+            p75 = np.percentile(valid_data, 75)
 
             reclass_table = [
                 0.00,
@@ -257,9 +372,9 @@ class SafetyRasterWorkflow(WorkflowBase):
                 median,
                 3,  # Moderate
                 median,
-                percentile_75,
+                p75,
                 4,  # High
-                percentile_75,
+                p75,
                 "inf",
                 5,  # Very High
             ]
