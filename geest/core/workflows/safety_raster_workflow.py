@@ -238,9 +238,9 @@ class SafetyRasterWorkflow(WorkflowBase):
         - 4: High
         - 5: Very High (well-lit)
 
-        Uses two classification schemes based on data characteristics:
-        - Low-light mode: When max_value <= 0.05 OR low variance detected
-        - Standard mode: When max_value > 0.05 AND good variance
+        Uses Jenks Natural Breaks for optimal data-driven classification.
+        If Jenks cannot compute valid breaks (e.g., insufficient data variation),
+        the workflow will fail with a descriptive error message.
 
         Args:
             max_val: Maximum value in the raster
@@ -251,53 +251,17 @@ class SafetyRasterWorkflow(WorkflowBase):
             Reclassification table as list of [min, max, class, min, max, class, ...]
             formatted as strings for QGIS native:reclassifybytable algorithm
 
+        Raises:
+            ValueError: If Jenks Natural Breaks cannot compute valid classification breaks
+
         Example:
             >>> table = [0.0, 0.5, 0, 0.5, 1.2, 1, 1.2, 2.5, 2, ...]
             >>> # Means: [0.0-0.5] -> class 0, [0.5-1.2] -> class 1, etc.
         """
         n_classes = 6  # Fixed: 0=No Access, 1-5=Safety levels
 
-        # Determine if we should use low-light classification mode
-        # Low-light mode triggers when:
-        # 1. Max value is very low (<= 0.05), OR
-        # 2. Variance is very low (data is too homogeneous for meaningful Jenks breaks)
-        variance = np.var(valid_data)
-        use_low_light_mode = (max_val <= 0.05) or (variance < 1e-6)
-
-        if use_low_light_mode:
-            log_message(
-                f"🌙 Using low-light classification mode (max={max_val:.6f}, var={variance:.6f})",
-                tag="Geest",
-                level=0,
-            )
-            # For very low light areas, use simple percentile-based breaks
-            # This avoids Jenks issues with near-zero variance data
-            reclass_table = [
-                0,
-                0,
-                0,  # No Light (exactly 0)
-                0.01,
-                max_val * 0.2,
-                1,  # Very Low
-                max_val * 0.2 + 0.01,
-                max_val * 0.4,
-                2,  # Low
-                max_val * 0.4 + 0.01,
-                max_val * 0.6,
-                3,  # Moderate
-                max_val * 0.6 + 0.01,
-                max_val * 0.8,
-                4,  # High
-                max_val * 0.8 + 0.01,
-                max_val,
-                5,  # Highest
-            ]
-            reclass_table = list(map(str, reclass_table))
-            return reclass_table
-
-        # Standard mode: Use Jenks Natural Breaks for optimal classification
         log_message(
-            f"📊 Using Jenks Natural Breaks classification (max={max_val:.6f}, "
+            f"📊 Computing Jenks Natural Breaks classification (max={max_val:.6f}, "
             f"median={median:.6f}, n={len(valid_data)})",
             tag="Geest",
             level=0,
@@ -346,40 +310,20 @@ class SafetyRasterWorkflow(WorkflowBase):
             return reclass_table
 
         except Exception as e:
-            # Fallback to percentile-based if Jenks fails
-            log_message(
-                f"⚠️ Jenks classification failed ({e}), falling back to percentile-based",
-                tag="Geest",
-                level=1,
+            # Fail workflow with clear error message
+            unique_count = len(np.unique(valid_data))
+            error_msg = (
+                f"❌ Jenks Natural Breaks classification failed: {e}\n"
+                f"   Data characteristics:\n"
+                f"     - Maximum value: {max_val:.6f}\n"
+                f"     - Median value: {median:.6f}\n"
+                f"     - Unique values: {unique_count}\n"
+                f"     - Total values: {len(valid_data)}\n"
+                f"   This may indicate insufficient data variation for meaningful classification.\n"
+                f"   Please verify your nighttime lights raster has valid data with reasonable variation."
             )
-
-            # Fallback: Use percentile-based breaks similar to original implementation
-            quarter_median = 0.25 * median
-            half_median = 0.5 * median
-            p75 = np.percentile(valid_data, 75)
-
-            reclass_table = [
-                0.00,
-                0.05,
-                0,  # No Access
-                0.05,
-                quarter_median,
-                1,  # Very Low
-                quarter_median,
-                half_median,
-                2,  # Low
-                half_median,
-                median,
-                3,  # Moderate
-                median,
-                p75,
-                4,  # High
-                p75,
-                "inf",
-                5,  # Very High
-            ]
-            reclass_table = list(map(str, reclass_table))
-            return reclass_table
+            log_message(error_msg, tag="Geest", level=2)  # Critical
+            raise ValueError(error_msg) from e
 
     # Not used in this workflow since we work with rasters
     def _process_features_for_area(

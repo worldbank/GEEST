@@ -51,8 +51,6 @@ NIGHTTIME_LIGHTS_SAFETY = {
     "example_note": ("Example values shown are for a typical urban area with VIIRS nighttime lights data."),
     "note": (
         "Actual break points are computed dynamically using Jenks Natural Breaks algorithm "
-        "for optimal classification based on your study area's data distribution. "
-        "For areas with very low maximum values (≤0.05) or low variance, "
-        "a percentile-based classification is used instead."
+        "for optimal classification based on your study area's data distribution."
     ),
 }
