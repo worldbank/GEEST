@@ -36,16 +36,21 @@ STREETLIGHTS_SAFETY = {
 }
 
 # Nighttime Lights Safety (VIIRS annual composites)
-# Same for all scales
+# Uses Jenks Natural Breaks algorithm for optimal data-driven classification
 NIGHTTIME_LIGHTS_SAFETY = {
     "data_source": "VIIRS annual composites",
-    "scoring_method": "raster_value_classification",
+    "scoring_method": "jenks_natural_breaks",
     "classes": [
-        {"min_value": 0, "max_value": 15, "score": 0},
-        {"min_value": 16, "max_value": 50, "score": 1},
-        {"min_value": 51, "max_value": 85, "score": 2},
-        {"min_value": 86, "max_value": 120, "score": 3},
-        {"min_value": 121, "max_value": 155, "score": 4},
-        {"min_value": 156, "max_value": None, "score": 5},
+        {"score": 0, "label": "No Access", "range": "0 - Break₁", "example": "0 - 0.5"},
+        {"score": 1, "label": "Very Low", "range": "> Break₁ - Break₂", "example": "0.5 - 2.0"},
+        {"score": 2, "label": "Low", "range": "> Break₂ - Break₃", "example": "2.0 - 8.0"},
+        {"score": 3, "label": "Moderate", "range": "> Break₃ - Break₄", "example": "8.0 - 25.0"},
+        {"score": 4, "label": "High", "range": "> Break₄ - Break₅", "example": "25.0 - 75.0"},
+        {"score": 5, "label": "Very High", "range": "> Break₅", "example": "> 75.0"},
     ],
+    "example_note": ("Example values shown are for a typical urban area with VIIRS nighttime lights data."),
+    "note": (
+        "Actual break points are computed dynamically using Jenks Natural Breaks algorithm "
+        "for optimal classification based on your study area's data distribution."
+    ),
 }
