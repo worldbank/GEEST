@@ -21,6 +21,26 @@ LOCAL_ROOT_DIR = Path(__file__).parent.resolve()
 SRC_NAME = "geest"
 PACKAGE_NAME = SRC_NAME.replace("_", "")
 TEST_FILES = ["test", "test_suite.py", "docker-compose.yml", "scripts"]
+# Vendored dependencies to bundle with the plugin
+# These will be downloaded for multiple platforms
+VENDORED_PACKAGES = [
+    "h3",
+]
+# Platform tags for wheel downloads (covers most QGIS installations)
+WHEEL_PLATFORMS = [
+    # Linux
+    ("manylinux2014_x86_64", "cp311", "linux"),
+    ("manylinux2014_x86_64", "cp312", "linux"),
+    ("manylinux2014_x86_64", "cp313", "linux"),
+    # macOS
+    ("macosx_10_9_x86_64", "cp311", "macos-intel"),
+    ("macosx_10_9_x86_64", "cp312", "macos-intel"),
+    ("macosx_11_0_arm64", "cp311", "macos-arm"),
+    ("macosx_11_0_arm64", "cp312", "macos-arm"),
+    # Windows
+    ("win_amd64", "cp311", "windows"),
+    ("win_amd64", "cp312", "windows"),
+]
 app = typer.Typer()
 
 
@@ -38,18 +58,12 @@ class GithubRelease:
 
 @app.callback()
 def main(context: typer.Context, verbose: bool = False, qgis_profile: str = "default"):
-    """Performs various development-oriented tasks for this plugin
+    """Perform various development-oriented tasks for this plugin.
 
-    :param context: Application context
-    :type context: typer.Context
-
-    :param verbose: Boolean value to whether more details should be displayed
-    :type verbose: bool
-
-    :param qgis_profile: QGIS user profile to be used when operating in
-            QGIS application
-    :type qgis_profile: str
-
+    Args:
+        context: Application context.
+        verbose: Whether more details should be displayed.
+        qgis_profile: QGIS user profile to be used when operating in QGIS application.
     """
     context.obj = {
         "verbose": verbose,
@@ -59,13 +73,11 @@ def main(context: typer.Context, verbose: bool = False, qgis_profile: str = "def
 
 @app.command()
 def install(context: typer.Context, build_src: bool = True):
-    """Deploys plugin to QGIS plugins directory
+    """Deploy plugin to QGIS plugins directory.
 
-    :param context: Application context
-    :type context: typer.Context
-
-    :param build_src: Whether to build plugin files from source
-    :type build_src: bool
+    Args:
+        context: Application context.
+        build_src: Whether to build plugin files from source.
     """
     _log("Uninstalling...", context=context)
     uninstall(context)
@@ -100,10 +112,10 @@ def install(context: typer.Context, build_src: bool = True):
 
 @app.command()
 def symlink(context: typer.Context):
-    """Create a plugin symlink to QGIS plugins directory
+    """Create a plugin symlink to QGIS plugins directory.
 
-    :param context: Application context
-    :type context: typer.Context
+    Args:
+        context: Application context.
     """
 
     build_path = LOCAL_ROOT_DIR / "build" / SRC_NAME
@@ -120,10 +132,10 @@ def symlink(context: typer.Context):
 
 @app.command()
 def uninstall(context: typer.Context):
-    """Removes the plugin from QGIS plugins directory
+    """Remove the plugin from QGIS plugins directory.
 
-    :param context: Application context
-    :type context: typer.Context
+    Args:
+        context: Application context.
     """
     root_directory = Path.home() / f".local/share/QGIS/QGIS3/profiles/" f"{context.obj['qgis_profile']}"
     base_target_directory = root_directory / "python/plugins" / SRC_NAME
@@ -137,17 +149,15 @@ def generate_zip(
     version: str = None,
     output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "dist",
 ):
-    """Generates plugin zip folder, that can be used to installed the
-        plugin in QGIS
+    """Generate plugin zip folder that can be used to install the plugin in QGIS.
 
-    :param context: Application context
-    :type context: typer.Context
+    Args:
+        context: Application context.
+        version: Plugin version.
+        output_directory: Directory where the zip folder will be saved.
 
-    :param version: Plugin version
-    :type version: str
-
-    :param output_directory: Directory where the zip folder will be saved.
-    :type context: Path
+    Returns:
+        Path to the generated zip file.
     """
     build_dir = build(context)
     metadata = _get_metadata()["general"]
@@ -167,24 +177,16 @@ def build(
     clean: bool = True,
     tests: bool = False,
 ) -> Path:
-    """Builds plugin directory for use in QGIS application.
+    """Build plugin directory for use in QGIS application.
 
-    :param context: Application context
-    :type context: typer.Context
+    Args:
+        context: Application context.
+        output_directory: Build output directory where plugin files will be saved.
+        clean: Whether current build directory files should be removed before writing.
+        tests: Flag to indicate whether to include test related files.
 
-    :param output_directory: Build output directory plugin where
-            files will be saved.
-    :type output_directory: Path
-
-    :param clean: Whether current build directory files should be removed,
-            before writing new files.
-    :type clean: bool
-
-    :param tests: Flag to indicate whether to include test related files.
-    :type tests: bool
-
-    :returns: Build directory path.
-    :rtype: Path
+    Returns:
+        Build directory path.
     """
     if clean:
         shutil.rmtree(str(output_directory), ignore_errors=True)
@@ -203,14 +205,13 @@ def build(
 def copy_icon(
     output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
 ) -> Path:
-    """Copies the plugin intended icon to the specified output
-        directory.
+    """Copy the plugin intended icon to the specified output directory.
 
-    :param output_directory: Output directory where the icon will be saved.
-    :type output_directory: Path
+    Args:
+        output_directory: Output directory where the icon will be saved.
 
-    :returns: Icon output directory path.
-    :rtype: Path
+    Returns:
+        Icon output directory path, or None if icon not found.
     """
 
     metadata = _get_metadata()["general"]
@@ -230,15 +231,11 @@ def copy_source_files(
     output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
     tests: bool = False,
 ):
-    """Copies the plugin source files to the specified output
-            directory.
+    """Copy the plugin source files to the specified output directory.
 
-    :param output_directory: Output directory where the icon will be saved.
-    :type output_directory: Path
-
-    :param tests: Flag to indicate whether to include test related files.
-    :type tests: bool
-
+    Args:
+        output_directory: Output directory where the files will be saved.
+        tests: Flag to indicate whether to include test related files.
     """
     output_directory.mkdir(parents=True, exist_ok=True)
     for child in (LOCAL_ROOT_DIR / SRC_NAME).iterdir():
@@ -259,13 +256,11 @@ def compile_resources(
     context: typer.Context,
     output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
 ):
-    """Compiles plugin resources using the pyrcc package
+    """Compile plugin resources using the pyrcc package.
 
-    :param context: Application context
-    :type context: typer.Context
-
-    :param output_directory: Output directory where the resources will be saved.
-    :type output_directory: Path
+    Args:
+        context: Application context.
+        output_directory: Output directory where the resources will be saved.
     """
     resources_path = LOCAL_ROOT_DIR / "resources" / "resources.qrc"
     target_path = output_directory / "resources.py"
@@ -290,14 +285,11 @@ def generate_metadata(
     context: typer.Context,
     output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
 ):
-    """Generates plugin metadata file using settings defined in the
-        project configuration file config.json
+    """Generate plugin metadata file using settings defined in config.json.
 
-    :param context: Application context
-    :type context: typer.Context
-
-    :param output_directory: Output directory where the metadata.txt file will be saved.
-    :type output_directory: Path
+    Args:
+        context: Application context.
+        output_directory: Output directory where the metadata.txt file will be saved.
     """
     metadata = _get_metadata()
     target_path = output_directory / "metadata.txt"
@@ -316,11 +308,13 @@ def generate_metadata(
 def generate_plugin_repo_xml(
     context: typer.Context,
 ):
-    """Generates the plugin repository xml file, from which users
-        can use to install the plugin in QGIS.
+    """Generate the plugin repository xml file for QGIS plugin installation.
 
-    :param context: Application context
-    :type context: typer.Context
+    Args:
+        context: Application context.
+
+    Returns:
+        The generated XML content as a string.
     """
     repo_base_dir = LOCAL_ROOT_DIR / "docs" / "repository"
     repo_base_dir.mkdir(parents=True, exist_ok=True)
@@ -380,11 +374,10 @@ def generate_plugin_repo_xml(
 
 @lru_cache()
 def _get_metadata() -> typing.Dict:
-    """Reads the metadata properties from the
-        project configuration file 'config.json'
+    """Read the metadata properties from the project configuration file 'config.json'.
 
-    :return: plugin metadata
-    :type: Dict
+    Returns:
+        Plugin metadata dictionary.
     """
     config_path = LOCAL_ROOT_DIR / "config.json"
     with config_path.open("r") as fh:
@@ -406,10 +399,10 @@ def _get_metadata() -> typing.Dict:
 
 
 def _changelog() -> str:
-    """Reads the changelog content from a config file.
+    """Read the changelog content from a config file.
 
-    :returns: Plugin changelog
-    :type: str
+    Returns:
+        Plugin changelog content.
     """
     path = LOCAL_ROOT_DIR / "docs/plugin/changelog.txt"
 
@@ -420,16 +413,12 @@ def _changelog() -> str:
 
 
 def _add_to_zip(directory: Path, zip_handler: zipfile.ZipFile, arc_path_base: Path):
-    """Adds to files inside the passed directory to the zip file.
+    """Add files inside the passed directory to the zip file.
 
-    :param directory: Directory with files that are to be zipped.
-    :type directory: Path
-
-    :param zip_handler: Plugin zip file
-    :type zip_handler: ZipFile
-
-    :param arc_path_base: Parent directory of the input files directory.
-    :type arc_path_base: Path
+    Args:
+        directory: Directory with files that are to be zipped.
+        zip_handler: Plugin zip file.
+        arc_path_base: Parent directory of the input files directory.
     """
     for item in directory.iterdir():
         if item.is_file():
@@ -439,12 +428,13 @@ def _add_to_zip(directory: Path, zip_handler: zipfile.ZipFile, arc_path_base: Pa
 
 
 def _log(msg, *args, context: typing.Optional[typer.Context] = None, **kwargs):
-    """Logs the message into the terminal.
-    :param msg: Directory with files that are to be zipped.
-    :type msg: str
+    """Log the message to the terminal.
 
-    :param context: Application context
-    :type context: typer.Context
+    Args:
+        msg: Message to log.
+        *args: Additional positional arguments passed to typer.echo.
+        context: Application context.
+        **kwargs: Additional keyword arguments passed to typer.echo.
     """
     if context is not None:
         context_user_data = context.obj or {}
@@ -458,13 +448,13 @@ def _log(msg, *args, context: typing.Optional[typer.Context] = None, **kwargs):
 def _get_existing_releases(
     context: typing.Optional = None,
 ) -> typing.List[GithubRelease]:
-    """Gets the existing plugin releases in  available in the Github repository.
+    """Get the existing plugin releases available in the Github repository.
 
-    :param context: Application context
-    :type context: typer.Context
+    Args:
+        context: Application context.
 
-    :returns: List of github releases
-    :rtype: List[GithubRelease]
+    Returns:
+        List of github releases.
     """
     base_url = "https://api.github.com/repos/" "worldbank/GEEST/releases"
     response = httpx.get(base_url)
@@ -494,14 +484,13 @@ def _get_existing_releases(
 def _get_latest_releases(
     current_releases: typing.List[GithubRelease],
 ) -> typing.Tuple[typing.Optional[GithubRelease], typing.Optional[GithubRelease]]:
-    """Searches for the latest plugin releases from the Github plugin releases.
+    """Search for the latest plugin releases from the Github plugin releases.
 
-    :param current_releases: Existing plugin releases
-     available in the Github repository.
-    :type current_releases: list
+    Args:
+        current_releases: Existing plugin releases available in the Github repository.
 
-    :returns: Tuple containing the latest stable and experimental releases
-    :rtype: tuple
+    Returns:
+        Tuple containing the latest stable and experimental releases.
     """
     latest_experimental = None
     latest_stable = None
@@ -519,6 +508,117 @@ def _get_latest_releases(
             else:
                 latest_stable = release
     return latest_stable, latest_experimental
+
+
+@app.command()
+def bundle_deps(
+    context: typer.Context,
+    output_directory: typing.Optional[Path] = None,
+    packages: typing.Optional[str] = None,
+):
+    """Download and bundle vendored dependencies for all platforms.
+
+    This downloads wheels for the packages listed in VENDORED_PACKAGES
+    for multiple platforms (Linux, macOS, Windows) and Python versions,
+    then extracts them into the extlibs directory.
+
+    Args:
+        context: Application context.
+        output_directory: Output directory for extlibs (default: geest/extlibs).
+        packages: Comma-separated list of packages to bundle (overrides VENDORED_PACKAGES).
+    """
+    if output_directory is None:
+        output_directory = LOCAL_ROOT_DIR / SRC_NAME / "extlibs"
+
+    output_directory.mkdir(parents=True, exist_ok=True)
+
+    # Use provided packages or default
+    pkgs_to_bundle = packages.split(",") if packages else VENDORED_PACKAGES
+
+    _log(f"Bundling dependencies to {output_directory}", context=context)
+    _log(f"Packages: {pkgs_to_bundle}", context=context)
+
+    # Create a temp directory for downloading wheels
+    temp_wheel_dir = output_directory / "_wheels"
+    temp_wheel_dir.mkdir(exist_ok=True)
+
+    try:
+        for pkg in pkgs_to_bundle:
+            _log(f"\nDownloading {pkg} for all platforms...", context=context)
+
+            for platform_tag, python_tag, platform_name in WHEEL_PLATFORMS:
+                _log(f"  - {platform_name} ({python_tag})...", context=context)
+                try:
+                    result = subprocess.run(  # nosec B603 B607
+                        [
+                            "pip",
+                            "download",
+                            "--no-deps",
+                            "--only-binary=:all:",
+                            f"--platform={platform_tag}",
+                            f"--python-version={python_tag[2:]}",  # cp311 -> 311
+                            f"--dest={temp_wheel_dir}",
+                            pkg,
+                        ],
+                        capture_output=True,
+                        text=True,
+                    )
+                    if result.returncode != 0:
+                        _log(f"    Warning: Could not download for {platform_name}/{python_tag}", context=context)
+                        _log(f"    {result.stderr}", context=context)
+                except subprocess.SubprocessError as e:
+                    _log(f"    Error: {e}", context=context)
+
+        # Extract all downloaded wheels
+        _log("\nExtracting wheels...", context=context)
+        for wheel_file in temp_wheel_dir.glob("*.whl"):
+            _log(f"  Extracting {wheel_file.name}", context=context)
+            with zipfile.ZipFile(wheel_file, "r") as whl:
+                # Extract everything (including .dist-info for metadata)
+                whl.extractall(output_directory)
+
+        _log(f"\nDependencies bundled to {output_directory}", context=context)
+
+        # List what was extracted
+        _log("\nBundled packages:", context=context)
+        for item in sorted(output_directory.iterdir()):
+            if item.is_dir() and not item.name.startswith("_") and item.name != ".gitkeep":
+                _log(f"  - {item.name}", context=context)
+
+    finally:
+        # Clean up temp wheel directory
+        shutil.rmtree(temp_wheel_dir, ignore_errors=True)
+
+
+@app.command()
+def clean_extlibs(
+    context: typer.Context,
+    extlibs_directory: typing.Optional[Path] = None,
+):
+    """Remove all bundled dependencies from extlibs.
+
+    Args:
+        context: Application context.
+        extlibs_directory: Path to extlibs directory.
+    """
+    if extlibs_directory is None:
+        extlibs_directory = LOCAL_ROOT_DIR / SRC_NAME / "extlibs"
+
+    if not extlibs_directory.exists():
+        _log("extlibs directory does not exist", context=context)
+        return
+
+    for item in extlibs_directory.iterdir():
+        if item.name in (".gitkeep", "_wheels"):
+            continue
+        if item.is_dir():
+            shutil.rmtree(item)
+            _log(f"Removed {item.name}", context=context)
+        elif item.is_file():
+            item.unlink()
+            _log(f"Removed {item.name}", context=context)
+
+    _log("extlibs cleaned", context=context)
 
 
 if __name__ == "__main__":
