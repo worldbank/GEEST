@@ -1,7 +1,20 @@
 # -*- coding: utf-8 -*-
 """Init for Geest."""
+# ruff: noqa: E402
+# flake8: noqa: E402
+# The sys.path modification below MUST happen before other imports
+# to ensure vendored dependencies in extlibs/ are available.
 
 from __future__ import annotations
+
+import os as _os
+import sys as _sys
+
+# Add vendored dependencies to path BEFORE other imports
+_extlibs_path = _os.path.join(_os.path.dirname(__file__), "extlibs")
+if _os.path.isdir(_extlibs_path) and _extlibs_path not in _sys.path:
+    _sys.path.insert(0, _extlibs_path)
+del _os, _sys, _extlibs_path  # Clean up module namespace
 
 __copyright__ = "Copyright 2024, Tim Sutton"
 __license__ = "GPL version 3"
@@ -18,6 +31,7 @@ __revision__ = "$Format:%H$"
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # ---------------------------------------------------------------------
+
 import cProfile
 import datetime
 import io

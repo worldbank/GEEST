@@ -1,0 +1,16 @@
+{
+  "include": ["geest", "test"],
+  "exclude": [
+    "**/__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    ".vscode",
+    ".vscode-extensions"
+  ],
+  "extraPaths": ["geest/extlibs"],
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false
+}
