@@ -525,6 +525,10 @@ class JsonTreeItem:
                 "use_index_score",
                 "use_index_score_with_ookla",
                 "use_environmental_hazards",
+                "use_contextual_index_score",  # Contextual indicators don't use vector layers
+                "use_eplex_score",  # EPLex indicators don't use vector layers
+                "use_index_score_with_ghsl",  # GHSL indicators use raster, not vector
+                "use_nighttime_lights",  # Nighttime lights use raster, not vector
             ]:
                 if not data.get(qgis_layer_source_key, False) and not data.get(qgis_layer_shapefile_key, False):
                     return "Not configured (optional)"
