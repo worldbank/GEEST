@@ -47,21 +47,75 @@ local function float_term(cmd, opts)
   vim.cmd('startinsert')
 end
 
+-- Helper to open a bottom split terminal tailing the GEEST log file
+local function open_log_tail()
+  local tmp_dir = os.getenv("TMPDIR") or os.getenv("TMP") or os.getenv("TEMP") or "/tmp"
+  local datestamp = os.date("%Y%m%d")
+  local log_file = tmp_dir .. "/geest_logfile_" .. datestamp .. ".log"
+
+  -- Check if GEEST_LOG env var is set
+  local geest_log_env = os.getenv("GEEST_LOG")
+  if geest_log_env and geest_log_env ~= "" and geest_log_env ~= "0" then
+    log_file = geest_log_env
+  end
+
+  -- Create a horizontal split at the bottom
+  vim.cmd('botright 12split')
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_win_set_buf(0, buf)
+  vim.api.nvim_buf_set_name(buf, 'GEEST Log')
+
+  -- Set buffer options
+  vim.bo[buf].buftype = 'nofile'
+  vim.bo[buf].bufhidden = 'wipe'
+  vim.bo[buf].swapfile = false
+
+  -- Start tailing the log file (create if it doesn't exist)
+  vim.fn.termopen(string.format('touch "%s" && tail -f "%s"', log_file, log_file), {
+    on_exit = function()
+      -- Buffer will be wiped automatically due to bufhidden setting
+    end,
+  })
+
+  -- Set window title
+  vim.wo.winfixheight = true
+  vim.wo.statusline = '%#StatusLine# GEEST Log: ' .. log_file .. ' %='
+
+  -- Return to the previous window
+  vim.cmd('wincmd p')
+end
+
+-- Helper to launch QGIS with log tail (QGIS runs in background)
+local function launch_qgis_with_log(cmd, title)
+  -- Open the log tail panel first
+  open_log_tail()
+  -- Launch QGIS as a background job (not in a terminal)
+  vim.fn.jobstart(cmd, {
+    detach = true,
+    on_exit = function(_, exit_code)
+      if exit_code ~= 0 then
+        vim.notify(title .. ' exited with code ' .. exit_code, vim.log.levels.WARN)
+      end
+    end,
+  })
+  vim.notify('Started' .. title .. '(background)', vim.log.levels.INFO)
+end
+
 -- Project-specific commands
 vim.api.nvim_create_user_command('GeestQgis', function()
-  float_term('GEEST_DEBUG=0 GEEST_EXPERIMENTAL=0 RUNNING_ON_LOCAL=1 nix run .#default -- --profile GEEST2', { title = ' QGIS ' })
+  launch_qgis_with_log('GEEST_DEBUG=0 GEEST_EXPERIMENTAL=0 RUNNING_ON_LOCAL=1 nix run .#default -- --profile GEEST2', ' QGIS ')
 end, { desc = 'Launch QGIS (normal mode)' })
 
 vim.api.nvim_create_user_command('GeestQgisDebug', function()
-  float_term('GEEST_DEBUG=1 GEEST_EXPERIMENTAL=0 RUNNING_ON_LOCAL=1 nix run .#default -- --profile GEEST2', { title = ' QGIS Debug ' })
+  launch_qgis_with_log('GEEST_DEBUG=1 GEEST_EXPERIMENTAL=0 RUNNING_ON_LOCAL=1 nix run .#default -- --profile GEEST2', ' QGIS Debug ')
 end, { desc = 'Launch QGIS (debug mode)' })
 
 vim.api.nvim_create_user_command('GeestQgisExperimental', function()
-  float_term('GEEST_DEBUG=0 GEEST_EXPERIMENTAL=1 RUNNING_ON_LOCAL=1 nix run .#default -- --profile GEEST2', { title = ' QGIS Experimental ' })
+  launch_qgis_with_log('GEEST_DEBUG=0 GEEST_EXPERIMENTAL=1 RUNNING_ON_LOCAL=1 nix run .#default -- --profile GEEST2', ' QGIS Experimental ')
 end, { desc = 'Launch QGIS (experimental features)' })
 
 vim.api.nvim_create_user_command('GeestQgisLtr', function()
-  float_term('RUNNING_ON_LOCAL=1 nix run .#qgis-ltr', { title = ' QGIS LTR ' })
+  launch_qgis_with_log('RUNNING_ON_LOCAL=1 nix run .#qgis-ltr', ' QGIS LTR ')
 end, { desc = 'Launch QGIS LTR' })
 
 vim.api.nvim_create_user_command('GeestPrecommit', function()
@@ -107,6 +161,10 @@ end, { desc = 'Update translation strings' })
 vim.api.nvim_create_user_command('GeestTerm', function()
   float_term(nil, { title = ' Terminal ' })
 end, { desc = 'Open floating terminal' })
+
+vim.api.nvim_create_user_command('GeestLogTail', function()
+  open_log_tail()
+end, { desc = 'Open GEEST log tail panel' })
 
 vim.api.nvim_create_user_command('GeestGitStatus', function()
   float_term('git status && echo "\\n--- Recent commits ---\\n" && git log --oneline -10', { title = ' Git Status ' })
@@ -233,6 +291,7 @@ if wk_ok then
     -- Misc
     { '<leader>pv', '<cmd>GeestGource<cr>', desc = 'Gource visualization' },
     { '<leader>pp', '<cmd>GeestTerm<cr>', desc = 'Floating terminal' },
+    { '<leader>pl', '<cmd>GeestLogTail<cr>', desc = 'Tail GEEST log' },
   })
 end
 
