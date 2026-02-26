@@ -32,6 +32,7 @@ from qgis.PyQt.QtCore import (
 
 from geest.core.algorithms import GHSLDownloader, GHSLProcessor
 from geest.core.settings import setting
+from geest.core.h3_utils import get_h3_resolution_for_scale
 from geest.utilities import calculate_utm_zone, log_message
 
 from .grid_chunker_task import GridChunkerTask
@@ -716,7 +717,7 @@ class ChunkRunnable(QRunnable):
             chunk: Dictionary with chunk parameters.
             geom: OGR geometry for intersection testing.
             cell_size: Cell size in meters.
-            feedback: QgFeedback for progress reporting.
+            feedback: QgsFeedback for progress reporting.
             write_callback: Optional callable(task, start_time) that queues
                 the chunk's geometries to the write queue and frees them.
             analysis_scale: Analysis scale ("regional", "national", or "local")
@@ -742,8 +743,6 @@ class ChunkRunnable(QRunnable):
 
             # Use H3 task for regional scale, regular grid task otherwise
             if self.analysis_scale == "regional":
-                from geest.core.h3_utils import get_h3_resolution_for_scale
-
                 h3_res = get_h3_resolution_for_scale(self.analysis_scale) or 6
                 task = GridFromBboxH3Task(
                     index,
@@ -836,7 +835,7 @@ class StudyAreaProcessingTask(QgsTask):
             field_name: Name of the field that holds the study area name.
             cell_size_m: Cell size for grid spacing (in meters).
             working_dir: Directory path where outputs will be saved.
-            feedback: QgFeedback object for progress reporting.
+            feedback: QgsFeedback object for progress reporting.
             crs: Target CRS. If None, a UTM zone will be computed.
             analysis_scale: Analysis scale ("regional", "national", or "local").
                 Regional uses H3 hexagonal grids, others use square grids.
@@ -2255,13 +2254,11 @@ class StudyAreaProcessingTask(QgsTask):
             bbox_chunk: Tuple of (x_start, x_end, y_start, y_end).
             geom: OGR geometry for intersection testing.
             cell_size: Cell size in meters.
-            feedback: QgFeedback for progress reporting.
+            feedback: QgsFeedback for progress reporting.
 
         Returns:
             Grid task (GridFromBboxTask or GridFromBboxH3Task)
         """
-        from geest.core.h3_utils import get_h3_resolution_for_scale
-
         if self.analysis_scale == "regional":
             h3_res = get_h3_resolution_for_scale(self.analysis_scale)
             if h3_res is None:
@@ -2294,7 +2291,7 @@ class StudyAreaProcessingTask(QgsTask):
             geom: OGR geometry for intersection testing.
             cell_size: Cell size in meters.
             normalized_name: Name of the study area.
-            feedback: QgFeedback for progress reporting.
+            feedback: QgsFeedback for progress reporting.
         """
         total_chunks = len(chunks)
         for counter, chunk in enumerate(chunks, start=1):
@@ -2416,8 +2413,6 @@ class StudyAreaProcessingTask(QgsTask):
         is_h3_task = isinstance(task.features_out[0], tuple) if task.features_out else False
 
         if is_h3_task:
-            from geest.core.h3_utils import get_h3_resolution_for_scale
-
             h3_resolution = get_h3_resolution_for_scale(self.analysis_scale)
 
         for feature in task.features_out:
@@ -2473,7 +2468,6 @@ class StudyAreaProcessingTask(QgsTask):
 
                 # Add H3 fields for regional scale
                 if self.analysis_scale == "regional":
-                    from geest.core.h3_utils import get_h3_resolution_for_scale
 
                     h3_res = get_h3_resolution_for_scale(self.analysis_scale)
                     field_defn = ogr.FieldDefn("h3_index", ogr.OFTString)

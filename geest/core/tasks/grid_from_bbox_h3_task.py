@@ -58,7 +58,7 @@ class GridFromBboxH3Task(QgsTask):
             geom: OGR Geometry for intersection testing (in target CRS).
             target_epsg: EPSG code of target CRS.
             h3_resolution: H3 resolution level (6 for Regional).
-            feedback: OptionalQgFeedback for progress reporting.
+            feedback: OptionalQgsFeedback for progress reporting.
         """
         super().__init__(f"CreateH3GridChunkTask-{chunk_id}", QgsTask.CanCancel)
         self.chunk_id = chunk_id
