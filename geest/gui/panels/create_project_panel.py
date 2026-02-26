@@ -83,10 +83,8 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.national_scale.clicked.connect(lambda: self.spatial_scale_changed("national"))
         self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
-        # Note: Regional scale is disabled in the UI for this release
-        # National and Local scales are currently active
-        # Explicitly disable Regional radio button (overrides enable_widgets())
-        self.regional_scale.setEnabled(False)
+        # Regional scale uses H3 hexagonal grids (L6 resolution)
+        # National and Local scales use square grids
         # Local mode enabled for National vs Local analysis implementation
         # self.local_scale.setEnabled(False)
 
@@ -156,11 +154,10 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         """
         log_message(f"Spatial scale changed: {value}")
         if value == "regional":
-            # Regional scale uses H3 indexes (H3l6 by default)
-            # For this release, regional is disabled
+            # Regional scale uses H3 hexagonal grids (resolution L6)
             self.cell_size_spinbox.setValue(5000)
             self.cell_size_spinbox.setSingleStep(1000)
-            self.cell_size_spinbox.setSuffix(" m (H3)")
+            self.cell_size_spinbox.setSuffix(" m (H3 L6)")
         elif value == "national":
             self.cell_size_spinbox.setValue(1000)
             self.cell_size_spinbox.setSingleStep(100)
@@ -258,7 +255,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             with open(model_path, "r") as f:
                 model = json.load(f)
                 model["analysis_cell_size_m"] = self.cell_size_spinbox.value()
-                if self.local_scale.isChecked():
+                if self.regional_scale.isChecked():
+                    model["analysis_scale"] = "regional"
+                elif self.local_scale.isChecked():
                     model["analysis_scale"] = "local"
                 else:
                     model["analysis_scale"] = "national"
@@ -272,6 +271,14 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress
             try:
 
+                # Determine analysis scale
+                if self.regional_scale.isChecked():
+                    analysis_scale = "regional"
+                elif self.local_scale.isChecked():
+                    analysis_scale = "local"
+                else:
+                    analysis_scale = "national"
+
                 processor = StudyAreaProcessingTask(
                     layer=layer,
                     field_name=field_name,
@@ -279,6 +286,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     crs=crs,
                     working_dir=self.working_dir,
                     feedback=feedback,
+                    analysis_scale=analysis_scale,
                 )
                 # Hook up the QTask feedback signal to the progress bar
                 # Measure overall task progress from the task object itself
@@ -312,10 +320,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def enable_widgets(self):
         """Enable all widgets in the panel."""
         for widget in self.findChildren(QWidget):
-            # Skip Regional scale radio button - it should remain disabled
-            # Local scale is now enabled for National vs Local analysis
-            if widget == self.regional_scale:
-                continue
+            # Regional scale is now enabled with H3 hexagonal grids
             widget.setEnabled(True)
 
     def reference_layer(self):

@@ -36,6 +36,7 @@ from geest.utilities import calculate_utm_zone, log_message
 
 from .grid_chunker_task import GridChunkerTask
 from .grid_from_bbox_task import GridFromBboxTask
+from .grid_from_bbox_h3_task import GridFromBboxH3Task
 
 
 class QtQueue:
@@ -206,18 +207,27 @@ class GpkgOperation:
         self.data = kwargs
 
     @classmethod
-    def write_grid_cell(cls, geometry, area_name, grid_id):
+    def write_grid_cell(cls, geometry, area_name, grid_id, h3_index=None, h3_resolution=None):
         """Factory method for grid cell write operation.
 
         Args:
             geometry: OGR geometry for the grid cell
             area_name: Name of the area this cell belongs to
             grid_id: Unique grid cell ID
+            h3_index: Optional H3 cell index for hexagonal grids (regional scale)
+            h3_resolution: Optional H3 resolution level
 
         Returns:
             GpkgOperation instance
         """
-        return cls(cls.WRITE_GRID_CELL, geometry=geometry, area_name=area_name, grid_id=grid_id)
+        return cls(
+            cls.WRITE_GRID_CELL,
+            geometry=geometry,
+            area_name=area_name,
+            grid_id=grid_id,
+            h3_index=h3_index,
+            h3_resolution=h3_resolution,
+        )
 
     @classmethod
     def write_geometry(cls, layer_name, geometry, area_name, **extra_fields):
@@ -499,6 +509,13 @@ class UnifiedWriterThread(QThread):
                 feature = ogr.Feature(feat_defn)
                 feature.SetField("grid_id", op.data["grid_id"])
                 feature.SetField("area_name", op.data["area_name"])
+
+                # Add H3 fields if present (regional scale)
+                if "h3_index" in op.data and op.data["h3_index"]:
+                    feature.SetField("h3_index", op.data["h3_index"])
+                if "h3_resolution" in op.data and op.data["h3_resolution"]:
+                    feature.SetField("h3_resolution", op.data["h3_resolution"])
+
                 feature.SetGeometry(op.data["geometry"])
                 layer.CreateFeature(feature)
                 feature = None
@@ -690,16 +707,20 @@ class ChunkRunnable(QRunnable):
         error: Exception if processing failed.
     """
 
-    def __init__(self, chunk, geom, cell_size, feedback, write_callback=None):
+    def __init__(
+        self, chunk, geom, cell_size, feedback, write_callback=None, analysis_scale="national", epsg_code=None
+    ):
         """Initialize the chunk runnable.
 
         Args:
             chunk: Dictionary with chunk parameters.
             geom: OGR geometry for intersection testing.
             cell_size: Cell size in meters.
-            feedback: QgsFeedback for progress reporting.
+            feedback: QgFeedback for progress reporting.
             write_callback: Optional callable(task, start_time) that queues
                 the chunk's geometries to the write queue and frees them.
+            analysis_scale: Analysis scale ("regional", "national", or "local")
+            epsg_code: EPSG code for coordinate transformation
         """
         super().__init__()
         self.chunk = chunk
@@ -707,6 +728,8 @@ class ChunkRunnable(QRunnable):
         self.cell_size = cell_size
         self.feedback = feedback
         self.write_callback = write_callback
+        self.analysis_scale = analysis_scale
+        self.epsg_code = epsg_code
         self.result = None
         self.error = None
         self.setAutoDelete(False)  # We manage lifecycle manually
@@ -717,18 +740,37 @@ class ChunkRunnable(QRunnable):
             start_time = time.time()
             index = self.chunk["index"]
 
-            task = GridFromBboxTask(
-                index,
-                (
-                    self.chunk["x_start"],
-                    self.chunk["x_end"],
-                    self.chunk["y_start"],
-                    self.chunk["y_end"],
-                ),
-                self.geom,
-                self.cell_size,
-                self.feedback,
-            )
+            # Use H3 task for regional scale, regular grid task otherwise
+            if self.analysis_scale == "regional":
+                from geest.core.h3_utils import get_h3_resolution_for_scale
+
+                h3_res = get_h3_resolution_for_scale(self.analysis_scale) or 6
+                task = GridFromBboxH3Task(
+                    index,
+                    (
+                        self.chunk["x_start"],
+                        self.chunk["x_end"],
+                        self.chunk["y_start"],
+                        self.chunk["y_end"],
+                    ),
+                    self.geom,
+                    int(self.epsg_code) if self.epsg_code else 4326,
+                    h3_res,
+                    self.feedback,
+                )
+            else:
+                task = GridFromBboxTask(
+                    index,
+                    (
+                        self.chunk["x_start"],
+                        self.chunk["x_end"],
+                        self.chunk["y_start"],
+                        self.chunk["y_end"],
+                    ),
+                    self.geom,
+                    self.cell_size,
+                    self.feedback,
+                )
             task.run()
 
             if self.write_callback:
@@ -783,9 +825,26 @@ class StudyAreaProcessingTask(QgsTask):
         field_name,
         cell_size_m,
         working_dir,
-        feedback: QgsFeedback = None,
+        feedback: "QgsFeedback | None" = None,
         crs=None,
+        analysis_scale: str = "national",
     ):
+        """Initialize the study area processing task.
+
+        Args:
+            layer: The input vector layer containing study area polygons.
+            field_name: Name of the field that holds the study area name.
+            cell_size_m: Cell size for grid spacing (in meters).
+            working_dir: Directory path where outputs will be saved.
+            feedback: QgFeedback object for progress reporting.
+            crs: Target CRS. If None, a UTM zone will be computed.
+            analysis_scale: Analysis scale ("regional", "national", or "local").
+                Regional uses H3 hexagonal grids, others use square grids.
+
+        Raises:
+            RuntimeError: If the input layer cannot be opened with OGR.
+            Exception: If the CRS is not EPSG-based.
+        """
         """Initialize the study area processing task.
 
         Args:
@@ -812,6 +871,7 @@ class StudyAreaProcessingTask(QgsTask):
         self.input_vector_path = self.export_qgs_layer_to_shapefile(layer, working_dir)
         self.field_name = field_name
         self.cell_size_m = cell_size_m
+        self.analysis_scale = analysis_scale
         self.working_dir = working_dir
         self.gpkg_path = os.path.join(working_dir, "study_area", "study_area.gpkg")
         self.counter = 0
@@ -2187,6 +2247,44 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(f"{k}: {v:.4f} seconds")  # noqa: E231
         self.total_cells += self.current_geom_actual_cell_count
 
+    def _create_grid_task(self, index, bbox_chunk, geom, cell_size, feedback):
+        """Create the appropriate grid task based on analysis scale.
+
+        Args:
+            index: Chunk index.
+            bbox_chunk: Tuple of (x_start, x_end, y_start, y_end).
+            geom: OGR geometry for intersection testing.
+            cell_size: Cell size in meters.
+            feedback: QgFeedback for progress reporting.
+
+        Returns:
+            Grid task (GridFromBboxTask or GridFromBboxH3Task)
+        """
+        from geest.core.h3_utils import get_h3_resolution_for_scale
+
+        if self.analysis_scale == "regional":
+            h3_res = get_h3_resolution_for_scale(self.analysis_scale)
+            if h3_res is None:
+                h3_res = 6  # Default to resolution 6 for regional scale
+            log_message(f"Creating H3 grid task (resolution {h3_res}) for chunk {index}")
+            task = GridFromBboxH3Task(
+                index,
+                bbox_chunk,
+                geom,
+                int(self.epsg_code),
+                h3_res,
+                feedback,
+            )
+        else:
+            task = GridFromBboxTask(
+                index,
+                bbox_chunk,
+                geom,
+                cell_size,
+                feedback,
+            )
+        return task
+
     def _process_chunks_sequential(self, layer, chunks, geom, cell_size, normalized_name, feedback):
         """Process chunks sequentially (original implementation).
 
@@ -2196,14 +2294,14 @@ class StudyAreaProcessingTask(QgsTask):
             geom: OGR geometry for intersection testing.
             cell_size: Cell size in meters.
             normalized_name: Name of the study area.
-            feedback: QgsFeedback for progress reporting.
+            feedback: QgFeedback for progress reporting.
         """
         total_chunks = len(chunks)
         for counter, chunk in enumerate(chunks, start=1):
             start_time = time.time()
             index = chunk["index"]
 
-            task = GridFromBboxTask(
+            task = self._create_grid_task(
                 index,
                 (chunk["x_start"], chunk["x_end"], chunk["y_start"], chunk["y_end"]),
                 geom,
@@ -2281,7 +2379,15 @@ class StudyAreaProcessingTask(QgsTask):
         # Submit all chunks but each writes+frees immediately on completion
         runnables = []
         for chunk in chunks:
-            runnable = ChunkRunnable(chunk, geom, cell_size, feedback, write_callback=_write_callback)
+            runnable = ChunkRunnable(
+                chunk,
+                geom,
+                cell_size,
+                feedback,
+                write_callback=_write_callback,
+                analysis_scale=self.analysis_scale,
+                epsg_code=self.epsg_code,
+            )
             runnables.append(runnable)
             pool.start(runnable)
 
@@ -2301,12 +2407,20 @@ class StudyAreaProcessingTask(QgsTask):
 
         Args:
             layer: Unused (kept for compatibility)
-            task: GridFromBboxTask with generated features
+            task: GridFromBboxTask or GridFromBboxH3Task with generated features
             normalized_name: Area name for this chunk
         """
         self.track_time("Preparing chunks", task.run_time)
 
-        for geometry in task.features_out:
+        # Check if this is an H3 task (features are tuples of (h3_index, geometry))
+        is_h3_task = isinstance(task.features_out[0], tuple) if task.features_out else False
+
+        if is_h3_task:
+            from geest.core.h3_utils import get_h3_resolution_for_scale
+
+            h3_resolution = get_h3_resolution_for_scale(self.analysis_scale)
+
+        for feature in task.features_out:
             # Get unique grid_id with lock
             self.grid_id_lock.lock()
             try:
@@ -2315,8 +2429,22 @@ class StudyAreaProcessingTask(QgsTask):
             finally:
                 self.grid_id_lock.unlock()
 
-            # Queue grid cell write operation
-            op = GpkgOperation.write_grid_cell(geometry=geometry, area_name=normalized_name, grid_id=grid_id)
+            # Handle H3 features (tuples) vs square grid features (just geometry)
+            if is_h3_task:
+                h3_index, geometry = feature
+                op = GpkgOperation.write_grid_cell(
+                    geometry=geometry,
+                    area_name=normalized_name,
+                    grid_id=grid_id,
+                    h3_index=h3_index,
+                    h3_resolution=h3_resolution,
+                )
+            else:
+                op = GpkgOperation.write_grid_cell(
+                    geometry=feature,
+                    area_name=normalized_name,
+                    grid_id=grid_id,
+                )
             self.write_queue.put(op)
 
         # Free geometries after queuing to release memory
@@ -2342,6 +2470,18 @@ class StudyAreaProcessingTask(QgsTask):
                 layer.CreateField(field_defn)
                 field_defn = ogr.FieldDefn("area_name", ogr.OFTString)
                 layer.CreateField(field_defn)
+
+                # Add H3 fields for regional scale
+                if self.analysis_scale == "regional":
+                    from geest.core.h3_utils import get_h3_resolution_for_scale
+
+                    h3_res = get_h3_resolution_for_scale(self.analysis_scale)
+                    field_defn = ogr.FieldDefn("h3_index", ogr.OFTString)
+                    layer.CreateField(field_defn)
+                    field_defn = ogr.FieldDefn("h3_resolution", ogr.OFTInteger)
+                    layer.CreateField(field_defn)
+                    log_message(f"Created grid layer with H3 fields (resolution {h3_res})")
+
             ds = None
         finally:
             self.gpkg_lock.unlock()
