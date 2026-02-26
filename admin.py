@@ -32,14 +32,17 @@ WHEEL_PLATFORMS = [
     ("manylinux2014_x86_64", "cp311", "linux"),
     ("manylinux2014_x86_64", "cp312", "linux"),
     ("manylinux2014_x86_64", "cp313", "linux"),
+    ("manylinux2014_x86_64", "cp314", "linux"),
     # macOS
     ("macosx_10_9_x86_64", "cp311", "macos-intel"),
     ("macosx_10_9_x86_64", "cp312", "macos-intel"),
     ("macosx_11_0_arm64", "cp311", "macos-arm"),
     ("macosx_11_0_arm64", "cp312", "macos-arm"),
+    ("macosx_11_0_arm64", "cp314", "macos-arm"),
     # Windows
     ("win_amd64", "cp311", "windows"),
     ("win_amd64", "cp312", "windows"),
+    ("win_amd64", "cp314", "windows"),
 ]
 app = typer.Typer()
 
