@@ -19,4 +19,17 @@ WATER_SANITATION_ACCESS = {
         "scores": {"intersects": 5, "no_intersection": 0},
         "description": "Local scale - 1km buffer",
     },
+    "regional": {
+        "buffer_distance": 3000,
+        "scoring_method": "percentage_intersection",
+        "percentage_scores": {
+            0: 0,
+            16: 1,
+            32: 2,
+            48: 3,
+            64: 4,
+            100: 5,
+        },
+        "description": "Regional scale - percentage-based scoring with 3km buffer",
+    },
 }

@@ -1767,9 +1767,10 @@ class TreePanel(QWidget):
 
         attributes = item.attributes()
 
-        # Validate road network layer if needed
+        # Validate road network layer if needed (skip for Regional scale - uses simple buffer)
         analysis_mode = attributes.get("analysis_mode", "")
-        needs_road_network = analysis_mode in ["use_multi_buffer_point"]
+        analysis_scale = self.model.get_analysis_item().attributes().get("analysis_scale", "national")
+        needs_road_network = analysis_mode in ["use_multi_buffer_point"] and analysis_scale != "regional"
         road_network_path = self.road_network_layer_path()
         if needs_road_network:
             # Get expected CRS from study area

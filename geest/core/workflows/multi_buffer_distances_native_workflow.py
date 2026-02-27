@@ -12,6 +12,7 @@ from qgis.core import (
     QgsField,
     QgsGeometry,
     QgsProcessingContext,
+    QgsProcessingFeedback,
     QgsVectorLayer,
     edit,
 )
@@ -54,6 +55,11 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         super().__init__(item, cell_size_m, analysis_scale, feedback, context, working_directory)
         self.workflow_name = "use_multi_buffer_point"
         self.distances = self.attributes.get("multi_buffer_travel_distances", None)
+        # Default scoring method (distance-based for national/local)
+        self.scoring_method = ""
+        self.percentage_scores = {}
+        self.use_simple_buffer = False  # Use network isochrones by default
+        self.buffer_distance = 0  # Single buffer distance for Regional scale
         if not self.distances:
             factor_id = None
             if item.isIndicator() and item.parentItem:
@@ -67,6 +73,15 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                     thresholds = config.get("thresholds")
                     if thresholds:
                         self.distances = thresholds
+                    # Get buffer distance for regional scale (single buffer approach)
+                    buffer_distance = config.get("buffer_distance")
+                    if buffer_distance:
+                        self.buffer_distance = buffer_distance
+                    # Get scoring method and percentage scores for regional scale
+                    self.scoring_method = config.get("scoring_method", "")
+                    self.percentage_scores = config.get("percentage_scores", {})
+                    # Flag to use simple buffer instead of network analysis
+                    self.use_simple_buffer = self.scoring_method == "percentage_intersection"
         if not self.distances:
             log_message(
                 "Invalid travel distances, using default.",
@@ -128,22 +143,24 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         else:  # Driving
             self.mode = "time"
         self.road_network_layer_path = self.attributes.get("road_network_layer_path", None)
-        log_message(f"Using network layer at {self.road_network_layer_path}")
-        if not self.road_network_layer_path:
-            log_message(
-                f"Invalid network layer found in {self.road_network_layer_path}.",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
-            raise Exception("Invalid network layer found.")
+        # Only require network layer for National/Local scale (Regional uses simple buffer)
+        if not self.use_simple_buffer:
+            log_message(f"Using network layer at {self.road_network_layer_path}")
+            if not self.road_network_layer_path:
+                log_message(
+                    f"Invalid network layer found in {self.road_network_layer_path}.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+                raise Exception("Invalid network layer found.")
         log_message("Multi Buffer Distances Native Workflow initialized")
 
     def _process_features_for_area(
         self,
-        current_area: QgsGeometry,
-        clip_area: QgsGeometry,
-        current_bbox: QgsGeometry,
-        area_features: QgsVectorLayer,
+        current_area: "QgsGeometry",
+        clip_area: "QgsGeometry",
+        current_bbox: "QgsGeometry",
+        area_features: "QgsVectorLayer",
         index: int,
     ) -> str:
         """Process a single area.
@@ -158,6 +175,21 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         Returns:
             Raster file path, or False if failed.
         """
+        # Check if we should use simple buffer (Regional scale) instead of network analysis
+        if self.use_simple_buffer and self.buffer_distance:
+            log_message(
+                f"Using simple buffer for Regional scale: {self.buffer_distance}m",
+                level=Qgis.Info,
+            )
+            return self._process_features_with_simple_buffer(
+                current_area=current_area,
+                clip_area=clip_area,
+                current_bbox=current_bbox,
+                area_features=area_features,
+                index=index,
+            )
+
+        # Original network analysis approach for National/Local scale
         log_message(
             f"Starting network analysis for area {index + 1}",
             level=Qgis.Info,
@@ -408,6 +440,206 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         # Return the path to the created GeoPackage
         return task.result_path
 
+    def _process_features_with_simple_buffer(
+        self,
+        current_area: "QgsGeometry",
+        clip_area: "QgsGeometry",
+        current_bbox: "QgsGeometry",
+        area_features: "QgsVectorLayer",
+        index: int,
+    ) -> str:
+        """Process a single area using simple buffer (no network analysis).
+
+        Used for Regional scale - creates a single buffer around POIs
+        and scores grid cells based on percentage intersection.
+
+        Args:
+            current_area: Polygon from study area.
+            clip_area: Polygon to clip features to.
+            current_bbox: Bounding box.
+            area_features: Features to analyze.
+            index: Area number being processed.
+
+        Returns:
+            Raster file path, or False if failed.
+        """
+        from qgis import processing
+        from geest.core.algorithms.utilities import subset_vector_layer
+
+        log_message(
+            f"Creating simple buffer for area {index + 1} (buffer: {self.buffer_distance}m)",
+            level=Qgis.Info,
+        )
+
+        buffer_output = os.path.join(self.workflow_directory, f"simple_buffer_{index}.gpkg")
+        if os.path.exists(buffer_output):
+            os.remove(buffer_output)
+
+        buffer_params = {
+            "INPUT": area_features,
+            "DISTANCE": self.buffer_distance,
+            "OUTPUT": buffer_output,
+        }
+        result = processing.run("native:buffer", buffer_params, feedback=QgsProcessingFeedback())
+        buffered_layer_path = result["OUTPUT"]
+
+        if not buffered_layer_path or not os.path.exists(buffered_layer_path):
+            log_message(
+                f"Failed to create buffer for area {index}",
+                level=Qgis.Warning,
+            )
+            return False
+
+        buffered_layer = QgsVectorLayer(buffered_layer_path, "buffered", "ogr")
+        if not buffered_layer.isValid():
+            log_message(
+                f"Failed to load buffered layer for area {index}",
+                level=Qgis.Warning,
+            )
+            return False
+
+        grid_output = os.path.join(self.workflow_directory, f"grid_area_{index}.gpkg")
+        if os.path.exists(grid_output):
+            os.remove(grid_output)
+
+        area_grid = subset_vector_layer(
+            self.workflow_directory,
+            self.grid_layer,
+            current_area,
+            f"grid_area_{index}",
+        )
+        if not area_grid or not area_grid.isValid():
+            log_message(
+                f"Failed to get grid cells for area {index}",
+                level=Qgis.Warning,
+            )
+            return False
+
+        scored_grid = self._score_grid_for_percentage(
+            grid_layer=area_grid,
+            buffered_layer=buffered_layer,
+        )
+
+        if scored_grid is False:
+            log_message(
+                "No scored grid cells were created.",
+                level=Qgis.Warning,
+            )
+            return False
+
+        raster_output = self._rasterize(
+            input_layer=scored_grid,
+            bbox=current_bbox,
+            index=index,
+            value_field="value",
+        )
+
+        return raster_output
+
+    def _score_grid_for_percentage(
+        self,
+        grid_layer: "QgsVectorLayer",
+        buffered_layer: "QgsVectorLayer",
+    ) -> "QgsVectorLayer":
+        """Score grid cells based on percentage intersection with buffered features.
+
+        For Regional scale: calculates what percentage of each grid cell
+        is covered by the accessibility buffer and assigns score accordingly.
+
+        Args:
+            grid_layer: The grid layer (H3 hexagons).
+            buffered_layer: The buffered POI features.
+
+        Returns:
+            The grid layer with "value" field containing assigned scores.
+        """
+        log_message("Scoring grid cells based on percentage intersection")
+
+        field_names = [field.name() for field in grid_layer.fields()]
+        if "value" not in field_names:
+            grid_layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
+            grid_layer.updateFields()
+
+        grid_layer.startEditing()
+        for grid_feature in grid_layer.getFeatures():
+            grid_geom = grid_feature.geometry()
+            if grid_geom.isNull():
+                continue
+
+            grid_area = grid_geom.area()
+            if grid_area == 0:
+                continue
+
+            max_score = 0
+            max_overlap_percent = 0
+
+            for buffered_feature in buffered_layer.getFeatures():
+                buffered_geom = buffered_feature.geometry()
+                if buffered_geom.isNull():
+                    continue
+
+                intersection = grid_geom.intersection(buffered_geom)
+                if intersection.isNull() or intersection.area() == 0:
+                    continue
+
+                # Calculate % of buffer within hexagon (not % of hexagon covered)
+                buffer_area = buffered_geom.area()
+                if buffer_area > 0:
+                    overlap_percent = (intersection.area() / buffer_area) * 100
+                else:
+                    overlap_percent = 0
+
+                if overlap_percent > max_overlap_percent:
+                    max_overlap_percent = overlap_percent
+
+            # Calculate score based on final max_overlap_percent after all buffers checked
+            # Table ranges: Score 0: 0%, Score 1: 0.01-6%, Score 2: 6.01-12%, etc.
+            sorted_items = sorted(self.percentage_scores.items())
+            log_message(
+                f"DEBUG: Feature {grid_feature.id()} - max_overlap: {max_overlap_percent:.4f}%, thresholds: {sorted_items}",
+                level=Qgis.Info,
+            )
+            max_score = 0
+            for i, (min_pct, score) in enumerate(sorted_items):
+                if score == 0:
+                    if max_overlap_percent == 0:
+                        max_score = 0
+                        log_message(
+                            f"DEBUG: Feature {grid_feature.id()} - Score 0 (overlap=0%)",
+                            level=Qgis.Info,
+                        )
+                elif i == len(sorted_items) - 1:
+                    # Last score: prev_pct < overlap (e.g., 24 < x <= 100, but use >= for float precision)
+                    prev_pct = sorted_items[i - 1][0]
+                    in_range = prev_pct < max_overlap_percent
+                    log_message(
+                        f"DEBUG: Feature {grid_feature.id()} - Checking Score {score}: {prev_pct} < {max_overlap_percent:.4f} = {in_range}",
+                        level=Qgis.Info,
+                    )
+                    if in_range:
+                        max_score = score
+                else:
+                    # Middle scores: prev_pct < overlap <= min_pct
+                    prev_pct = sorted_items[i - 1][0]
+                    in_range = prev_pct < max_overlap_percent <= min_pct
+                    log_message(
+                        f"DEBUG: Feature {grid_feature.id()} - Checking Score {score}: {prev_pct} < {max_overlap_percent:.4f} <= {min_pct} = {in_range}",
+                        level=Qgis.Info,
+                    )
+                    if in_range:
+                        max_score = score
+
+            log_message(
+                f"DEBUG: Feature {grid_feature.id()} - FINAL: max_overlap={max_overlap_percent:.4f}%, assigned_score={max_score}",
+                level=Qgis.Info,
+            )
+
+            grid_feature.setAttribute("value", max_score)
+            grid_layer.updateFeature(grid_feature)
+
+        grid_layer.commitChanges()
+        return grid_layer
+
     def _create_bands(self, isochrones_gpkg_path, index):
         """Create bands by computing differences between isochrone ranges.
 
@@ -533,14 +765,88 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         log_message(f"Field names: {field_names}")
         if "value" not in field_names:
             log_message("Adding 'value' field to input layer")
-            # Add the burn field to the input layer if it doesn't exist
             layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
             layer.updateFields()
-
-            # Log message when the field is added
             log_message('Added "value" field to input layer')
 
-        # Calculate the burn field value based on the item number in the distance list
+        # Check if we should use percentage-based scoring (Regional scale)
+        if self.scoring_method == "percentage_intersection" and self.percentage_scores:
+            layer = self._assign_percentage_scores(layer)
+        else:
+            # Original distance-based scoring
+            layer = self._assign_distance_scores(layer)
+
+        return layer
+
+    def _assign_percentage_scores(self, layer: "QgsVectorLayer") -> "QgsVectorLayer":
+        """Assign scores based on percentage intersection with buffer.
+
+        For Regional scale: calculates what percentage of each grid cell
+        is covered by the accessibility buffer and assigns score accordingly.
+
+        Args:
+            layer: The buffered features layer.
+
+        Returns:
+            The same layer with a "value" field containing the assigned scores.
+        """
+        log_message("Using percentage-based scoring for Regional scale")
+
+        buffer_distance = 0
+        if hasattr(self, "buffer_distances") and self.buffer_distances:
+            buffer_distance = (
+                max(self.buffer_distances) if isinstance(self.buffer_distances, list) else self.buffer_distances
+            )
+        elif self.distances:
+            buffer_distance = max(self.distances) if isinstance(self.distances, list) else self.distances
+
+        log_message(f"Buffer distance for percentage scoring: {buffer_distance}m")
+
+        layer.startEditing()
+        for feature in layer.getFeatures():
+            grid_geom = feature.geometry()
+            if grid_geom.isNull():
+                continue
+
+            grid_area = grid_geom.area()
+
+            buffer_geom = feature.geometry()
+            if buffer_geom.isNull():
+                continue
+
+            intersection = grid_geom.intersection(buffer_geom)
+            if intersection.isNull() or intersection.area() == 0:
+                feature.setAttribute("value", 0)
+            else:
+                overlap_percent = (intersection.area() / grid_area) * 100
+
+                score = 0
+                for min_pct, score_value in sorted(self.percentage_scores.items(), reverse=True):
+                    if overlap_percent >= min_pct:
+                        score = score_value
+                        break
+
+                feature.setAttribute("value", score)
+                log_message(
+                    f"Grid cell overlap: {overlap_percent:.2f}%, score: {score}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+
+            layer.updateFeature(feature)
+
+        layer.commitChanges()
+        return layer
+
+    def _assign_distance_scores(self, layer: "QgsVectorLayer") -> "QgsVectorLayer":
+        """Assign scores based on distance band (original method).
+
+        Args:
+            layer: The buffered features layer.
+
+        Returns:
+            The same layer with a "value" field containing the assigned scores.
+        """
         layer.startEditing()
         for i, feature in enumerate(layer.getFeatures()):
             # Get the value of the burn field from the feature

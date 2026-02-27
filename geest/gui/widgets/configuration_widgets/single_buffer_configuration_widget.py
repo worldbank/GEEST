@@ -41,21 +41,57 @@ class SingleBufferConfigurationWidget(BaseConfigurationWidget):
 
             buffer_distance = config.get("buffer_distance")
             scores = config.get("scores", {})
+            scoring_method = config.get("scoring_method", "")
+            percentage_scores = config.get("percentage_scores", {})
+
             if buffer_distance is not None:
                 self.mapping_buffer_distance = buffer_distance
 
-            inside_score = scores.get("intersects", 0)
-            outside_score = scores.get("no_intersection", 0)
+            # Check if this is Regional scale with percentage-based scoring
+            if scoring_method == "percentage_intersection" and percentage_scores:
+                # Show percentage-based table for Regional scale
+                html = f"""
+                <p><b>{factor_name} ({analysis_scale.title()} Scale)</b></p>
+                <p><b>Buffer Distance:</b> {buffer_distance}m</p>
+                <table border='1' cellpadding='4' cellspacing='0'>
+                    <tr><th>Coverage Percentage</th><th>Score</th></tr>
+                """
 
-            html = f"""
-            <p><b>{factor_name} ({analysis_scale.title()} Scale)</b></p>
-            <table border='1' cellpadding='4' cellspacing='0'>
-                <tr><th>Distance Range (m)</th><th>Score</th></tr>
-                <tr><td>≤ {buffer_distance}</td><td>{inside_score}</td></tr>
-                <tr><td>&gt; {buffer_distance}</td><td>{outside_score}</td></tr>
-            </table>
-            <p><i>Note: You can override this default below</i></p>
-            """
+                # Build percentage ranges (same logic as multi_buffer_configuration_widget)
+                sorted_thresholds = sorted(percentage_scores.items())
+                prev_pct = 0
+                for i, (min_pct, score) in enumerate(sorted_thresholds):
+                    if score == 0:
+                        pct_range = "0% (no intersection)"
+                    elif i == len(sorted_thresholds) - 1:
+                        # Last entry (highest score): show prev_pct to 100%
+                        pct_range = f"{prev_pct + 0.01:.2f}% - 100%"
+                    else:
+                        # Use min_pct as upper bound
+                        if prev_pct == 0:
+                            # First non-zero score starts from 0.01%
+                            pct_range = f"0.01% - {min_pct:.2f}%"
+                        else:
+                            pct_range = f"{prev_pct + 0.01:.2f}% - {min_pct:.2f}%"
+                    html += f"<tr><td>{pct_range}</td><td>{score}</td></tr>"
+                    prev_pct = min_pct
+
+                html += "</table>"
+                html += "<p><i>Note: You can override the buffer distance below</i></p>"
+            else:
+                # Show binary table for National/Local scale
+                inside_score = scores.get("intersects", 0)
+                outside_score = scores.get("no_intersection", 0)
+
+                html = f"""
+                <p><b>{factor_name} ({analysis_scale.title()} Scale)</b></p>
+                <table border='1' cellpadding='4' cellspacing='0'>
+                    <tr><th>Distance Range (m)</th><th>Score</th></tr>
+                    <tr><td>≤ {buffer_distance}</td><td>{inside_score}</td></tr>
+                    <tr><td>&gt; {buffer_distance}</td><td>{outside_score}</td></tr>
+                </table>
+                <p><i>Note: You can override this default below</i></p>
+                """
 
             self.mapping_table_label = QLabel()
             self.mapping_table_label.setWordWrap(True)
