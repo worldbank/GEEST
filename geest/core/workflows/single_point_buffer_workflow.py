@@ -81,6 +81,11 @@ class SinglePointBufferWorkflow(WorkflowBase):
         config = mapping.get(analysis_scale, mapping.get("national")) if mapping else None
         mapped_distance = config.get("buffer_distance") if config else None
         self.mapped_scores = config.get("scores", {}) if config else {}
+        
+        # Load scoring method and percentage scores for Regional scale
+        self.scoring_method = config.get("scoring_method", "") if config else ""
+        self.percentage_scores = config.get("percentage_scores", {}) if config else {}
+        
         default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", 0))
         if mapped_distance:
             default_buffer_distance = int(mapped_distance)
@@ -90,10 +95,10 @@ class SinglePointBufferWorkflow(WorkflowBase):
 
     def _process_features_for_area(
         self,
-        current_area: QgsGeometry,
-        clip_area: QgsGeometry,
-        current_bbox: QgsGeometry,
-        area_features: QgsVectorLayer,
+        current_area: "QgsGeometry",
+        clip_area: "QgsGeometry",
+        current_bbox: "QgsGeometry",
+        area_features: "QgsVectorLayer",
         index: int,
     ) -> str:
         """
@@ -109,6 +114,17 @@ class SinglePointBufferWorkflow(WorkflowBase):
         """
         log_message(f"{self.workflow_name}  Processing Started")
 
+        # Check if we should use percentage-based scoring (Regional scale)
+        if self.scoring_method == "percentage_intersection" and self.percentage_scores:
+            return self._process_with_percentage_scoring(
+                current_area=current_area,
+                clip_area=clip_area,
+                current_bbox=current_bbox,
+                area_features=area_features,
+                index=index,
+            )
+
+        # Original binary scoring approach for National/Local scale
         # Step 1: Buffer the selected features
         buffered_layer = self._buffer_features(area_features, f"{self.layer_id}_buffered_{index}")
 
@@ -117,6 +133,185 @@ class SinglePointBufferWorkflow(WorkflowBase):
 
         # Step 3: Rasterize the scored buffer layer
         raster_output = self._rasterize(scored_layer, current_bbox, index)
+
+        return raster_output
+
+    def _process_with_percentage_scoring(
+        self,
+        current_area: "QgsGeometry",
+        clip_area: "QgsGeometry",
+        current_bbox: "QgsGeometry",
+        area_features: "QgsVectorLayer",
+        index: int,
+    ) -> str:
+        """Process using percentage-based scoring (Regional scale).
+        
+        For each grid cell, calculate the percentage of the buffer within
+        the hexagon and assign score based on percentage thresholds.
+        
+        Args:
+            current_area: Polygon from study area.
+            clip_area: Polygon to clip features to.
+            current_bbox: Bounding box.
+            area_features: Features to analyze.
+            index: Area number being processed.
+            
+        Returns:
+            Raster file path, or False if failed.
+        """
+        from geest.core.algorithms.utilities import subset_vector_layer
+        
+        log_message(
+            f"Single Point Buffer: Using percentage scoring for Regional scale (buffer: {self.buffer_distance}m)",
+            level=Qgis.Info,
+        )
+
+        # Step 1: Create buffer around points
+        buffer_output = os.path.join(
+            self.workflow_directory, f"simple_buffer_{index}.gpkg"
+        )
+        if os.path.exists(buffer_output):
+            os.remove(buffer_output)
+
+        buffer_params = {
+            "INPUT": area_features,
+            "DISTANCE": self.buffer_distance,
+            "OUTPUT": buffer_output,
+        }
+        result = processing.run("native:buffer", buffer_params)
+        buffered_layer_path = result["OUTPUT"]
+
+        if not buffered_layer_path or not os.path.exists(buffered_layer_path):
+            log_message(
+                f"Failed to create buffer for area {index}",
+                level=Qgis.Warning,
+            )
+            return False
+
+        buffered_layer =QgsVectorLayer(buffered_layer_path, "buffered", "ogr")
+        if not buffered_layer.isValid():
+            log_message(
+                f"Failed to load buffered layer for area {index}",
+                level=Qgis.Warning,
+            )
+            return False
+
+        # Step 2: Get grid cells for current area
+        area_grid = subset_vector_layer(
+            self.workflow_directory,
+            self.grid_layer,
+            current_area,
+            f"grid_area_{index}",
+        )
+        if not area_grid or not area_grid.isValid():
+            log_message(
+                f"Failed to get grid cells for area {index}",
+                level=Qgis.Warning,
+            )
+            return False
+
+        # Step 3: Score grid cells based on percentage intersection
+        scored_grid = self._score_grid_for_percentage(
+            grid_layer=area_grid,
+            buffered_layer=buffered_layer,
+        )
+
+        if scored_grid is False:
+            log_message(
+                "No scored grid cells were created.",
+                level=Qgis.Warning,
+            )
+            return False
+
+        # Step 4: Rasterize
+        raster_output = self._rasterize(
+            input_layer=scored_grid,
+            bbox=current_bbox,
+            index=index,
+            value_field="value",
+        )
+
+        return raster_output
+
+    def _score_grid_for_percentage(
+        self,
+        grid_layer: "QgsVectorLayer",
+        buffered_layer: "QgsVectorLayer",
+    ) -> "QgsVectorLayer":
+        """Score grid cells based on percentage intersection with buffered features.
+
+        For Regional scale: calculates what percentage of each grid cell
+        is covered by the accessibility buffer and assigns score accordingly.
+
+        Args:
+            grid_layer: The grid layer (H3 hexagons).
+            buffered_layer: The buffered POI features.
+
+        Returns:
+            The grid layer with "value" field containing the assigned scores.
+        """
+        log_message("Scoring grid cells based on percentage intersection")
+
+        field_names = [field.name() for field in grid_layer.fields()]
+        if "value" not in field_names:
+            grid_layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
+            grid_layer.updateFields()
+
+        grid_layer.startEditing()
+        for grid_feature in grid_layer.getFeatures():
+            grid_geom = grid_feature.geometry()
+            if grid_geom.isNull():
+                continue
+
+            grid_area = grid_geom.area()
+            if grid_area == 0:
+                continue
+
+            max_score = 0
+            max_overlap_percent = 0
+
+            for buffered_feature in buffered_layer.getFeatures():
+                buffered_geom = buffered_feature.geometry()
+                if buffered_geom.isNull():
+                    continue
+
+                intersection = grid_geom.intersection(buffered_geom)
+                if intersection.isNull() or intersection.area() == 0:
+                    continue
+
+                # Calculate % of buffer within hexagon
+                buffer_area = buffered_geom.area()
+                if buffer_area > 0:
+                    overlap_percent = (intersection.area() / buffer_area) * 100
+                else:
+                    overlap_percent = 0
+
+                if overlap_percent > max_overlap_percent:
+                    max_overlap_percent = overlap_percent
+
+            # Calculate score based on final max_overlap_percent after all buffers checked
+            sorted_items = sorted(self.percentage_scores.items())
+            max_score = 0
+            for i, (min_pct, score) in enumerate(sorted_items):
+                if score == 0:
+                    if max_overlap_percent == 0:
+                        max_score = 0
+                elif i == len(sorted_items) - 1:
+                    # Last score: prev_pct < overlap
+                    prev_pct = sorted_items[i - 1][0]
+                    if prev_pct < max_overlap_percent:
+                        max_score = score
+                else:
+                    # Middle scores: prev_pct < overlap <= min_pct
+                    prev_pct = sorted_items[i - 1][0]
+                    if prev_pct < max_overlap_percent <= min_pct:
+                        max_score = score
+
+            grid_feature.setAttribute("value", max_score)
+            grid_layer.updateFeature(grid_feature)
+
+        grid_layer.commitChanges()
+        return grid_layer
 
         return raster_output
 
