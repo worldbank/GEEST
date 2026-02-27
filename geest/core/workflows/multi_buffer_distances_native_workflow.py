@@ -81,7 +81,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                     self.scoring_method = config.get("scoring_method", "")
                     self.percentage_scores = config.get("percentage_scores", {})
                     # Flag to use simple buffer instead of network analysis
-                    self.use_simple_buffer = (self.scoring_method == "percentage_intersection")
+                    self.use_simple_buffer = self.scoring_method == "percentage_intersection"
         if not self.distances:
             log_message(
                 "Invalid travel distances, using default.",
@@ -471,9 +471,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             level=Qgis.Info,
         )
 
-        buffer_output = os.path.join(
-            self.workflow_directory, f"simple_buffer_{index}.gpkg"
-        )
+        buffer_output = os.path.join(self.workflow_directory, f"simple_buffer_{index}.gpkg")
         if os.path.exists(buffer_output):
             os.remove(buffer_output)
 
@@ -492,7 +490,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             )
             return False
 
-        buffered_layer =QgsVectorLayer(buffered_layer_path, "buffered", "ogr")
+        buffered_layer = QgsVectorLayer(buffered_layer_path, "buffered", "ogr")
         if not buffered_layer.isValid():
             log_message(
                 f"Failed to load buffered layer for area {index}",
@@ -500,9 +498,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             )
             return False
 
-        grid_output = os.path.join(
-            self.workflow_directory, f"grid_area_{index}.gpkg"
-        )
+        grid_output = os.path.join(self.workflow_directory, f"grid_area_{index}.gpkg")
         if os.path.exists(grid_output):
             os.remove(grid_output)
 
@@ -798,7 +794,9 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
         buffer_distance = 0
         if hasattr(self, "buffer_distances") and self.buffer_distances:
-            buffer_distance = max(self.buffer_distances) if isinstance(self.buffer_distances, list) else self.buffer_distances
+            buffer_distance = (
+                max(self.buffer_distances) if isinstance(self.buffer_distances, list) else self.buffer_distances
+            )
         elif self.distances:
             buffer_distance = max(self.distances) if isinstance(self.distances, list) else self.distances
 

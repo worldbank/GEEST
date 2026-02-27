@@ -757,7 +757,7 @@ class WorkflowBase(QObject):
 
         # Ensure resolution parameters are properly formatted as float values
         # For Regional scale (H3 L6), use smaller cell size for better resolution
-        if hasattr(self, 'analysis_scale') and self.analysis_scale == "regional":
+        if hasattr(self, "analysis_scale") and self.analysis_scale == "regional":
             x_res = 500  # Smaller cell size for H3 hexagons (H3 L6 edge ~3229m)
             y_res = 500
         else:

@@ -28,12 +28,12 @@ WOMENS_TRAVEL_PATTERNS = {
         "buffer_distance": 1500,
         "scoring_method": "percentage_intersection",
         "percentage_scores": {
-            0: 0,   # 0% (no intersection)
-            6: 1,   # 0.01-6%
+            0: 0,  # 0% (no intersection)
+            6: 1,  # 0.01-6%
             12: 2,  # 6.01-12%
             18: 3,  # 12.01-18%
             24: 4,  # 18.01-24%
-            100: 5, # 24.01-100%
+            100: 5,  # 24.01-100%
         },
         "description": "Regional scale - percentage-based scoring with 1.5km buffer",
     },
@@ -57,12 +57,12 @@ PUBLIC_TRANSPORT_ACCESS = {
         "buffer_distance": 1000,
         "scoring_method": "percentage_intersection",
         "percentage_scores": {
-            0: 0,   # 0% (no intersection)
-            6: 1,   # 0.01-6%
+            0: 0,  # 0% (no intersection)
+            6: 1,  # 0.01-6%
             12: 2,  # 6.01-12%
             18: 3,  # 12.01-18%
             24: 4,  # 18.01-24%
-            100: 5, # 24.01-100%
+            100: 5,  # 24.01-100%
         },
         "description": "Regional scale - percentage-based scoring with 1km buffer",
     },
@@ -86,11 +86,11 @@ HEALTH_FACILITIES_ACCESS = {
         "buffer_distance": 6000,
         "scoring_method": "percentage_intersection",
         "percentage_scores": {
-            0: 0,    # 0% (no intersection)
-            20: 1,   # 0.01-20%
-            40: 2,   # 20.01-40%
-            60: 3,   # 40.01-60%
-            80: 4,   # 60.01-80%
+            0: 0,  # 0% (no intersection)
+            20: 1,  # 0.01-20%
+            40: 2,  # 20.01-40%
+            60: 3,  # 40.01-60%
+            80: 4,  # 60.01-80%
             100: 5,  # 80.01-100%
         },
         "description": "Regional scale - percentage-based scoring with 6km buffer",
@@ -115,11 +115,11 @@ EDUCATION_FACILITIES_ACCESS = {
         "buffer_distance": 3000,
         "scoring_method": "percentage_intersection",
         "percentage_scores": {
-            0: 0,    # 0% (no intersection)
-            16: 1,   # 0.01-16%
-            32: 2,   # 16.01-32%
-            48: 3,   # 32.01-48%
-            64: 4,   # 48.01-64%
+            0: 0,  # 0% (no intersection)
+            16: 1,  # 0.01-16%
+            32: 2,  # 16.01-32%
+            48: 3,  # 32.01-48%
+            64: 4,  # 48.01-64%
             100: 5,  # 64.01-100%
         },
         "description": "Regional scale - percentage-based scoring with 3km buffer",
@@ -144,11 +144,11 @@ FINANCIAL_FACILITIES_ACCESS = {
         "buffer_distance": 2500,
         "scoring_method": "percentage_intersection",
         "percentage_scores": {
-            0: 0,    # 0% (no intersection)
-            10: 1,   # 0.01-10%
-            20: 2,   # 10.01-20%
-            30: 3,   # 20.01-30%
-            40: 4,   # 30.01-40%
+            0: 0,  # 0% (no intersection)
+            10: 1,  # 0.01-10%
+            20: 2,  # 10.01-20%
+            30: 3,  # 20.01-30%
+            40: 4,  # 30.01-40%
             100: 5,  # 40.01-100%
         },
         "description": "Regional scale - percentage-based scoring with 2.5km buffer",

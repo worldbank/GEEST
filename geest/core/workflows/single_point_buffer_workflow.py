@@ -81,11 +81,11 @@ class SinglePointBufferWorkflow(WorkflowBase):
         config = mapping.get(analysis_scale, mapping.get("national")) if mapping else None
         mapped_distance = config.get("buffer_distance") if config else None
         self.mapped_scores = config.get("scores", {}) if config else {}
-        
+
         # Load scoring method and percentage scores for Regional scale
         self.scoring_method = config.get("scoring_method", "") if config else ""
         self.percentage_scores = config.get("percentage_scores", {}) if config else {}
-        
+
         default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", 0))
         if mapped_distance:
             default_buffer_distance = int(mapped_distance)
@@ -145,31 +145,29 @@ class SinglePointBufferWorkflow(WorkflowBase):
         index: int,
     ) -> str:
         """Process using percentage-based scoring (Regional scale).
-        
+
         For each grid cell, calculate the percentage of the buffer within
         the hexagon and assign score based on percentage thresholds.
-        
+
         Args:
             current_area: Polygon from study area.
             clip_area: Polygon to clip features to.
             current_bbox: Bounding box.
             area_features: Features to analyze.
             index: Area number being processed.
-            
+
         Returns:
             Raster file path, or False if failed.
         """
         from geest.core.algorithms.utilities import subset_vector_layer
-        
+
         log_message(
             f"Single Point Buffer: Using percentage scoring for Regional scale (buffer: {self.buffer_distance}m)",
             level=Qgis.Info,
         )
 
         # Step 1: Create buffer around points
-        buffer_output = os.path.join(
-            self.workflow_directory, f"simple_buffer_{index}.gpkg"
-        )
+        buffer_output = os.path.join(self.workflow_directory, f"simple_buffer_{index}.gpkg")
         if os.path.exists(buffer_output):
             os.remove(buffer_output)
 
@@ -188,7 +186,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
             )
             return False
 
-        buffered_layer =QgsVectorLayer(buffered_layer_path, "buffered", "ogr")
+        buffered_layer = QgsVectorLayer(buffered_layer_path, "buffered", "ogr")
         if not buffered_layer.isValid():
             log_message(
                 f"Failed to load buffered layer for area {index}",
