@@ -756,8 +756,13 @@ class WorkflowBase(QObject):
             log_message(f"Rasterizing {input_layer}")
 
         # Ensure resolution parameters are properly formatted as float values
-        x_res = self.cell_size_m  # pixel size in X direction
-        y_res = self.cell_size_m  # pixel size in Y direction
+        # For Regional scale (H3 L6), use smaller cell size for better resolution
+        if hasattr(self, 'analysis_scale') and self.analysis_scale == "regional":
+            x_res = 500  # Smaller cell size for H3 hexagons (H3 L6 edge ~3229m)
+            y_res = 500
+        else:
+            x_res = self.cell_size_m  # pixel size in X direction
+            y_res = self.cell_size_m  # pixel size in Y direction
         bbox = bbox.boundingBox()
         # Define rasterization parameters for the temporary layer
         params = {

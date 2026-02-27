@@ -468,6 +468,7 @@ class TreePanel(QWidget):
                 self.load_json()  # sets the class member json_data
                 self.model.loadJsonData(self.json_data)
                 self.apply_women_considerations_logic()  # Hide factors based on women considerations
+                self.apply_regional_scale_logic()  # Disable AT and WTP for regional scale
                 self.treeView.expandAll()
                 log_message(f"Loaded model.json from {model_path}")
 
@@ -519,6 +520,7 @@ class TreePanel(QWidget):
             self.load_json()
             self.model.loadJsonData(self.json_data)
             self.apply_women_considerations_logic()  # Hide factors based on women considerations
+            self.apply_regional_scale_logic()  # Disable AT and WTP for regional scale
             self.treeView.expandAll()
         # Collapse any factors that have only a single indicator
         self.treeView.collapse_single_nodes()
@@ -620,6 +622,7 @@ class TreePanel(QWidget):
         self.json_file = model_path
         self.load_json()
         self.apply_women_considerations_logic()
+        self.apply_regional_scale_logic()
 
     def apply_women_considerations_logic(self):
         """Apply factor enabled/disabled state based on women considerations setting.
@@ -725,6 +728,115 @@ class TreePanel(QWidget):
         self.treeView.viewport().update()
         self.treeView.update()
 
+    def apply_regional_scale_logic(self):
+        """Apply factor enabled/disabled state based on Regional scale.
+
+        Regional scale uses H3 L6 cells (~3.2km edge) which are too large
+        for fine-grained analysis.
+
+        Logic:
+        - Women enabling (ON): AT and WTP are enabled even at regional scale
+        - Generic (OFF): AT and WTP are disabled at regional scale
+        """
+        if not hasattr(self, "json_data") or self.json_data is None:
+            return
+
+        # Get analysis_scale from model.json
+        analysis_scale = self.json_data.get("analysis_scale", "national")
+
+        if analysis_scale != "regional":
+            return  # Only apply for regional scale
+
+        # Get women_considerations_enabled status
+        women_considerations_enabled = self.json_data.get("women_considerations_enabled", True)
+
+        log_message(f"Applying Regional scale logic: women_considerations={women_considerations_enabled}")
+
+        # For regional scale:
+        # - Women enabling (ON): AT and WTP are enabled
+        # - Generic (OFF): AT and WTP are disabled
+        regional_scale_factors = ["active_transport", "women_s_travel_patterns"]
+
+        if women_considerations_enabled:
+            # Enable AT and WTP for women enabling at regional scale
+            enabled_factors = regional_scale_factors
+            disabled_factors = []
+        else:
+            # Disable AT and WTP for generic analysis at regional scale
+            enabled_factors = []
+            disabled_factors = regional_scale_factors
+
+        # Get all dimensions from the model
+        root_item = self.model.get_analysis_item()
+        if not root_item:
+            return
+
+        # Iterate through dimensions and factors
+        for dim_idx in range(root_item.childCount()):
+            dimension = root_item.child(dim_idx)
+            if not dimension:
+                continue
+
+            # Iterate through factors in this dimension
+            for factor_idx in range(dimension.childCount()):
+                factor = dimension.child(factor_idx)
+                if not factor:
+                    continue
+
+                factor_id = factor.attribute("id", "")
+                factor_name = factor.data(0)
+
+                # Apply regional scale logic to specific factors
+                if factor_id in disabled_factors:
+                    factor.set_enabled(False)
+                    log_message(f"Disabled '{factor_name}' ({factor_id}) for Regional scale (Generic)")
+
+                    # Also disable all child indicators
+                    for indicator_idx in range(factor.childCount()):
+                        indicator = factor.child(indicator_idx)
+                        if indicator:
+                            indicator.set_enabled(False)
+                elif factor_id in enabled_factors:
+                    factor.set_enabled(True)
+                    log_message(f"Enabled '{factor_name}' ({factor_id}) for Regional scale (Women enabling)")
+
+                    # Also enable all child indicators
+                    for indicator_idx in range(factor.childCount()):
+                        indicator = factor.child(indicator_idx)
+                        if indicator:
+                            indicator.set_enabled(True)
+
+        # Rebalance weights per dimension based on enabled state
+        for dim_idx in range(root_item.childCount()):
+            dimension = root_item.child(dim_idx)
+            if not dimension:
+                continue
+
+            enabled_factors = [
+                dimension.child(idx)
+                for idx in range(dimension.childCount())
+                if dimension.child(idx) and dimension.child(idx).is_enabled()
+            ]
+            if enabled_factors:
+                equal_weight = 1.0 / len(enabled_factors)
+            else:
+                equal_weight = 0.0
+
+            for factor_idx in range(dimension.childCount()):
+                factor = dimension.child(factor_idx)
+                if not factor:
+                    continue
+                new_weight = equal_weight if factor.is_enabled() else 0.0
+                root_item.updateFactorWeighting(factor.guid, new_weight)
+
+        # Force a complete refresh of the tree view
+        self.model.beginResetModel()
+        self.model.endResetModel()
+
+        # Force viewport repaint
+        self.treeView.viewport().update()
+        self.treeView.update()
+
     def load_json_from_file(self):
         """Prompt the user to load a JSON file and update the tree."""
         json_file, _ = QFileDialog.getOpenFileName(
@@ -735,6 +847,7 @@ class TreePanel(QWidget):
             self.load_json()
             self.model.loadJsonData(self.json_data)
             self.apply_women_considerations_logic()  # Hide factors based on women considerations
+            self.apply_regional_scale_logic()  # Disable AT and WTP for regional scale
             self.treeView.expandAll()
 
     def export_json_to_file(self):
@@ -1767,9 +1880,10 @@ class TreePanel(QWidget):
 
         attributes = item.attributes()
 
-        # Validate road network layer if needed
+        # Validate road network layer if needed (skip for Regional scale - uses simple buffer)
         analysis_mode = attributes.get("analysis_mode", "")
-        needs_road_network = analysis_mode in ["use_multi_buffer_point"]
+        analysis_scale = self.model.get_analysis_item().attributes().get("analysis_scale", "national")
+        needs_road_network = analysis_mode in ["use_multi_buffer_point"] and analysis_scale != "regional"
         road_network_path = self.road_network_layer_path()
         if needs_road_network:
             # Get expected CRS from study area
