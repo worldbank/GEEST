@@ -24,7 +24,7 @@ isort==6.0.1
 Jinja2==3.1.6
 jsonschema==4.21.1
 jsonschema-specifications==2023.12.1
-Markdown==3.7
+Markdown==3.8.1
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mccabe==0.7.0
