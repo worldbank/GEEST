@@ -16,6 +16,7 @@ from geest.gui.widgets.datasource_widgets import (
     EPLEXDataSourceWidget,
     FixedValueDataSourceWidget,
     RasterDataSourceWidget,
+    S2SDataSourceWidget,
     VectorAndFieldDataSourceWidget,
     VectorDataSourceWidget,
 )
@@ -71,6 +72,9 @@ class DataSourceWidgetFactory:
             if widget_key == "use_single_buffer_point" and value == 1:
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_polygon_per_cell" and value == 1:
+                analysis_scale = attributes.get("analysis_scale")
+                if analysis_scale == "regional":
+                    return S2SDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_polyline_per_cell" and value == 1:
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
