@@ -6,13 +6,10 @@ from urllib.parse import quote
 
 from qgis.core import (
     QgsApplication,
-    QgsFieldProxyModel,
     QgsMapLayerProxyModel,
-    QgsMapLayerType,
     QgsProject,
     QgsVectorLayer,
 )
-from qgis.gui import QgsFieldComboBox
 from qgis.PyQt.QtCore import QSettings
 from qgis.PyQt.QtWidgets import QFileDialog, QLabel, QMessageBox, QSizePolicy
 
@@ -36,21 +33,6 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         self.raster_layer_combo.setFilters(QgsMapLayerProxyModel.RasterLayer | QgsMapLayerProxyModel.VectorLayer)
         self.raster_layer_combo.setToolTip("Select raster or vector layer from the map")
         self.raster_layer_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-
-        self.s2s_vector_field_combo = QgsFieldComboBox()
-        self.s2s_vector_field_combo.setFilters(QgsFieldProxyModel.Numeric)
-        self.s2s_vector_field_combo.setEnabled(False)
-        self.s2s_vector_field_combo.setVisible(False)
-        self.s2s_vector_field_combo.setMinimumWidth(140)
-        self.s2s_vector_field_combo.setMaximumWidth(220)
-        self.s2s_vector_field_combo.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        self.layout.addWidget(self.s2s_vector_field_combo)
-
-        self.raster_line_edit.textChanged.connect(self._update_vector_field_combo)
-        self.raster_layer_combo.layerChanged.connect(self._update_vector_field_combo)
-        self.s2s_vector_field_combo.currentIndexChanged.connect(self.update_attributes)
-
-        self._update_vector_field_combo()
 
         self.s2s_ntl_field = self.attributes.get("s2s_ntl_field") or DEFAULT_S2S_NTL_FIELD
         self.s2s_controls = DownloadTaskControls(
@@ -191,7 +173,6 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         self.raster_line_edit.setVisible(False)
         self.raster_layer_combo.setVisible(True)
         self.raster_layer_combo.setLayer(s2s_layer if s2s_layer.isValid() else None)
-        self._update_vector_field_combo()
 
         self._set_status("S2S nighttime lights downloaded")
         self.s2s_controls.set_downloaded()
@@ -226,48 +207,10 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         self.settings.setValue("GeoE3/lastRasterDir", parent_directory)
         self.settings.setValue("GeoE3/lastShapefileDir", parent_directory)
         self.resizeEvent(None)
-        self._update_vector_field_combo()
 
     def clear_raster(self):
-        """Clear selected file and reset vector field selection."""
+        """Clear selected file and reset widget state."""
         super().clear_raster()
-        self.s2s_vector_field_combo.setLayer(None)
-        self.s2s_vector_field_combo.setCurrentIndex(-1)
-        self.s2s_vector_field_combo.setEnabled(False)
-        self.s2s_vector_field_combo.setVisible(False)
-
-    def _update_vector_field_combo(self) -> None:
-        """Populate field combo only when selected file is a vector datasource."""
-        candidate_path = self.raster_line_edit.text().strip()
-        vector_layer = None
-
-        if self._is_vector_path(candidate_path):
-            vector_layer = QgsVectorLayer(candidate_path, "nighttime_lights_vector", "ogr")
-        else:
-            selected_layer = self.raster_layer_combo.currentLayer()
-            if selected_layer and selected_layer.type() == QgsMapLayerType.VectorLayer:
-                vector_layer = selected_layer
-
-        if vector_layer is None:
-            self.s2s_vector_field_combo.setLayer(None)
-            self.s2s_vector_field_combo.setCurrentIndex(-1)
-            self.s2s_vector_field_combo.setEnabled(False)
-            self.s2s_vector_field_combo.setVisible(False)
-            return
-
-        if not vector_layer.isValid():
-            self.s2s_vector_field_combo.setLayer(None)
-            self.s2s_vector_field_combo.setCurrentIndex(-1)
-            self.s2s_vector_field_combo.setEnabled(False)
-            self.s2s_vector_field_combo.setVisible(False)
-            return
-
-        previous_field = self.attributes.get(f"{self.widget_key}_selected_field", "")
-        self.s2s_vector_field_combo.setLayer(vector_layer)
-        self.s2s_vector_field_combo.setEnabled(True)
-        self.s2s_vector_field_combo.setVisible(True)
-        if previous_field and self.s2s_vector_field_combo.findText(previous_field) != -1:
-            self.s2s_vector_field_combo.setCurrentText(previous_field)
 
     @classmethod
     def _is_vector_path(cls, file_path: str) -> bool:
@@ -290,17 +233,11 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         if is_vector_file:
             self.attributes[f"{self.widget_key}_vector"] = quote(selected_path)
             self.attributes[f"{self.widget_key}_raster"] = ""
-            selected_field = (
-                self.s2s_vector_field_combo.currentText() if self.s2s_vector_field_combo.isEnabled() else ""
-            )
-            self.attributes[f"{self.widget_key}_selected_field"] = selected_field
+            self.attributes[f"{self.widget_key}_selected_field"] = ""
             self.attributes[f"{self.widget_key}_input_type"] = "vector"
-        elif is_vector_layer:
+        elif is_vector_layer and self._is_vector_path(selected_layer.source()):
             self.attributes[f"{self.widget_key}_vector"] = quote(selected_layer.source())
-            selected_field = (
-                self.s2s_vector_field_combo.currentText() if self.s2s_vector_field_combo.isEnabled() else ""
-            )
-            self.attributes[f"{self.widget_key}_selected_field"] = selected_field
+            self.attributes[f"{self.widget_key}_selected_field"] = ""
             self.attributes[f"{self.widget_key}_input_type"] = "vector"
         elif selected_path:
             self.attributes[f"{self.widget_key}_input_type"] = "raster"

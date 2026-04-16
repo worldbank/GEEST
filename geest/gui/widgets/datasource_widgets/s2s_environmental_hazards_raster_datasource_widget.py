@@ -20,9 +20,21 @@ class S2SEnvironmentalHazardsRasterDataSourceWidget(S2SNTLRasterDataSourceWidget
     def add_internal_widgets(self) -> None:
         """Build controls and configure hazard-specific S2S defaults."""
         super().add_internal_widgets()
+        self.s2s_vector_field_combo.setLayer(None)
+        self.s2s_vector_field_combo.setCurrentIndex(-1)
+        self.s2s_vector_field_combo.setEnabled(False)
+        self.s2s_vector_field_combo.setVisible(False)
         self.s2s_ntl_field = self._hazard_field_from_attributes()
         self._set_status("S2S idle")
         self.s2s_status_label.setToolTip(f"S2S field: {self.s2s_ntl_field}")
+
+    def _update_vector_field_combo(self) -> None:
+        """Disable manual field selection for S2S-specific hazards workflow."""
+        if hasattr(self, "s2s_vector_field_combo"):
+            self.s2s_vector_field_combo.setLayer(None)
+            self.s2s_vector_field_combo.setCurrentIndex(-1)
+            self.s2s_vector_field_combo.setEnabled(False)
+            self.s2s_vector_field_combo.setVisible(False)
 
     def fetch_from_s2s(self) -> None:
         """Fetch S2S summary rows for environmental hazards grid scoring."""
