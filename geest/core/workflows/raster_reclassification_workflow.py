@@ -18,6 +18,7 @@ from qgis.core import (
 
 from geest.core import JsonTreeItem
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
+from geest.core.grid_column_utils import write_joined_values_to_grid
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
@@ -50,6 +51,23 @@ class RasterReclassificationWorkflow(WorkflowBase):
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_environmental_hazards"
+        self.s2s_output_path = self.attributes.get("s2s_output_path", "")
+        self.s2s_hazard_field = self.attributes.get("s2s_hazard_field", "")
+        self._use_s2s_grid_path = bool(
+            self.analysis_scale == "regional" and self.s2s_output_path and self.s2s_hazard_field
+        )
+
+        if self._use_s2s_grid_path:
+            self.features_layer = True
+            self.use_grid_first = True
+            self.raster_layer = None
+            log_message(
+                f"Using regional S2S grid path for environmental hazards ({self.layer_id}) field '{self.s2s_hazard_field}'.",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
+            return
+
         if self.layer_id == "landslide":
             self.range_boundaries = 2  # min and max values are included
         else:
@@ -271,7 +289,43 @@ class RasterReclassificationWorkflow(WorkflowBase):
         :index: Iteration / number of area being processed.
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
-        pass
+        _ = current_area
+        _ = clip_area
+        _ = area_features
+
+        if not self._use_s2s_grid_path:
+            return None
+
+        if not area_name:
+            raise ValueError("area_name is required for regional S2S environmental hazards processing.")
+
+        source_layer = os.path.splitext(os.path.basename(self.s2s_output_path))[0]
+        updated_count = write_joined_values_to_grid(
+            gpkg_path=self.gpkg_path,
+            column_name=self.layer_id,
+            source_gpkg=self.s2s_output_path,
+            source_layer=source_layer,
+            source_key_field="hex_id",
+            target_key_field="h3_index",
+            source_value_field=self.s2s_hazard_field,
+            area_name=area_name,
+        )
+
+        if updated_count < 0:
+            raise RuntimeError("Failed to write S2S environmental hazards values to study_area_grid.")
+
+        log_message(
+            f"Wrote {updated_count} regional S2S environmental hazards values to grid column {self.layer_id}",
+            tag="GeoE3",
+            level=Qgis.Info,
+        )
+
+        return self._rasterize_grid_column(
+            column_name=self.layer_id,
+            bbox=current_bbox,
+            area_name=area_name,
+            index=index,
+        )
 
     def _process_aggregate_for_area(
         self,

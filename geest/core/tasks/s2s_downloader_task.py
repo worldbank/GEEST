@@ -201,7 +201,10 @@ class S2SDownloaderTask(QgsTask):
 
                 geometry_value = row.get("geometry")
                 if geometry_value is not None and geometry_type != ogr.wkbNone:
-                    geometry = ogr.CreateGeometryFromJson(json.dumps(geometry_value))
+                    normalized_geometry = self._normalize_geometry(geometry_value)
+                    geometry = None
+                    if normalized_geometry is not None:
+                        geometry = ogr.CreateGeometryFromJson(json.dumps(normalized_geometry))
                     if geometry is not None:
                         feature.SetGeometry(geometry)
 
@@ -219,7 +222,7 @@ class S2SDownloaderTask(QgsTask):
     def _infer_geometry_type(rows: List[Dict[str, Any]]) -> int:
         """Infer OGR geometry type from S2S rows."""
         for row in rows:
-            geometry = row.get("geometry")
+            geometry = S2SDownloaderTask._normalize_geometry(row.get("geometry"))
             if not geometry:
                 continue
 
@@ -233,6 +236,25 @@ class S2SDownloaderTask(QgsTask):
             return ogr.wkbUnknown
 
         return ogr.wkbNone
+
+    @staticmethod
+    def _normalize_geometry(geometry_value: Any) -> Optional[Dict[str, Any]]:
+        """Normalize geometry values from S2S rows to GeoJSON dicts."""
+        if geometry_value is None:
+            return None
+
+        if isinstance(geometry_value, dict):
+            return geometry_value
+
+        if isinstance(geometry_value, str):
+            try:
+                parsed = json.loads(geometry_value)
+                if isinstance(parsed, dict):
+                    return parsed
+            except json.JSONDecodeError:
+                return None
+
+        return None
 
     @staticmethod
     def _infer_field_types(rows: List[Dict[str, Any]], output_fields: List[str]) -> Dict[str, int]:

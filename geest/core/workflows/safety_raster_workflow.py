@@ -3,6 +3,7 @@
 This module contains functionality for safety raster workflow.
 """
 import os
+from typing import Optional
 from urllib.parse import unquote
 
 import numpy as np
@@ -18,6 +19,7 @@ from qgis.core import (
 )
 
 from geest.core import JsonTreeItem
+from geest.core.grid_column_utils import write_joined_values_to_grid, write_spatial_join_to_grid
 from geest.core.jenks import calculate_goodness_of_variance_fit, jenks_natural_breaks
 from geest.core.settings import setting
 from geest.utilities import log_message
@@ -54,6 +56,53 @@ class SafetyRasterWorkflow(WorkflowBase):
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_nighttime_lights"
+
+        self.s2s_output_path = self.attributes.get("s2s_output_path", "")
+        self.s2s_ntl_field = self.attributes.get("s2s_ntl_field", "")
+        self.vector_source_path = unquote(self.attributes.get("nighttime_lights_vector", ""))
+        self.vector_value_field = self.attributes.get("nighttime_lights_selected_field", "")
+        self._use_s2s_grid_path = bool(
+            self.analysis_scale == "regional" and self.s2s_output_path and self.s2s_ntl_field
+        )
+        self._use_vector_path = bool(self.vector_source_path and self.vector_value_field)
+
+        if self._use_s2s_grid_path:
+            self.features_layer = True
+            self.use_grid_first = True
+            self.raster_layer = None
+            log_message(
+                "Using regional S2S grid path for nighttime lights (direct raw value write).",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
+            return
+
+        if self._use_vector_path:
+            self.features_layer = QgsVectorLayer(self.vector_source_path, "Nighttime Lights Vector", "ogr")
+            if not self.features_layer.isValid():
+                log_message(
+                    f"Invalid nighttime lights vector source: {self.vector_source_path}. Falling back to raster path.",
+                    tag="GeoE3",
+                    level=Qgis.Warning,
+                )
+                self.features_layer = None
+            else:
+                self.use_grid_first = True
+                self.raster_layer = None
+                log_message(
+                    f"Using vector nighttime lights path with field '{self.vector_value_field}'.",
+                    tag="GeoE3",
+                    level=Qgis.Info,
+                )
+                return
+
+        if self.analysis_scale == "regional":
+            log_message(
+                "Regional nighttime lights S2S data not configured; falling back to raster input path.",
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+
         layer_name = unquote(self.attributes.get("nighttime_lights_raster", None))
         if not layer_name:
             log_message(
@@ -114,6 +163,78 @@ class SafetyRasterWorkflow(WorkflowBase):
             bbox=current_bbox,
         )
         return reclassified_raster
+
+    def _process_features_for_area(
+        self,
+        current_area: QgsGeometry,
+        clip_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
+        index: int,
+        area_name: str = None,
+    ) -> Optional[str]:
+        """Process S2S regional nighttime lights by writing raw values to the H3 grid."""
+        _ = current_area
+        _ = clip_area
+        _ = area_features
+
+        if not self._use_s2s_grid_path and not self._use_vector_path:
+            return None
+
+        if not area_name:
+            raise ValueError("area_name is required for regional S2S nighttime lights processing.")
+
+        if self._use_s2s_grid_path:
+            source_layer = os.path.splitext(os.path.basename(self.s2s_output_path))[0]
+            updated_count = write_joined_values_to_grid(
+                gpkg_path=self.gpkg_path,
+                column_name=self.layer_id,
+                source_gpkg=self.s2s_output_path,
+                source_layer=source_layer,
+                source_key_field="hex_id",
+                target_key_field="h3_index",
+                source_value_field=self.s2s_ntl_field,
+                area_name=area_name,
+            )
+
+            if updated_count < 0:
+                raise RuntimeError("Failed to write S2S nighttime lights values to study_area_grid.")
+
+            log_message(
+                f"Wrote {updated_count} regional S2S nighttime lights values to grid column {self.layer_id}",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
+        else:
+            source_path = area_features.source()
+            source_layer = os.path.splitext(os.path.basename(source_path))[0]
+            updated_count = write_spatial_join_to_grid(
+                gpkg_path=self.gpkg_path,
+                column_name=self.layer_id,
+                features_gpkg=source_path,
+                features_layer=source_layer,
+                score_expression=self.vector_value_field,
+                area_name=area_name,
+                aggregation_method="MAX",
+                save_buffers=False,
+                workflow_directory=self.workflow_directory,
+            )
+
+            if updated_count < 0:
+                raise RuntimeError("Failed to write vector nighttime lights values to study_area_grid.")
+
+            log_message(
+                f"Wrote {updated_count} vector nighttime lights values to grid column {self.layer_id}",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
+
+        return self._rasterize_grid_column(
+            column_name=self.layer_id,
+            bbox=current_bbox,
+            area_name=area_name,
+            index=index,
+        )
 
     def _apply_reclassification(
         self,
@@ -315,26 +436,6 @@ class SafetyRasterWorkflow(WorkflowBase):
             )
             log_message(error_msg, tag="GeoE3", level=2)  # Critical
             raise ValueError(error_msg) from e
-
-    # Not used in this workflow since we work with rasters
-    def _process_features_for_area(
-        self,
-        current_area: QgsGeometry,
-        current_bbox: QgsGeometry,
-        area_features: QgsVectorLayer,
-        index: int,
-        area_name: str = None,
-    ) -> str:
-        """
-        Executes the actual workflow logic for a single area
-        Must be implemented by subclasses.
-        :current_area: Current polygon from our study area.
-        :current_bbox: Bounding box of the above area.
-        :area_features: A vector layer of features to analyse that includes only features in the study area.
-        :index: Iteration / number of area being processed.
-        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
-        """
-        pass
 
     def _process_aggregate_for_area(
         self,

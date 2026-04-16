@@ -14,10 +14,11 @@ from qgis.core import (
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QSettings
-from qgis.PyQt.QtWidgets import QLabel, QLineEdit, QMessageBox, QPushButton
+from qgis.PyQt.QtWidgets import QLabel, QLineEdit, QMessageBox, QSizePolicy
 
 from geest.core.tasks import S2SDownloaderTask
 
+from .download_task_controls import DownloadTaskControls
 from .vector_datasource_widget import VectorDataSourceWidget
 
 
@@ -30,6 +31,7 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
 
         self.s2s_fields_line_edit = QLineEdit()
         self.s2s_fields_line_edit.setPlaceholderText("S2S fields (comma separated)")
+        self.s2s_fields_line_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         initial_fields = self.attributes.get("s2s_fields", [])
         if isinstance(initial_fields, list) and initial_fields:
             self.s2s_fields_line_edit.setText(",".join(str(field) for field in initial_fields))
@@ -38,12 +40,23 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
         self.s2s_fields_line_edit.textChanged.connect(self.update_attributes)
         self.layout.addWidget(self.s2s_fields_line_edit)
 
-        self.s2s_fetch_button = QPushButton("Fetch from S2S")
-        self.s2s_fetch_button.clicked.connect(self.fetch_from_s2s)
-        self.layout.addWidget(self.s2s_fetch_button)
+        self.s2s_controls = DownloadTaskControls(
+            button_text="Download from S2S",
+            tooltip="Download data from Space2Stats",
+            click_handler=self.fetch_from_s2s,
+        )
+        self.s2s_fetch_button = self.s2s_controls.button
+        self.layout.addWidget(self.s2s_controls.container)
 
         self.s2s_status_label = QLabel("S2S idle")
+        self.s2s_status_label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.s2s_status_label.setMinimumWidth(90)
+        self.s2s_status_label.setMaximumWidth(170)
         self.layout.addWidget(self.s2s_status_label)
+
+        self.layout.setStretchFactor(self.layer_combo, 4)
+        self.layout.setStretchFactor(self.shapefile_line_edit, 4)
+        self.layout.setStretchFactor(self.s2s_fields_line_edit, 3)
 
         self._s2s_error_handled = False
         self.s2s_task = None
@@ -99,8 +112,7 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
 
         self.s2s_output_path = os.path.join(working_directory, "study_area", f"s2s_{self.widget_key}.gpkg")
 
-        self.s2s_fetch_button.setEnabled(False)
-        self.s2s_fetch_button.setText("Fetching...")
+        self.s2s_controls.set_running()
         self.s2s_status_label.setText("Fetching S2S data...")
 
         self._s2s_error_handled = False
@@ -123,13 +135,13 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
     def _on_s2s_progress(self, message: str) -> None:
         """Update S2S status text from task progress."""
         self.s2s_status_label.setText(message)
+        self.s2s_controls.update_progress(message)
 
     def _on_s2s_error(self, message: str) -> None:
         """Handle S2S task errors."""
         self._s2s_error_handled = True
         self.s2s_status_label.setText("S2S download failed")
-        self.s2s_fetch_button.setEnabled(True)
-        self.s2s_fetch_button.setText("Fetch from S2S")
+        self.s2s_controls.set_download_failed(message)
         friendly_message = self._humanize_s2s_error(message)
         QMessageBox.warning(self, "S2S Download Failed", friendly_message)
 
@@ -138,28 +150,29 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
         if self._s2s_error_handled:
             return
         self.s2s_status_label.setText("S2S task terminated")
-        self.s2s_fetch_button.setEnabled(True)
-        self.s2s_fetch_button.setText("Fetch from S2S")
+        self.s2s_controls.set_cancelled()
 
     def _on_s2s_completed(self) -> None:
         """Load output layer after successful S2S task completion."""
-        self.s2s_fetch_button.setEnabled(True)
-        self.s2s_fetch_button.setText("Fetch from S2S")
+        self.s2s_controls.reset()
 
         if not self.s2s_output_path or not os.path.exists(self.s2s_output_path):
             self.s2s_status_label.setText("S2S output not found")
+            self.s2s_controls.set_not_found(self.s2s_output_path)
             return
 
         layer_name = os.path.splitext(os.path.basename(self.s2s_output_path))[0]
         output_layer = QgsVectorLayer(self.s2s_output_path, layer_name, "ogr")
         if not output_layer.isValid():
             self.s2s_status_label.setText("S2S output invalid")
+            self.s2s_controls.set_load_failed(self.s2s_output_path)
             QMessageBox.warning(self, "Invalid S2S Output", "S2S output file exists but could not be loaded.")
             return
 
         QgsProject.instance().addMapLayer(output_layer)
         self.layer_combo.setLayer(output_layer)
         self.s2s_status_label.setText("S2S download complete")
+        self.s2s_controls.set_downloaded()
         self.update_attributes()
 
     def update_attributes(self):

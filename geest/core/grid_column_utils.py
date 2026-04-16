@@ -10,6 +10,7 @@ directly to study_area_grid columns, then optionally rasterized using gdal_raste
 
 import json
 import os
+import re
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from osgeo import gdal, ogr
@@ -328,6 +329,32 @@ def _sanitize_column_name(column_name: str) -> str:
     return column_name.replace(" ", "_").replace("-", "_")[:63].lower()
 
 
+def _quote_sql_identifier(identifier: str) -> str:
+    """Quote and validate an SQL identifier for SQLite usage.
+
+    Args:
+        identifier: The identifier to validate and quote.
+
+    Returns:
+        Safely quoted identifier string.
+
+    Raises:
+        ValueError: If identifier contains unsupported characters.
+    """
+    if not identifier:
+        raise ValueError("SQL identifier cannot be empty")
+
+    if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", identifier):
+        raise ValueError(f"Invalid SQL identifier: {identifier}")
+
+    return f'"{identifier}"'
+
+
+def _quote_sql_literal(value: str) -> str:
+    """Quote a string literal for SQLite usage."""
+    return "'" + value.replace("'", "''") + "'"
+
+
 def _get_grid_layer_and_field_index(
     ds: ogr.DataSource,
     column_name: str,
@@ -368,6 +395,152 @@ def _get_grid_layer_and_field_index(
             return layer, -1
 
     return layer, field_idx
+
+
+def write_joined_values_to_grid(
+    gpkg_path: str,
+    column_name: str,
+    source_gpkg: str,
+    source_layer: str,
+    source_key_field: str,
+    target_key_field: str,
+    source_value_field: str,
+    area_name: Optional[str] = None,
+) -> int:
+    """Write values to study_area_grid via key-based join.
+
+    This function joins `study_area_grid` in the target GeoPackage with an external
+    source layer and writes matched values to a target grid column.
+
+    Typical usage for regional S2S:
+      - target_key_field: h3_index
+      - source_key_field: hex_id
+
+    Args:
+        gpkg_path: Path to the GeoPackage containing study_area_grid.
+        column_name: Target grid column to write values into.
+        source_gpkg: Path to source GeoPackage containing source_layer.
+        source_layer: Source layer name in source_gpkg.
+        source_key_field: Source key field name (e.g. hex_id).
+        target_key_field: Grid key field name (e.g. h3_index).
+        source_value_field: Source value field name to copy.
+        area_name: Optional area_name filter for grid rows.
+
+    Returns:
+        Number of matched grid rows updated, or -1 on error.
+    """
+    if not os.path.exists(gpkg_path):
+        log_message(f"GeoPackage not found: {gpkg_path}", level=Qgis.Warning)
+        return -1
+
+    if not os.path.exists(source_gpkg):
+        log_message(f"Source GeoPackage not found: {source_gpkg}", level=Qgis.Warning)
+        return -1
+
+    try:
+        # Ensure the target column exists in study_area_grid.
+        ds = ogr.Open(gpkg_path, 1)
+        if not ds:
+            log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
+            return -1
+
+        layer, field_idx = _get_grid_layer_and_field_index(ds, column_name, create_if_missing=True)
+        ds = None
+        if layer is None or field_idx < 0:
+            return -1
+
+        sanitized_column = _sanitize_column_name(column_name)
+
+        target_col_sql = _quote_sql_identifier(sanitized_column)
+        target_key_sql = _quote_sql_identifier(target_key_field)
+        source_key_sql = _quote_sql_identifier(source_key_field)
+        source_value_sql = _quote_sql_identifier(source_value_field)
+        source_layer_sql = _quote_sql_identifier(source_layer)
+
+        area_predicate = ""
+        if area_name:
+            area_predicate = f"AND g.area_name = {_quote_sql_literal(area_name)}"
+
+        source_gpkg_literal = _quote_sql_literal(source_gpkg)
+        source_layer_literal = _quote_sql_literal(source_layer)
+
+        ds = ogr.Open(gpkg_path, 1)
+        if not ds:
+            log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
+            return -1
+
+        ds.ExecuteSQL(f"ATTACH DATABASE {source_gpkg_literal} AS src", dialect="SQLite")  # nosec B608
+
+        try:
+            # Validate source layer exists.
+            source_exists_result = ds.ExecuteSQL(
+                (
+                    "SELECT 1 AS exists_flag "
+                    "FROM src.sqlite_master "
+                    "WHERE type IN ('table', 'view') "
+                    f"AND name = {source_layer_literal} "
+                    "LIMIT 1"
+                ),
+                dialect="SQLite",
+            )
+            source_exists = False
+            if source_exists_result is not None:
+                feature = source_exists_result.GetNextFeature()
+                source_exists = feature is not None
+                ds.ReleaseResultSet(source_exists_result)
+
+            if not source_exists:
+                log_message(f"Source layer not found in source GeoPackage: {source_layer}", level=Qgis.Warning)
+                return -1
+
+            # Clear existing values to preserve NULL semantics for unmatched keys.
+            clear_sql = f"UPDATE study_area_grid SET {target_col_sql} = NULL"
+            if area_name:
+                clear_sql += f" WHERE area_name = {_quote_sql_literal(area_name)}"
+            ds.ExecuteSQL(clear_sql, dialect="SQLite")  # nosec B608
+
+            update_sql = (
+                f"UPDATE study_area_grid AS g "  # nosec B608
+                f"SET {target_col_sql} = ("
+                f"SELECT CAST(s.{source_value_sql} AS REAL) "
+                f"FROM src.{source_layer_sql} AS s "
+                f"WHERE s.{source_key_sql} = g.{target_key_sql} "
+                f"LIMIT 1"
+                f") "
+                f"WHERE EXISTS ("
+                f"SELECT 1 FROM src.{source_layer_sql} AS s "
+                f"WHERE s.{source_key_sql} = g.{target_key_sql}"
+                f") {area_predicate}"
+            )
+            ds.ExecuteSQL(update_sql, dialect="SQLite")  # nosec B608
+
+            count_sql = (
+                f"SELECT COUNT(*) AS matched_count "  # nosec B608
+                f"FROM study_area_grid AS g "
+                f"JOIN src.{source_layer_sql} AS s "
+                f"ON s.{source_key_sql} = g.{target_key_sql} "
+                f"WHERE 1=1 {area_predicate}"
+            )
+            count_result = ds.ExecuteSQL(count_sql, dialect="SQLite")
+            matched_count = 0
+            if count_result is not None:
+                feature = count_result.GetNextFeature()
+                if feature is not None:
+                    matched_count = feature.GetField("matched_count") or 0
+                ds.ReleaseResultSet(count_result)
+        finally:
+            ds.ExecuteSQL("DETACH DATABASE src", dialect="SQLite")
+            ds = None
+
+        log_message(
+            f"Updated {matched_count} grid rows in {sanitized_column} using key join "
+            f"({target_key_field} <- {source_key_field})"
+        )
+        return int(matched_count)
+
+    except Exception as e:
+        log_message(f"Error in write_joined_values_to_grid: {e}", level=Qgis.Critical)
+        return -1
 
 
 def write_uniform_value_to_grid(

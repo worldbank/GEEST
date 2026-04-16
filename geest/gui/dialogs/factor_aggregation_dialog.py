@@ -151,7 +151,7 @@ class FactorAggregationDialog(CustomBaseDialog):
             self.table.setColumnCount(6)
             self.table.setHorizontalHeaderLabels(["Input", "Indicator", "Weight 0-1", "Use", "GUID", ""])
             self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-            self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+            self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Fixed)
             self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
             self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
             self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
@@ -170,6 +170,7 @@ class FactorAggregationDialog(CustomBaseDialog):
             self.table.setColumnWidth(4, 50)
             self.table.setColumnWidth(6, 75)
         else:
+            self.table.setColumnWidth(1, 200)
             self.table.setColumnWidth(2, 100)
             self.table.setColumnWidth(3, 50)
             self.table.setColumnWidth(5, 75)
@@ -359,6 +360,9 @@ class FactorAggregationDialog(CustomBaseDialog):
             row = guid_index
             item = self.tree_item.getItemByGuid(guid)
             attributes = item.attributes()
+            analysis_item = self.tree_item.parentItem.parentItem if self.tree_item.parentItem else None
+            if analysis_item:
+                attributes["analysis_scale"] = analysis_item.attribute("analysis_scale", "")
             log_message(f"Populating table for GUID: {guid}")
             log_message(f"Attributes: {item.attributesAsMarkdown()}")
 
