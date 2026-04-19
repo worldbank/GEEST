@@ -391,6 +391,7 @@ class UnifiedWriterThread(QThread):
             if self.ds:
                 try:
                     self.ds.FlushCache()
+                    self.ds.ExecuteSQL("PRAGMA wal_checkpoint(TRUNCATE)")
                 except Exception as e:
                     log_message(f"UnifiedWriter: Error flushing on cleanup: {e}", level="WARNING")
                 self.ds = None

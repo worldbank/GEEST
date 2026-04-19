@@ -120,7 +120,7 @@ class WorkflowBase(QObject):
         self.grid_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_grid", "study_area_grid", "ogr")
         self.features_layer = None  # set in concrete class if needed
         self.raster_layer = None  # set in concrete class if needed
-        self.target_crs = self.bboxes_layer.crs()
+        self.target_crs = self._resolve_target_crs()
 
         self.result_file_key = "result_file"
         self.result_key = "result"
@@ -176,6 +176,62 @@ class WorkflowBase(QObject):
         bbox = self.bbox_layer.extent()
         bbox = QgsCoordinateTransform.transformBoundingBox(transform, bbox)
         return bbox
+
+    def _resolve_target_crs(self) -> QgsCoordinateReferenceSystem:
+        """Resolve the target CRS from the study area GeoPackage.
+
+        First tries ``self.bboxes_layer.crs()``.  If the QGIS OGR provider
+        returns an invalid/empty CRS (which can happen when WAL journal files
+        leave stale shared-memory state), falls back to reading the CRS
+        directly from the ``gpkg_geometry_columns`` / ``gpkg_spatial_ref_sys``
+        metadata tables via OGR SQL.
+        """
+        crs = self.bboxes_layer.crs()
+        if crs.isValid() and crs.authid():
+            return crs
+
+        log_message(
+            "bboxes_layer CRS is invalid or empty — reading CRS from gpkg metadata",
+            tag="GeoE3",
+            level=Qgis.Warning,
+        )
+        try:
+            from osgeo import ogr
+
+            ds = ogr.Open(self.gpkg_path, 0)
+            if ds:
+                result = ds.ExecuteSQL(
+                    "SELECT gc.srs_id, srs.organization, srs.organization_coordsys_id "
+                    "FROM gpkg_geometry_columns gc "
+                    "JOIN gpkg_spatial_ref_sys srs ON gc.srs_id = srs.srs_id "
+                    "WHERE gc.table_name = 'study_area_bboxes' LIMIT 1"
+                )
+                if result:
+                    feat = result.GetNextFeature()
+                    if feat:
+                        org = feat.GetField("organization")
+                        org_id = feat.GetField("organization_coordsys_id")
+                        if org and org_id:
+                            crs = QgsCoordinateReferenceSystem(f"{org}:{org_id}")
+                            log_message(
+                                f"Recovered CRS from gpkg metadata: {crs.authid()}",
+                                tag="GeoE3",
+                                level=Qgis.Info,
+                            )
+                    ds.ReleaseResultSet(result)
+                ds = None
+        except Exception as e:
+            log_message(
+                f"Failed to read CRS from gpkg metadata: {e}",
+                tag="GeoE3",
+                level=Qgis.Critical,
+            )
+
+        if not crs.isValid():
+            raise ValueError(
+                f"Could not determine CRS for study area from {self.gpkg_path}. " "The GeoPackage may be corrupted."
+            )
+        return crs
 
     def _check_ghsl_layer_exists(self) -> bool:
         """Check if the GHSL settlements layer exists in the study area GeoPackage.

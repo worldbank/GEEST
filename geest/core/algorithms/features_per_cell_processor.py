@@ -277,6 +277,10 @@ def assign_values_to_grid(grid_layer: QgsVectorLayer, feedback: QgsFeedback = No
             END
         """
         ds.ExecuteSQL(sql)
+        try:
+            ds.ExecuteSQL("PRAGMA wal_checkpoint(TRUNCATE)")
+        except Exception:  # nosec B110 – non-fatal; the close will still flush
+            pass
         ds = None  # Close the datasource
 
         log_message(

@@ -19,6 +19,23 @@ from qgis.core import Qgis, QgsFeedback, QgsVectorLayer
 from geest.utilities import log_message
 
 
+def _checkpoint_wal(ds) -> None:
+    """Force a WAL checkpoint on a GeoPackage dataset before closing.
+
+    When multiple OGR write connections open the same GeoPackage in WAL mode,
+    uncheckpointed WAL data can cause QGIS's OGR provider to return stale
+    metadata (including empty CRS).  A TRUNCATE checkpoint flushes all WAL
+    content back into the main database file and removes the WAL/SHM files,
+    ensuring subsequent readers see the full, up-to-date database.
+    """
+    if ds is None:
+        return
+    try:
+        ds.ExecuteSQL("PRAGMA wal_checkpoint(TRUNCATE)")
+    except Exception:  # nosec B110 – non-fatal; the close will still flush
+        pass
+
+
 def extract_model_ids(model_path: str) -> Dict[str, List[str]]:
     """Extract all IDs from the model JSON file.
 
@@ -168,6 +185,7 @@ def add_model_columns_to_grid(gpkg_path: str, model_path: str) -> bool:
                 added_count += 1
 
         ds.FlushCache()
+        _checkpoint_wal(ds)
         ds = None
 
         log_message(f"Added {added_count} model columns to study_area_grid")
@@ -306,6 +324,7 @@ def write_raster_values_to_grid(
                 ds.ExecuteSQL(sql)
                 updated_count += len(batch_fids)
 
+        _checkpoint_wal(ds)
         ds = None
         raster_ds = None
 
@@ -475,7 +494,7 @@ def write_joined_values_to_grid(
             # Validate source layer exists.
             source_exists_result = ds.ExecuteSQL(
                 (
-                    "SELECT 1 AS exists_flag "
+                    "SELECT 1 AS exists_flag "  # nosec B608
                     "FROM src.sqlite_master "
                     "WHERE type IN ('table', 'view') "
                     f"AND name = {source_layer_literal} "
@@ -494,7 +513,7 @@ def write_joined_values_to_grid(
                 return -1
 
             # Clear existing values to preserve NULL semantics for unmatched keys.
-            clear_sql = f"UPDATE study_area_grid SET {target_col_sql} = NULL"
+            clear_sql = f"UPDATE study_area_grid SET {target_col_sql} = NULL"  # nosec B608
             if area_name:
                 clear_sql += f" WHERE area_name = {_quote_sql_literal(area_name)}"
             ds.ExecuteSQL(clear_sql, dialect="SQLite")  # nosec B608
@@ -530,6 +549,7 @@ def write_joined_values_to_grid(
                 ds.ReleaseResultSet(count_result)
         finally:
             ds.ExecuteSQL("DETACH DATABASE src", dialect="SQLite")
+            _checkpoint_wal(ds)
             ds = None
 
         log_message(
@@ -589,6 +609,7 @@ def write_uniform_value_to_grid(
         sql = f'UPDATE study_area_grid SET "{sanitized_column}" = {value}'  # nosec B608
         log_message(f"Executing: {sql}")
         ds.ExecuteSQL(sql)  # nosec B608
+        _checkpoint_wal(ds)
         ds = None
 
         return 0
@@ -625,6 +646,7 @@ def clear_grid_column(gpkg_path: str, column_name: str) -> bool:
         sql = f'UPDATE study_area_grid SET "{sanitized_column}" = NULL'  # nosec B608
         log_message(f"Clearing column: {sql}")
         ds.ExecuteSQL(sql)  # nosec B608
+        _checkpoint_wal(ds)
         ds = None
         return True
 
@@ -733,6 +755,7 @@ def count_features_per_grid_cell(
                 progress = 50 + (batch_start / len(fids)) * 50
                 feedback.setProgress(progress)
 
+        _checkpoint_wal(ds)
         ds = None
         log_message(f"Updated {updated_count} grid cells with feature counts")
         return updated_count
@@ -906,6 +929,7 @@ def write_spatial_join_to_grid(
 
         features_ds = None
         ds.FlushCache()
+        _checkpoint_wal(ds)
         ds = None
 
         log_message(f"Updated {updated_count} grid cells via spatial join for column {sanitized_column}")
@@ -1054,6 +1078,7 @@ def write_point_count_to_grid(
 
         features_ds = None
         ds.FlushCache()
+        _checkpoint_wal(ds)
         ds = None
 
         log_message(f"Updated {updated_count} grid cells with point counts for column {sanitized_column}")
@@ -1139,6 +1164,7 @@ def write_aggregation_to_grid(
         sql = f'UPDATE study_area_grid SET "{sanitized_target}" = ({expression})'  # nosec B608
         log_message(f"Executing aggregation SQL: {sql[:200]}...")
         ds.ExecuteSQL(sql)  # nosec B608
+        _checkpoint_wal(ds)
         ds = None
 
         log_message(f"Aggregated {len(source_columns_weights)} columns into {sanitized_target}")
@@ -1399,6 +1425,7 @@ def write_buffer_values_to_grid(
                 progress = 50 + (batch_start / max(len(fids), 1)) * 50
                 feedback.setProgress(progress)
 
+        _checkpoint_wal(ds)
         ds = None
         log_message(f"Updated {updated_count} grid cells with buffer scores")
         return updated_count
