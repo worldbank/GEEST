@@ -20,7 +20,7 @@ from qgis.core import (
 from geest.core import JsonTreeItem
 from geest.core.algorithms import AreaIterator
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
-from geest.core.grid_column_utils import write_raster_values_to_grid
+from geest.core.grid_column_utils import clear_grid_column, write_raster_values_to_grid
 from geest.utilities import log_message, resources_path
 
 
@@ -157,6 +157,9 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         Calculates Mask x GeoE3 Score using raster algebra and saves the result for each area.
         Also writes the masked values to the study_area_grid column 'geoe3_masked'.
         """
+        # Clear stale values before writing new masked scores
+        clear_grid_column(self.study_area_gpkg_path, "geoe3_masked")
+
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         for index, (_, _, _, _, area_name) in enumerate(area_iterator):
             if self.isCanceled():

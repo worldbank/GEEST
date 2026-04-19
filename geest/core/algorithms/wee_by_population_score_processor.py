@@ -18,7 +18,7 @@ from qgis.core import (
 )
 
 from geest.core.algorithms import AreaIterator
-from geest.core.grid_column_utils import write_raster_values_to_grid
+from geest.core.grid_column_utils import clear_grid_column, write_raster_values_to_grid
 from geest.utilities import log_message, resources_path
 
 
@@ -191,6 +191,9 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
         Calculates GeoE3 by POP SCORE using raster algebra and saves the result for each area.
         Also writes the bivariate values to the study_area_grid column 'geoe3_by_population'.
         """
+        # Clear stale values before writing new scores
+        clear_grid_column(self.study_area_gpkg_path, "geoe3_by_population")
+
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         for index, (_, _, _, _, area_name) in enumerate(area_iterator):
             if self.isCanceled():

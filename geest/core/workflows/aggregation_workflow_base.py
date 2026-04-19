@@ -22,6 +22,7 @@ from qgis.core import (
 
 from geest.core import JsonTreeItem
 from geest.core.grid_column_utils import (
+    clear_grid_column,
     rasterize_grid_column,
     write_aggregation_to_grid,
 )
@@ -364,6 +365,9 @@ class AggregationWorkflowBase(WorkflowBase):
             tag="GeoE3",
             level=Qgis.Info,
         )
+
+        # Clear stale values before writing new aggregation
+        clear_grid_column(self.gpkg_path, self.layer_id)
 
         # Use the grid-first aggregation function
         updated_count = write_aggregation_to_grid(

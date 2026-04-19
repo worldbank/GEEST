@@ -26,7 +26,7 @@ from qgis.core import (
 )
 
 from geest.core import JsonTreeItem
-from geest.core.grid_column_utils import write_raster_values_to_grid
+from geest.core.grid_column_utils import clear_grid_column, write_raster_values_to_grid
 from geest.utilities import log_message, resources_path
 
 from .area_iterator import AreaIterator
@@ -272,6 +272,9 @@ class OpportunitiesMaskProcessor(QgsTask):
             bool: True if the task completed successfully, False otherwise.
         """
         try:
+            # Clear stale values before writing new mask
+            clear_grid_column(self.study_area_gpkg_path, "opportunities_mask")
+
             area_iterator = AreaIterator(self.study_area_gpkg_path)
             for index, (current_area, clip_area, current_bbox, progress, area_name) in enumerate(area_iterator):
                 if self.feedback and self.feedback.isCanceled():
