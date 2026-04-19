@@ -20,7 +20,7 @@ from qgis.core import (
 from geest.core import JsonTreeItem
 from geest.core.algorithms import AreaIterator
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
-from geest.core.grid_column_utils import clear_grid_column, write_raster_values_to_grid
+from geest.core.grid_column_utils import clear_grid_column
 from geest.utilities import log_message, resources_path
 
 
@@ -157,9 +157,6 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         Calculates Mask x GeoE3 Score using raster algebra and saves the result for each area.
         Also writes the masked values to the study_area_grid column 'geoe3_masked'.
         """
-        # Clear stale values before writing new masked scores
-        clear_grid_column(self.study_area_gpkg_path, "geoe3_masked")
-
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         for index, (_, _, _, _, area_name) in enumerate(area_iterator):
             if self.isCanceled():
@@ -175,8 +172,6 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing raster: {output_path}")
                 self.output_rasters.append(output_path)
-                # Still write to grid even when reusing raster
-                self._write_to_grid(output_path, area_name)
                 continue
 
             log_message(f"Calculating Mask by SCORE for area {index}")
@@ -201,26 +196,35 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
 
             log_message(f"Masked GeoE3 Score raster saved to {output_path}")
 
-            # Write results to grid column
-            self._write_to_grid(output_path, area_name)
+        # Write masked values to grid using SQL — copy geoe3 scores only
+        # where the opportunities mask (settlements) is present, leaving
+        # cells outside settlements as NULL.
+        self._write_masked_to_grid()
 
-    def _write_to_grid(self, raster_path: str, area_name: str) -> None:
-        """Write masked raster values to the geoe3_masked column in the grid.
+    def _write_masked_to_grid(self) -> None:
+        """Copy geoe3 values to geoe3_masked for cells covered by the settlements mask.
 
-        Args:
-            raster_path: Path to the masked raster file.
-            area_name: Name of the area being processed.
+        Uses a single SQL UPDATE rather than raster sampling, which is both
+        faster and correctly leaves non-settlement cells as NULL instead of 0.
         """
-        updated = write_raster_values_to_grid(
-            gpkg_path=self.study_area_gpkg_path,
-            raster_path=raster_path,
-            column_name="geoe3_masked",
-            area_name=area_name,
+        from osgeo import ogr
+
+        clear_grid_column(self.study_area_gpkg_path, "geoe3_masked")
+        ds = ogr.Open(self.study_area_gpkg_path, 1)
+        if not ds:
+            log_message("Could not open GeoPackage to write geoe3_masked")
+            return
+        sql = (
+            'UPDATE study_area_grid SET "geoe3_masked" = "geoe3" '  # nosec B608
+            'WHERE "opportunities_mask" IS NOT NULL'
         )
-        if updated >= 0:
-            log_message(f"Updated {updated} grid cells with geoe3_masked values for area {area_name}")
-        else:
-            log_message(f"Failed to write geoe3_masked values to grid for area {area_name}")
+        ds.ExecuteSQL(sql)
+        try:
+            ds.ExecuteSQL("PRAGMA wal_checkpoint(TRUNCATE)")
+        except Exception:  # nosec B110
+            pass
+        ds = None
+        log_message("Updated geoe3_masked grid column from geoe3 where opportunities_mask is set")
 
     def generate_vrt(self) -> str:
         """
