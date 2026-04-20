@@ -1023,15 +1023,13 @@ class WorkflowBase(QObject):
                     continue
                 if file.endswith(".tif") and file in referenced_tifs:
                     continue
-                # Delete everything else (intermediate TIFs, shapefiles, etc.)
+                # Skip subdirectories — they contain child workflow outputs
+                if os.path.isdir(file_path):
+                    continue
+                # Delete intermediate files (unreferenced TIFs, shapefiles, etc.)
                 log_message(f"Removing {file_path}")
                 try:
-                    if os.path.isfile(file_path):
-                        os.remove(file_path)
-                    elif os.path.isdir(file_path):
-                        import shutil
-
-                        shutil.rmtree(file_path)
+                    os.remove(file_path)
                 except Exception as e:
                     log_message(
                         f"Failed to remove {file_path}: {e}",
