@@ -996,37 +996,48 @@ class WorkflowBase(QObject):
         role = self.item.role
         source_qml = resources_path("resources", "qml", f"{role}.qml")
         vrt_filepath = combine_rasters_to_vrt(rasters, self.target_crs, vrt_filepath, source_qml)
-        # if debug mode is off, remove all files except the VRT and the rasters it refers to
+        # if debug mode is off, remove all intermediate files
         if not int(setting(key="developer_mode", default=0)):
-            log_message("Debug mode is off. Removing all files except the VRT and the rasters it refers to.")
-            # Compile a list of all of the files in the workflow directory - recursively
+            log_message("Debug mode is off. Removing intermediate files, keeping only VRT-referenced rasters.")
+            # Build set of TIF filenames referenced by VRTs in this directory
+            # VRTs are locally generated XML — extract SourceFilename values via regex
+            import re
 
+            referenced_tifs = set()
             all_files = os.listdir(self.workflow_directory)
-            # Remove all files except the VRT, qml and the rasters it refers to
-            # loop through all files in the workflow directory
+            source_pattern = re.compile(r"<SourceFilename[^>]*>([^<]+)</SourceFilename>")
+            for file in all_files:
+                if file.endswith(".vrt"):
+                    try:
+                        vrt_path = os.path.join(self.workflow_directory, file)
+                        with open(vrt_path, "r") as f:
+                            for match in source_pattern.finditer(f.read()):
+                                referenced_tifs.add(os.path.basename(match.group(1)))
+                    except Exception:  # nosec B110
+                        pass  # If VRT can't be read, keep all TIFs as fallback
+
             for file in all_files:
                 file_path = os.path.join(self.workflow_directory, file)
-                if (
-                    not file.endswith(".vrt")  # noqa W503
-                    and not file.endswith(".qml")  # noqa W503
-                    and not file.endswith(".tif")  # noqa W503
-                    and not file.endswith("error.txt")  # noqa W503
-                ):
-                    log_message(f"Removing {file_path}")
-                    try:
+                # Keep: VRTs, QMLs, error logs, and TIFs referenced by VRTs
+                if file.endswith(".vrt") or file.endswith(".qml") or file.endswith("error.txt"):
+                    continue
+                if file.endswith(".tif") and file in referenced_tifs:
+                    continue
+                # Delete everything else (intermediate TIFs, shapefiles, etc.)
+                log_message(f"Removing {file_path}")
+                try:
+                    if os.path.isfile(file_path):
                         os.remove(file_path)
-                    except Exception as e:
-                        log_message(
-                            f"Failed to remove {file_path}: {e}",
-                            tag="GeoE3",
-                            level=Qgis.Warning,
-                        )
-                        log_message(
-                            traceback.format_exc(),
-                            tag="GeoE3",
-                            level=Qgis.Warning,
-                        )
-                        continue
+                    elif os.path.isdir(file_path):
+                        import shutil
+
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    log_message(
+                        f"Failed to remove {file_path}: {e}",
+                        tag="GeoE3",
+                        level=Qgis.Warning,
+                    )
         else:
             log_message("Debug mode is on. Keeping all files in the workflow directory.")
 
