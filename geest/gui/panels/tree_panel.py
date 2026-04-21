@@ -327,7 +327,7 @@ class TreePanel(QWidget):
             return
 
         if item.role == "indicator":
-            self.edit_factor_aggregation(item.parent())
+            self.edit_factor_aggregation(item.parent(), selected_guids=[item.guid])
         elif item.role == "factor":
             self.edit_factor_aggregation(item)
         elif item.role == "dimension":
@@ -373,10 +373,14 @@ class TreePanel(QWidget):
 
     def on_previous_button_clicked(self):
         """⚙️ On previous button clicked."""
+        QSettings().setValue("geoe3/overlay_label", "")
+        QSettings().setValue("geoe3/pie_data", "")
         self.switch_to_previous_tab.emit()
 
     def on_next_button_clicked(self):
         """⚙️ On next button clicked."""
+        QSettings().setValue("geoe3/overlay_label", "")
+        QSettings().setValue("geoe3/pie_data", "")
         self.switch_to_next_tab.emit()
 
     def clear_item(self):
@@ -552,6 +556,8 @@ class TreePanel(QWidget):
         """
         if working_directory:
             self.working_directory = working_directory
+            QSettings().setValue("geoe3/overlay_label", "")
+            QSettings().setValue("geoe3/pie_data", "")
             self.working_directory_changed(working_directory)
 
     @pyqtSlot()
@@ -1013,7 +1019,9 @@ class TreePanel(QWidget):
             )
 
             # Connect actions
-            show_properties_action.triggered.connect(lambda: self.edit_factor_aggregation(item.parent()))
+            show_properties_action.triggered.connect(
+                lambda: self.edit_factor_aggregation(item.parent(), selected_guids=[item.guid])
+            )
             # Add actions to menu
             menu = SolidMenu(self)
             menu.addAction(show_properties_action)
@@ -1657,17 +1665,24 @@ class TreePanel(QWidget):
             dialog.saveWeightingsToModel()
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
 
-    def edit_factor_aggregation(self, factor_item):
+    def edit_factor_aggregation(self, factor_item, selected_guids=None):
         """Open the FactorAggregationDialog for editing the weightings of layers in a factor.
 
         Args:
             factor_item: The factor item to edit.
+            selected_guids: Optional subset of indicator GUIDs to display in the dialog.
         """
         factor_name = factor_item.data(0)
         factor_data = factor_item.attributes()
         if not factor_data:
             factor_data = {}
-        dialog = FactorAggregationDialog(factor_name, factor_data, factor_item, parent=self)
+        dialog = FactorAggregationDialog(
+            factor_name,
+            factor_data,
+            factor_item,
+            parent=self,
+            selected_guids=selected_guids,
+        )
         if dialog.exec_():  # If OK was clicked
             dialog.save_weightings_to_model()
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary

@@ -3,7 +3,7 @@
 
 import os
 
-from qgis.core import QgsApplication, QgsProject, QgsVectorLayer
+from qgis.core import QgsApplication, QgsVectorLayer
 from qgis.PyQt.QtCore import QSettings
 from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox
 
@@ -25,7 +25,6 @@ class S2SEnvironmentalHazardsRasterDataSourceWidget(S2SNTLRasterDataSourceWidget
         self.s2s_vector_field_combo.setEnabled(False)
         self.s2s_vector_field_combo.setVisible(False)
         self.s2s_ntl_field = self._hazard_field_from_attributes()
-        self._set_status("S2S idle")
         self.s2s_status_label.setToolTip(f"S2S field: {self.s2s_ntl_field}")
         self._select_existing_hazard_output_layer()
 
@@ -158,18 +157,14 @@ class S2SEnvironmentalHazardsRasterDataSourceWidget(S2SNTLRasterDataSourceWidget
             return
 
         layer_name = os.path.splitext(os.path.basename(self.s2s_vector_output_path))[0]
-        output_layer = QgsVectorLayer(f"{self.s2s_vector_output_path}|layername={layer_name}", layer_name, "ogr")
-        if not output_layer.isValid():
-            output_layer = QgsVectorLayer(self.s2s_vector_output_path, layer_name, "ogr")
-        if not output_layer.isValid():
-            self._set_status("Existing S2S output invalid")
+        output_layer = S2SDataSourceWidget._load_or_reuse_vector_layer(self.s2s_vector_output_path, layer_name)
+        if output_layer is None:
+            self._set_status("S2S output invalid")
             return
 
-        QgsProject.instance().addMapLayer(output_layer)
         self.raster_line_edit.clear()
         self.raster_line_edit.setVisible(False)
         self.raster_layer_combo.setVisible(True)
         self.raster_layer_combo.setLayer(output_layer)
-        self._set_status("Existing S2S hazards selected")
         self.s2s_controls.set_downloaded()
         self.update_attributes()

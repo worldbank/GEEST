@@ -46,7 +46,7 @@ from shutil import which
 from typing import Optional
 
 from qgis.core import Qgis, QgsProject
-from qgis.PyQt.QtCore import QSettings, Qt, pyqtSignal
+from qgis.PyQt.QtCore import QEvent, QObject, QSettings, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import (
     QAction,
@@ -97,6 +97,25 @@ log_message(f"Logging output to: {log_file_path}", force=True)
 log_message(f"log_path_env: {log_path_env}", force=True)
 log_message("»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
 log_message("QGIS Version: {}".format(Qgis.QGIS_VERSION), force=True)
+
+
+class CanvasOverlayFilter(QObject):
+    """Event filter to clear overlay label when clicking on map canvas."""
+
+    def eventFilter(self, obj, event):
+        """Filter mouse press events on map canvas to clear overlay.
+
+        Args:
+            obj: The object that received the event.
+            event: The event to process.
+
+        Returns:
+            False to let the event propagate normally.
+        """
+        if event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
+            QSettings().setValue("geoe3/overlay_label", "")
+            QSettings().setValue("geoe3/pie_data", "")
+        return False
 
 
 def classFactory(iface):  # pylint: disable=missing-function-docstring
@@ -287,6 +306,10 @@ class GeoE3Plugin:
         self.options_factory = GeoE3OptionsFactory()
         self.iface.registerOptionsWidgetFactory(self.options_factory)
         self.setup_map_canvas_items()
+
+        # Install event filter to clear overlay label on canvas left-click
+        self._canvas_overlay_filter = CanvasOverlayFilter()
+        self.iface.mapCanvas().viewport().installEventFilter(self._canvas_overlay_filter)
 
     def run_tests(self):
         """Run unit tests in the python console."""
@@ -756,6 +779,11 @@ for module_name in list(sys.modules.keys()):
         if self.options_factory:
             self.iface.unregisterOptionsWidgetFactory(self.options_factory)
             self.options_factory = None
+
+        # Remove canvas event filter
+        if hasattr(self, "_canvas_overlay_filter") and self._canvas_overlay_filter:
+            self.iface.mapCanvas().viewport().removeEventFilter(self._canvas_overlay_filter)
+            self._canvas_overlay_filter = None
 
         # Remove dock widget if it exists
         if self.dock_widget:

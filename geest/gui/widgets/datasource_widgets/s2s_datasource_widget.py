@@ -3,7 +3,7 @@
 
 import json
 import os
-from typing import List
+from typing import List, Optional
 
 from qgis.core import (
     QgsApplication,
@@ -48,7 +48,7 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
         self.s2s_fetch_button = self.s2s_controls.button
         self.layout.addWidget(self.s2s_controls.container)
 
-        self.s2s_status_label = QLabel("S2S idle")
+        self.s2s_status_label = QLabel()
         self.s2s_status_label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.s2s_status_label.setMinimumWidth(90)
         self.s2s_status_label.setMaximumWidth(170)
@@ -163,14 +163,13 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
             return
 
         layer_name = os.path.splitext(os.path.basename(self.s2s_output_path))[0]
-        output_layer = QgsVectorLayer(self.s2s_output_path, layer_name, "ogr")
-        if not output_layer.isValid():
+        output_layer = self._load_or_reuse_vector_layer(self.s2s_output_path, layer_name)
+        if output_layer is None:
             self.s2s_status_label.setText("S2S output invalid")
             self.s2s_controls.set_load_failed(self.s2s_output_path)
             QMessageBox.warning(self, "Invalid S2S Output", "S2S output file exists but could not be loaded.")
             return
 
-        QgsProject.instance().addMapLayer(output_layer)
         self.layer_combo.setLayer(output_layer)
         self.s2s_status_label.setText("S2S download complete")
         self.s2s_controls.set_downloaded()
@@ -182,17 +181,35 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
             return
 
         layer_name = os.path.splitext(os.path.basename(self.s2s_output_path))[0]
-        output_layer = QgsVectorLayer(f"{self.s2s_output_path}|layername={layer_name}", layer_name, "ogr")
-        if not output_layer.isValid():
-            output_layer = QgsVectorLayer(self.s2s_output_path, layer_name, "ogr")
-        if not output_layer.isValid():
-            self.s2s_status_label.setText("Existing S2S output invalid")
+        output_layer = self._load_or_reuse_vector_layer(self.s2s_output_path, layer_name)
+        if output_layer is None:
+            self.s2s_status_label.setText("S2S output invalid")
             return
 
-        QgsProject.instance().addMapLayer(output_layer)
         self.layer_combo.setLayer(output_layer)
-        self.s2s_status_label.setText("Existing S2S data selected")
         self.s2s_controls.set_downloaded()
+
+    @staticmethod
+    def _load_or_reuse_vector_layer(layer_path: str, layer_name: str) -> Optional[QgsVectorLayer]:
+        """Load a vector layer once, reusing an existing project layer when possible."""
+        target_path = os.path.normpath(os.path.abspath(layer_path))
+        for existing_layer in QgsProject.instance().mapLayers().values():
+            if not isinstance(existing_layer, QgsVectorLayer):
+                continue
+            source = existing_layer.source() or ""
+            source_path = os.path.normpath(os.path.abspath(source.split("|")[0]))
+            if source_path != target_path:
+                continue
+            return existing_layer
+
+        output_layer = QgsVectorLayer(f"{layer_path}|layername={layer_name}", layer_name, "ogr")
+        if not output_layer.isValid():
+            output_layer = QgsVectorLayer(layer_path, layer_name, "ogr")
+        if not output_layer.isValid():
+            return None
+
+        QgsProject.instance().addMapLayer(output_layer)
+        return output_layer
 
     def update_attributes(self):
         """Update base layer attributes and S2S metadata attributes."""

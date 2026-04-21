@@ -8,7 +8,6 @@ from qgis.core import (
     QgsApplication,
     QgsMapLayerType,
     QgsMapLayerProxyModel,
-    QgsProject,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QSettings
@@ -44,7 +43,7 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         self.s2s_fetch_button = self.s2s_controls.button
         self.layout.addWidget(self.s2s_controls.container)
 
-        self.s2s_status_label = QLabel("S2S idle")
+        self.s2s_status_label = QLabel()
         self.s2s_status_label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.s2s_status_label.setMinimumWidth(90)
         self.s2s_status_label.setMaximumWidth(170)
@@ -161,10 +160,8 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
             return
 
         layer_name = os.path.splitext(os.path.basename(self.s2s_vector_output_path))[0]
-        s2s_layer = QgsVectorLayer(f"{self.s2s_vector_output_path}|layername={layer_name}", layer_name, "ogr")
-        if s2s_layer.isValid():
-            QgsProject.instance().addMapLayer(s2s_layer)
-        else:
+        s2s_layer = S2SDataSourceWidget._load_or_reuse_vector_layer(self.s2s_vector_output_path, layer_name)
+        if s2s_layer is None:
             self.s2s_controls.set_load_failed(self.s2s_vector_output_path)
             self._set_status("S2S output invalid")
             QMessageBox.warning(self, "Invalid S2S Output", "S2S output file exists but could not be loaded.")
@@ -190,19 +187,15 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
             return
 
         layer_name = os.path.splitext(os.path.basename(self.s2s_vector_output_path))[0]
-        output_layer = QgsVectorLayer(f"{self.s2s_vector_output_path}|layername={layer_name}", layer_name, "ogr")
-        if not output_layer.isValid():
-            output_layer = QgsVectorLayer(self.s2s_vector_output_path, layer_name, "ogr")
-        if not output_layer.isValid():
-            self._set_status("Existing S2S output invalid")
+        output_layer = S2SDataSourceWidget._load_or_reuse_vector_layer(self.s2s_vector_output_path, layer_name)
+        if output_layer is None:
+            self._set_status("S2S output invalid")
             return
 
-        QgsProject.instance().addMapLayer(output_layer)
         self.raster_line_edit.clear()
         self.raster_line_edit.setVisible(False)
         self.raster_layer_combo.setVisible(True)
         self.raster_layer_combo.setLayer(output_layer)
-        self._set_status("Existing S2S nighttime lights selected")
         self.s2s_controls.set_downloaded()
         self.update_attributes()
 

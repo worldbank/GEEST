@@ -4,6 +4,8 @@
 This module contains functionality for factor aggregation dialog.
 """
 
+from typing import Optional, Sequence
+
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import QByteArray, QSettings, Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QFont, QPixmap
@@ -51,7 +53,14 @@ class FactorAggregationDialog(CustomBaseDialog):
         factor_data: Factor data.
     """
 
-    def __init__(self, factor_name, factor_data, factor_item, parent=None):
+    def __init__(
+        self,
+        factor_name,
+        factor_data,
+        factor_item,
+        parent=None,
+        selected_guids: Optional[Sequence[str]] = None,
+    ):
         """🏗️ Initialize the instance.
 
         Args:
@@ -69,6 +78,11 @@ class FactorAggregationDialog(CustomBaseDialog):
 
         # Initialize dictionaries
         self.guids = self.tree_item.getFactorIndicatorGuids()
+        if selected_guids is not None:
+            selected_guid_set = set(selected_guids)
+            self.guids = [guid for guid in self.guids if guid in selected_guid_set]
+            if not self.guids:
+                self.guids = self.tree_item.getFactorIndicatorGuids()
         # If the indicators do not have a usable analysis mode set, iterate through them
         # and set it to the first available usable mode
         for guid in self.guids:

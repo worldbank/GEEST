@@ -45,6 +45,8 @@ class LayerDescriptionItem(QgsMapCanvasItem):
             return
         # Get the label text from QSettings
         label_text = QSettings().value("geoe3/overlay_label", "GeoE3 Overlay")
+        if not label_text:
+            return
         painter.setPen(QColor(0, 0, 0))
         font = QFont("Arial", 12, QFont.Bold)
         painter.setFont(font)
