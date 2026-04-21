@@ -3,7 +3,7 @@
 
 import os
 
-from qgis.core import QgsApplication
+from qgis.core import QgsApplication, QgsProject, QgsVectorLayer
 from qgis.PyQt.QtCore import QSettings
 from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox
 
@@ -27,6 +27,7 @@ class S2SEnvironmentalHazardsRasterDataSourceWidget(S2SNTLRasterDataSourceWidget
         self.s2s_ntl_field = self._hazard_field_from_attributes()
         self._set_status("S2S idle")
         self.s2s_status_label.setToolTip(f"S2S field: {self.s2s_ntl_field}")
+        self._select_existing_hazard_output_layer()
 
     def _update_vector_field_combo(self) -> None:
         """Disable manual field selection for S2S-specific hazards workflow."""
@@ -111,8 +112,6 @@ class S2SEnvironmentalHazardsRasterDataSourceWidget(S2SNTLRasterDataSourceWidget
     @staticmethod
     def _build_aoi_layer(study_area_gpkg: str):
         """Build and validate AOI layer from study area geopackage."""
-        from qgis.core import QgsVectorLayer
-
         aoi_layer = QgsVectorLayer(f"{study_area_gpkg}|layername=study_area_bboxes", "study_area_bboxes", "ogr")
         if not aoi_layer.isValid() or aoi_layer.featureCount() == 0:
             return None
@@ -150,3 +149,27 @@ class S2SEnvironmentalHazardsRasterDataSourceWidget(S2SNTLRasterDataSourceWidget
         super().update_attributes()
         self.attributes["s2s_hazard_field"] = self.s2s_ntl_field
         self.attributes["s2s_ntl_field"] = ""
+
+    def _select_existing_hazard_output_layer(self) -> None:
+        """Auto-select existing S2S hazard output when available."""
+        if not self.s2s_vector_output_path:
+            self.s2s_vector_output_path = self.attributes.get("s2s_output_path", "")
+        if not self.s2s_vector_output_path or not os.path.exists(self.s2s_vector_output_path):
+            return
+
+        layer_name = os.path.splitext(os.path.basename(self.s2s_vector_output_path))[0]
+        output_layer = QgsVectorLayer(f"{self.s2s_vector_output_path}|layername={layer_name}", layer_name, "ogr")
+        if not output_layer.isValid():
+            output_layer = QgsVectorLayer(self.s2s_vector_output_path, layer_name, "ogr")
+        if not output_layer.isValid():
+            self._set_status("Existing S2S output invalid")
+            return
+
+        QgsProject.instance().addMapLayer(output_layer)
+        self.raster_line_edit.clear()
+        self.raster_line_edit.setVisible(False)
+        self.raster_layer_combo.setVisible(True)
+        self.raster_layer_combo.setLayer(output_layer)
+        self._set_status("Existing S2S hazards selected")
+        self.s2s_controls.set_downloaded()
+        self.update_attributes()

@@ -60,7 +60,8 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
 
         self._s2s_error_handled = False
         self.s2s_task = None
-        self.s2s_output_path = ""
+        self.s2s_output_path = self.attributes.get("s2s_output_path", "")
+        self._load_existing_s2s_output()
 
     def fetch_from_s2s(self) -> None:
         """Start a background task to fetch S2S data for the study area."""
@@ -174,6 +175,24 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
         self.s2s_status_label.setText("S2S download complete")
         self.s2s_controls.set_downloaded()
         self.update_attributes()
+
+    def _load_existing_s2s_output(self) -> None:
+        """Auto-select existing S2S output when available."""
+        if not self.s2s_output_path or not os.path.exists(self.s2s_output_path):
+            return
+
+        layer_name = os.path.splitext(os.path.basename(self.s2s_output_path))[0]
+        output_layer = QgsVectorLayer(f"{self.s2s_output_path}|layername={layer_name}", layer_name, "ogr")
+        if not output_layer.isValid():
+            output_layer = QgsVectorLayer(self.s2s_output_path, layer_name, "ogr")
+        if not output_layer.isValid():
+            self.s2s_status_label.setText("Existing S2S output invalid")
+            return
+
+        QgsProject.instance().addMapLayer(output_layer)
+        self.layer_combo.setLayer(output_layer)
+        self.s2s_status_label.setText("Existing S2S data selected")
+        self.s2s_controls.set_downloaded()
 
     def update_attributes(self):
         """Update base layer attributes and S2S metadata attributes."""

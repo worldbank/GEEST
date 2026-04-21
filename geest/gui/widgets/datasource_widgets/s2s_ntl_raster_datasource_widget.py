@@ -6,6 +6,7 @@ from urllib.parse import quote
 
 from qgis.core import (
     QgsApplication,
+    QgsMapLayerType,
     QgsMapLayerProxyModel,
     QgsProject,
     QgsVectorLayer,
@@ -65,7 +66,7 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
             if working_directory and os.path.exists(candidate_path):
                 self.s2s_vector_output_path = candidate_path
         if self.s2s_vector_output_path and os.path.exists(self.s2s_vector_output_path):
-            self._set_status("Existing S2S nighttime lights found")
+            self._select_existing_s2s_output_layer()
 
     def fetch_from_s2s(self) -> None:
         """Fetch S2S summary rows for downstream grid-based regional scoring."""
@@ -182,6 +183,28 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         """Set status label text when available."""
         if hasattr(self, "s2s_status_label") and self.s2s_status_label is not None:
             self.s2s_status_label.setText(message)
+
+    def _select_existing_s2s_output_layer(self) -> None:
+        """Auto-select existing S2S nighttime lights layer from disk."""
+        if not self.s2s_vector_output_path or not os.path.exists(self.s2s_vector_output_path):
+            return
+
+        layer_name = os.path.splitext(os.path.basename(self.s2s_vector_output_path))[0]
+        output_layer = QgsVectorLayer(f"{self.s2s_vector_output_path}|layername={layer_name}", layer_name, "ogr")
+        if not output_layer.isValid():
+            output_layer = QgsVectorLayer(self.s2s_vector_output_path, layer_name, "ogr")
+        if not output_layer.isValid():
+            self._set_status("Existing S2S output invalid")
+            return
+
+        QgsProject.instance().addMapLayer(output_layer)
+        self.raster_line_edit.clear()
+        self.raster_line_edit.setVisible(False)
+        self.raster_layer_combo.setVisible(True)
+        self.raster_layer_combo.setLayer(output_layer)
+        self._set_status("Existing S2S nighttime lights selected")
+        self.s2s_controls.set_downloaded()
+        self.update_attributes()
 
     def select_raster(self) -> None:
         """Select raster or vector file for nighttime lights input."""
