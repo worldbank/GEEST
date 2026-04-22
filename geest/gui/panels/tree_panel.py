@@ -56,6 +56,7 @@ from geest.core.algorithms import (
     SubnationalAggregationProcessingTask,
     WEEByPopulationScoreProcessingTask,
 )
+from geest.core.constants import MAX_FEATURES_FOR_VECTOR
 from geest.core.reports import StudyAreaReport
 from geest.core.settings import set_setting, setting
 from geest.core.tasks import AnalysisReportTask
@@ -348,7 +349,6 @@ class TreePanel(QWidget):
 
         show_layer_on_click = setting(key="show_layer_on_click", default=True)
         if show_layer_on_click:
-            # Determine the column name based on item role
             if item.role == "dimension":
                 column_name = f"dim_{item.attribute('id').lower().replace(' ', '_').replace('-', '_')}"
             elif item.role == "factor":
@@ -358,11 +358,12 @@ class TreePanel(QWidget):
             elif item.role == "analysis":
                 column_name = "geoe3"  # Analysis aggregation uses geoe3 column
             else:
-                # For unknown roles, fall back to raster
+                column_name = None
+
+            if column_name is None or self._get_render_strategy() == "raster":
                 add_to_map(item)
-                return
-            # Add grid layer instead of raster
-            add_grid_layer_to_map(item, column_name, self.working_directory)
+            else:
+                add_grid_layer_to_map(item, column_name, self.working_directory)
         show_overlay = setting(key="show_overlay", default=False)
         if show_overlay:
             QSettings().setValue("geoe3/overlay_label", item.data(0))
@@ -1754,6 +1755,49 @@ class TreePanel(QWidget):
         analysis_scale = self.model.get_analysis_item().attributes().get("analysis_scale", "national")
         return analysis_scale
 
+    def _get_study_area_area_km2(self) -> float:
+        """Get total study area area in km² from study_area_clip_polygons layer.
+
+        Returns:
+            float: Total area in km².
+        """
+        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+        layer = QgsVectorLayer(f"{gpkg_path}|layername=study_area_clip_polygons", "study_area", "ogr")
+        if not layer.isValid():
+            log_message(
+                f"Could not load study_area_clip_polygons from {gpkg_path}",
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+            return 0.0
+        total_area = 0.0
+        for feature in layer.getFeatures():
+            geom = feature.geometry()
+            if geom:
+                total_area += geom.area()
+        return total_area / 1_000_000
+
+    def _get_render_strategy(self) -> str:
+        """Determine render strategy based on analysis scale and feature count.
+
+        Uses feature count estimate to decide whether raster or vector rendering
+        is more appropriate for performance.
+
+        Returns:
+            str: 'raster' or 'vector'
+        """
+
+        analysis_scale = self.analysis_scale()
+
+        if analysis_scale == "regional":
+            return "vector"
+
+        study_area_area_km2 = self._get_study_area_area_km2()
+        cell_size_m = self.cell_size_m()
+        estimated_features = (study_area_area_km2 * 1_000_000) / (cell_size_m**2)
+
+        return "raster" if estimated_features > MAX_FEATURES_FOR_VECTOR else "vector"
+
     def road_network_layer_path(self):
         """Get the layer used for network analysis.
 
@@ -2081,7 +2125,7 @@ class TreePanel(QWidget):
         self.overall_progress_bar.setMaximum(self.items_to_run - 1)
         self.workflow_progress_bar.setValue(0)
         self.save_json_to_working_directory()
-        # Add the grid layer to the map after workflow completes
+        # Add layer to map after workflow completes using auto-determined strategy
         if item.role == "dimension":
             column_name = f"dim_{item.attribute('id').lower().replace(' ', '_').replace('-', '_')}"
         elif item.role == "factor":
@@ -2091,10 +2135,12 @@ class TreePanel(QWidget):
         elif item.role == "analysis":
             column_name = "geoe3"  # Analysis aggregation uses geoe3 column
         else:
-            # For unknown roles, fall back to raster
+            column_name = None
+
+        if column_name is None or self._get_render_strategy() == "raster":
             add_to_map(item)
-            return
-        add_grid_layer_to_map(item, column_name, self.working_directory)
+        else:
+            add_grid_layer_to_map(item, column_name, self.working_directory)
 
         # Now cancel the animated icon
         node_index = self.model.itemIndex(item)

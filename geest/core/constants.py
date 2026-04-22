@@ -30,3 +30,5 @@ DEFAULT_S2S_ENV_HAZARD_FIELDS = {
     "cyclone": "cy_frequency_mean",
     "drought": "drought_spei_1_5_rp100_mean",
 }
+
+MAX_FEATURES_FOR_VECTOR = 100000
