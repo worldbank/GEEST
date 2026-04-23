@@ -49,15 +49,53 @@ class EPLEXWorkflow(WorkflowBase):
             working_directory: Folder containing study_area.gpkg and outputs.
         """
         super().__init__(item, cell_size_m, analysis_scale, feedback, context, working_directory)
-        # Get EPLEX score from attributes
-        self.eplex_score = self.attributes.get("eplex_score", 0.0)
+
+        # Get EPLEX score from attributes and rescale to Likert 0-5.
+        raw_eplex_score = float(self.attributes.get("eplex_score", 0.0))
+        self.eplex_score = self._to_likert_score(raw_eplex_score)
         log_message(
-            f"EPLEX score from attributes: {self.eplex_score}",
+            f"EPLEX score from attributes (raw): {raw_eplex_score}",
+            tag="GeoE3",
+            level=Qgis.Info,
+        )
+        log_message(
+            f"EPLEX score used in workflow (Likert 0-5): {self.eplex_score}",
             tag="GeoE3",
             level=Qgis.Info,
         )
         self.features_layer = True  # Not needed for this workflow
         self.workflow_name = "eplex_score"
+
+    def _to_likert_score(self, raw_score: float) -> float:
+        """Convert input EPLEX score to 0-5 Likert scale.
+
+        Supports both current normalized inputs (0-1) and older project values
+        already stored on Likert scale (0-5).
+
+        Args:
+            raw_score: Input score from item attributes.
+
+        Returns:
+            Score on a 0-5 Likert scale.
+        """
+        if 0.0 <= raw_score <= 1.0:
+            return raw_score * 5.0
+
+        if 1.0 < raw_score <= 5.0:
+            log_message(
+                "EPLEX score appears to be already on Likert scale; using value as-is.",
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+            return raw_score
+
+        clamped = max(0.0, min(raw_score, 5.0))
+        log_message(
+            f"EPLEX score {raw_score} out of expected range; clamped to {clamped}.",
+            tag="GeoE3",
+            level=Qgis.Warning,
+        )
+        return clamped
 
     def _process_features_for_area(
         self,

@@ -5,7 +5,7 @@ This module contains functionality for EPLEX datasource widget.
 """
 
 from qgis.core import Qgis
-from qgis.PyQt.QtWidgets import QDoubleSpinBox
+from qgis.PyQt.QtWidgets import QDoubleSpinBox, QLabel
 
 from geest.utilities import log_message
 
@@ -16,7 +16,8 @@ class EPLEXDataSourceWidget(BaseDataSourceWidget):
     """
     A widget for entering EPLEX score value.
 
-    This widget provides a single spinbox with a value range 0-5 for the EPLEX score.
+    This widget provides a single spinbox with a normalized value range 0-0.99
+    for the EPLEX score.
 
     Attributes:
         widget_key (str): The key identifier for this widget.
@@ -29,14 +30,27 @@ class EPLEXDataSourceWidget(BaseDataSourceWidget):
         This method is called during the widget initialization and sets up the layout for the UI components.
         """
         try:
-            # EPLEX score spinbox
+            # EPLEX score spinbox (normalized score)
             self.spin_box = QDoubleSpinBox()
-            self.spin_box.setRange(0.0, 5.0)
+            self.spin_box.setRange(0.0, 0.99)
             self.spin_box.setDecimals(2)
-            self.spin_box.setSingleStep(0.1)
-            self.spin_box.setValue(self.attributes.get("eplex_score", 0.0))
-            self.spin_box.setToolTip("Enter EPLEX score between 0 (weakest protection) and 5 (strongest protection)")
+            self.spin_box.setSingleStep(0.01)
+            raw_value = float(self.attributes.get("eplex_score", 0.0))
+            if 1.0 < raw_value <= 5.0:
+                # Backward compatibility for older projects storing Likert-scale values.
+                raw_value = raw_value / 5.0
+            self.spin_box.setValue(max(0.0, min(raw_value, 0.99)))
+            self.spin_box.setToolTip(
+                "Enter normalized EPLEX score between 0.00 and 0.99. "
+                "This is rescaled to the 0-5 Likert scale during processing."
+            )
             self.layout.addWidget(self.spin_box)
+
+            self.reference_link_label = QLabel(
+                '<a href="https://eplex.ilo.org/en#indicators-section">' "EPLEX indicator reference" "</a>"
+            )
+            self.reference_link_label.setOpenExternalLinks(True)
+            self.layout.addWidget(self.reference_link_label)
 
             # Connect signal to update the data when user changes value
             self.spin_box.valueChanged.connect(self.update_attributes)

@@ -86,6 +86,12 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         if details:
             msg_box.setDetailedText(details)
         msg_box.exec_()
+        self.progress_bar.setVisible(False)
+        self.child_progress_bar.setVisible(False)
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setMaximum(100)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setFormat("OSM download failed")
         self.enable_widgets()  # Re-enable widgets in case they were disabled
 
     @pyqtSlot(str)
@@ -710,6 +716,8 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         """Enable all widgets in the panel."""
         for widget in self.findChildren(QWidget):
             widget.setEnabled(True)
+        # Keep Next button gated by layer validity after any state reset.
+        self._update_next_button_state()
 
     def _get_bbox_from_study_area(self):
         """Get bounding box from existing study_area.gpkg.
@@ -832,6 +840,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             # Measure overall task progress from the task object itself
             processor.progressChanged.connect(self.osm_download_progress_updated)
             processor.taskCompleted.connect(self.active_transport_download_done)
+            processor.taskTerminated.connect(self.active_transport_download_terminated)
             # Measure subtask progress from the feedback object
             feedback.progressChanged.connect(self.osm_extract_progress_updated)
             self.disable_widgets()
@@ -917,6 +926,21 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         QgsProject.instance().addMapLayer(layer)
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
+        self.enable_widgets()
+
+    def active_transport_download_terminated(self):
+        """Handle OSM task termination and keep navigation state safe."""
+        log_message(
+            "OSM Active Transport download task terminated.",
+            tag="GeoE3",
+            level=Qgis.Warning,
+        )
+        self.progress_bar.setVisible(False)
+        self.child_progress_bar.setVisible(False)
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setMaximum(100)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setFormat("OSM download failed")
         self.enable_widgets()
 
     def resizeEvent(self, event):

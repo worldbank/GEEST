@@ -1,0 +1,43 @@
+Version 2.0.3 - NTL Classification and UI Fixes
+
+## New Features
+* Added user-controlled NTL classification mode toggle (Jenks vs Binary) with live UI updates
+
+## Bug Fixes
+* Fixed NTL binary classification to use explicit split behavior (0 -> class 0, > 0 -> class 5)
+* Fixed EPLEX input flow with normalized input (0.00-0.99) and backward compatibility for older saved values
+* Fixed road-network panel gating bug after failed OSM download
+
+## Improvements
+* Reduced plugin size by removing h3 from bundled dependencies
+* Improved build cleanup by excluding __pycache__, .pyc, and .xcf files from plugin zip
+* Updated pygments dependency to 2.20.0
+
+---
+
+Version 2.0.2 - Stability Fixes
+
+## Bug Fixes
+* Fixed QGIS crashes in ACLED workflow by adding context and feedback to processing.run calls
+* Fixed thread-safety issues in workflow_base.py processing operations
+* Fixed ID handling in aggregation workflow to handle spaces in names
+
+## Improvements
+* Added logging for masked raster path checking in aggregation workflow
+* Cleaned up duplicate environment variables in start script
+* Added tailspin package for log viewing
+
+---
+
+Version 2.0.1 - Minor Bug Fixes and Improvements
+
+## Bug Fixes
+* Fixed road network CRS issues
+* Fixed AttributeError in RoadNetworkPanel by reordering attribute initialization
+
+## Improvements
+* Improved banner text rendering and refined button styling
+* Updated font sizing for women's considerations section
+* Open existing project no longer shows women's options incorrectly
+* Move EPLEX Score to contextual only
+* Auto-balance weights under dimension

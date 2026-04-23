@@ -1,13 +1,64 @@
 [general]
-name=GeoE3
-icon=icon.svg
-description=Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector
-about=Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector
-version=2.0.2
-qgisMinimumVersion=3.6
-author=Tim Sutton
-email=tim@kartoza.com
-repository=https://github.com/worldbank/geoe3
-tracker=https://github.com/worldbank/geoe3/issues
-homepage=https://worldbank.github.io/geoe3/
-license=GPLv2
+name = GeoE3 - The Geospatial Enabling Environments for Employment Tool
+qgisMinimumVersion = 3.0
+qgisMaximumVersion = 4.99
+icon = icon.svg
+experimental = False
+deprecated = False
+homepage = https://github.com/worldbank/GEOE3
+tracker = https://github.com/worldbank/GEOE3/issues
+repository = https://github.com/worldbank/GEOE3
+tags =
+category = ['plugins']
+hasProcessingProvider = no
+about = The Geospatial Enabling Environments for Employment Spatial Tool, developed by the World Bank, supports the evaluation of locations based on its supportiveness for employment and entrepreneurship. It allows for a generic analysis of foundational infrastructure and mobility aspects but also supports the inclusion of women specific considerations that can act as barriers in their economic empowerment. By analyzing spatial factors across three dimensions (Contextual/ Accessibility and Place Characterization) GeoE3 is a stepping stone to identifying the critical employment investments required in cities and regions.
+author = Kartoza for and with The World Bank
+email = info@kartoza.com, gost@worldbank.org
+description = Geospatial Enabling Environments for Employment Spatial Tool
+version = 2.0.3
+changelog = Version 2.0.3 - NTL Classification and UI Fixes
+
+	## New Features
+	* Added user-controlled NTL classification mode toggle (Jenks vs Binary) with live UI updates
+
+	## Bug Fixes
+	* Fixed NTL binary classification to use explicit split behavior (0 -> class 0, > 0 -> class 5)
+	* Fixed EPLEX input flow with normalized input (0.00-0.99) and backward compatibility for older saved values
+	* Fixed road-network panel gating bug after failed OSM download
+
+	## Improvements
+	* Reduced plugin size by removing h3 from bundled dependencies
+	* Improved build cleanup by excluding __pycache__, .pyc, and .xcf files from plugin zip
+	* Updated pygments dependency to 2.20.0
+
+	---
+
+	Version 2.0.2 - Stability Fixes
+
+	## Bug Fixes
+	* Fixed QGIS crashes in ACLED workflow by adding context and feedback to processing.run calls
+	* Fixed thread-safety issues in workflow_base.py processing operations
+	* Fixed ID handling in aggregation workflow to handle spaces in names
+
+	## Improvements
+	* Added logging for masked raster path checking in aggregation workflow
+	* Cleaned up duplicate environment variables in start script
+	* Added tailspin package for log viewing
+
+	---
+
+	Version 2.0.1 - Minor Bug Fixes and Improvements
+
+	## Bug Fixes
+	* Fixed road network CRS issues
+	* Fixed AttributeError in RoadNetworkPanel by reordering attribute initialization
+
+	## Improvements
+	* Improved banner text rendering and refined button styling
+	* Updated font sizing for women's considerations section
+	* Open existing project no longer shows women's options incorrectly
+	* Move EPLEX Score to contextual only
+	* Auto-balance weights under dimension
+
+server = False
+license = GPLv2

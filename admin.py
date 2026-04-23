@@ -21,6 +21,33 @@ LOCAL_ROOT_DIR = Path(__file__).parent.resolve()
 SRC_NAME = "geest"
 PACKAGE_NAME = SRC_NAME.replace("_", "")
 TEST_FILES = ["test", "test_suite.py", "docker-compose.yml", "scripts"]
+
+# Patterns to exclude from build and zip
+EXCLUDE_DIRS = {"__pycache__", ".git", ".pytest_cache", "__pypackages__"}
+EXCLUDE_EXTENSIONS = {".pyc", ".pyo", ".xcf"}
+
+
+def _ignore_patterns(directory: str, files: list) -> set:
+    """Return set of files/dirs to ignore during shutil.copytree.
+
+    Args:
+        directory: The directory being copied.
+        files: List of files in the directory.
+
+    Returns:
+        Set of filenames to ignore.
+    """
+    ignored = set()
+    for f in files:
+        # Ignore excluded directories
+        if f in EXCLUDE_DIRS:
+            ignored.add(f)
+        # Ignore files with excluded extensions
+        elif any(f.endswith(ext) for ext in EXCLUDE_EXTENSIONS):
+            ignored.add(f)
+    return ignored
+
+
 # Vendored dependencies to bundle with the plugin
 # These will be downloaded for multiple platforms
 VENDORED_PACKAGES = [
@@ -247,22 +274,28 @@ def copy_source_files(
 ):
     """Copy the plugin source files to the specified output directory.
 
+    Excludes __pycache__, .pyc, .pyo, and .xcf files.
+
     Args:
         output_directory: Output directory where the files will be saved.
         tests: Flag to indicate whether to include test related files.
     """
     output_directory.mkdir(parents=True, exist_ok=True)
     for child in (LOCAL_ROOT_DIR / SRC_NAME).iterdir():
-        if child.name != "__pycache__":
+        if child.name not in EXCLUDE_DIRS:
             target_path = output_directory / child.name
-            handler = shutil.copytree if child.is_dir() else shutil.copy
-            handler(str(child.resolve()), str(target_path))
+            if child.is_dir():
+                shutil.copytree(str(child.resolve()), str(target_path), ignore=_ignore_patterns)
+            elif not any(child.name.endswith(ext) for ext in EXCLUDE_EXTENSIONS):
+                shutil.copy(str(child.resolve()), str(target_path))
     if tests:
         for child in LOCAL_ROOT_DIR.iterdir():
             if child.name in TEST_FILES:
                 target_path = output_directory / child.name
-                handler = shutil.copytree if child.is_dir() else shutil.copy
-                handler(str(child.resolve()), str(target_path))
+                if child.is_dir():
+                    shutil.copytree(str(child.resolve()), str(target_path), ignore=_ignore_patterns)
+                elif not any(child.name.endswith(ext) for ext in EXCLUDE_EXTENSIONS):
+                    shutil.copy(str(child.resolve()), str(target_path))
 
 
 @app.command()
@@ -429,20 +462,18 @@ def _changelog() -> str:
 def _add_to_zip(directory: Path, zip_handler: zipfile.ZipFile, arc_path_base: Path):
     """Add files inside the passed directory to the zip file.
 
+    Excludes directories and files matching EXCLUDE_DIRS and EXCLUDE_EXTENSIONS.
+
     Args:
         directory: Directory with files that are to be zipped.
         zip_handler: Plugin zip file.
         arc_path_base: Parent directory of the input files directory.
     """
-    # Patterns to exclude from the zip
-    exclude_dirs = {"__pycache__", ".git", ".pytest_cache", "__pypackages__"}
-    exclude_extensions = {".pyc", ".pyo", ".xcf"}
-
     for item in directory.iterdir():
         if item.is_file():
-            if item.suffix not in exclude_extensions:
+            if item.suffix not in EXCLUDE_EXTENSIONS:
                 zip_handler.write(item, arcname=str(item.relative_to(arc_path_base)))
-        elif item.name not in exclude_dirs:
+        elif item.name not in EXCLUDE_DIRS:
             _add_to_zip(item, zip_handler, arc_path_base)
 
 

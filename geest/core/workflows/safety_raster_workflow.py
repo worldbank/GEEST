@@ -21,7 +21,6 @@ from qgis.core import (
 from geest.core import JsonTreeItem
 from geest.core.grid_column_utils import write_joined_values_to_grid, write_spatial_join_to_grid
 from geest.core.jenks import calculate_goodness_of_variance_fit, jenks_natural_breaks
-from geest.core.settings import setting
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
@@ -327,29 +326,33 @@ class SafetyRasterWorkflow(WorkflowBase):
 
     def _build_binary_table(self, max_val: float) -> list:
         """
-        Build binary classification table: no light vs light present.
-        Uses fixed threshold of 0.001 (VIIRS noise floor) to avoid
-        false positives from sensor noise.
+        Build binary classification table: non-positive vs positive.
+
+        Uses exact zero as the boundary:
+        - values <= 0 map to class 0
+        - values > 0 map to class 5
+
+        The table is interpreted with RANGE_BOUNDARIES = 0
+        (min < value <= max).
+
         Args:
             max_val: Maximum value in the raster data
         Returns:
             Reclassification table as list of strings
             Format: [min1, max1, class1, min2, max2, class2]
         """
-        threshold = 0.001
-        reclass_table = ["0.0", str(threshold), "0", str(threshold), str(max_val), "5"]
+        reclass_table = ["-inf", "0.0", "0", "0.0", "inf", "5"]
         return list(map(str, reclass_table))
 
     def _build_reclassification_table(self, max_val: float, median: float, valid_data: np.ndarray) -> list:
         """
-        Build reclassification table with automatic method selection.
-        Automatically chooses between Binary and Jenks Natural Breaks
-        classification based on data distribution:
-        - Binary: If > ntl_binary_threshold_percent zeros OR GVF < 0.3
-        - Jenks: Otherwise
-        The table maps nighttime lights intensity values to safety classes:
-        - Binary: 2 classes (0=No Access, 5=Light Present)
-        - Jenks: 6 classes (0=No Access to 5=Very High)
+        Build reclassification table using the method chosen by the user in the configuration widget.
+
+        Reads ``ntl_classification_mode`` from the item attributes:
+        - ``"binary"``  → 2 classes (0=No Access, 5=Light Present)
+        - ``"jenks"``   → 6 classes via Jenks Natural Breaks (default; also used when the
+                          attribute is absent for backward compatibility with existing models)
+
         Args:
             max_val: Maximum value in the raster
             median: Median value in the raster
@@ -360,41 +363,30 @@ class SafetyRasterWorkflow(WorkflowBase):
         Raises:
             ValueError: If Jenks Natural Breaks cannot compute valid classification breaks
         """
-        # Read threshold from settings (default 80%)
-        threshold_percent = int(setting(key="ntl_binary_threshold_percent", default=80))
-        # Calculate metrics for auto-detection
-        zero_threshold = 0.001
-        non_zero_data = valid_data[valid_data > zero_threshold]
-        if len(non_zero_data) == 0:
-            zero_percentage = 100.0
-            gvf = 0.0
-        else:
-            zero_percentage = (len(valid_data) - len(non_zero_data)) / len(valid_data) * 100
-            breaks = jenks_natural_breaks(valid_data, n_classes=6)
-            gvf = calculate_goodness_of_variance_fit(valid_data, breaks)
-        # Auto-decide: Binary or Jenks?
-        use_binary = (zero_percentage > threshold_percent) or (gvf < 0.3)
+        classification_mode = self.attributes.get("ntl_classification_mode", "jenks")
+        use_binary = classification_mode == "binary"
+
         if use_binary:
             log_message(
-                f"🎯 Auto-selected Binary classification "
-                f"(zeros={zero_percentage:.1f}%, threshold={threshold_percent}%, GVF={gvf:.3f})",
+                f"🎯 Binary classification selected by user (max={max_val:.6f})",
                 tag="GeoE3",
                 level=0,
             )
             return self._build_binary_table(max_val)
-        # Continue with Jenks Natural Breaks
+
+        # Jenks Natural Breaks
         n_classes = 6
         log_message(
             f"📊 Computing Jenks Natural Breaks classification (max={max_val:.6f}, "
-            f"median={median:.6f}, n={len(valid_data)}, zeros={zero_percentage:.1f}%, "
-            f"threshold={threshold_percent}%, GVF={gvf:.3f})",
+            f"median={median:.6f}, n={len(valid_data)})",
             tag="GeoE3",
             level=0,
         )
         try:
-            # Calculate Jenks breaks for n_classes
             # Returns: [break₁, break₂, break₃, break₄, break₅, max_value]
             breaks = jenks_natural_breaks(valid_data, n_classes=n_classes)
+            gvf = calculate_goodness_of_variance_fit(valid_data, breaks)
+
             # Build QGIS reclassification table format
             # Format: [min₁, max₁, class₁, min₂, max₂, class₂, ...]
             reclass_table = []
