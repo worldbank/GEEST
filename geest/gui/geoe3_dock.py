@@ -22,6 +22,7 @@ from geest.gui.panels import (
     OpenProjectPanel,
     OrsPanel,
     RoadNetworkPanel,
+    S2SPanel,
     SetupPanel,
     TreePanel,
 )
@@ -37,10 +38,11 @@ CREDITS_PANEL = 1
 SETUP_PANEL = 2
 OPEN_PROJECT_PANEL = 3
 CREATE_PROJECT_PANEL = 4
-ORS_PANEL = 5
-ROAD_NETWORK_PANEL = 6
-TREE_PANEL = 7
-HELP_PANEL = 8
+S2S_PANEL = 5
+ORS_PANEL = 6
+ROAD_NETWORK_PANEL = 7
+TREE_PANEL = 8
+HELP_PANEL = 9
 
 
 class GeoE3Dock(QDockWidget):
@@ -65,6 +67,7 @@ class GeoE3Dock(QDockWidget):
         self.initialised = False
         self._suppress_qgis_project_changed = False  # Flag to prevent signal loop
         super().__init__(parent)
+        self.background_image = theme_background_image()
         # Get the plugin version from metadata.txt
         self.plugin_version = version()
 
@@ -95,6 +98,7 @@ class GeoE3Dock(QDockWidget):
         self.road_network_widget: RoadNetworkPanel = RoadNetworkPanel()
         self.road_network_widget.set_message_bar(self.message_bar)  # Pass message bar reference
         self.create_project_widget: CreateProjectPanel = CreateProjectPanel()
+        self.s2s_widget: S2SPanel = S2SPanel()
         self.ors_widget: OrsPanel = OrsPanel()
         self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
         help_widget: HelpPanel = HelpPanel()
@@ -196,16 +200,34 @@ class GeoE3Dock(QDockWidget):
             self.create_project_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: [
-                    self.stacked_widget.setCurrentIndex(ORS_PANEL),
+                    self.stacked_widget.setCurrentIndex(S2S_PANEL),
                 ][
                     -1
                 ]  # The [-1] ensures the lambda returns the last value
             )
 
             self.create_project_widget.working_directory_changed.connect(
-                lambda: self.tree_widget.set_working_directory(self.create_project_widget.working_dir)
+                lambda _path: self.tree_widget.set_working_directory(self.create_project_widget.working_dir)
             )
-            # ORS_PANEL = 5
+            self.create_project_widget.working_directory_changed.connect(
+                lambda _path: self.s2s_widget.set_working_directory(self.create_project_widget.working_dir)
+            )
+
+            # S2S_PANEL = 5
+            # Create and add the "S2S" panel
+
+            s2s_panel: QWidget = QWidget()
+            s2s_layout: QVBoxLayout = QVBoxLayout(s2s_panel)
+            s2s_layout.setContentsMargins(10, 10, 10, 10)
+            s2s_layout.addWidget(self.s2s_widget)
+            self.stacked_widget.addWidget(s2s_panel)
+
+            self.s2s_widget.switch_to_previous_tab.connect(
+                lambda: self.stacked_widget.setCurrentIndex(CREATE_PROJECT_PANEL)
+            )
+            self.s2s_widget.switch_to_next_tab.connect(lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL))
+
+            # ORS_PANEL = 6
             # Create and add the "ORS" panel
 
             ors_panel: QWidget = QWidget()
@@ -214,9 +236,7 @@ class GeoE3Dock(QDockWidget):
             ors_layout.addWidget(self.ors_widget)
             self.stacked_widget.addWidget(ors_panel)
 
-            self.ors_widget.switch_to_previous_tab.connect(
-                lambda: self.stacked_widget.setCurrentIndex(CREATE_PROJECT_PANEL)
-            )
+            self.ors_widget.switch_to_previous_tab.connect(lambda: self.stacked_widget.setCurrentIndex(S2S_PANEL))
 
             self.ors_widget.switch_to_next_tab.connect(self._open_road_network_from_ors)
 
@@ -319,7 +339,6 @@ class GeoE3Dock(QDockWidget):
 
         # Load the background image and style sheet
         # do this last so it applies to all the widgets
-        self.background_image = theme_background_image()
         main_widget.setStyleSheet(theme_stylesheet())
         self.initialised = True
 
@@ -329,9 +348,14 @@ class GeoE3Dock(QDockWidget):
         Args:
             event: Event.
         """
+        background_image = getattr(self, "background_image", None)
+        if background_image is None or background_image.isNull():
+            super().paintEvent(event)
+            return
+
         with QPainter(self) as painter:
             # Calculate the scaling and cropping offsets
-            scaled_background = self.background_image.scaled(self.size(), Qt.KeepAspectRatioByExpanding)
+            scaled_background = background_image.scaled(self.size(), Qt.KeepAspectRatioByExpanding)
 
             # Calculate the offset to crop from top and right to keep bottom left anchored
             x_offset = max(0, scaled_background.width() - self.width())
@@ -426,6 +450,10 @@ class GeoE3Dock(QDockWidget):
             log_message("Switched to Create Project panel")
         elif index == ORS_PANEL:
             log_message("Switched to ORS panel")
+        elif index == S2S_PANEL:
+            working_directory = self.create_project_widget.working_dir or self.tree_widget.working_directory
+            self.s2s_widget.set_working_directory(working_directory)
+            log_message("Switched to S2S panel")
         elif index == ROAD_NETWORK_PANEL:
             working_directory = self.tree_widget.working_directory
             log_message(f"Setting road network panel working directory to: {working_directory}")
