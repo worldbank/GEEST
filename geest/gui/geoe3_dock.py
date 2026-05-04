@@ -5,6 +5,7 @@ This module contains functionality for geoe3 dock.
 """
 
 import os
+import json
 from typing import Optional
 
 from qgis.core import Qgis, QgsProject
@@ -197,14 +198,7 @@ class GeoE3Dock(QDockWidget):
                 lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
 
-            self.create_project_widget.switch_to_next_tab.connect(
-                # Switch to the next tab when the button is clicked
-                lambda: [
-                    self.stacked_widget.setCurrentIndex(S2S_PANEL),
-                ][
-                    -1
-                ]  # The [-1] ensures the lambda returns the last value
-            )
+            self.create_project_widget.switch_to_next_tab.connect(self._open_next_panel_after_project_creation)
 
             self.create_project_widget.working_directory_changed.connect(
                 lambda _path: self.tree_widget.set_working_directory(self.create_project_widget.working_dir)
@@ -236,7 +230,7 @@ class GeoE3Dock(QDockWidget):
             ors_layout.addWidget(self.ors_widget)
             self.stacked_widget.addWidget(ors_panel)
 
-            self.ors_widget.switch_to_previous_tab.connect(lambda: self.stacked_widget.setCurrentIndex(S2S_PANEL))
+            self.ors_widget.switch_to_previous_tab.connect(self._open_previous_panel_before_ors)
 
             self.ors_widget.switch_to_next_tab.connect(self._open_road_network_from_ors)
 
@@ -451,6 +445,9 @@ class GeoE3Dock(QDockWidget):
         elif index == ORS_PANEL:
             log_message("Switched to ORS panel")
         elif index == S2S_PANEL:
+            if not self._is_regional_project_flow():
+                self.stacked_widget.setCurrentIndex(ORS_PANEL)
+                return
             working_directory = self.create_project_widget.working_dir or self.tree_widget.working_directory
             self.s2s_widget.set_working_directory(working_directory)
             log_message("Switched to S2S panel")
@@ -488,3 +485,35 @@ class GeoE3Dock(QDockWidget):
             self.road_network_widget.set_crs(
                 self.create_project_widget.crs(working_directory=self.create_project_widget.working_dir)
             )
+
+    def _open_next_panel_after_project_creation(self) -> None:
+        """Open the next panel after project creation based on analysis scale."""
+        if self._is_regional_project_flow():
+            self.stacked_widget.setCurrentIndex(S2S_PANEL)
+        else:
+            self.stacked_widget.setCurrentIndex(ORS_PANEL)
+
+    def _open_previous_panel_before_ors(self) -> None:
+        """Open the previous panel before ORS based on analysis scale."""
+        if self._is_regional_project_flow():
+            self.stacked_widget.setCurrentIndex(S2S_PANEL)
+        else:
+            self.stacked_widget.setCurrentIndex(CREATE_PROJECT_PANEL)
+
+    def _is_regional_project_flow(self) -> bool:
+        """Return True when current project analysis_scale is regional."""
+        working_directory = self.create_project_widget.working_dir or self.tree_widget.working_directory
+        if not working_directory:
+            return False
+
+        model_path = os.path.join(working_directory, "model.json")
+        if not os.path.exists(model_path):
+            return False
+
+        try:
+            with open(model_path, "r", encoding="utf-8") as model_file:
+                model = json.load(model_file)
+            return model.get("analysis_scale") == "regional"
+        except Exception as error:
+            log_message(f"Failed reading model.json for panel routing: {error}", tag="GeoE3", level=Qgis.Warning)
+            return False
