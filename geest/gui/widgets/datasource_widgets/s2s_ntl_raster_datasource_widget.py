@@ -34,7 +34,8 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         self.raster_layer_combo.setToolTip("Select raster or vector layer from the map")
         self.raster_layer_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
-        self.s2s_ntl_field = self.attributes.get("s2s_ntl_field") or DEFAULT_S2S_NTL_FIELD
+        existing_s2s_field = getattr(self, "s2s_ntl_field", "")
+        self.s2s_ntl_field = existing_s2s_field or self.attributes.get("s2s_ntl_field") or DEFAULT_S2S_NTL_FIELD
         self.s2s_controls = DownloadTaskControls(
             button_text="Download from S2S",
             tooltip="Download data from Space2Stats",
@@ -61,11 +62,17 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         if not self.s2s_vector_output_path:
             settings = QSettings()
             working_directory = settings.value("last_working_directory", "")
-            candidate_path = os.path.join(working_directory, "study_area", "s2s_nighttime_lights.gpkg")
-            if working_directory and os.path.exists(candidate_path):
+            candidate_path = self._resolve_default_s2s_output_path(working_directory)
+            if candidate_path and os.path.exists(candidate_path):
                 self.s2s_vector_output_path = candidate_path
         if self.s2s_vector_output_path and os.path.exists(self.s2s_vector_output_path):
             self._select_existing_s2s_output_layer()
+
+    def _resolve_default_s2s_output_path(self, working_directory: str) -> str:
+        """Return default S2S output path for this widget."""
+        if not working_directory:
+            return ""
+        return os.path.join(working_directory, "study_area", "s2s_nighttime_lights.gpkg")
 
     def fetch_from_s2s(self) -> None:
         """Fetch S2S summary rows for downstream grid-based regional scoring."""

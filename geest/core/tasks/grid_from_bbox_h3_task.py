@@ -157,10 +157,8 @@ class GridFromBboxH3Task(QgsTask):
 
             # Check precise intersection with study area geometry
             if self.geom.Intersects(polygon):
-                # Clip hexagon to study area boundary for exact alignment
-                clipped_polygon = self.geom.Intersection(polygon)
-                if clipped_polygon and not clipped_polygon.IsEmpty():
-                    self.features_out.append((h3_index, clipped_polygon))
+                # Keep full H3 hexagon geometry (do not clip to study area boundary)
+                self.features_out.append((h3_index, polygon))
 
             processed += 1
 

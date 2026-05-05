@@ -5,6 +5,7 @@ import datetime
 import json
 import os
 import traceback
+import uuid
 from typing import Any, Dict, List, Optional
 
 from osgeo import ogr, osr
@@ -68,10 +69,9 @@ class S2SDownloaderTask(QgsTask):
         self.study_area_dir = os.path.join(self.working_dir, "study_area")
         self.output_path = os.path.join(self.study_area_dir, f"{self.filename}.gpkg")
         self.layer_name = self.filename
+        self._temp_output_path = ""
 
         self._create_output_directory()
-        if os.path.exists(self.output_path) and self.delete_existing:
-            os.remove(self.output_path)
 
     def run(self) -> bool:
         """Execute task in worker thread."""
@@ -133,11 +133,12 @@ class S2SDownloaderTask(QgsTask):
 
     def _cleanup_partial_output(self) -> None:
         """Remove partial output file on failure."""
-        if os.path.exists(self.output_path):
+        if self._temp_output_path and os.path.exists(self._temp_output_path):
             try:
-                os.remove(self.output_path)
+                os.remove(self._temp_output_path)
             except Exception as cleanup_error:
-                log_message(f"Could not remove partial S2S output: {cleanup_error}")
+                log_message(f"Could not remove temporary S2S output: {cleanup_error}")
+        self._temp_output_path = ""
 
     def _write_error_file(self, stack_trace: str) -> None:
         """Write a task error trace in the working directory."""
@@ -156,9 +157,15 @@ class S2SDownloaderTask(QgsTask):
         if driver is None:
             raise RuntimeError("GeoPackage driver is not available.")
 
-        dataset = driver.CreateDataSource(self.output_path)
+        if os.path.exists(self.output_path) and not self.delete_existing:
+            raise RuntimeError(f"Output already exists and delete_existing is False: {self.output_path}")
+
+        temp_filename = f"{self.filename}.{uuid.uuid4().hex}.tmp.gpkg"
+        self._temp_output_path = os.path.join(self.study_area_dir, temp_filename)
+
+        dataset = driver.CreateDataSource(self._temp_output_path)
         if dataset is None:
-            raise RuntimeError(f"Could not create output GeoPackage: {self.output_path}")
+            raise RuntimeError(f"Could not create output GeoPackage: {self._temp_output_path}")
 
         try:
             geometry_type = self._infer_geometry_type(rows)
@@ -217,6 +224,9 @@ class S2SDownloaderTask(QgsTask):
 
         finally:
             dataset = None
+
+        os.replace(self._temp_output_path, self.output_path)
+        self._temp_output_path = ""
 
     @staticmethod
     def _infer_geometry_type(rows: List[Dict[str, Any]]) -> int:

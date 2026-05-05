@@ -672,6 +672,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     or "malformed" in error_str
                     or "gpkg_spatial_ref_sys" in error_str
                     or "gpkg_contents" in error_str
+                    or "not recognized as being in a supported file format" in error_str
+                    or "unable to open database file" in error_str
+                    or "readonly database" in error_str
                 ):
                     log_message(
                         f"Database busy or still initializing, skipping map refresh for {layer_name}",

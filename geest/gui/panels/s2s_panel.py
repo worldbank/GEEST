@@ -195,6 +195,8 @@ class S2SPanel(FORM_CLASS, QWidget):
                     if int(indicator.get("use_environmental_hazards", 0)) == 1:
                         hazard_id = indicator_id.lower()
                         hazard_field = str(indicator.get("s2s_hazard_field") or "").strip()
+                        if hazard_field == DEFAULT_S2S_NTL_FIELD:
+                            hazard_field = ""
                         if not hazard_field:
                             hazard_field = DEFAULT_S2S_ENV_HAZARD_FIELDS.get(hazard_id, "")
                         if not hazard_field:

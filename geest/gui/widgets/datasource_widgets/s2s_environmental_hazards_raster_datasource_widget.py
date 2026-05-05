@@ -108,6 +108,16 @@ class S2SEnvironmentalHazardsRasterDataSourceWidget(S2SNTLRasterDataSourceWidget
         indicator_id = str(self.attributes.get("id", "")).lower()
         return DEFAULT_S2S_ENV_HAZARD_FIELDS.get(indicator_id, "")
 
+    def _resolve_default_s2s_output_path(self, working_directory: str) -> str:
+        """Return default hazard-specific S2S output path for this indicator."""
+        if not working_directory:
+            return ""
+        indicator_id = str(self.attributes.get("id", "")).lower()
+        if not indicator_id:
+            return ""
+        filename = f"s2s_environmental_hazards_{indicator_id}.gpkg"
+        return os.path.join(working_directory, "study_area", filename)
+
     @staticmethod
     def _build_aoi_layer(study_area_gpkg: str):
         """Build and validate AOI layer from study area geopackage."""

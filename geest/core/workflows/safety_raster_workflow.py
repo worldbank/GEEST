@@ -199,8 +199,13 @@ class SafetyRasterWorkflow(WorkflowBase):
             if updated_count < 0:
                 raise RuntimeError("Failed to write S2S nighttime lights values to study_area_grid.")
 
+            mapped_count = self._apply_s2s_ntl_likert_mapping(area_name=area_name)
+            if mapped_count < 0:
+                raise RuntimeError("Failed to map S2S nighttime lights values to Likert scale.")
+
             log_message(
-                f"Wrote {updated_count} regional S2S nighttime lights values to grid column {self.layer_id}",
+                f"Wrote {updated_count} regional S2S nighttime lights values and mapped {mapped_count} cells "
+                f"to Likert scale in grid column {self.layer_id}",
                 tag="GeoE3",
                 level=Qgis.Info,
             )
@@ -233,6 +238,57 @@ class SafetyRasterWorkflow(WorkflowBase):
             bbox=current_bbox,
             area_name=area_name,
             index=index,
+        )
+
+    def _apply_s2s_ntl_likert_mapping(self, area_name: str) -> int:
+        """Map joined S2S NTL values to the same Likert scale as raster mode."""
+        from geest.core.grid_column_utils import get_grid_column_values, reclassify_grid_column_with_table
+
+        classification_mode = self.attributes.get("ntl_classification_mode", "jenks")
+        if classification_mode == "binary":
+            reclass_table = ["-inf", "0.0", "0", "0.0", "inf", "5"]
+            return reclassify_grid_column_with_table(
+                gpkg_path=self.gpkg_path,
+                column_name=self.layer_id,
+                reclassification_table=reclass_table,
+                area_name=area_name,
+                range_boundaries=0,
+            )
+
+        values = get_grid_column_values(self.gpkg_path, self.layer_id, area_name=area_name)
+        if not values:
+            return 0
+
+        valid_data = np.asarray(values, dtype=float)
+        breaks = jenks_natural_breaks(valid_data, n_classes=6)
+        _ = calculate_goodness_of_variance_fit(valid_data, breaks)
+
+        reclass_table = [
+            str(0.0),
+            str(breaks[0]),
+            "0",
+            str(breaks[0]),
+            str(breaks[1]),
+            "1",
+            str(breaks[1]),
+            str(breaks[2]),
+            "2",
+            str(breaks[2]),
+            str(breaks[3]),
+            "3",
+            str(breaks[3]),
+            str(breaks[4]),
+            "4",
+            str(breaks[4]),
+            str(breaks[5]),
+            "5",
+        ]
+        return reclassify_grid_column_with_table(
+            gpkg_path=self.gpkg_path,
+            column_name=self.layer_id,
+            reclassification_table=reclass_table,
+            area_name=area_name,
+            range_boundaries=0,
         )
 
     def _apply_reclassification(

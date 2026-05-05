@@ -637,6 +637,11 @@ class WorkflowBase(QObject):
                             area_name=area_name,
                         )
 
+                    if not raster_output:
+                        raise RuntimeError(
+                            f"{self.workflow_name} produced no raster output for area {area_name} (index {index})."
+                        )
+
                     # clip the area by its matching mask layer in study_area geopackage
                     self.updateStatus(f"Masking area {index + 1}...")
                     masked_layer = self._mask_raster(

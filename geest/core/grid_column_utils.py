@@ -232,7 +232,6 @@ def add_model_columns_to_grid(gpkg_path: str, model_path: str) -> bool:
                 added_count += 1
 
         ds.FlushCache()
-        _checkpoint_wal(ds)
         ds = None
 
         log_message(f"Added {added_count} model columns to study_area_grid")
@@ -371,7 +370,6 @@ def write_raster_values_to_grid(
                 _execute_sql_with_retry(ds, sql)
                 updated_count += len(batch_fids)
 
-        _checkpoint_wal(ds)
         ds = None
         raster_ds = None
 
@@ -419,6 +417,148 @@ def _quote_sql_identifier(identifier: str) -> str:
 def _quote_sql_literal(value: str) -> str:
     """Quote a string literal for SQLite usage."""
     return "'" + value.replace("'", "''") + "'"
+
+
+def _parse_reclass_boundary(boundary: Any) -> float:
+    """Parse a reclassification table boundary value into float."""
+    if isinstance(boundary, str):
+        token = boundary.strip().lower()
+        if token in {"inf", "+inf", "infinity", "+infinity"}:
+            return float("inf")
+        if token in {"-inf", "-infinity"}:
+            return float("-inf")
+        return float(token)
+    return float(boundary)
+
+
+def _value_matches_range(value: float, minimum: float, maximum: float, range_boundaries: int) -> bool:
+    """Check whether a value falls into a reclassification range."""
+    if range_boundaries == 0:
+        return minimum < value <= maximum
+    if range_boundaries == 1:
+        return minimum <= value < maximum
+    if range_boundaries == 2:
+        return minimum <= value <= maximum
+    if range_boundaries == 3:
+        return minimum < value < maximum
+    return minimum < value <= maximum
+
+
+def get_grid_column_values(gpkg_path: str, column_name: str, area_name: Optional[str] = None) -> List[float]:
+    """Read non-null values from a grid column, optionally filtered by area."""
+    if not os.path.exists(gpkg_path):
+        return []
+
+    values: List[float] = []
+    try:
+        ds = ogr.Open(gpkg_path, 0)
+        if not ds:
+            return values
+
+        layer, field_idx = _get_grid_layer_and_field_index(ds, column_name, create_if_missing=False)
+        if layer is None or field_idx < 0:
+            ds = None
+            return values
+
+        sanitized_column = _sanitize_column_name(column_name)
+        if area_name:
+            layer.SetAttributeFilter(f"area_name = '{area_name}'")
+
+        for feature in layer:
+            value = feature.GetField(sanitized_column)
+            if value is None:
+                continue
+            try:
+                values.append(float(value))
+            except (TypeError, ValueError):
+                continue
+
+        layer.SetAttributeFilter(None)
+        ds = None
+        return values
+    except Exception as error:
+        log_message(f"Error reading grid column values: {error}", level=Qgis.Warning)
+        return []
+
+
+def reclassify_grid_column_with_table(
+    gpkg_path: str,
+    column_name: str,
+    reclassification_table: List[Any],
+    area_name: Optional[str] = None,
+    range_boundaries: int = 0,
+) -> int:
+    """Apply a QGIS-style reclassification table directly to a grid column.
+
+    The table format must be [min1, max1, class1, min2, max2, class2, ...].
+    """
+    if len(reclassification_table) % 3 != 0:
+        log_message("Invalid reclassification table length", level=Qgis.Warning)
+        return -1
+
+    if not os.path.exists(gpkg_path):
+        log_message(f"GeoPackage not found: {gpkg_path}", level=Qgis.Warning)
+        return -1
+
+    try:
+        parsed_ranges: List[Tuple[float, float, float]] = []
+        for index in range(0, len(reclassification_table), 3):
+            minimum = _parse_reclass_boundary(reclassification_table[index])
+            maximum = _parse_reclass_boundary(reclassification_table[index + 1])
+            output_value = float(reclassification_table[index + 2])
+            parsed_ranges.append((minimum, maximum, output_value))
+    except Exception as error:
+        log_message(f"Failed to parse reclassification table: {error}", level=Qgis.Critical)
+        return -1
+
+    try:
+        ds = _open_gpkg_for_write(gpkg_path)
+        if not ds:
+            log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
+            return -1
+
+        layer, field_idx = _get_grid_layer_and_field_index(ds, column_name, create_if_missing=False)
+        if layer is None or field_idx < 0:
+            ds = None
+            return -1
+
+        sanitized_column = _sanitize_column_name(column_name)
+        if area_name:
+            layer.SetAttributeFilter(f"area_name = '{area_name}'")
+
+        updated_count = 0
+        layer.StartTransaction()
+        try:
+            for feature in layer:
+                value = feature.GetField(sanitized_column)
+                if value is None:
+                    continue
+
+                numeric_value = float(value)
+                mapped_value = None
+                for minimum, maximum, output_value in parsed_ranges:
+                    if _value_matches_range(numeric_value, minimum, maximum, range_boundaries):
+                        mapped_value = output_value
+                        break
+
+                if mapped_value is None:
+                    continue
+
+                feature.SetField(sanitized_column, mapped_value)
+                if layer.SetFeature(feature) == 0:
+                    updated_count += 1
+
+            layer.CommitTransaction()
+        except Exception:
+            layer.RollbackTransaction()
+            raise
+
+        layer.SetAttributeFilter(None)
+        ds = None
+        return updated_count
+    except Exception as error:
+        log_message(f"Error reclassifying grid column: {error}", level=Qgis.Critical)
+        return -1
 
 
 def _get_grid_layer_and_field_index(
@@ -597,7 +737,6 @@ def write_joined_values_to_grid(
                 ds.ReleaseResultSet(count_result)
         finally:
             _execute_sql_with_retry(ds, "DETACH DATABASE src", dialect="SQLite")
-            _checkpoint_wal(ds)
             ds = None
 
         log_message(
@@ -657,7 +796,6 @@ def write_uniform_value_to_grid(
         sql = f'UPDATE study_area_grid SET "{sanitized_column}" = {value}'  # nosec B608
         log_message(f"Executing: {sql}")
         _execute_sql_with_retry(ds, sql)  # nosec B608
-        _checkpoint_wal(ds)
         ds = None
 
         return 0
@@ -694,7 +832,6 @@ def clear_grid_column(gpkg_path: str, column_name: str) -> bool:
         sql = f'UPDATE study_area_grid SET "{sanitized_column}" = NULL'  # nosec B608
         log_message(f"Clearing column: {sql}")
         _execute_sql_with_retry(ds, sql)  # nosec B608
-        _checkpoint_wal(ds)
         ds = None
         return True
 
@@ -803,7 +940,6 @@ def count_features_per_grid_cell(
                 progress = 50 + (batch_start / len(fids)) * 50
                 feedback.setProgress(progress)
 
-        _checkpoint_wal(ds)
         ds = None
         log_message(f"Updated {updated_count} grid cells with feature counts")
         return updated_count
@@ -977,7 +1113,6 @@ def write_spatial_join_to_grid(
 
         features_ds = None
         ds.FlushCache()
-        _checkpoint_wal(ds)
         ds = None
 
         log_message(f"Updated {updated_count} grid cells via spatial join for column {sanitized_column}")
@@ -1126,7 +1261,6 @@ def write_point_count_to_grid(
 
         features_ds = None
         ds.FlushCache()
-        _checkpoint_wal(ds)
         ds = None
 
         log_message(f"Updated {updated_count} grid cells with point counts for column {sanitized_column}")
@@ -1189,12 +1323,23 @@ def write_aggregation_to_grid(
 
         # Verify all source columns exist
         layer_defn = layer.GetLayerDefn()
+        created_missing_columns = []
         for source_col in source_columns_weights.keys():
             sanitized_source = _sanitize_column_name(source_col)
             if layer_defn.GetFieldIndex(sanitized_source) < 0:
-                log_message(f"Source column {sanitized_source} not found in grid layer", level=Qgis.Warning)
-                ds = None
-                return -1
+                field_defn = ogr.FieldDefn(sanitized_source, ogr.OFTReal)
+                if layer.CreateField(field_defn) != 0:
+                    log_message(f"Source column {sanitized_source} not found in grid layer", level=Qgis.Warning)
+                    ds = None
+                    return -1
+                created_missing_columns.append(sanitized_source)
+                layer_defn = layer.GetLayerDefn()
+
+        if created_missing_columns:
+            log_message(
+                f"Created missing aggregation source columns with NULL defaults: {', '.join(created_missing_columns)}",
+                level=Qgis.Warning,
+            )
 
         # Build the weighted sum expression
         # Example: (0.3 * COALESCE("indicator1", 0) + 0.4 * COALESCE("indicator2", 0))
@@ -1212,7 +1357,6 @@ def write_aggregation_to_grid(
         sql = f'UPDATE study_area_grid SET "{sanitized_target}" = ({expression})'  # nosec B608
         log_message(f"Executing aggregation SQL: {sql[:200]}...")
         _execute_sql_with_retry(ds, sql)  # nosec B608
-        _checkpoint_wal(ds)
         ds = None
 
         log_message(f"Aggregated {len(source_columns_weights)} columns into {sanitized_target}")
@@ -1473,7 +1617,6 @@ def write_buffer_values_to_grid(
                 progress = 50 + (batch_start / max(len(fids), 1)) * 50
                 feedback.setProgress(progress)
 
-        _checkpoint_wal(ds)
         ds = None
         log_message(f"Updated {updated_count} grid cells with buffer scores")
         return updated_count
