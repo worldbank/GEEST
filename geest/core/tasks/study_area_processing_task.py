@@ -861,13 +861,7 @@ class StudyAreaProcessingTask(QgsTask):
             Exception: If the CRS is not EPSG-based.
         """
         super().__init__("Study Area Preparation", QgsTask.CanCancel)
-
-        # Configure GDAL for optimized GeoPackage writes
-        # These settings trade crash safety for performance - acceptable for processing tasks
-        gdal.SetConfigOption("OGR_SQLITE_JOURNAL", "MEMORY")
-        gdal.SetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF")
-        gdal.SetConfigOption("SQLITE_USE_OGR_VFS", "YES")
-        log_message("Using optimized GeoPackage write settings")
+        self._previous_gdal_sqlite_options = {}
 
         self.input_vector_path = self.export_qgs_layer_to_shapefile(layer, working_dir)
         self.field_name = field_name
@@ -1225,6 +1219,7 @@ class StudyAreaProcessingTask(QgsTask):
         Returns:
             True if processing completed successfully, False otherwise.
         """
+        self._set_sqlite_write_safety_options()
         try:
             # 1) Create the bounding box as a single polygon feature
             #    and save to GeoPackage
@@ -1385,10 +1380,30 @@ class StudyAreaProcessingTask(QgsTask):
             return False
 
         finally:
+            self._restore_sqlite_write_safety_options()
             # Explicit cleanup of GDAL resources to prevent memory leaks
             self._cleanup_gdal_resources()
 
         return True
+
+    def _set_sqlite_write_safety_options(self) -> None:
+        """Configure safer SQLite options for GeoPackage writes.
+
+        These options are process-wide in GDAL, so we snapshot and restore them
+        per task execution to avoid leaking settings into workflow processing.
+        """
+        option_keys = ["OGR_SQLITE_JOURNAL", "OGR_SQLITE_SYNCHRONOUS", "SQLITE_USE_OGR_VFS"]
+        self._previous_gdal_sqlite_options = {key: gdal.GetConfigOption(key) for key in option_keys}
+
+        gdal.SetConfigOption("OGR_SQLITE_JOURNAL", "WAL")
+        gdal.SetConfigOption("OGR_SQLITE_SYNCHRONOUS", "NORMAL")
+        gdal.SetConfigOption("SQLITE_USE_OGR_VFS", "YES")
+        log_message("Configured safer GeoPackage write settings (WAL/NORMAL)")
+
+    def _restore_sqlite_write_safety_options(self) -> None:
+        """Restore GDAL SQLite options captured before task execution."""
+        for key, value in self._previous_gdal_sqlite_options.items():
+            gdal.SetConfigOption(key, value)
 
     def _cleanup_gdal_resources(self):
         """Clean up GDAL/OGR resources to prevent memory leaks and file handle issues."""

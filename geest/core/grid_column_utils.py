@@ -11,12 +11,59 @@ directly to study_area_grid columns, then optionally rasterized using gdal_raste
 import json
 import os
 import re
+import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from osgeo import gdal, ogr
 from qgis.core import Qgis, QgsFeedback, QgsVectorLayer
 
 from geest.utilities import log_message
+
+
+SQLITE_WRITE_BUSY_TIMEOUT_MS = 10000
+SQLITE_WRITE_MAX_RETRIES = 3
+SQLITE_WRITE_RETRY_DELAY_SECONDS = 0.2
+
+
+def _open_gpkg_for_write(gpkg_path: str):
+    """Open GeoPackage with safer SQLite write pragmas applied."""
+    ds = ogr.Open(gpkg_path, 1)
+    if not ds:
+        return None
+
+    try:
+        ds.ExecuteSQL(f"PRAGMA busy_timeout={SQLITE_WRITE_BUSY_TIMEOUT_MS}")
+        ds.ExecuteSQL("PRAGMA journal_mode=WAL")
+        ds.ExecuteSQL("PRAGMA synchronous=NORMAL")
+    except Exception as error:
+        log_message(f"Failed to apply SQLite write pragmas: {error}", level=Qgis.Warning)
+    return ds
+
+
+def _is_lock_error(error: Exception) -> bool:
+    """Return True if exception indicates SQLite lock contention."""
+    text = str(error).lower()
+    return "database is locked" in text or "database table is locked" in text or "busy" in text
+
+
+def _execute_sql_with_retry(ds, sql: str, dialect: Optional[str] = None):
+    """Execute SQL with bounded retries for lock/busy errors."""
+    last_error = None
+    for attempt in range(SQLITE_WRITE_MAX_RETRIES):
+        try:
+            if dialect:
+                return ds.ExecuteSQL(sql, dialect=dialect)
+            return ds.ExecuteSQL(sql)
+        except Exception as error:
+            last_error = error
+            if _is_lock_error(error) and attempt < SQLITE_WRITE_MAX_RETRIES - 1:
+                time.sleep(SQLITE_WRITE_RETRY_DELAY_SECONDS * (attempt + 1))
+                continue
+            raise
+
+    if last_error:
+        raise last_error
+    return None
 
 
 def _checkpoint_wal(ds) -> None:
@@ -152,7 +199,7 @@ def add_model_columns_to_grid(gpkg_path: str, model_path: str) -> bool:
         return False
 
     try:
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return False
@@ -238,7 +285,7 @@ def write_raster_values_to_grid(
         ymin = gt[3] + gt[5] * raster_ds.RasterYSize
 
         # Open the GeoPackage for updating
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             raster_ds = None
@@ -321,7 +368,7 @@ def write_raster_values_to_grid(
                     f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
                     f"WHERE fid IN ({fid_list})"
                 )
-                ds.ExecuteSQL(sql)
+                _execute_sql_with_retry(ds, sql)
                 updated_count += len(batch_fids)
 
         _checkpoint_wal(ds)
@@ -458,7 +505,7 @@ def write_joined_values_to_grid(
 
     try:
         # Ensure the target column exists in study_area_grid.
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return -1
@@ -483,16 +530,17 @@ def write_joined_values_to_grid(
         source_gpkg_literal = _quote_sql_literal(source_gpkg)
         source_layer_literal = _quote_sql_literal(source_layer)
 
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return -1
 
-        ds.ExecuteSQL(f"ATTACH DATABASE {source_gpkg_literal} AS src", dialect="SQLite")  # nosec B608
+        _execute_sql_with_retry(ds, f"ATTACH DATABASE {source_gpkg_literal} AS src", dialect="SQLite")  # nosec B608
 
         try:
             # Validate source layer exists.
-            source_exists_result = ds.ExecuteSQL(
+            source_exists_result = _execute_sql_with_retry(
+                ds,
                 (
                     "SELECT 1 AS exists_flag "  # nosec B608
                     "FROM src.sqlite_master "
@@ -516,7 +564,7 @@ def write_joined_values_to_grid(
             clear_sql = f"UPDATE study_area_grid SET {target_col_sql} = NULL"  # nosec B608
             if area_name:
                 clear_sql += f" WHERE area_name = {_quote_sql_literal(area_name)}"
-            ds.ExecuteSQL(clear_sql, dialect="SQLite")  # nosec B608
+            _execute_sql_with_retry(ds, clear_sql, dialect="SQLite")  # nosec B608
 
             update_sql = (
                 f"UPDATE study_area_grid AS g "  # nosec B608
@@ -531,7 +579,7 @@ def write_joined_values_to_grid(
                 f"WHERE s.{source_key_sql} = g.{target_key_sql}"
                 f") {area_predicate}"
             )
-            ds.ExecuteSQL(update_sql, dialect="SQLite")  # nosec B608
+            _execute_sql_with_retry(ds, update_sql, dialect="SQLite")  # nosec B608
 
             count_sql = (
                 f"SELECT COUNT(*) AS matched_count "  # nosec B608
@@ -540,7 +588,7 @@ def write_joined_values_to_grid(
                 f"ON s.{source_key_sql} = g.{target_key_sql} "
                 f"WHERE 1=1 {area_predicate}"
             )
-            count_result = ds.ExecuteSQL(count_sql, dialect="SQLite")
+            count_result = _execute_sql_with_retry(ds, count_sql, dialect="SQLite")
             matched_count = 0
             if count_result is not None:
                 feature = count_result.GetNextFeature()
@@ -548,7 +596,7 @@ def write_joined_values_to_grid(
                     matched_count = feature.GetField("matched_count") or 0
                 ds.ReleaseResultSet(count_result)
         finally:
-            ds.ExecuteSQL("DETACH DATABASE src", dialect="SQLite")
+            _execute_sql_with_retry(ds, "DETACH DATABASE src", dialect="SQLite")
             _checkpoint_wal(ds)
             ds = None
 
@@ -594,7 +642,7 @@ def write_uniform_value_to_grid(
     sanitized_column = _sanitize_column_name(column_name)
 
     try:
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return -1
@@ -608,7 +656,7 @@ def write_uniform_value_to_grid(
         # Simple SQL UPDATE - no area_name filter, update ALL cells
         sql = f'UPDATE study_area_grid SET "{sanitized_column}" = {value}'  # nosec B608
         log_message(f"Executing: {sql}")
-        ds.ExecuteSQL(sql)  # nosec B608
+        _execute_sql_with_retry(ds, sql)  # nosec B608
         _checkpoint_wal(ds)
         ds = None
 
@@ -638,14 +686,14 @@ def clear_grid_column(gpkg_path: str, column_name: str) -> bool:
     sanitized_column = _sanitize_column_name(column_name)
 
     try:
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return False
 
         sql = f'UPDATE study_area_grid SET "{sanitized_column}" = NULL'  # nosec B608
         log_message(f"Clearing column: {sql}")
-        ds.ExecuteSQL(sql)  # nosec B608
+        _execute_sql_with_retry(ds, sql)  # nosec B608
         _checkpoint_wal(ds)
         ds = None
         return True
@@ -720,7 +768,7 @@ def count_features_per_grid_cell(
         log_message(f"Found {len(grid_feature_counts)} grid cells with features")
 
         # Build SQL CASE statement for batch update
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return -1
@@ -748,7 +796,7 @@ def count_features_per_grid_cell(
                     f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
                     f"WHERE fid IN ({fid_list})"
                 )
-                ds.ExecuteSQL(sql)
+                _execute_sql_with_retry(ds, sql)
                 updated_count += len(batch_fids)
 
             if feedback:
@@ -808,7 +856,7 @@ def write_spatial_join_to_grid(
 
     try:
         # Open the main GeoPackage for updating
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return -1
@@ -983,7 +1031,7 @@ def write_point_count_to_grid(
 
     try:
         # Open the main GeoPackage for updating
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return -1
@@ -1127,7 +1175,7 @@ def write_aggregation_to_grid(
         return -1
 
     try:
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return -1
@@ -1163,7 +1211,7 @@ def write_aggregation_to_grid(
         # Build and execute SQL UPDATE
         sql = f'UPDATE study_area_grid SET "{sanitized_target}" = ({expression})'  # nosec B608
         log_message(f"Executing aggregation SQL: {sql[:200]}...")
-        ds.ExecuteSQL(sql)  # nosec B608
+        _execute_sql_with_retry(ds, sql)  # nosec B608
         _checkpoint_wal(ds)
         ds = None
 
@@ -1393,7 +1441,7 @@ def write_buffer_values_to_grid(
         log_message(f"Found {len(grid_scores)} grid cells with intersecting buffers")
 
         # Update grid using SQL batched updates
-        ds = ogr.Open(gpkg_path, 1)
+        ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
             log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return -1
@@ -1418,7 +1466,7 @@ def write_buffer_values_to_grid(
                     f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
                     f"WHERE fid IN ({fid_list})"
                 )
-                ds.ExecuteSQL(sql)
+                _execute_sql_with_retry(ds, sql)
                 updated_count += len(batch_fids)
 
             if feedback:

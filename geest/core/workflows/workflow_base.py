@@ -6,6 +6,7 @@ This module contains functionality for workflow base.
 
 import datetime
 import os
+import sqlite3
 import traceback
 from abc import abstractmethod
 from typing import Optional
@@ -228,10 +229,27 @@ class WorkflowBase(QObject):
             )
 
         if not crs.isValid():
+            integrity_status = self._quick_check_gpkg()
             raise ValueError(
-                f"Could not determine CRS for study area from {self.gpkg_path}. " "The GeoPackage may be corrupted."
+                f"Could not determine CRS for study area from {self.gpkg_path}. "
+                f"GeoPackage integrity check: {integrity_status}."
             )
         return crs
+
+    def _quick_check_gpkg(self) -> str:
+        """Run SQLite quick_check on the study area GeoPackage."""
+        try:
+            connection = sqlite3.connect(self.gpkg_path)
+            try:
+                cursor = connection.cursor()
+                cursor.execute("PRAGMA quick_check;")
+                row = cursor.fetchone()
+                result = row[0] if row else "unknown"
+                return str(result)
+            finally:
+                connection.close()
+        except Exception as error:
+            return f"failed ({error})"
 
     def _check_ghsl_layer_exists(self) -> bool:
         """Check if the GHSL settlements layer exists in the study area GeoPackage.
