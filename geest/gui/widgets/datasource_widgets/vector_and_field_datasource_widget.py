@@ -156,14 +156,19 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
 
     def select_shapefile(self):
         """
-        Opens a file dialog to select a shapefile and stores the last directory in QSettings.
+        Opens a file dialog to select a vector file and stores the last directory in QSettings.
         """
         try:
             settings = QSettings()
             last_dir = settings.value("GeoE3/lastShapefileDir", "")
 
-            # Open file dialog to select a shapefile
-            file_path, _ = QFileDialog.getOpenFileName(self, "Select Shapefile", last_dir, "Shapefiles (*.shp)")
+            # Open file dialog to select a vector file
+            file_path, _ = QFileDialog.getOpenFileName(
+                self,
+                "Select Vector File",
+                last_dir,
+                "GeoPackage and Shapefiles (*.gpkg *.shp);;GeoPackage (*.gpkg);;Shapefiles (*.shp)",
+            )
 
             if file_path:
                 # Update the line edit with the selected file path
