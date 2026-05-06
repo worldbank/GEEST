@@ -4,6 +4,8 @@
 
 <p align="justify">
   With support from the <a href="https://www.worldbank.org/en/topic/climatechange/brief/canada-world-bank-clean-energy-and-forests-climate-facility">Canada Clean Energy and Forest Climate Facility (CCEFCFy)</a>, the <a href="https://worldbank.github.io/GOST">Geospatial Operational Support Team (GOST, DECSC)</a> launched the project "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector" in <a href="#footnote1" id="ref1">SIDS<sup>1</sup></a>. The project aims to propose a novel methodology and generate a geospatial open-source tool for mapping the enabling environments for women in a country that can inform new energy projects to support the advancement of women's economic empowerment in <a href="#footnote1" id="ref1">SIDS<sup>1</sup></a> while contributing to closing gender gaps in employment in the RE sector.
+  
+  With additional support from the [Global Data Facility](https://www.worldbank.org/en/programs/global-data-facility), GOST further developed the methodology based on more recent research and worked on the generalization and scaling-up work of the Gender Enabling Environments Spatial Tool (GEEST) into the Geospatial Employment Environments (GeoE3) too. This is an important update that is meant to better respond to the Jobs agenda of the WBG, putting the software in the service of general labor/employment studies and not only limiting it to women. Women’s specific criteria will remain an integral component of the tool, but the GeoE3 will present itself as a generic tool for mapping foundational infrastructure and mobility issues that affect men and women alike, with respect to employment opportunities. The scaling-up effort further consists in tailoring the tool to allow for high-level, lower-resolution analysis, that would allow for regional analysis, supporting our final objective of a global map of Women’s Enabling Environments for Employment.
 </p>
 
 <h2 id="project-scope">Project Scope</h2>
@@ -13,7 +15,7 @@
 ---
 
 <p align="justify">
-An extensive literature review, focusing on the barriers women face in securing jobs, particularly within SIDS, was conducted. This comprehensive review resulted in the formulation of a novel Multicriteria Evaluation (MCE) framework comprising 15 key factors, both spatial and non-spatial, that affect women’s job opportunities. These factors are categorized into three dimensions: <strong>Contextual</strong>, <strong>Accessibility</strong>, and <strong>Place Characterization</strong>. The latter two dimensions concentrate on geographical factors.
+An extensive literature review, focusing on the barriers women face in securing jobs was conducted. This comprehensive review resulted in the formulation of a novel Multicriteria Evaluation (MCE) framework comprising 15 key factors, both spatial and non-spatial, that affect women’s job opportunities. These factors are categorized into three dimensions: <strong>Contextual</strong>, <strong>Accessibility</strong>, and <strong>Place Characterization</strong>. The latter two dimensions concentrate on geographical factors.
 
 For a comprehensive understanding of the GeoWEAF and the associated methodology employed to evaluate women’s spatial access to employment opportunities, please refer to the Methodology Report available at the following link: <a href="https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42" target="_blank">Methodology Report</a>
 </p>
@@ -21,14 +23,14 @@ For a comprehensive understanding of the GeoWEAF and the associated methodology 
 <a href="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GeoWEAF.png" target="_blank">
   <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GeoWEAF.png" alt="Analytical Framework" width="700" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view the Analytical Framework">
 </a>
-## 2. The Geospatial Enabling Environments for Employment Spatial Tool (GEOE3)
+## 2. The Geospatial Enabling Environments for Employment Spatial Tool (GeoOE3)
 
 ---
 
 <p align="justify">
-Based on the Methodological Framework, the GEOE3, an open-source plugin in QGIS, was developed for the automatic computation of the factors and dimensions. The GEOE3 characterizes communities based on women’s prospects to secure jobs or establish their own businesses within the RE sector. It aims to assist decision-makers in selecting optimal locations for RE projects, ensuring the maximum positive impact on communities and addressing gender disparities. Additionally, it provides insights for building the necessary infrastructure around RE projects to create enabling environments that enhance women’s participation in the RE sector in SIDS.
+Based on the Methodological Framework, the GeoE3, an open-source plugin in QGIS, was developed for the automatic computation of the factors and dimensions. The GeoE3 characterizes communities based on women’s prospects to secure jobs or establish their own businesses within the RE sector. It aims to assist decision-makers in selecting optimal locations for RE projects, ensuring the maximum positive impact on communities and addressing gender disparities. Additionally, it provides insights for building the necessary infrastructure around RE projects to create enabling environments that enhance women’s participation in the RE sector in SIDS.
 
-The GEOE3 generates raw score outputs for 15 factors outlined in the Analytical Framework. Each of the 15 factors, dimensions, and overall aggregate scores are assessed on a scale ranging from 0 to 5.
+The GeoE3 generates raw score outputs for 15 factors outlined in the Analytical Framework. Each of the 15 factors, dimensions, and overall aggregate scores are assessed on a scale ranging from 0 to 5.
 </p>
 
 <a href="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/3%20countries%20maps.png" target="_blank">
@@ -39,10 +41,10 @@ The GEOE3 generates raw score outputs for 15 factors outlined in the Analytical 
 ---
 
 <p align="justify">
-  The GEOE3 was tested in Saint Lucia to assess its functionality. The selection of this country was strategic, considering its varied geographic region, size, population densities, and data availability. Testing the GEOE3 across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GEOE3 implementation are documented in the Implementation Report, accessible through the following link:
+  The GeoE3 was tested in Saint Lucia to assess its functionality. The selection of this country was strategic, considering its varied geographic region, size, population densities, and data availability. Testing the GeoE3 across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GeoE3 implementation are documented in the Implementation Report, accessible through the following link:
   <a href="https://worldbankgroup-my.sharepoint.com/:w:/r/personal/civanescu_worldbank_org/Documents/Desktop/Work/Gender/TORs/Task%203/St%20Lucia%20-%20GEEST/Implementation%20Report/Implementation%20Report%20Saint%20Lucia.docx?d=wd12a9d054d5747f49788597e3fdc4ff8&csf=1&web=1&e=q6UcU0" target="_blank">Implementation Report St. Lucia</a>
 </p>
-### GEOE3 Results in Saint Lucia
+### GeoE3 Results in Saint Lucia
 
             a. Contextual Dimension
 <p align="justify">
@@ -231,6 +233,7 @@ This undertaking involved the identification and compilation of essential open-s
 <a href="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/data%20availability%20per%20country.JPG" target="_blank">
   <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/data%20availability%20per%20country.JPG" alt="Data Availability per Country" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view data availability">
 </a>
+
 ## 5. Geospatial Databases
 
 ---
