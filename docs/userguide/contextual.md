@@ -7,65 +7,37 @@ The Contextual Dimension refers to the laws and policies that shape workplace ge
 
 ### Input Contextual factors
 
+### > - If the analysis is generic, GeoE3 utilizes the EPLEX score of a country.
 ---
-<p align="justify">
-<strong>Workplace Discrimination</strong> involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields.
-This indicator is composed by the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
-</p>
-
-**Locate the Workplace Discrimination Section**
-
-> - 🖱️🖱️ **Double-click** on the **Workplace Discrimination section** to open the pop-up.
-> - 📝 In the *Input* field, enter the value from the **WBL2024 Workplace Index Score** and click **OK** to proceed.
-
+<p align="justify">EPLEX is a summary measure of Employment Protection Legislation (EPL) stringency, created by the International Labour Organization (ILO) that measures how strongly a country's laws protect workers against dismissal at the initiative of an employer.
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/WD.jpg"
-    alt="Workplace Discrimination"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Contextual_dm.jpg"
+    alt="Contextual Weights"
     style="width:75%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
+<p align="center">
+<img width="369" height="189" alt="image" src="https://github.com/user-attachments/assets/23240df3-f294-4310-9259-c47a8eebd849" />
+</p>
 
+### > - If the analysis is tailored for Women's Enabling Environments, GeoE3 utilizes data from the WBL database, as follows:
 ---
 <p align="justify">
-<strong>Regulatory Frameworks</strong> pertain to laws and policies that protect women’s employment rights, such as childcare support and parental leave, influencing their workforce participation.
-This indicator is composed by the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
+<strong>Workplace Discrimination</strong> involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields and it is btained from the Workplace Index score of the WBL.
 </p>
-
-**Locate the Regulatory Frameworks Section**
-
-> - 🖱️🖱️ **Double-click** on the **Regulatory Frameworks section** to open the pop-up.
-> - 📝 In the *Input* field, enter the **average** value of the **WBL2024 Pay Score and Parenthood Index Score**, then click **OK** to proceed.
-
-<p align="center">
-<img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/RF.jpg"
-    alt="Regulatory Frameworks"
-    style="width:75%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
-
----
 <p align="justify">
-<strong>Finacial Inclusion</strong> involves laws concerning women’s access to financial resources like loans and credit, which is crucial for starting businesses and investing in economic opportunities.
-This indicator is composed by the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
+<strong>Regulatory Frameworks</strong> pertain to laws and policies that protect women’s employment rights, such as childcare support and parental leave, influencing their workforce participation.This indicator is composed by the Workplace Index score of the WBL database.
 </p>
-
-**Locate the Financial Inclusion Section**
-
-> - 🖱️🖱️ **Double-click** on the **Financial Inclusion section** to open the pop-up.
-> - 📝 In the *Input* field, enter the value from the **WBL2024 Entrepreneurship Index Score**, then click **OK** to proceed.
-
+<p align="justify">
+<strong>Finacial Inclusion</strong> involves laws concerning women’s access to financial resources like loans and credit, which is crucial for starting businesses and investing in economic opportunities. This indicator is composed by the Workplace Index score of the WBL 2024.
+</p>
+The conversion of the WBL scores to the corresponding GeoWEAF classess is represented below.
 <p align="center">
-<img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/FI.jpg"
-    alt="Finacial Inclusion"
-    style="width:75%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
+<img width="420" height="209" alt="image" src="https://github.com/user-attachments/assets/d6b223bf-25dc-4e86-bb60-77c93762782c" />
 </p>
+
 
 ---
 **Additional Steps Before Processing**:
@@ -74,15 +46,6 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
 > - ⚖️ **Assign Weights**: Ensure the **weights** are correctly assigned, as they determine the relative importance of each factor in the analysis. Carefully review these values to ensure they are aligned with your project's objectives and reflect the significance of each factor accurately.
 > - 🚫 **Exclude Unused Factors**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis, then click **OK** to proceed.
-
-<p align="center">
-<img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Contextual_Weights.jpg"
-    alt="Contextual Weights"
-    style="width:75%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
 
 ### Process Contextual factors
 
@@ -94,23 +57,14 @@ After entering the values for the factors and adjusting their weights to achieve
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/contextual_run.png"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Contextual_dm2.jpg"
     alt="Contextual Run"
     style="width:55%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
-The successful completion of the process is indicated by the green checkmark widgets, as highlighted in red in the image below:
-
-<p align="center">
-<img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/CD_run_success.jpg"
-    alt="Contextual Run Success"
-    style="width:75%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
+The successful completion of the process is indicated by the green checkmark widgets.
 
 ### Visualizing the Outputs
 
@@ -123,7 +77,7 @@ The outputs consist of the Workplace Discrimination, Regulatory Frameworks, and 
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/CD_final.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Contextual_dm1.jpg"
     alt="Contextual Final Output"
     style="width:75%;"
     title="Click to enlarge"
@@ -138,7 +92,7 @@ If the results do not immediately appear in the Layer Panel after processing the
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/contextual_add.png"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Contextual_dm3.jpg"
     alt="Contextual Add to map"
     style="width:55%;"
     title="Click to enlarge"
