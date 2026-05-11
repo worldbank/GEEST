@@ -1,6 +1,6 @@
 ## Navigation
 
-The GEOE3 plugin interface is intuitive and easy to navigate. In this section, the streamlined workflow ensures an efficient transition from setup to core spatial analysis. For detailed instructions on each step, refer to the sections below.
+The GeoE3 plugin interface is intuitive and easy to navigate. In this section, the streamlined workflow ensures an efficient transition from setup to core spatial analysis. For detailed instructions on each step, refer to the sections below.
 
 ### Accessing the Plugin
 
@@ -8,7 +8,7 @@ The GEOE3 plugin interface is intuitive and easy to navigate. In this section, t
 After installing the plugin, its interface should automatically appear:
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_1st.png"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Welcome_GeoE3.jpg"
     alt="Plugin Interface"
     style="width:45%;"
     title="Click to enlarge"
@@ -28,32 +28,26 @@ Once the plugin window is open, press the right arrow buttons highlighted in red
 
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_2nd.png"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Welcome_GeoE3_navigation.jpg"
     alt="First Page Next"
-    style="width:45%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-  <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_3rd.png"
-    alt="Second Page Next"
     style="width:45%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
-- **Welcome to GEOE3 Page**: This is the introductory page of the plugin, providing an overview of its purpose and functionality. It serves as the starting point to familiarize users with the plugin's capabilities and its relevance to geospatial analysis.
+- **Welcome to GeoE3 Page**: This is the introductory page of the plugin, providing an overview of its purpose and functionality. It serves as the starting point to familiarize users with the plugin's capabilities and its relevance to geospatial analysis.
 
 - **About Page**: This page offers detailed information about the plugin, including its contributors, development background, and licensing. It highlights the open-source nature of the tool and acknowledges the organizations or individuals involved in its creation.
 
-#### GEOE3 Project Selection
+#### GeoE3 Project Selection
 
 In this step, you need to select a project folder to begin your work. The plugin provides you with two options:
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_set.png"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Project_Selection.jpg"
     alt="GeoE3 Project"
-    style="width:55%;"
+    style="width:45%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -61,33 +55,23 @@ In this step, you need to select a project folder to begin your work. The plugin
 Option 1: **Open an Existing Project**:
    Select this option if you already have a project folder created previously. Choosing this will load the project along with all its associated files. Once loaded, press the right arrow button to proceed to the data input and processing interface for further analysis.
 
-<p align="center">
- <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GEOE3%20project%20open.jpg"
-    alt="Open GeoE3 Project"
-    style="width:55%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
-
 Option 2: **Create a New Project**:
-   Choose this option to start a new project. The plugin will guide you through creating a new folder that will store the GEOE3 project files and working analysis results for spatial processing.
+   Choose this option to start a new project. The plugin will guide you through creating a new folder that will store the GeoE3 project files and working analysis results for spatial processing.
 
 <p align="center">
  <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_create1.png"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Project_Selection_2.jpg"
     alt="New GeoE3 Project"
-    style="width:75%;"
+    style="width:45%;"
+    title="Click to enlarge"
+    onclick="window.open(this.src, '_blank')">
+   <img
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Project_Selection_3.jpg"
+    alt="New GeoE3 Project"
+    style="width:45%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
-
-How to Create a New Folder
->
-> - Click on **Create or select a project directory** (highlighted in red).
-> - Navigate to the desired location on your system where you want to store the project.
-> - Create a **new folder** and ensure it is **empty**.
-> - Select the newly created folder and confirm your choice.
 
 ---
  Important Considerations
@@ -107,112 +91,53 @@ How to Create a New Folder
 >   - Enter a value between **100m and 1000m**:
 >     - Smaller values (e.g., 100m) will provide **more detailed results but require longer processing times**.
 >     - Larger values (e.g., 1000m) will **reduce processing time but result in coarser outputs**.
->     - **Note:** The tool processes the study area by iterating through each polygon and generating a grid cell raster based on the selected cell size (ranging from **100m to 1000m**). For each polygon, the following steps are performed:
->       - The tool uses the raster bounding box associated with the polygon to generate the grid.
->       - Areas marked as marine (C) pixels are excluded by assigning them a "NoData" value.
->       - Land cells are assigned appropriate values to create a complete raster mask for the study area.
->       - The resulting raster layers are stored in a dedicated directory, with files named according to the polygon’s name and part number (for multipart polygons).
->     - ⚠️ **Warning**: Considering these operations, processing time may vary significantly, ranging from a few minutes to several tens of minutes, depending on the selected cell size and the size of the region being analyzed. To enhance the user experience, a progress bar displays the estimated remaining time until completion.
 >
-> - **Download or select the road network**: To conduct the analysis for the Accessibility dimension, a road network is required. The process uses geospatial area analysis based on road network data to evaluate accessibility. You can provide this data in two ways: either upload an existing road network or download it directly from OpenStreetMap (OSM) by clicking the **Download from Open Street Map** button. Once the download is complete, proceed by clicking the arrow in the bottom-right corner to continue.
-
-<p align="center">
- <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_road.png"
-    alt="New GeoE3 Project"
-    style="width:45%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
+> - **Coordinate System Configuration**:If your boundary layer uses a valid **projected CRS** (e.g., UTM or EPSG:3857), select the checkbox **Use Coordinate System of your boundary layer**. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer's CRS.
 
 ---
-
-- 💡 **Tip**: For larger regions or countries, it is recommended to start with a larger cell size for initial testing to ensure faster processing times. Once the initial results are satisfactory, refine the analysis by reducing the cell size to achieve greater detail. This approach will help you unlock the full potential of the tool and ensure accurate and detailed outputs.
-
----
-
-- **Coordinate System Configuration**:
-
-  - If your boundary layer uses a valid **projected CRS** (e.g., UTM or EPSG:3857), select the checkbox **Use Coordinate System of your boundary layer**. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer's CRS.
-
----
-
 - ⚠️ **Note**: This option is automatically disabled if the map units of your boundary layer are in degrees (e.g., EPSG:4326). Spatial analysis requires projected coordinate systems with units in meters for precision.
 - 💡 **Tip**: If your data uses geographic coordinates (latitude/longitude in degrees), reproject it to a projected CRS before proceeding with the analysis.
-
 ---
 
 ### Pre-Processing
 
----
-Once you have completed all required inputs on the **GEOE3 Project Creation** screen, follow these steps to proceed:
-
----
-
-#### 1. Verify the Project Folder Path
->
-> - Ensure that the **folder path** displayed at the bottom of the interface is correct. This path indicates where the GEOE3 plugin will store analysis outputs and working files.
-> - **Example Path**:
-> `C:/Work/GEOE3/Analysis/Country/01152025`
-
----
-Important Notes:
-
-- The folder must be **empty**, containing no other files unrelated to the analysis.
-- Choose a **descriptive name** for the folder, as it will store critical project data.
-
----
-
-#### 2. Click the Right Arrow Button
->
 > - Locate the **right arrow button** at the bottom-right corner of the interface (highlighted in red in the image).
 > - Clicking this button confirms all selected settings and initiates the first step of the processing workflow — splitting the study area into grids. After the area is successfully split into grids, the interface transitions to the **Processing Data Interface**, where you can initiate the main analysis.
-
 <p align="center">
- <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GEOE3%20project%20final.jpg"
-    alt="GeoE3 Project final"
-    style="width:55%;"
+ <img
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/StudyArea_Creation.jpg"
+    alt="New GeoE3 Project"
+    style="width:45%;"
     title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
+    onclick="window.open(this.src, '_blank')">  
 </p>
-
 > - Now the process of splitting the area into grids has started, and a progress bar is displayed in the interface. Once completed, a report titled **Study Area Report** will open automatically. This report, along with all grid-splitting outputs, is saved in the project directory under the `/study_area` folder. This report summarizes the processing time and provides an explanation of each generated output, including: study area bounding boxes, polygons, grid cells and processing chunks.
 
 <p align="center">
- <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_report.png"
+ <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/StudyArea_report.jpg"
     alt="GeoE3 Project final"
     style="width:55%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
----
-Key Considerations
-
-- ⚠️ **Warning**: Double-check your settings and input data before clicking the arrow. Any incorrect configuration could lead to errors during the processing stage.
-- 💡 **Tip**: Ensure that the analysis cell size and boundary layer are correctly configured to avoid unexpected results.
-
----
-
-#### 3. Overview of Next Steps
-
-After pressing the right arrow, the plugin will begin processing the input boundary layer by dividing it into a grid based on the specified cell size. During this step, the project folder will automatically populate with the generated outputs, including the study area split into grids, polygons, gridded areas, bounding boxes and other relevant data.
-
-Once this pre-processing step is completed, you will seamlessly transition to the **Processing Data Interface**, where you can proceed with the core analysis workflows:
-
-1. The tool will generate outputs based on the inputs and configuration you’ve provided.
-2. View progress bars for analysis steps.
-3. Results will be saved in the selected project folder for further use.
+> - **Download or select the road network**: To conduct the analysis for the Accessibility dimension, a road network is required. The process uses geospatial area analysis based on road network data to evaluate accessibility. If you have a key to use the ORS service, you can input it here. Alternatively, you can provide this data in two ways: either upload an existing road network or download it directly from OpenStreetMap (OSM) by clicking the **Download from Open Street Map** button. Once the download is complete, proceed by clicking the arrow in the bottom-right corner to continue.
 
 <p align="center">
- <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GEOE3%20data%20processing%20UI.jpg"
-    alt="GeoE3 data processing"
-    style="width:65%;"
+ <img
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/RoadNetwork.jpg"
+    alt="New GeoE3 Project"
+    style="width:45%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/RoadNetwork2.jpg"
+    alt="New GeoE3 Project"
+    style="width:45%;"
+    title="Click to enlarge"
+    onclick="window.open(this.src, '_blank')">
+  
 </p>
-
-This marks the completion of the project setup and transition to the core analysis workflow.
 
 ### Processing Data Interface
 
@@ -289,4 +214,4 @@ The data processing interface serves as the central hub for managing, configurin
 | 🖥️ **Monitor Progress**    | Use status widgets to track progress and troubleshoot errors promptly.                   |
 | 📖 **Use Help Resources**   | Refer to the Help section or GitHub documentation for additional support.                |
 
-By keeping these considerations in mind, you can ensure a smooth and efficient workflow while minimizing errors and maximizing the utility of the GEOE3 plugin.
+By keeping these considerations in mind, you can ensure a smooth and efficient workflow while minimizing errors and maximizing the utility of the GeoE3 plugin.

@@ -429,18 +429,13 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-the-plugin">Accessing the Plugin</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#project-setup">Project Setup</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoe3-project-selection">GEOE3 Project Selection</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoe3-project-selection">GeoE3 Project Selection</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-steps-after-creating-the-folder">Additional Steps After Creating the Folder</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-processing">Pre-Processing</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verify-the-project-folder-path">1. Verify the Project Folder Path</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#click-the-right-arrow-button">2. Click the Right Arrow Button</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#overview-of-next-steps">3. Overview of Next Steps</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-processing">Pre-Processing</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-data-interface">Processing Data Interface</a></li>
 </ul>
             </nav>
@@ -455,14 +450,14 @@ document.write(`
                   
   <section id="navigation">
 <h1>Navigation<a class="headerlink" href="#navigation" title="Permalink to this heading">#</a></h1>
-<p>The GEOE3 plugin interface is intuitive and easy to navigate. In this section, the streamlined workflow ensures an efficient transition from setup to core spatial analysis. For detailed instructions on each step, refer to the sections below.</p>
+<p>The GeoE3 plugin interface is intuitive and easy to navigate. In this section, the streamlined workflow ensures an efficient transition from setup to core spatial analysis. For detailed instructions on each step, refer to the sections below.</p>
 <section id="accessing-the-plugin">
 <h2>Accessing the Plugin<a class="headerlink" href="#accessing-the-plugin" title="Permalink to this heading">#</a></h2>
 <hr class="docutils" />
 <p>After installing the plugin, its interface should automatically appear:</p>
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_1st.png"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Welcome_GeoE3.jpg"
     alt="Plugin Interface"
     style="width:45%;"
     title="Click to enlarge"
@@ -483,62 +478,45 @@ Click on the plugin’s toolbar icon to open its main window.</p></li>
 <p>Once the plugin window is open, press the right arrow buttons highlighted in red to navigate through the pages:</p>
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_2nd.png"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Welcome_GeoE3_navigation.jpg"
     alt="First Page Next"
-    style="width:45%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-  <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_3rd.png"
-    alt="Second Page Next"
     style="width:45%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 <ul class="simple">
-<li><p><strong>Welcome to GEOE3 Page</strong>: This is the introductory page of the plugin, providing an overview of its purpose and functionality. It serves as the starting point to familiarize users with the plugin’s capabilities and its relevance to geospatial analysis.</p></li>
+<li><p><strong>Welcome to GeoE3 Page</strong>: This is the introductory page of the plugin, providing an overview of its purpose and functionality. It serves as the starting point to familiarize users with the plugin’s capabilities and its relevance to geospatial analysis.</p></li>
 <li><p><strong>About Page</strong>: This page offers detailed information about the plugin, including its contributors, development background, and licensing. It highlights the open-source nature of the tool and acknowledges the organizations or individuals involved in its creation.</p></li>
 </ul>
 <section id="geoe3-project-selection">
-<h3>GEOE3 Project Selection<a class="headerlink" href="#geoe3-project-selection" title="Permalink to this heading">#</a></h3>
+<h3>GeoE3 Project Selection<a class="headerlink" href="#geoe3-project-selection" title="Permalink to this heading">#</a></h3>
 <p>In this step, you need to select a project folder to begin your work. The plugin provides you with two options:</p>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_set.png"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Project_Selection.jpg"
     alt="GeoE3 Project"
-    style="width:55%;"
+    style="width:45%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 <p>Option 1: <strong>Open an Existing Project</strong>:
 Select this option if you already have a project folder created previously. Choosing this will load the project along with all its associated files. Once loaded, press the right arrow button to proceed to the data input and processing interface for further analysis.</p>
-<p align="center">
- <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GEOE3%20project%20open.jpg"
-    alt="Open GeoE3 Project"
-    style="width:55%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
 <p>Option 2: <strong>Create a New Project</strong>:
-Choose this option to start a new project. The plugin will guide you through creating a new folder that will store the GEOE3 project files and working analysis results for spatial processing.</p>
+Choose this option to start a new project. The plugin will guide you through creating a new folder that will store the GeoE3 project files and working analysis results for spatial processing.</p>
 <p align="center">
  <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_create1.png"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Project_Selection_2.jpg"
     alt="New GeoE3 Project"
-    style="width:75%;"
+    style="width:45%;"
+    title="Click to enlarge"
+    onclick="window.open(this.src, '_blank')">
+   <img
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Project_Selection_3.jpg"
+    alt="New GeoE3 Project"
+    style="width:45%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
-<p>How to Create a New Folder</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>Click on <strong>Create or select a project directory</strong> (highlighted in red).</p></li>
-<li><p>Navigate to the desired location on your system where you want to store the project.</p></li>
-<li><p>Create a <strong>new folder</strong> and ensure it is <strong>empty</strong>.</p></li>
-<li><p>Select the newly created folder and confirm your choice.</p></li>
-</ul>
-</div></blockquote>
 <hr class="docutils" />
 <p>Important Considerations</p>
 <ul class="simple">
@@ -562,42 +540,13 @@ Choose this option to start a new project. The plugin will guide you through cre
 <ul>
 <li><p>Smaller values (e.g., 100m) will provide <strong>more detailed results but require longer processing times</strong>.</p></li>
 <li><p>Larger values (e.g., 1000m) will <strong>reduce processing time but result in coarser outputs</strong>.</p></li>
-<li><p><strong>Note:</strong> The tool processes the study area by iterating through each polygon and generating a grid cell raster based on the selected cell size (ranging from <strong>100m to 1000m</strong>). For each polygon, the following steps are performed:</p>
-<ul>
-<li><p>The tool uses the raster bounding box associated with the polygon to generate the grid.</p></li>
-<li><p>Areas marked as marine (C) pixels are excluded by assigning them a “NoData” value.</p></li>
-<li><p>Land cells are assigned appropriate values to create a complete raster mask for the study area.</p></li>
-<li><p>The resulting raster layers are stored in a dedicated directory, with files named according to the polygon’s name and part number (for multipart polygons).</p></li>
-</ul>
-</li>
-<li><p>⚠️ <strong>Warning</strong>: Considering these operations, processing time may vary significantly, ranging from a few minutes to several tens of minutes, depending on the selected cell size and the size of the region being analyzed. To enhance the user experience, a progress bar displays the estimated remaining time until completion.</p></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><p><strong>Download or select the road network</strong>: To conduct the analysis for the Accessibility dimension, a road network is required. The process uses geospatial area analysis based on road network data to evaluate accessibility. You can provide this data in two ways: either upload an existing road network or download it directly from OpenStreetMap (OSM) by clicking the <strong>Download from Open Street Map</strong> button. Once the download is complete, proceed by clicking the arrow in the bottom-right corner to continue.</p></li>
+<li><p><strong>Coordinate System Configuration</strong>:If your boundary layer uses a valid <strong>projected CRS</strong> (e.g., UTM or EPSG:3857), select the checkbox <strong>Use Coordinate System of your boundary layer</strong>. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer’s CRS.</p></li>
 </ul>
 </div></blockquote>
-<p align="center">
- <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_road.png"
-    alt="New GeoE3 Project"
-    style="width:45%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
-<hr class="docutils" />
-<ul class="simple">
-<li><p>💡 <strong>Tip</strong>: For larger regions or countries, it is recommended to start with a larger cell size for initial testing to ensure faster processing times. Once the initial results are satisfactory, refine the analysis by reducing the cell size to achieve greater detail. This approach will help you unlock the full potential of the tool and ensure accurate and detailed outputs.</p></li>
-</ul>
-<hr class="docutils" />
-<ul class="simple">
-<li><p><strong>Coordinate System Configuration</strong>:</p>
-<ul>
-<li><p>If your boundary layer uses a valid <strong>projected CRS</strong> (e.g., UTM or EPSG:3857), select the checkbox <strong>Use Coordinate System of your boundary layer</strong>. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer’s CRS.</p></li>
-</ul>
-</li>
-</ul>
 <hr class="docutils" />
 <ul class="simple">
 <li><p>⚠️ <strong>Note</strong>: This option is automatically disabled if the map units of your boundary layer are in degrees (e.g., EPSG:4326). Spatial analysis requires projected coordinate systems with units in meters for precision.</p></li>
@@ -609,28 +558,6 @@ Choose this option to start a new project. The plugin will guide you through cre
 <hr class="docutils" />
 <section id="pre-processing">
 <h2>Pre-Processing<a class="headerlink" href="#pre-processing" title="Permalink to this heading">#</a></h2>
-<hr class="docutils" />
-<p>Once you have completed all required inputs on the <strong>GEOE3 Project Creation</strong> screen, follow these steps to proceed:</p>
-<hr class="docutils" />
-<section id="verify-the-project-folder-path">
-<h3>1. Verify the Project Folder Path<a class="headerlink" href="#verify-the-project-folder-path" title="Permalink to this heading">#</a></h3>
-<blockquote>
-<div><ul class="simple">
-<li><p>Ensure that the <strong>folder path</strong> displayed at the bottom of the interface is correct. This path indicates where the GEOE3 plugin will store analysis outputs and working files.</p></li>
-<li><p><strong>Example Path</strong>:
-<code class="docutils literal notranslate"><span class="pre">C:/Work/GEOE3/Analysis/Country/01152025</span></code></p></li>
-</ul>
-</div></blockquote>
-<hr class="docutils" />
-<p>Important Notes:</p>
-<ul class="simple">
-<li><p>The folder must be <strong>empty</strong>, containing no other files unrelated to the analysis.</p></li>
-<li><p>Choose a <strong>descriptive name</strong> for the folder, as it will store critical project data.</p></li>
-</ul>
-</section>
-<hr class="docutils" />
-<section id="click-the-right-arrow-button">
-<h3>2. Click the Right Arrow Button<a class="headerlink" href="#click-the-right-arrow-button" title="Permalink to this heading">#</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li><p>Locate the <strong>right arrow button</strong> at the bottom-right corner of the interface (highlighted in red in the image).</p></li>
@@ -638,7 +565,16 @@ Choose this option to start a new project. The plugin will guide you through cre
 </ul>
 </div></blockquote>
 <p align="center">
- <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GEOE3%20project%20final.jpg"
+ <img
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/StudyArea_Creation.jpg"
+    alt="New GeoE3 Project"
+    style="width:45%;"
+    title="Click to enlarge"
+    onclick="window.open(this.src, '_blank')">  
+</p>
+> - Now the process of splitting the area into grids has started, and a progress bar is displayed in the interface. Once completed, a report titled **Study Area Report** will open automatically. This report, along with all grid-splitting outputs, is saved in the project directory under the `/study_area` folder. This report summarizes the processing time and provides an explanation of each generated output, including: study area bounding boxes, polygons, grid cells and processing chunks.
+<p align="center">
+ <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/StudyArea_report.jpg"
     alt="GeoE3 Project final"
     style="width:55%;"
     title="Click to enlarge"
@@ -646,42 +582,23 @@ Choose this option to start a new project. The plugin will guide you through cre
 </p>
 <blockquote>
 <div><ul class="simple">
-<li><p>Now the process of splitting the area into grids has started, and a progress bar is displayed in the interface. Once completed, a report titled <strong>Study Area Report</strong> will open automatically. This report, along with all grid-splitting outputs, is saved in the project directory under the <code class="docutils literal notranslate"><span class="pre">/study_area</span></code> folder. This report summarizes the processing time and provides an explanation of each generated output, including: study area bounding boxes, polygons, grid cells and processing chunks.</p></li>
+<li><p><strong>Download or select the road network</strong>: To conduct the analysis for the Accessibility dimension, a road network is required. The process uses geospatial area analysis based on road network data to evaluate accessibility. If you have a key to use the ORS service, you can input it here. Alternatively, you can provide this data in two ways: either upload an existing road network or download it directly from OpenStreetMap (OSM) by clicking the <strong>Download from Open Street Map</strong> button. Once the download is complete, proceed by clicking the arrow in the bottom-right corner to continue.</p></li>
 </ul>
 </div></blockquote>
 <p align="center">
- <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/navigation_report.png"
-    alt="GeoE3 Project final"
-    style="width:55%;"
+ <img
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/RoadNetwork.jpg"
+    alt="New GeoE3 Project"
+    style="width:45%;"
+    title="Click to enlarge"
+    onclick="window.open(this.src, '_blank')">
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/RoadNetwork2.jpg"
+    alt="New GeoE3 Project"
+    style="width:45%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
-<hr class="docutils" />
-<p>Key Considerations</p>
-<ul class="simple">
-<li><p>⚠️ <strong>Warning</strong>: Double-check your settings and input data before clicking the arrow. Any incorrect configuration could lead to errors during the processing stage.</p></li>
-<li><p>💡 <strong>Tip</strong>: Ensure that the analysis cell size and boundary layer are correctly configured to avoid unexpected results.</p></li>
-</ul>
-</section>
-<hr class="docutils" />
-<section id="overview-of-next-steps">
-<h3>3. Overview of Next Steps<a class="headerlink" href="#overview-of-next-steps" title="Permalink to this heading">#</a></h3>
-<p>After pressing the right arrow, the plugin will begin processing the input boundary layer by dividing it into a grid based on the specified cell size. During this step, the project folder will automatically populate with the generated outputs, including the study area split into grids, polygons, gridded areas, bounding boxes and other relevant data.</p>
-<p>Once this pre-processing step is completed, you will seamlessly transition to the <strong>Processing Data Interface</strong>, where you can proceed with the core analysis workflows:</p>
-<ol class="arabic simple">
-<li><p>The tool will generate outputs based on the inputs and configuration you’ve provided.</p></li>
-<li><p>View progress bars for analysis steps.</p></li>
-<li><p>Results will be saved in the selected project folder for further use.</p></li>
-</ol>
-<p align="center">
- <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GEOE3%20data%20processing%20UI.jpg"
-    alt="GeoE3 data processing"
-    style="width:65%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
-<p>This marks the completion of the project setup and transition to the core analysis workflow.</p>
-</section>
 </section>
 <section id="processing-data-interface">
 <h2>Processing Data Interface<a class="headerlink" href="#processing-data-interface" title="Permalink to this heading">#</a></h2>
@@ -767,7 +684,7 @@ Choose this option to start a new project. The plugin will guide you through cre
 </tbody>
 </table>
 </div>
-<p>By keeping these considerations in mind, you can ensure a smooth and efficient workflow while minimizing errors and maximizing the utility of the GEOE3 plugin.</p>
+<p>By keeping these considerations in mind, you can ensure a smooth and efficient workflow while minimizing errors and maximizing the utility of the GeoE3 plugin.</p>
 </section>
 <div class="toctree-wrapper compound">
 </div>
@@ -839,18 +756,13 @@ Choose this option to start a new project. The plugin will guide you through cre
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-the-plugin">Accessing the Plugin</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#project-setup">Project Setup</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoe3-project-selection">GEOE3 Project Selection</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoe3-project-selection">GeoE3 Project Selection</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-steps-after-creating-the-folder">Additional Steps After Creating the Folder</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-processing">Pre-Processing</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verify-the-project-folder-path">1. Verify the Project Folder Path</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#click-the-right-arrow-button">2. Click the Right Arrow Button</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#overview-of-next-steps">3. Overview of Next Steps</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-processing">Pre-Processing</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-data-interface">Processing Data Interface</a></li>
 </ul>
   </nav></div>
