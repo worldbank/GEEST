@@ -127,34 +127,46 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # Ensure crs is set on first load
         self.layer_changed(self.layer_combo.currentLayer())
 
+    def _refresh_boundary_crs_checkbox(self, layer: QgsVectorLayer) -> None:
+        """Refresh boundary CRS checkbox state for selected layer."""
+        if not layer:
+            self.use_boundary_crs.setChecked(False)
+            self.use_boundary_crs.setEnabled(False)
+            return
+
+        if layer.crs().authid() == "EPSG:4326":
+            self.use_boundary_crs.setChecked(False)
+            self.use_boundary_crs.setEnabled(False)
+            return
+
+        self.use_boundary_crs.setEnabled(True)
+
     def layer_changed(self, layer):
         """Slot to be called when the layer in the combo box changes.
 
         Args:
             layer: The new layer selected in the combo box.
         """
-        log_message(f"Layer changed: {layer.name() if layer else 'None'}")
-        if self.crs() is None:
-            log_message(
-                "CRS is None, cannot set layer or field combo box.",
-                tag="GeoE3",
-                level=Qgis.Critical,
-            )
-            self.crs_label.setText("Invalid CRS")
-            return
-        log_message(f"Layer crs: {layer.crs().authid() if layer else 'None'}")
-        if layer:
-            self.field_combo.setLayer(layer)
-            # Check if the layer has a valid CRS
-            if layer.crs().authid() == "EPSG:4326":
-                self.use_boundary_crs.setChecked(False)
-                self.use_boundary_crs.setEnabled(False)
-            else:
-                self.use_boundary_crs.setEnabled(True)
+        _ = layer
+        current_layer = self.layer_combo.currentLayer()
+        log_message(f"Layer changed: {current_layer.name() if current_layer else 'None'}")
+
+        log_message(f"Layer crs: {current_layer.crs().authid() if current_layer else 'None'}")
+        if current_layer:
+            self.field_combo.setLayer(current_layer)
         else:
             self.field_combo.clear()
-            self.use_boundary_crs.setEnabled(False)
-        self.crs_label.setText(self.crs().authid())
+        self._refresh_boundary_crs_checkbox(current_layer)
+
+        try:
+            current_crs = self.crs()
+            if current_crs is not None and current_crs.authid():
+                self.crs_label.setText(f"CRS: {current_crs.authid()}")
+            else:
+                self.crs_label.setText("CRS: Not set")
+        except Exception as error:
+            log_message(f"Could not resolve CRS after layer change: {error}", tag="GeoE3", level=Qgis.Warning)
+            self.crs_label.setText("CRS: Not set")
 
     def spatial_scale_changed(self, value: str):
         """Slot to be called when the spatial scale changes.
@@ -211,6 +223,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             QgsProject.instance().addMapLayer(layer)
             self.layer_combo.setLayer(layer)
             self.field_combo.setLayer(layer)
+            self._refresh_boundary_crs_checkbox(self.layer_combo.currentLayer())
 
     def create_new_project_folder(self):
         """⚙️ Create new project folder."""
