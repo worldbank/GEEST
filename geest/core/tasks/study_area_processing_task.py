@@ -32,7 +32,7 @@ from qgis.PyQt.QtCore import (
 
 from geest.core.algorithms import GHSLDownloader, GHSLProcessor
 from geest.core.grid_column_utils import add_model_columns_to_grid
-from geest.core.h3_utils import get_h3_resolution_for_scale
+from geest.core.h3_utils import estimate_h3_cells_for_area, get_h3_resolution_for_scale, h3_cell_area_km2
 from geest.core.settings import setting
 from geest.utilities import calculate_utm_zone, log_message
 
@@ -826,6 +826,9 @@ class StudyAreaProcessingTask(QgsTask):
 
     # Signal emitted when GHSL download fails - allows UI to prompt user to continue or abort
     ghsl_download_failed = pyqtSignal(str)
+
+    MIN_H3_ESTIMATED_CELLS = 3
+    MAX_H3_ESTIMATED_CELLS = 200000
 
     # Signal emitted when waiting for user response about GHSL failure
     ghsl_user_response_ready = pyqtSignal()
@@ -1651,6 +1654,13 @@ class StudyAreaProcessingTask(QgsTask):
         # Check GHSL intersection
         intersects_ghsl = self.check_ghsl_intersection(geom)
         log_message(f"{normalized_name} intersects GHSL: {intersects_ghsl}")
+
+        if self.analysis_scale == "regional" and not self._validate_regional_h3_runtime_guard(geom, normalized_name):
+            self.error_count += 1
+            self.counter += 1
+            progress = int((self.counter / self.parts_count) * 100)
+            self.setProgress(progress)
+            return
 
         # Save the geometry (in the target CRS) to "study_area_polygons"
         self.save_geometry_to_geopackage("study_area_polygons", geom, normalized_name, intersects_ghsl)
@@ -2739,6 +2749,57 @@ class StudyAreaProcessingTask(QgsTask):
 
                 log_message(f"Created Chunk bbox: {x_start_coord}, {x_end_coord}, {ymin}, {ymax}")
                 yield (x_start_coord, x_end_coord, y_start_coord, y_end_coord)
+
+    def _estimate_geom_area_km2(self, geom):
+        """Estimate geometry area in square kilometers using Mollweide projection."""
+        if geom is None or geom.IsEmpty():
+            return 0.0
+
+        geom_clone = geom.Clone()
+        geom_clone.AssignSpatialReference(self.target_spatial_ref)
+
+        mollweide_srs = osr.SpatialReference()
+        mollweide_srs.SetFromUserInput("ESRI:54009")
+
+        transform_to_mollweide = osr.CoordinateTransformation(self.target_spatial_ref, mollweide_srs)
+        geom_clone.Transform(transform_to_mollweide)
+
+        area_m2 = abs(geom_clone.GetArea())
+        return area_m2 / 1000000.0
+
+    def _validate_regional_h3_runtime_guard(self, geom, normalized_name):
+        """Fail fast at runtime for unsafe H3 density choices."""
+        try:
+            area_km2 = self._estimate_geom_area_km2(geom)
+            estimated_cells = estimate_h3_cells_for_area(area_km2, self.h3_resolution)
+            cell_area_km2 = h3_cell_area_km2(self.h3_resolution)
+
+            if estimated_cells > self.MAX_H3_ESTIMATED_CELLS:
+                log_message(
+                    (
+                        f"Skipping {normalized_name}: H3 resolution {self.h3_resolution} is too fine "
+                        f"for runtime safeguards (estimated {estimated_cells:,} cells from {area_km2:,.2f} km2, "
+                        f"cell area {cell_area_km2:,.6f} km2, max {self.MAX_H3_ESTIMATED_CELLS:,})."
+                    ),
+                    level="WARNING",
+                )
+                return False
+
+            if estimated_cells < self.MIN_H3_ESTIMATED_CELLS:
+                log_message(
+                    (
+                        f"Skipping {normalized_name}: H3 resolution {self.h3_resolution} is too coarse "
+                        f"for runtime safeguards (estimated {estimated_cells} cells from {area_km2:,.2f} km2, "
+                        f"minimum {self.MIN_H3_ESTIMATED_CELLS})."
+                    ),
+                    level="WARNING",
+                )
+                return False
+
+            return True
+        except Exception as e:
+            log_message(f"Runtime H3 safeguard check failed for {normalized_name}: {e}", level="WARNING")
+            return False
 
     ##########################################################################
     # Create Raster Mask

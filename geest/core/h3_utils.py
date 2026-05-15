@@ -16,6 +16,27 @@ from qgis.core import Qgis
 from geest.utilities import log_message
 
 
+# Fallback average H3 cell areas in km^2 (approximate)
+H3_CELL_AREA_KM2 = {
+    0: 4250546.848,
+    1: 607220.978,
+    2: 86745.854,
+    3: 12392.265,
+    4: 1770.323,
+    5: 252.903,
+    6: 36.129,
+    7: 5.161,
+    8: 0.737,
+    9: 0.105,
+    10: 0.015,
+    11: 0.002,
+    12: 0.00031,
+    13: 0.000044,
+    14: 0.000006,
+    15: 0.0000009,
+}
+
+
 def get_h3_resolution_for_scale(analysis_scale: str) -> Optional[int]:
     """Get H3 resolution for a given analysis scale.
 
@@ -28,6 +49,80 @@ def get_h3_resolution_for_scale(analysis_scale: str) -> Optional[int]:
     if analysis_scale == "regional":
         return 6
     return None
+
+
+def h3_cell_area_km2(h3_resolution: int) -> float:
+    """Return average H3 cell area in km^2 for a resolution.
+
+    Args:
+        h3_resolution: H3 resolution level.
+
+    Returns:
+        Average hexagon area in square kilometers.
+    """
+    if h3_resolution < 0 or h3_resolution > 15:
+        raise ValueError("H3 resolution must be between 0 and 15.")
+
+    try:
+        import h3
+
+        return float(h3.average_hexagon_area(h3_resolution, unit="km^2"))
+    except Exception:
+        return H3_CELL_AREA_KM2[h3_resolution]
+
+
+def estimate_h3_cells_for_area(area_km2: float, h3_resolution: int) -> int:
+    """Estimate H3 cell count needed for an area.
+
+    Args:
+        area_km2: Area in square kilometers.
+        h3_resolution: H3 resolution level.
+
+    Returns:
+        Estimated number of cells.
+    """
+    if area_km2 <= 0:
+        return 0
+
+    cell_area = h3_cell_area_km2(h3_resolution)
+    if cell_area <= 0:
+        return 0
+
+    return max(1, int(round(area_km2 / cell_area)))
+
+
+def suggest_coarser_resolution(area_km2: float, max_cells: int, start_res: int) -> int:
+    """Suggest a coarser resolution that stays under max cell count.
+
+    Args:
+        area_km2: Area in square kilometers.
+        max_cells: Maximum allowed estimated cells.
+        start_res: Starting resolution.
+
+    Returns:
+        Suggested resolution (0-15).
+    """
+    suggested = max(0, min(15, start_res))
+    while suggested > 0 and estimate_h3_cells_for_area(area_km2, suggested) > max_cells:
+        suggested -= 1
+    return suggested
+
+
+def suggest_finer_resolution(area_km2: float, min_cells: int, start_res: int) -> int:
+    """Suggest a finer resolution that reaches minimum cell count.
+
+    Args:
+        area_km2: Area in square kilometers.
+        min_cells: Minimum estimated cells.
+        start_res: Starting resolution.
+
+    Returns:
+        Suggested resolution (0-15).
+    """
+    suggested = max(0, min(15, start_res))
+    while suggested < 15 and estimate_h3_cells_for_area(area_km2, suggested) < min_cells:
+        suggested += 1
+    return suggested
 
 
 def bbox_to_wgs84(

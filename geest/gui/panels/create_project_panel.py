@@ -14,11 +14,13 @@ import traceback
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
+    QgsDistanceArea,
     QgsFeedback,
     QgsFieldProxyModel,
     QgsLayerTreeGroup,
     QgsMapLayerProxyModel,
     QgsProject,
+    QgsUnitTypes,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
@@ -26,6 +28,12 @@ from qgis.PyQt.QtGui import QFont, QPixmap
 from qgis.PyQt.QtWidgets import QComboBox, QFileDialog, QMessageBox, QWidget
 
 from geest.core import WorkflowQueueManager
+from geest.core.h3_utils import (
+    estimate_h3_cells_for_area,
+    h3_cell_area_km2,
+    suggest_coarser_resolution,
+    suggest_finer_resolution,
+)
 from geest.core.tasks import StudyAreaProcessingTask, StudyAreaReportTask
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (
@@ -53,6 +61,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     switch_to_previous_tab = pyqtSignal()
     # Signal to set the working directory
     working_directory_changed = pyqtSignal(str)
+
+    MIN_H3_ESTIMATED_CELLS = 3
+    MAX_H3_ESTIMATED_CELLS = 200000
 
     def __init__(self):
         """🏗️ Initialize the instance."""
@@ -328,6 +339,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 QMessageBox.critical(self, "Error", f"Invalid area name field '{field_name}'.")
                 self.enable_widgets()
                 return
+
+            if self.regional_scale.isChecked():
+                if not self._validate_h3_preflight(layer, self.selected_h3_resolution()):
+                    self.enable_widgets()
+                    return
 
             # Copy default model.json if not present
             default_model_path = resources_path("resources", "model.json")
@@ -703,6 +719,78 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         if selected_value is None:
             selected_value = self.h3_resolution_combo.currentText().split(" ")[0]
         return int(selected_value)
+
+    def _estimate_layer_area_km2(self, layer: QgsVectorLayer) -> float:
+        """Estimate total polygon area in square kilometers for selected input features."""
+        if not layer:
+            return 0.0
+
+        distance_area = QgsDistanceArea()
+        distance_area.setSourceCrs(layer.crs(), QgsProject.instance().transformContext())
+        if layer.crs().isGeographic():
+            distance_area.setEllipsoid("WGS84")
+        else:
+            distance_area.setEllipsoid(layer.crs().ellipsoidAcronym() or "WGS84")
+
+        area_m2 = 0.0
+        if layer.selectedFeatureCount() > 0:
+            features = layer.getSelectedFeatures()
+        else:
+            features = layer.getFeatures()
+
+        for feature in features:
+            geometry = feature.geometry()
+            if geometry is None or geometry.isEmpty():
+                continue
+            area_m2 += abs(distance_area.measureArea(geometry))
+
+        return distance_area.convertAreaMeasurement(area_m2, QgsUnitTypes.AreaSquareKilometers)
+
+    def _validate_h3_preflight(self, layer: QgsVectorLayer, h3_resolution: int) -> bool:
+        """Validate H3 configuration and block unsafe runs before processing."""
+        area_km2 = self._estimate_layer_area_km2(layer)
+        if area_km2 <= 0:
+            QMessageBox.critical(
+                self,
+                "Invalid Study Area",
+                "Could not estimate study area size. Please verify polygon geometry and try again.",
+            )
+            return False
+
+        estimated_cells = estimate_h3_cells_for_area(area_km2, h3_resolution)
+        cell_area_km2 = h3_cell_area_km2(h3_resolution)
+
+        if estimated_cells > self.MAX_H3_ESTIMATED_CELLS:
+            suggested = suggest_coarser_resolution(area_km2, self.MAX_H3_ESTIMATED_CELLS, h3_resolution)
+            QMessageBox.critical(
+                self,
+                "H3 Resolution Too Fine",
+                (
+                    f"Selected H3 resolution {h3_resolution} is too fine for this study area.\n\n"
+                    f"Estimated area: {area_km2:,.2f} km²\n"
+                    f"Approximate cell area: {cell_area_km2:,.6f} km²\n"
+                    f"Estimated cells: {estimated_cells:,} (max allowed: {self.MAX_H3_ESTIMATED_CELLS:,})\n\n"
+                    f"Please choose a coarser resolution, e.g. {suggested}."
+                ),
+            )
+            return False
+
+        if estimated_cells < self.MIN_H3_ESTIMATED_CELLS:
+            suggested = suggest_finer_resolution(area_km2, self.MIN_H3_ESTIMATED_CELLS, h3_resolution)
+            QMessageBox.critical(
+                self,
+                "H3 Resolution Too Coarse",
+                (
+                    f"Selected H3 resolution {h3_resolution} is too coarse for this study area.\n\n"
+                    f"Estimated area: {area_km2:,.2f} km²\n"
+                    f"Approximate cell area: {cell_area_km2:,.2f} km²\n"
+                    f"Estimated cells: {estimated_cells} (minimum required: {self.MIN_H3_ESTIMATED_CELLS})\n\n"
+                    f"Please choose a finer resolution, e.g. {suggested}."
+                ),
+            )
+            return False
+
+        return True
 
     def add_bboxes_to_map(self):
         """Add the study area layers to the map.
