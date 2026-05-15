@@ -503,6 +503,9 @@ class BaseReport:
          by the Geospatial Team in the <strong>Development Economics Data Group (DECDG)</strong>.
          This project is open source; you can download the code at
          <a href="https://github.com/worldbank/GEOE3">https://github.com/worldbank/GEOE3</a>.</p>
+         <p>Data attribution: analysis workflows may include data/services from OpenStreetMap,
+         OpenRouteService, GHSL, Ookla Open Data, Space2Stats, ACLED, VIIRS Nighttime Lights,
+         and user-supplied datasets. Please review source terms and citation requirements.</p>
 """
         credits_text = """Developed by <a href="https://kartoza.com">Kartoza</a> for and
         with The World Bank."""
