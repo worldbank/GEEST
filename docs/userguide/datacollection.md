@@ -271,6 +271,12 @@ While the above table showcases data specific to Saint Lucia, similar data can b
 8. <strong>Mapillary</strong>: A collaborative platform that offers street-level imagery contributed by users worldwide. Mapillary data includes vector data on street crossings, sidewalks, and public lighting, making it useful for place-based and accessibility assessments.
 </p>
 
+## Data Attribution and Citation
+
+GeoE3 may use external datasets and services depending on the selected workflows and user-provided inputs. Typical sources include OpenStreetMap, OpenRouteService, GHSL (European Commission JRC), Ookla Open Data, Space2Stats, ACLED, and VIIRS Nighttime Lights.
+
+When sharing outputs, always verify and include the relevant provider attribution, citation text, and license/terms for the datasets actually used in your analysis.
+
 
 ### Instructions for Data Collection:
 - **Query the Source**: Use the query instructions provided in the table to filter and collect specific data.
