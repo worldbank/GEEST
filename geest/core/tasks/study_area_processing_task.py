@@ -711,7 +711,15 @@ class ChunkRunnable(QRunnable):
     """
 
     def __init__(
-        self, chunk, geom, cell_size, feedback, write_callback=None, analysis_scale="national", epsg_code=None
+        self,
+        chunk,
+        geom,
+        cell_size,
+        feedback,
+        write_callback=None,
+        analysis_scale="national",
+        epsg_code=None,
+        h3_resolution=6,
     ):
         """Initialize the chunk runnable.
 
@@ -724,6 +732,7 @@ class ChunkRunnable(QRunnable):
                 the chunk's geometries to the write queue and frees them.
             analysis_scale: Analysis scale ("regional", "national", or "local")
             epsg_code: EPSG code for coordinate transformation
+            h3_resolution: H3 resolution override for regional scale.
         """
         super().__init__()
         self.chunk = chunk
@@ -733,6 +742,7 @@ class ChunkRunnable(QRunnable):
         self.write_callback = write_callback
         self.analysis_scale = analysis_scale
         self.epsg_code = epsg_code
+        self.h3_resolution = h3_resolution
         self.result = None
         self.error = None
         self.setAutoDelete(False)  # We manage lifecycle manually
@@ -745,7 +755,7 @@ class ChunkRunnable(QRunnable):
 
             # Use H3 task for regional scale, regular grid task otherwise
             if self.analysis_scale == "regional":
-                h3_res = get_h3_resolution_for_scale(self.analysis_scale) or 6
+                h3_res = self.h3_resolution
                 task = GridFromBboxH3Task(
                     index,
                     (
@@ -829,6 +839,7 @@ class StudyAreaProcessingTask(QgsTask):
         feedback: "QgsFeedback | None" = None,
         crs=None,
         analysis_scale: str = "national",
+        h3_resolution: int = None,
     ):
         """Initialize the study area processing task.
 
@@ -841,6 +852,7 @@ class StudyAreaProcessingTask(QgsTask):
             crs: Target CRS. If None, a UTM zone will be computed.
             analysis_scale: Analysis scale ("regional", "national", or "local").
                 Regional uses H3 hexagonal grids, others use square grids.
+            h3_resolution: Optional H3 resolution override for regional analysis.
 
         Raises:
             RuntimeError: If the input layer cannot be opened with OGR.
@@ -867,6 +879,9 @@ class StudyAreaProcessingTask(QgsTask):
         self.field_name = field_name
         self.cell_size_m = cell_size_m
         self.analysis_scale = analysis_scale
+        self.h3_resolution = h3_resolution if h3_resolution is not None else (get_h3_resolution_for_scale("regional") or 6)
+        if self.analysis_scale == "regional":
+            log_message(f"Using H3 resolution: {self.h3_resolution}")
         self.working_dir = working_dir
         self.gpkg_path = os.path.join(working_dir, "study_area", "study_area.gpkg")
         self.counter = 0
@@ -2288,9 +2303,7 @@ class StudyAreaProcessingTask(QgsTask):
             Grid task (GridFromBboxTask or GridFromBboxH3Task)
         """
         if self.analysis_scale == "regional":
-            h3_res = get_h3_resolution_for_scale(self.analysis_scale)
-            if h3_res is None:
-                h3_res = 6  # Default to resolution 6 for regional scale
+            h3_res = self.h3_resolution
             log_message(f"Creating H3 grid task (resolution {h3_res}) for chunk {index}")
             task = GridFromBboxH3Task(
                 index,
@@ -2412,6 +2425,7 @@ class StudyAreaProcessingTask(QgsTask):
                 write_callback=_write_callback,
                 analysis_scale=self.analysis_scale,
                 epsg_code=self.epsg_code,
+                h3_resolution=self.h3_resolution,
             )
             runnables.append(runnable)
             pool.start(runnable)
@@ -2435,13 +2449,13 @@ class StudyAreaProcessingTask(QgsTask):
             task: GridFromBboxTask or GridFromBboxH3Task with generated features
             normalized_name: Area name for this chunk
         """
-        self.track_time("Preparing chunks", task.run_time)
+        self.metrics["Preparing chunks"] += task.run_time
 
         # Check if this is an H3 task (features are tuples of (h3_index, geometry))
         is_h3_task = isinstance(task.features_out[0], tuple) if task.features_out else False
 
         if is_h3_task:
-            h3_resolution = get_h3_resolution_for_scale(self.analysis_scale)
+            h3_resolution = self.h3_resolution
 
         for feature in task.features_out:
             # Get unique grid_id with lock
@@ -2497,7 +2511,7 @@ class StudyAreaProcessingTask(QgsTask):
                 # Add H3 fields for regional scale
                 if self.analysis_scale == "regional":
 
-                    h3_res = get_h3_resolution_for_scale(self.analysis_scale)
+                    h3_res = self.h3_resolution
                     field_defn = ogr.FieldDefn("h3_index", ogr.OFTString)
                     layer.CreateField(field_defn)
                     field_defn = ogr.FieldDefn("h3_resolution", ogr.OFTInteger)
