@@ -197,24 +197,9 @@
           <string notr="true"/>
          </property>
           <property name="text">
-           <string>This plugin was built with support from the Canada Clean Energy and Forest Climate Facility (CCEFCF) and the Global Development Fund (GDF), by the Geospatial Team in the Development Economics Data Group (DECDG).
+           <string>This plugin was built with support from the Canada Clean Energy and Forest Climate Facility (CCEFCF) and the Global Data Facility (GDF), by the Geospatial Team in the Development Economics Data Group (DECDG).
 
-The project is open-source and you can access the code here: https://github.com/worldbank/GEOE3
-
-## Data Sources and Attribution
-
-GeoE3 workflows may use external datasets and services, including:
-
-- OpenStreetMap, Overpass, and Nominatim (https://www.openstreetmap.org)
-- OpenRouteService by HeiGIT (https://openrouteservice.org)
-- GHSL - Global Human Settlement Layer (https://ghsl.jrc.ec.europa.eu)
-- Ookla Open Data (https://registry.opendata.aws/speedtest-global-performance/)
-- Space2Stats API and datasets (https://api.space2stats.com)
-- ACLED (when user-provided)
-- VIIRS Nighttime Lights (when selected in analysis)
-- User-supplied population rasters (for example WorldPop)
-
-Please review provider terms and citation requirements for your specific use case and outputs.</string>
+The project is open-source and you can access the code here: https://github.com/worldbank/GEOE3</string>
           </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>

@@ -364,9 +364,10 @@ class TreePanel(QWidget):
                 add_to_map(item)
             else:
                 add_grid_layer_to_map(item, column_name, self.working_directory)
-        show_overlay = setting(key="show_overlay", default=False)
-        if show_overlay:
-            QSettings().setValue("geoe3/overlay_label", item.data(0))
+        # TEMPORARY: Disable writing layer name into top-left overlay label.
+        # show_overlay = setting(key="show_overlay", default=False)
+        # if show_overlay:
+        #     QSettings().setValue("geoe3/overlay_label", item.data(0))
         show_pie = setting(key="show_pie_overlay", default=False)
         if show_pie:
             # TODO - calculate the pie data

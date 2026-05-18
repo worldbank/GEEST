@@ -359,7 +359,9 @@ for module_name in list(sys.modules.keys()):
 
     def setup_map_canvas_items(self):
         """⚙️ Setup map canvas items."""
-        self.label_overlay = LayerDescriptionItem(self.iface.mapCanvas())
+        # TEMPORARY: Disable layer description overlay creation.
+        # self.label_overlay = LayerDescriptionItem(self.iface.mapCanvas())
+        self.label_overlay = None
         experimental_features = int(os.getenv("GEOE3_EXPERIMENTAL") or os.getenv("GEEST_EXPERIMENTAL", 0))
         if experimental_features:
             self.pie_overlay = PieChartItem(self.iface.mapCanvas())

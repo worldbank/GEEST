@@ -882,7 +882,9 @@ class StudyAreaProcessingTask(QgsTask):
         self.field_name = field_name
         self.cell_size_m = cell_size_m
         self.analysis_scale = analysis_scale
-        self.h3_resolution = h3_resolution if h3_resolution is not None else (get_h3_resolution_for_scale("regional") or 6)
+        self.h3_resolution = (
+            h3_resolution if h3_resolution is not None else (get_h3_resolution_for_scale("regional") or 6)
+        )
         if self.analysis_scale == "regional":
             log_message(f"Using H3 resolution: {self.h3_resolution}")
         self.working_dir = working_dir

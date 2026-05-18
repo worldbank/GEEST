@@ -499,7 +499,7 @@ class BaseReport:
 
         footer_text = """
          <p>This plugin was built with support from the <strong>Canada Clean Energy and
-         Forest Climate Facility (CCEFCF)</strong> and the <strong>Global Development Fund (GDF)</strong>,
+         Forest Climate Facility (CCEFCF)</strong> and the <strong>Global Data Facility (GDF)</strong>,
          by the Geospatial Team in the <strong>Development Economics Data Group (DECDG)</strong>.
          This project is open source; you can download the code at
          <a href="https://github.com/worldbank/GEOE3">https://github.com/worldbank/GEOE3</a>.</p>
