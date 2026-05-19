@@ -1,23 +1,23 @@
 ## Insights
 
 <p align="justify">
-The final aggregation of all three dimensions is carried out by applying weights to each dimension, ensuring a balanced and comprehensive representation. This tab provides users with deeper insights by identifying regions where conditions are optimal—or at least favorable—for women to access job opportunities in a specific sector. The outputs from this tab assign a combined classification score to the input raster, aggregate results at desired adminstrative level and extract aggregated polygons or administrative units intersecting these regions. Additionally, GEOE3 highlights key infrastructure investments that could boost women's participation in the workforce. Population data can also be incorporated into the analysis to provide more nuanced insights that account for both population levels and enablement. This process integrates proximity data, classification scores, population data and weighted dimensions to support informed decision-making.
+The final aggregation of all three dimensions is carried out by applying weights to each dimension, ensuring a balanced and comprehensive representation. This tab provides users with deeper insights by identifying regions where conditions are optimal—or at least favorable—for women to access job opportunities in a specific sector. The outputs from this tab assign a combined classification score to the input raster, aggregate results at desired adminstrative level and extract aggregated polygons or administrative units intersecting these regions. Additionally, GeoE3 highlights key infrastructure investments that could boost women's participation in the workforce. Population data can also be incorporated into the analysis to provide more nuanced insights that account for both population levels and enablement. This process integrates proximity data, classification scores, population data and weighted dimensions to support informed decision-making.
 </p>
 
-### Computing the Women’s Enablement Environments Indicator (WEE)
+### Computing the GeoE3 Score
 ---
 <p align="justify">
-Before accessing the full insights tab, it is necessary to aggregate all the factors processed in the previous steps. This is achieved by assigning weights to each dimension, resulting in the WEE (Women’s Enablement Environments) output. The output is categorized into five classes: highly enabling, enabling, moderately enabling, low enablement and very low enablement.
+Before accessing the full insights tab, it is necessary to aggregate all the factors processed in the previous steps. This is achieved by assigning weights to each dimension, resulting in the GeoE3 output. The output is categorized into five classes: highly enabling, enabling, moderately enabling, low enablement and very low enablement.
 </p>
 
-> - 🖱️🖱️ **Double-click** on the **WEE Score section** to open the pop-up.
+> - 🖱️🖱️ **Double-click** on the **GeoE3 Score section** to open the pop-up.
 > - ⚖️ **Assign Weights**: Ensure the **weights** are correctly assigned, as they determine the relative importance of each factor in the analysis. Carefully review these values to ensure they are aligned with your project's objectives and reflect the significance of each factor accurately.
 > - 🚫 **Exclude Unused Dimensions (optional)**: If a specific dimension is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - 🔄 **Readjust Weights**: After excluding any dimensions, make sure to **Balance Weights** of the remaining ones. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis, then click **OK** to proceed.
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/WEE_score.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GeoE3_Score.jpg"
     alt="WEE Weights"
     style="width:75%;"
     title="Click to enlarge"
@@ -26,42 +26,33 @@ Before accessing the full insights tab, it is necessary to aggregate all the fac
 
 After configuring the dimensions and adjusting their weights to achieve balance, you can initiate the process workflow:
 
-> - 🖱️**Right-click on WEE Score**.
+> - 🖱️**Right-click on GeoE3 Score**.
 > - ▶️**Select Run Item Workflow** from the context menu.
-
-<p align="center">
-<img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Wee_run.jpg"
-    alt="Wee Run"
-    style="width:75%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
 
 The process should be successfully completed and indicated by a green checkmark widget.
 
 ### Optional Steps After Defining the WEE Score
 ---
 <p align="justify">
-WEE can be visualized in relation to female population distribution by providing a raster dataset containing female population density and/or by job distribution by providing job locations. These datasets are combined with the WEE score to calculate the WEE by Population score and/or WEE by Job Distribution score. If an administrative layer is defined, results are aggregated by subnational boundaries to display the predominant WEE outputs for each region.
+GeoE3 can be visualized in relation to male/female population distribution by providing a raster dataset containing male/female population density and/or by job distribution by providing job locations. These datasets are combined with the GeoE3 score to calculate the GeoE3 by Population score and/or GeoE3 by Job Distribution score. If an administrative layer is defined, results are aggregated by subnational boundaries to display the predominant WEE outputs for each region.
 </p>
 
 #### 1. Aggregation Boundaries (Optional)
 
-This step allows aggregating the WEE analysis results by subnational boundaries (e.g., districts, provinces).
+This step allows aggregating the GeoE3 analysis results by subnational boundaries (e.g., districts, provinces).
 > - 🛠️ **What to do**: Select or upload a layer containing subnational boundaries (e.g., administrative polygons).
-> - 📊 **What can be done**: Calculate the majority WEE score for each boundary. If population data is available, calculate the majority WEE by Population score for each boundary. If job distribution data is configured (see Step 3), calculate the majority WEE by Job Distribution score for each boundary.
+> - 📊 **What can be done**: Calculate the majority GeoE3 score for each boundary. If population data is available, calculate the majority GeoE3 by Population score for each boundary. If job distribution data is configured (see Step 3), calculate the majority GeoE3 by Job Distribution score for each boundary.
 
-#### 2. WEE by Population (Optional)
+#### 2. GeoE3 by Population (Optional)
 
-This step combines female population data with the WEE score to provide insights into population-weighted WEE results.
+This step combines female population data with the GeoE3 score to provide insights into population-weighted WEE results.
 
 > - 🛠️ **What to do**: Upload or select a raster dataset containing female population density.
-> - 📊 **What can be done**: Combine the population data with WEE scores to calculate the WEE by Population score. If an aggregation layer has been defined (in Step 1), the results will be summarized per subnational boundary to show the predominant WEE by Population score. The final output is a comprehensive dataset consisting of 15 classes, representing a combination of 5 levels of enablement and 3 population density categories: low, medium and high.
+> - 📊 **What can be done**: Combine the population data with WEE scores to calculate the GeoE3 by Population score. If an aggregation layer has been defined (in Step 1), the results will be summarized per subnational boundary to show the predominant GeoE3 by Population score. The final output is a comprehensive dataset consisting of 15 classes, representing a combination of 5 levels of enablement and 3 population density categories: low, medium and high.
 
-#### 3. WEE by Job Distribution (Optional)
+#### 3. GeoE3 by Job Distribution (Optional)
 
-This step enables targeted analysis based on job locations, identifying areas where WEE intersects with job opportunities.
+This step enables targeted analysis based on job locations, identifying areas where GeoE3 intersects with job opportunities.
 
 > - 🛠️ **What to do**: Upload or select job location data, either as:
 >   - Point Layer: Locations of individual jobs (e.g., existing or planned job sites).
@@ -72,10 +63,10 @@ This step enables targeted analysis based on job locations, identifying areas wh
 >   - Buffer Point Layer: Creates a buffer around points (e.g., job sites or facilities).
 >   - Polygon Layer: Limits analysis to selected polygons (e.g., administrative regions or zones).
 >   - Raster Layer: Uses raster data to define areas for focused analysis.
-> - 📊 **What can be done**: Explore how WEE scores relate to existing or planned job opportunities. Identify areas with high WEE potential that align with job locations. Can restrict the analysis to areas of specific interest, such as around job sites, within administrative boundaries, or in high-density regions.
+> - 📊 **What can be done**: Explore how GeoE3 scores relate to existing or planned job opportunities. Identify areas with high GeoE3 potential that align with job locations. Can restrict the analysis to areas of specific interest, such as around job sites, within administrative boundaries, or in high-density regions.
 
 <p align="center">
- <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/WEE_insights.jpg"
+ <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GeoE#_Score1.jpg"
     alt="WEE insights"
     style="width:65%;"
     title="Click to enlarge"
@@ -84,31 +75,30 @@ This step enables targeted analysis based on job locations, identifying areas wh
 
 After configuring the optional features you can initiate the process workflow:
 
-> - 🖱️**Right-click on WEE Score**.
+> - 🖱️**Right-click on GeoE3 Score**.
 > - ▶️**Select Run Item Workflow** from the context menu.
-
-<p align="center">
-<img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Wee_run.jpg"
-    alt="Wee Run"
-    style="width:75%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
 
 ### Visualizing the Outputs
 ---
 <p align="justify">
 After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the *Mutually Exclusive Group* feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
 
-The outputs consist of all WEE score outputs (aggreagated at administrative level, by population or by job distribution). All scores are assessed on a scale from 0 to 15, categorized as follows: 14 - 15: Highly enabling, high population | 13 - 14: Highly enabling, medium population | 12 - 13: Highly enabling, low population | 11 - 12: Enabling, high population | 10 - 11: Enabling, medium population | 9 - 10: Enabling, low population | 8 - 9: Moderately enabling, high population | 7 - 8: Moderately enabling, medium population | 6 - 7: Moderately enabling, low population | 5 - 6: Low enablement, high population | 4 - 5: Low enablement, medium population | 3 - 4: Low enablement, low population | 2 - 3: Very low enablement, high population | 1 - 2: Very low enablement, medium population | 0 - 1: Very low enablement, low population.
+The outputs consist of all GeoE3 score outputs (aggreagated at administrative level, by population or by job distribution). All scores are assessed on a scale from 0 to 15, categorized as follows: 14 - 15: Highly enabling, high population | 13 - 14: Highly enabling, medium population | 12 - 13: Highly enabling, low population | 11 - 12: Enabling, high population | 10 - 11: Enabling, medium population | 9 - 10: Enabling, low population | 8 - 9: Moderately enabling, high population | 7 - 8: Moderately enabling, medium population | 6 - 7: Moderately enabling, low population | 5 - 6: Low enablement, high population | 4 - 5: Low enablement, medium population | 3 - 4: Low enablement, low population | 2 - 3: Very low enablement, high population | 1 - 2: Very low enablement, medium population | 0 - 1: Very low enablement, low population.
+
+<p align="center">
+ <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/WEEpopB.png"
+    alt="WEE Score features"
+    style="width:65%;"
+    title="Click to enlarge"
+    onclick="window.open(this.src, '_blank')">
+</p>
 
 The outputs are stored within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.
 
-If the results do not immediately appear in the Layer Panel after processing the WEE Scores, you can resolve this by either adding them manually from the folder path or by right-clicking on the WEE Score and selecting **Add to map** from the context menu.
+If the results do not immediately appear in the Layer Panel after processing the GeoE3 Scores, you can resolve this by either adding them manually from the folder path or by right-clicking on the GeoE3 Score and selecting **Add to map** from the context menu.
 </p>
 
-**🖥️ Key attributes of WEE Score tab**
+**🖥️ Key attributes of GeoE3 Score tab**
 
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/WEE_features.jpg"
@@ -140,15 +130,15 @@ If the results do not immediately appear in the Layer Panel after processing the
     <td style="border: 1px solid black;">Executes the workflow.</td>
   </tr>
   <tr style="border: 1px solid black;">
-    <td style="border: 1px solid black;"><strong>6. Add WEE Score to Map</strong></td>
+    <td style="border: 1px solid black;"><strong>6. Add GeoE3 Score to Map</strong></td>
     <td style="border: 1px solid black;">Adds the Women’s Enablement Environment (WEE) score to the map display.</td>
   </tr>
   <tr style="border: 1px solid black;">
-    <td style="border: 1px solid black;"><strong>7. Add WEE by Population to Map</strong></td>
+    <td style="border: 1px solid black;"><strong>7. Add GeoE3 by Population to Map</strong></td>
     <td style="border: 1px solid black;">Displays WEE scores combined with population data on the map.</td>
   </tr>
   <tr style="border: 1px solid black;">
-    <td style="border: 1px solid black;"><strong>8. Add WEE Aggregates to Map</strong></td>
+    <td style="border: 1px solid black;"><strong>8. Add GeoE3 Aggregates to Map</strong></td>
     <td style="border: 1px solid black;">Visualizes aggregated WEE scores on the map.</td>
   </tr>
   <tr style="border: 1px solid black;">
