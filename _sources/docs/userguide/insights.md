@@ -66,7 +66,7 @@ This step enables targeted analysis based on job locations, identifying areas wh
 > - 📊 **What can be done**: Explore how GeoE3 scores relate to existing or planned job opportunities. Identify areas with high GeoE3 potential that align with job locations. Can restrict the analysis to areas of specific interest, such as around job sites, within administrative boundaries, or in high-density regions.
 
 <p align="center">
- <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GeoE#_Score1.jpg"
+ <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/GeoE3_Score1.jpg"
     alt="WEE insights"
     style="width:65%;"
     title="Click to enlarge"
@@ -86,7 +86,7 @@ After completing the process, the outputs are automatically added to the Layer P
 The outputs consist of all GeoE3 score outputs (aggreagated at administrative level, by population or by job distribution). All scores are assessed on a scale from 0 to 15, categorized as follows: 14 - 15: Highly enabling, high population | 13 - 14: Highly enabling, medium population | 12 - 13: Highly enabling, low population | 11 - 12: Enabling, high population | 10 - 11: Enabling, medium population | 9 - 10: Enabling, low population | 8 - 9: Moderately enabling, high population | 7 - 8: Moderately enabling, medium population | 6 - 7: Moderately enabling, low population | 5 - 6: Low enablement, high population | 4 - 5: Low enablement, medium population | 3 - 4: Low enablement, low population | 2 - 3: Very low enablement, high population | 1 - 2: Very low enablement, medium population | 0 - 1: Very low enablement, low population.
 
 <p align="center">
- <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/WEEpopB.png"
+ <img src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/8 WEEpopB.png"
     alt="WEE Score features"
     style="width:65%;"
     title="Click to enlarge"
