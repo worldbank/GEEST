@@ -6,9 +6,8 @@ The Contextual Dimension refers to the laws and policies that shape workplace ge
 </p>
 
 ### Input Contextual factors
-
-### > - If the analysis is generic, GeoE3 utilizes the EPLEX score of a country.
 ---
+#### > If the analysis is generic, GeoE3 utilizes the EPLEX score of a country.
 <p align="justify">EPLEX is a summary measure of Employment Protection Legislation (EPL) stringency, created by the International Labour Organization (ILO) that measures how strongly a country's laws protect workers against dismissal at the initiative of an employer.
 <p align="center">
 <img
@@ -22,9 +21,10 @@ The Contextual Dimension refers to the laws and policies that shape workplace ge
 <img width="369" height="189" alt="image" src="https://github.com/user-attachments/assets/23240df3-f294-4310-9259-c47a8eebd849" />
 </p>
 
-### > - If the analysis is tailored for Women's Enabling Environments, GeoE3 utilizes data from the WBL database, as follows:
 ---
+#### > If the analysis is tailored for Women's Enabling Environments, GeoE3 utilizes data from the WBL database, as follows:
 <p align="justify">
+    
 <strong>Workplace Discrimination</strong> involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields and it is btained from the Workplace Index score of the WBL.
 </p>
 <p align="justify">
