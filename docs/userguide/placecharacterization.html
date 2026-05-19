@@ -430,7 +430,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-place-characterization-factors">Input Place Characterization factors</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety-perception">Safety Perception</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fcv">FCV</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">Digital Inclusion</a></li>
@@ -455,17 +455,17 @@ document.write(`
   <section id="place-characterization">
 <h1>Place Characterization<a class="headerlink" href="#place-characterization" title="Permalink to this heading">#</a></h1>
 <p align="justify">
-The Place Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence women’s ability to participate in the workforce. For more information on data input used from open sources, please refer to the <a href="https://worldbank.github.io/GEOE3/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
+The Place Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence people’s ability to participate in the workforce. For more information on data input used from open sources, please refer to the <a href="https://worldbank.github.io/GEOE3/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
 </p>
 <section id="general-overview">
 <h2>General Overview<a class="headerlink" href="#general-overview" title="Permalink to this heading">#</a></h2>
 <p>Place Characterization factors refer to the following indicators:</p>
 <ul class="simple">
-<li><p><strong>Active Transport:</strong> identifies areas based on their capacity to support safe and efficient active transport for women—such as walking, cycling, and other non-motorized modes—by analyzing and categorizing the road network features downloaded during the project setup phase.</p></li>
+<li><p><strong>Active Transport:</strong> identifies areas based on their capacity to support safe and efficient active transport — such as walking, cycling, and other non-motorized modes—by analyzing and categorizing the road network features downloaded during the project setup phase.</p></li>
 <li><p><strong>Safety:</strong> defines areas perceived as safe based on specific data or, alternatively, on how brightly lit they are, assuming that brightly lit areas are safer than those with no lights.</p></li>
 <li><p><strong>Fragility, conflict and violence (FCV):</strong> assigns scores to by analyzing overlap with ACLED data with buffers representing various types of events.</p></li>
-<li><p><strong>Education:</strong> computes a raster that provides a standardized measure of the percentage of women who have attained higher education within the country or region of interest.</p></li>
-<li><p><strong>Digital Inclusion:</strong> assesses the availability and accessibility of digital infrastructure by computing a national index score.</p></li>
+<li><p><strong>Education:</strong> computes a raster that provides a standardized measure of the percentage of people who have attained higher education within the country or region of interest.The spatial representation of education attainment is confined to inhabited areas as classified by GHS-SMOD. The default classes to be excluded from GHS-MOD are 10 (Water grid cell) and 11 (Very low density rural grid cell)</p></li>
+<li><p><strong>Digital Inclusion:</strong> assesses the availability and accessibility of digital infrastructure by computing a national index score.If local statistics are available, this is used in conjunction with Ookla coverage layers, which supports the spatial representation of the data. Each ookla polygon receives the DI score and it is further mapped to the raster cell. Raster cells that do not intersect ookla polygons receive a score of 0 (no access)</p></li>
 <li><p><strong>Environmental Hazards:</strong> characterizes areas based on their vulnerability to natural disasters.</p></li>
 <li><p><strong>Water sanitation:</strong> assesses the availability and accessibility of clean water and sanitation facilities.</p></li>
 </ul>
@@ -478,7 +478,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <section id="active-transport">
 <h3>Active Transport<a class="headerlink" href="#active-transport" title="Permalink to this heading">#</a></h3>
 <p align="justify">
-<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that women often rely on non-motorized modes of travel for daily commutes and errands.
+<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that people often rely on non-motorized modes of travel for daily commutes and errands. It is computed using the OpenStreetMap road network, where road types are classified based on their suitability for walking and cycling.
 <p><strong>Locate Active Transport Section</strong></p>
 <blockquote>
 <div><ul class="simple">
@@ -492,13 +492,13 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/ActiveTr.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/ActiveTransport.jpg"
     alt="Active Transport input"
     style="width:75%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
-<p><strong>Active transport</strong> factor is calculated based on the four subfactors averaged across the raster cells:</p>
+<p><strong>Active transport</strong> factor is calculated based on road types from OpenStreetMap as follows:</p>
 <div class="pst-scrollable-table-container"><table class="colwidths-auto table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Subfactor</p></th>
@@ -511,37 +511,21 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><strong>Street Crossings</strong></p></td>
-<td><p>None</p></td>
-<td><p>N/A</p></td>
-<td><p>N/A</p></td>
-<td><p>1 crossing</p></td>
-<td><p>N/A</p></td>
-<td><p>2+ crossings</p></td>
+<tr class="row-even"><td><p><strong>Key = highway</strong></p></td>
+<td><p>bus_guideway, escape, raceway, construction and proposed roads</p></td>
+<td><p>motorway, motorway_link, trunk and trunk_lin</p></td>
+<td><p>primary, primary_link and track</p></td>
+<td><p>secondary, secondary_link, unclassified, road, bridleway and service</p></td>
+<td><p>tertiary and tertiary_link</p></td>
+<td><p>Pedestrian, Footway, Residential, Living_street, steps</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>Cycle Paths</strong></p></td>
+<tr class="row-odd"><td><p><strong>Key = cycleway</strong></p></td>
 <td><p>None</p></td>
 <td><p>N/A</p></td>
 <td><p>N/A</p></td>
 <td><p>1 cycle path</p></td>
+<td><p>lane, shared_lane, share_busway, track, separate, crossing, shoulder and link</p></td>
 <td><p>N/A</p></td>
-<td><p>2+ paths</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Footpaths</strong></p></td>
-<td><p>None</p></td>
-<td><p>N/A</p></td>
-<td><p>N/A</p></td>
-<td><p>1 path</p></td>
-<td><p>N/A</p></td>
-<td><p>2+ paths</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Block Sizes</strong></p></td>
-<td><p>None</p></td>
-<td><p>&gt;1 km</p></td>
-<td><p>751m - 1 km</p></td>
-<td><p>501m - 750m</p></td>
-<td><p>251m - 500m</p></td>
-<td><p>&lt;250m</p></td>
 </tr>
 </tbody>
 </table>
@@ -556,7 +540,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/ActiveRun.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/ActiveTransport2.jpg"
     alt="Active transport run"
     style="width:55%;"
     title="Click to enlarge"
@@ -565,10 +549,10 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <p>The successful completion of the process is indicated by the green checkmark widgets.</p>
 </section>
 <hr class="docutils" />
-<section id="safety">
-<h3>Safety<a class="headerlink" href="#safety" title="Permalink to this heading">#</a></h3>
+<section id="safety-perception">
+<h3>Safety Perception<a class="headerlink" href="#safety-perception" title="Permalink to this heading">#</a></h3>
 <p align="justify">
-<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services.
+<strong>Safety Perception</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services.
 </p>
 <p><strong>Locate Safety Section</strong></p>
 <blockquote>
@@ -580,7 +564,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_index.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/SafetyPerception.jpg"
     alt="Safety index score"
     style="width:55%;"
     title="Click to enlarge"
@@ -593,7 +577,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_classes.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_classes1.jpg"
     alt="Safety classes"
     style="width:55%;"
     title="Click to enlarge"
@@ -606,7 +590,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_NTL.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/SafetyPerception2.jpg"
     alt="Safety NTL"
     style="width:55%;"
     title="Click to enlarge"
@@ -619,7 +603,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_street.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_street1.jpg"
     alt="Safety street lights"
     style="width:55%;"
     title="Click to enlarge"
@@ -678,7 +662,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <section id="fcv">
 <h3>FCV<a class="headerlink" href="#fcv" title="Permalink to this heading">#</a></h3>
 <p align="justify">
-<strong>Fragility, conflict and violence (FCV)</strong> considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase women’s vulnerability and limit their access to employment and essential services.
+<strong>Fragility, conflict and violence (FCV)</strong> considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase people’s vulnerability and limit their access to employment and essential services.
 </p>
 <p><strong>Locate FCV Section</strong></p>
 <blockquote>
@@ -761,7 +745,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <section id="education">
 <h3>Education<a class="headerlink" href="#education" title="Permalink to this heading">#</a></h3>
 <p align="justify">
-<strong>Education</strong> refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector.
+<strong>Education</strong> refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector. The raster file is filtered by GHSL classes to account only for areas where people live.
 </p>
 <p><strong>Locate Education Section</strong></p>
 <blockquote>
@@ -773,7 +757,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Edu_index.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Education1.jpg"
     alt="Education index score"
     style="width:55%;"
     title="Click to enlarge"
@@ -786,7 +770,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Edu_class.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Education2.jpg"
     alt="Education classified polygons data"
     style="width:55%;"
     title="Click to enlarge"
@@ -821,7 +805,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <section id="digital-inclusion">
 <h3>Digital Inclusion<a class="headerlink" href="#digital-inclusion" title="Permalink to this heading">#</a></h3>
 <p align="justify">
-<strong>Digital Inclusion</strong> assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training and education opportunities, and use financial services.
+<strong>Digital Inclusion</strong> assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training and education opportunities, and use financial services. This dataset is masked using the Ookla dataset, to account for areas where internet coverage has been mapped and exclude inhabited areas.
 </p>
 <p><strong>Locate Digital Inclusion Section</strong></p>
 <blockquote>
@@ -833,7 +817,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/DIG_index.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/DigitalInclusion1.jpg"
     alt="Digital Inclusion index score"
     style="width:55%;"
     title="Click to enlarge"
@@ -846,7 +830,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/DIG_class.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/DigitalInclusion2.jpg"
     alt="Digital Inclusion classified polygons data"
     style="width:55%;"
     title="Click to enlarge"
@@ -901,7 +885,7 @@ This factor is composed, by default, of five subfactors representing different t
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/ENV_select.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/EnvHazards.jpg"
     alt="Environmental Hazards data input"
     style="width:55%;"
     title="Click to enlarge"
@@ -985,26 +969,26 @@ This factor is composed, by default, of five subfactors representing different t
 <section id="water-sanitation">
 <h3>Water sanitation<a class="headerlink" href="#water-sanitation" title="Permalink to this heading">#</a></h3>
 <p align="justify">
-<strong>Water sanitation</strong> concerns the availability of clean water and sanitation facilities, affecting women’s time allocation and capacity to engage in employment.
+<strong>Water sanitation</strong> concerns the availability of clean water and sanitation facilities, affecting women’s time allocation and capacity to engage in employment. It is captured indirectly, by accounting for the spatial distribution of facilities whose operation depends on reliable water supply and sanitation services. The presence of thee points of interest suggests the existence of minimum water and sanitation infrastructure necessary for service delivery, even where direct household level data are unavailable.
 </p>
 <p><strong>Locate Water sanitation Section</strong></p>
 <blockquote>
 <div><ul class="simple">
 <li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Water sanitation section</strong> to open the pop-up.</p></li>
-<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>point features</strong>) corresponding to the water and sanitation facilities by clicking the three-dot button; a buffer is needed to estimate the spatial impact of these facilities, the default radius is set to 1000 meters; however, this value can be adjusted based on the user’s considerations.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>point features</strong>) corresponding to the points of interest by clicking the three-dot button; a buffer is needed to estimate the spatial impact of these facilities, the default radius is set to 1000 meters; however, this value can be adjusted based on the user’s considerations.</p></li>
 <li><p>🚫 <strong>Exclude Unused Factor (optional)</strong>: If this specific factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Water_select.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/WaterSanitation.jpg"
     alt="Water sanitation input"
     style="width:55%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
-<p><strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within a raster cell, applying a default 1000m buffer. The scoring is as follows:</p>
+<p><strong>Water Sanitation</strong> is assessed based on the presence of water related features within a raster cell, applying a default 3000m buffer. The scoring is as follows:</p>
 <div class="pst-scrollable-table-container"><table class="colwidths-auto table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Factor</p></th>
@@ -1018,12 +1002,12 @@ This factor is composed, by default, of five subfactors representing different t
 </thead>
 <tbody>
 <tr class="row-even"><td><p><strong>Water Sanitation</strong></p></td>
-<td><p>No water points</p></td>
+<td><p>outside the 3km buffer</p></td>
 <td><p>N/A</p></td>
 <td><p>N/A</p></td>
-<td><p>1 water point</p></td>
 <td><p>N/A</p></td>
-<td><p>2 or more water points</p></td>
+<td><p>N/A</p></td>
+<td><p>intersection with the 3km buffer</p></td>
 </tr>
 </tbody>
 </table>
@@ -1057,7 +1041,7 @@ This factor is composed, by default, of five subfactors representing different t
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_weights.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_weights0.jpg"
     alt="Place Characterization Weights"
     style="width:75%;"
     title="Click to enlarge"
@@ -1077,7 +1061,7 @@ This factor is composed, by default, of five subfactors representing different t
 </div></blockquote>
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_run.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_weights1.jpg"
     alt="Place Characterization Run"
     style="width:75%;"
     title="Click to enlarge"
@@ -1091,15 +1075,7 @@ This factor is composed, by default, of five subfactors representing different t
 <p>After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the <em>Mutually Exclusive Group</em> feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.</p>
 <p>The outputs consist of all factors and subfactors, as well as the aggregation of these into the final Place Characterization output. All scores are assessed on a scale from 0 to 5, categorized as follows: ≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling).</p>
 <p>The outputs are stored under the Place Characterization folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.</p>
-<p>If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting <strong>Add to map</strong> from the context menu:</p>
-<p align="center">
-<img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_add.jpg"
-    alt="Place Characterization Add to map"
-    style="width:75%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
+<p>If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting <strong>Add to map</strong> from the context menu.</p>
 <blockquote>
 <div><p>💡 <strong>Tip</strong>: If the input needs to be changed for any reason (e.g., incorrect initial input), you can clear the results and reprocess them as follows:</p>
 <ul class="simple">
@@ -1108,14 +1084,6 @@ This factor is composed, by default, of five subfactors representing different t
 This process ensures that the tool reassesses the input datasets and outputs the corrected scores.</p></li>
 </ul>
 </div></blockquote>
-<p align="center">
-<img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_rerun.jpg"
-    alt="Place Characterization Clear and rerun"
-    style="width:75%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
 </section>
 <section id="key-considerations">
 <h2>Key Considerations<a class="headerlink" href="#key-considerations" title="Permalink to this heading">#</a></h2>
@@ -1194,7 +1162,7 @@ This process ensures that the tool reassesses the input datasets and outputs the
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-place-characterization-factors">Input Place Characterization factors</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety-perception">Safety Perception</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fcv">FCV</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">Digital Inclusion</a></li>

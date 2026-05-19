@@ -1,18 +1,18 @@
 ## Place Characterization
 
 <p align="justify">
-The Place Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence women’s ability to participate in the workforce. For more information on data input used from open sources, please refer to the <a href="https://worldbank.github.io/GEOE3/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
+The Place Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence people’s ability to participate in the workforce. For more information on data input used from open sources, please refer to the <a href="https://worldbank.github.io/GEOE3/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
 </p>
 
 ### General Overview
 
 Place Characterization factors refer to the following indicators:
 
-- **Active Transport:** identifies areas based on their capacity to support safe and efficient active transport for women—such as walking, cycling, and other non-motorized modes—by analyzing and categorizing the road network features downloaded during the project setup phase.
+- **Active Transport:** identifies areas based on their capacity to support safe and efficient active transport — such as walking, cycling, and other non-motorized modes—by analyzing and categorizing the road network features downloaded during the project setup phase.
 - **Safety:** defines areas perceived as safe based on specific data or, alternatively, on how brightly lit they are, assuming that brightly lit areas are safer than those with no lights.
 - **Fragility, conflict and violence (FCV):** assigns scores to by analyzing overlap with ACLED data with buffers representing various types of events.
-- **Education:** computes a raster that provides a standardized measure of the percentage of women who have attained higher education within the country or region of interest.
-- **Digital Inclusion:** assesses the availability and accessibility of digital infrastructure by computing a national index score.
+- **Education:** computes a raster that provides a standardized measure of the percentage of people who have attained higher education within the country or region of interest.The spatial representation of education attainment is confined to inhabited areas as classified by GHS-SMOD. The default classes to be excluded from GHS-MOD are 10 (Water grid cell) and 11 (Very low density rural grid cell)
+- **Digital Inclusion:** assesses the availability and accessibility of digital infrastructure by computing a national index score.If local statistics are available, this is used in conjunction with Ookla coverage layers, which supports the spatial representation of the data. Each ookla polygon receives the DI score and it is further mapped to the raster cell. Raster cells that do not intersect ookla polygons receive a score of 0 (no access)
 - **Environmental Hazards:** characterizes areas based on their vulnerability to natural disasters.
 - **Water sanitation:** assesses the availability and accessibility of clean water and sanitation facilities.
 
@@ -27,7 +27,7 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
 #### Active Transport
 
 <p align="justify">
-<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that women often rely on non-motorized modes of travel for daily commutes and errands.
+<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that people often rely on non-motorized modes of travel for daily commutes and errands. It is computed using the OpenStreetMap road network, where road types are classified based on their suitability for walking and cycling.
 
 **Locate Active Transport Section**
 
@@ -40,21 +40,19 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/ActiveTr.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/ActiveTransport.jpg"
     alt="Active Transport input"
     style="width:75%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
-<strong>Active transport</strong> factor is calculated based on the four subfactors averaged across the raster cells:
-
+<strong>Active transport</strong> factor is calculated based on road types from OpenStreetMap as follows:
 | Subfactor               | Score 0          | Score 1               | Score 2                 | Score 3                 | Score 4                 | Score 5                 |
 |----------------------|------------------|-----------------------|-------------------------|-------------------------|-------------------------|-------------------------|
-| **Street Crossings** | None             | N/A                   | N/A                     | 1 crossing              | N/A                     | 2+ crossings           |
-| **Cycle Paths**      | None             | N/A                   | N/A                     | 1 cycle path            | N/A                     | 2+ paths               |
-| **Footpaths**        | None             | N/A                   | N/A                     | 1 path                  | N/A                     | 2+ paths               |
-| **Block Sizes**      | None             | >1 km                 | 751m - 1 km             | 501m - 750m             | 251m - 500m             | <250m                  |
+| **Key = highway** | bus_guideway, escape, raceway, construction and proposed roads           | motorway, motorway_link, trunk and trunk_lin                 | primary, primary_link and track                  | secondary, secondary_link, unclassified, road, bridleway and service          | tertiary and tertiary_link                    | Pedestrian, Footway, Residential, Living_street, steps           |
+| **Key = cycleway**      | None             | N/A                   | N/A                     | 1 cycle path            | lane, shared_lane, share_busway, track, separate, crossing, shoulder and link                     | N/A              |
+
 
 **Process Active Transport factors**
 
@@ -65,7 +63,7 @@ Back in the Data Processing Interface:
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/ActiveRun.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/ActiveTransport2.jpg"
     alt="Active transport run"
     style="width:55%;"
     title="Click to enlarge"
@@ -76,10 +74,10 @@ The successful completion of the process is indicated by the green checkmark wid
 
 ---
 
-#### Safety
+#### Safety Perception
 
 <p align="justify">
-<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services.
+<strong>Safety Perception</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services.
 </p>
 
 **Locate Safety Section**
@@ -90,7 +88,7 @@ The successful completion of the process is indicated by the green checkmark wid
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_index.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/SafetyPerception.jpg"
     alt="Safety index score"
     style="width:55%;"
     title="Click to enlarge"
@@ -101,7 +99,7 @@ The successful completion of the process is indicated by the green checkmark wid
 >
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_classes.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_classes1.jpg"
     alt="Safety classes"
     style="width:55%;"
     title="Click to enlarge"
@@ -112,7 +110,7 @@ The successful completion of the process is indicated by the green checkmark wid
 >
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_NTL.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/SafetyPerception2.jpg"
     alt="Safety NTL"
     style="width:55%;"
     title="Click to enlarge"
@@ -123,7 +121,7 @@ The successful completion of the process is indicated by the green checkmark wid
 >
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_street.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Safety_street1.jpg"
     alt="Safety street lights"
     style="width:55%;"
     title="Click to enlarge"
@@ -164,7 +162,7 @@ The successful completion of the process is indicated by the green checkmark wid
 #### FCV
 
 <p align="justify">
-<strong>Fragility, conflict and violence (FCV)</strong> considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase women’s vulnerability and limit their access to employment and essential services.
+<strong>Fragility, conflict and violence (FCV)</strong> considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase people’s vulnerability and limit their access to employment and essential services.
 </p>
 
 **Locate FCV Section**
@@ -225,7 +223,7 @@ The successful completion of the process is indicated by the green checkmark wid
 #### Education
 
 <p align="justify">
-<strong>Education</strong> refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector.
+<strong>Education</strong> refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector. The raster file is filtered by GHSL classes to account only for areas where people live.
 </p>
 
 **Locate Education Section**
@@ -236,7 +234,7 @@ The successful completion of the process is indicated by the green checkmark wid
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Edu_index.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Education1.jpg"
     alt="Education index score"
     style="width:55%;"
     title="Click to enlarge"
@@ -247,7 +245,7 @@ The successful completion of the process is indicated by the green checkmark wid
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Edu_class.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Education2.jpg"
     alt="Education classified polygons data"
     style="width:55%;"
     title="Click to enlarge"
@@ -282,7 +280,7 @@ The successful completion of the process is indicated by the green checkmark wid
 #### Digital Inclusion
 
 <p align="justify">
-<strong>Digital Inclusion</strong> assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training and education opportunities, and use financial services.
+<strong>Digital Inclusion</strong> assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training and education opportunities, and use financial services. This dataset is masked using the Ookla dataset, to account for areas where internet coverage has been mapped and exclude inhabited areas.
 </p>
 
 **Locate Digital Inclusion Section**
@@ -293,7 +291,7 @@ The successful completion of the process is indicated by the green checkmark wid
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/DIG_index.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/DigitalInclusion1.jpg"
     alt="Digital Inclusion index score"
     style="width:55%;"
     title="Click to enlarge"
@@ -304,7 +302,7 @@ The successful completion of the process is indicated by the green checkmark wid
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/DIG_class.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/DigitalInclusion2.jpg"
     alt="Digital Inclusion classified polygons data"
     style="width:55%;"
     title="Click to enlarge"
@@ -361,7 +359,7 @@ The thresholds for defining hazard levels are based on a predefined scoring list
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/ENV_select.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/EnvHazards.jpg"
     alt="Environmental Hazards data input"
     style="width:55%;"
     title="Click to enlarge"
@@ -401,30 +399,30 @@ The successful completion of the process is indicated by the green checkmark wid
 #### Water sanitation
 
 <p align="justify">
-<strong>Water sanitation</strong> concerns the availability of clean water and sanitation facilities, affecting women’s time allocation and capacity to engage in employment.
+<strong>Water sanitation</strong> concerns the availability of clean water and sanitation facilities, affecting women’s time allocation and capacity to engage in employment. It is captured indirectly, by accounting for the spatial distribution of facilities whose operation depends on reliable water supply and sanitation services. The presence of thee points of interest suggests the existence of minimum water and sanitation infrastructure necessary for service delivery, even where direct household level data are unavailable.
 </p>
 
 **Locate Water sanitation Section**
 
 > - 🖱️🖱️ **Double-click** on the **Water sanitation section** to open the pop-up.
-> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point features**) corresponding to the water and sanitation facilities by clicking the three-dot button; a buffer is needed to estimate the spatial impact of these facilities, the default radius is set to 1000 meters; however, this value can be adjusted based on the user's considerations.
+> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point features**) corresponding to the points of interest by clicking the three-dot button; a buffer is needed to estimate the spatial impact of these facilities, the default radius is set to 1000 meters; however, this value can be adjusted based on the user's considerations.
 > - 🚫 **Exclude Unused Factor (optional)**: If this specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/Water_select.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/WaterSanitation.jpg"
     alt="Water sanitation input"
     style="width:55%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
-<strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within a raster cell, applying a default 1000m buffer. The scoring is as follows:
+<strong>Water Sanitation</strong> is assessed based on the presence of water related features within a raster cell, applying a default 3000m buffer. The scoring is as follows:
 
 | Factor                  | Score 0                   | Score 1 | Score 2 | Score 3                     | Score 4 | Score 5                        |
 |-------------------------|---------------------------|---------|---------|-----------------------------|---------|--------------------------------|
-| **Water Sanitation**    | No water points           | N/A     | N/A     | 1 water point               | N/A     | 2 or more water points         |
+| **Water Sanitation**    | outside the 3km buffer          | N/A     | N/A     | N/A               | N/A     | intersection with the 3km buffer         |
 
 **Process Water sanitation factor**
 
@@ -454,7 +452,7 @@ The successful completion of the process is indicated by the green checkmark wid
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_weights.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_weights0.jpg"
     alt="Place Characterization Weights"
     style="width:75%;"
     title="Click to enlarge"
@@ -471,7 +469,7 @@ After configuring the factors and adjusting their weights to achieve balance, yo
 
 <p align="center">
 <img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_run.jpg"
+    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_weights1.jpg"
     alt="Place Characterization Run"
     style="width:75%;"
     title="Click to enlarge"
@@ -489,31 +487,13 @@ The outputs consist of all factors and subfactors, as well as the aggregation of
 
 The outputs are stored under the Place Characterization folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.
 
-If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting **Add to map** from the context menu:
-
-<p align="center">
-<img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_add.jpg"
-    alt="Place Characterization Add to map"
-    style="width:75%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
+If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting **Add to map** from the context menu.
 
 > 💡 **Tip**: If the input needs to be changed for any reason (e.g., incorrect initial input), you can clear the results and reprocess them as follows:
 >
 > - 🖱️ **Right-click** on the factor/dimension and select **Clear Item**.
 > - 🖱️ **Right-click again** on the same cleared factor/dimension, and while holding the **SHIFT** key on your keyboard, select **Run Item Workflow**.
 > This process ensures that the tool reassesses the input datasets and outputs the corrected scores.
-
-<p align="center">
-<img
-    src="https://raw.githubusercontent.com/worldbank/GEOE3/main/docs/images/new%20images/PC_rerun.jpg"
-    alt="Place Characterization Clear and rerun"
-    style="width:75%;"
-    title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">
-</p>
 
 ### Key Considerations
 
