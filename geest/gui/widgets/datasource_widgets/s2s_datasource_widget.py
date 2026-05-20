@@ -302,8 +302,7 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
         lowered = str(message).lower()
         if "503" in lowered or "service temporarily unavailable" in lowered or "server error (503)" in lowered:
             return (
-                "The Space2Stats service is temporarily unavailable (503). "
-                "Please wait a few minutes and try again."
+                "The Space2Stats service is temporarily unavailable (503). " "Please wait a few minutes and try again."
             )
         if "exterior must be valid" in lowered or "coordinate" in lowered:
             return (

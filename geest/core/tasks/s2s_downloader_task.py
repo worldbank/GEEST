@@ -168,11 +168,14 @@ class S2SDownloaderTask(QgsTask):
             raise ValueError("No hex IDs available for chunked S2S fetch.")
 
         if self.start_chunk_index >= total_chunks:
-            raise ValueError(
-                f"Start chunk index {self.start_chunk_index} exceeds total chunks {total_chunks}."
-            )
+            raise ValueError(f"Start chunk index {self.start_chunk_index} exceeds total chunks {total_chunks}.")
 
-        if self.delete_existing and not self.append_existing and self.start_chunk_index == 0 and os.path.exists(self.output_path):
+        if (
+            self.delete_existing
+            and not self.append_existing
+            and self.start_chunk_index == 0
+            and os.path.exists(self.output_path)
+        ):
             os.remove(self.output_path)
 
         wrote_any_rows = False

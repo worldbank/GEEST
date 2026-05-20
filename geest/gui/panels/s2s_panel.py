@@ -385,9 +385,7 @@ class S2SPanel(FORM_CLASS, QWidget):
             if active == gate_label:
                 self.processing_info_label.setText(f"S2S prefetch already running for {job.get('filename', '')}.")
             else:
-                self.processing_info_label.setText(
-                    f"S2S prefetch waiting: another S2S download is running ({active})."
-                )
+                self.processing_info_label.setText(f"S2S prefetch waiting: another S2S download is running ({active}).")
             self._schedule_next_s2s_prefetch_job(aoi_feature, 3000)
             return
         self._s2s_gate_token = token
@@ -446,7 +444,9 @@ class S2SPanel(FORM_CLASS, QWidget):
     def _on_s2s_prefetch_task_terminated(self, job: dict, aoi_feature: dict) -> None:
         """Handle terminated S2S prefetch tasks and continue queue."""
         self._release_s2s_gate()
-        if self._s2s_prefetch_error_for_current_task and self._is_transient_prefetch_error(self._s2s_prefetch_last_error_message):
+        if self._s2s_prefetch_error_for_current_task and self._is_transient_prefetch_error(
+            self._s2s_prefetch_last_error_message
+        ):
             attempt = int(job.get("attempt", 1))
             if attempt < self.PREFETCH_MAX_ATTEMPTS:
                 next_attempt = attempt + 1

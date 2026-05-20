@@ -258,10 +258,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
         required_fields = list(DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS)
         missing_fields = [field for field in required_fields if field not in self.s2s_fields]
         if missing_fields:
-            raise ValueError(
-                "Education S2S proxy requires fields "
-                f"{required_fields}, but missing {missing_fields}."
-            )
+            raise ValueError("Education S2S proxy requires fields " f"{required_fields}, but missing {missing_fields}.")
 
         source_layer = os.path.splitext(os.path.basename(self.s2s_output_path))[0]
         temp_column_prefix = f"{self.layer_id}_s2s"
