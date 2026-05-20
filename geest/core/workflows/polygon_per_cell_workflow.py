@@ -314,7 +314,8 @@ class PolygonPerCellWorkflow(WorkflowBase):
             ctotal = q(temp_columns["ghs_total_pop"])
             target = q(self.layer_id)
 
-            where_area = f"area_name = '{area_name.replace("'", "''")}'"
+            escaped_area_name = area_name.replace("'", "''")
+            where_area = f"area_name = '{escaped_area_name}'"
             score_expr = (
                 f"CASE "
                 f"WHEN COALESCE({ctotal}, 0) <= 0 THEN NULL "
