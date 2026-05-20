@@ -3,6 +3,7 @@
 
 import json
 import os
+from datetime import datetime
 from typing import Dict, List
 
 from qgis.core import (
@@ -14,11 +15,16 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtCore import QTimer, pyqtSignal
 from qgis.PyQt.QtGui import QFont
 from qgis.PyQt.QtWidgets import QMessageBox, QWidget
 
-from geest.core.constants import DEFAULT_S2S_ENV_HAZARD_FIELDS, DEFAULT_S2S_NTL_FIELD
+from geest.core.constants import (
+    DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS,
+    DEFAULT_S2S_ENV_HAZARD_FIELDS,
+    DEFAULT_S2S_NTL_FIELD,
+)
+from geest.core.s2s_task_gate import S2STaskGate
 from geest.core.tasks import S2SDownloaderTask
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import get_ui_class, linear_interpolation, log_message, resources_path
@@ -31,6 +37,10 @@ class S2SPanel(FORM_CLASS, QWidget):
 
     switch_to_next_tab = pyqtSignal()
     switch_to_previous_tab = pyqtSignal()
+    PREFETCH_MAX_ATTEMPTS = 4
+    PREFETCH_INTER_JOB_DELAY_MS = 750
+    PREFETCH_CHUNK_SIZE = 3000
+    PREFETCH_CHUNK_THRESHOLD = 50000
 
     def __init__(self):
         """Initialize panel and UI."""
@@ -43,6 +53,11 @@ class S2SPanel(FORM_CLASS, QWidget):
         self._s2s_prefetch_updates: List[Dict] = []
         self._s2s_prefetch_task = None
         self._s2s_prefetch_error_for_current_task = False
+        self._s2s_prefetch_last_error_message = ""
+        self._s2s_prefetch_hex_ids: List[str] = []
+        self._s2s_gate_token = None
+        self._s2s_prefetch_warning_keys = set()
+        self._s2s_prefetch_retry_timer_pending = False
 
         self.setupUi(self)
         log_message("Loading S2S panel")
@@ -147,16 +162,68 @@ class S2SPanel(FORM_CLASS, QWidget):
             log_message("S2S prefetch skipped: failed to build AOI feature.", tag="GeoE3", level=Qgis.Warning)
             return False
 
+        self._s2s_prefetch_hex_ids = self._load_study_area_h3_indexes()
+
         jobs, warnings = self._prepare_s2s_prefetch_jobs(model)
         self._s2s_prefetch_warnings = warnings
+        self._s2s_prefetch_updates = []
+        self._s2s_prefetch_warning_keys = set()
+        self._s2s_prefetch_retry_timer_pending = False
+
+        completed_jobs = set(self._load_prefetch_completed_jobs(model))
+        pending_jobs: List[Dict] = []
+        resumed_count = 0
+
+        for job in jobs:
+            job_with_mode = self._job_with_fetch_mode(job, model)
+            existing_output = self._existing_s2s_output_path(job_with_mode)
+            if self._is_existing_s2s_output_valid(
+                existing_output,
+                job_with_mode.get("fields", []),
+                job_with_mode.get("filename", ""),
+            ):
+                self._s2s_prefetch_updates.append(
+                    {
+                        "indicator_ids": job_with_mode["indicator_ids"],
+                        "output_path": existing_output,
+                        "metadata": job_with_mode["metadata"],
+                    }
+                )
+                completed_jobs.add(job_with_mode["filename"])
+                self._clear_prefetch_job_state(job_with_mode["filename"], model=model)
+                resumed_count += 1
+                continue
+
+            if job_with_mode["filename"] in completed_jobs:
+                completed_jobs.remove(job_with_mode["filename"])
+
+            job_with_mode["attempt"] = 1
+            pending_jobs.append(job_with_mode)
+
+        self._store_prefetch_completed_jobs(model, completed_jobs)
+        self._write_model(model)
+
+        if resumed_count:
+            self._append_prefetch_warning(f"Resuming prefetch: {resumed_count} datasets already available.")
+
         if not jobs:
             if warnings:
                 QMessageBox.information(self, "S2S Fetch", "\n".join(warnings))
             return False
 
-        self._s2s_prefetch_jobs = jobs
-        self._s2s_prefetch_updates = []
+        if not pending_jobs:
+            self.processing_info_label.setText("All S2S datasets already available.")
+            self.processing_info_label.setVisible(True)
+            self.progress_bar.setVisible(True)
+            self.progress_bar.setMinimum(0)
+            self.progress_bar.setMaximum(100)
+            self.progress_bar.setValue(100)
+            self._finalize_s2s_prefetch()
+            return True
+
+        self._s2s_prefetch_jobs = pending_jobs
         self._s2s_prefetch_index = 0
+        self._s2s_prefetch_task = None
         self.processing_info_label.setText("Fetching S2S data for regional indicators...")
         self.processing_info_label.setVisible(True)
         self.progress_bar.setVisible(True)
@@ -168,7 +235,7 @@ class S2SPanel(FORM_CLASS, QWidget):
         self.next_button.setEnabled(False)
         self.prefetch_s2s_checkbox.setEnabled(False)
 
-        self._run_next_s2s_prefetch_job(aoi_feature)
+        self._schedule_next_s2s_prefetch_job(aoi_feature, 0)
         return True
 
     def _prepare_s2s_prefetch_jobs(self, model: dict) -> tuple[list, list]:
@@ -221,6 +288,9 @@ class S2SPanel(FORM_CLASS, QWidget):
                         else:
                             fields = []
 
+                        if not fields and indicator_id.lower() == "education":
+                            fields = list(DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS)
+
                         unique_fields = []
                         for field in fields:
                             if field not in unique_fields:
@@ -231,12 +301,15 @@ class S2SPanel(FORM_CLASS, QWidget):
                             continue
 
                         sanitized_id = indicator_id.lower().replace(" ", "_").replace("-", "_")
+                        filename = f"s2s_polygon_per_cell_{sanitized_id}"
+                        if indicator_id.lower() == "education":
+                            filename = "s2s_education"
                         jobs.append(
                             {
                                 "type": "polygon_per_cell",
                                 "indicator_ids": [indicator_id],
                                 "fields": unique_fields,
-                                "filename": f"s2s_polygon_per_cell_{sanitized_id}",
+                                "filename": filename,
                                 "metadata": {
                                     "s2s_fields": unique_fields,
                                     "s2s_fields_text": ",".join(unique_fields),
@@ -267,7 +340,8 @@ class S2SPanel(FORM_CLASS, QWidget):
         job = self._s2s_prefetch_jobs[self._s2s_prefetch_index]
         job_index = self._s2s_prefetch_index + 1
         total = len(self._s2s_prefetch_jobs)
-        self.processing_info_label.setText(f"Fetching S2S dataset {job_index}/{total}: {job['filename']}")
+        mode_text = " (chunked)" if job.get("fetch_mode") == "hex_ids" else ""
+        self.processing_info_label.setText(f"Fetching S2S dataset {job_index}/{total}: {job['filename']}{mode_text}")
         self.progress_bar.setFormat(f"S2S {job_index}/{total}: %p%")
 
         self._s2s_prefetch_task = S2SDownloaderTask(
@@ -278,17 +352,46 @@ class S2SPanel(FORM_CLASS, QWidget):
             spatial_join_method="centroid",
             geometry="point",
             delete_existing=True,
+            mode=job.get("fetch_mode", "aoi"),
+            hex_ids=job.get("hex_ids"),
+            chunk_size=job.get("chunk_size", self.PREFETCH_CHUNK_SIZE),
+            start_chunk_index=job.get("start_chunk_index", 0),
+            append_existing=bool(job.get("start_chunk_index", 0) > 0),
         )
         self._s2s_prefetch_task.progress_updated.connect(self._on_s2s_prefetch_progress_message)
         self._s2s_prefetch_task.progressChanged.connect(self._on_s2s_prefetch_progress_value)
         self._s2s_prefetch_task.error_occurred.connect(self._on_s2s_prefetch_error)
+        if job.get("fetch_mode") == "hex_ids":
+            self._s2s_prefetch_task.chunk_completed.connect(
+                lambda current_chunk, total_chunks, current_job=job: self._on_s2s_prefetch_chunk_completed(
+                    current_job,
+                    current_chunk,
+                    total_chunks,
+                )
+            )
         self._s2s_prefetch_error_for_current_task = False
+        self._s2s_prefetch_last_error_message = ""
         self._s2s_prefetch_task.taskCompleted.connect(
             lambda aoi=aoi_feature, current_job=job: self._on_s2s_prefetch_task_completed(current_job, aoi)
         )
         self._s2s_prefetch_task.taskTerminated.connect(
             lambda aoi=aoi_feature, current_job=job: self._on_s2s_prefetch_task_terminated(current_job, aoi)
         )
+
+        gate_label = f"prefetch:{job.get('filename', '')}"
+        token = S2STaskGate.acquire(gate_label)
+        if not token:
+            active = S2STaskGate.active_label() or "another panel"
+            if active == gate_label:
+                self.processing_info_label.setText(f"S2S prefetch already running for {job.get('filename', '')}.")
+            else:
+                self.processing_info_label.setText(
+                    f"S2S prefetch waiting: another S2S download is running ({active})."
+                )
+            self._schedule_next_s2s_prefetch_job(aoi_feature, 3000)
+            return
+        self._s2s_gate_token = token
+
         QgsApplication.taskManager().addTask(self._s2s_prefetch_task)
 
     def _on_s2s_prefetch_progress_message(self, message: str) -> None:
@@ -299,13 +402,30 @@ class S2SPanel(FORM_CLASS, QWidget):
         """Update progress bar from S2S task progress."""
         self.progress_bar.setValue(int(progress))
 
+    def _on_s2s_prefetch_chunk_completed(self, job: dict, current_chunk: int, total_chunks: int) -> None:
+        """Persist chunk progress for resumable chunked prefetch jobs."""
+        model = self._read_model()
+        if not model:
+            return
+
+        state = {
+            "mode": "hex_ids",
+            "total_chunks": int(total_chunks),
+            "next_chunk_index": int(current_chunk),
+            "chunk_size": int(job.get("chunk_size", self.PREFETCH_CHUNK_SIZE)),
+            "updated_at": datetime.utcnow().isoformat() + "Z",
+        }
+        self._store_prefetch_job_state(model, job.get("filename", ""), state)
+        self._write_model(model)
+
     def _on_s2s_prefetch_error(self, message: str) -> None:
         """Record non-blocking S2S prefetch errors."""
         self._s2s_prefetch_error_for_current_task = True
-        self._s2s_prefetch_warnings.append(message)
+        self._s2s_prefetch_last_error_message = message
 
     def _on_s2s_prefetch_task_completed(self, job: dict, aoi_feature: dict) -> None:
         """Handle successful S2S prefetch task and run next."""
+        self._release_s2s_gate()
         output_path = os.path.join(self.working_dir, "study_area", f"{job['filename']}.gpkg")
         if os.path.exists(output_path):
             self._s2s_prefetch_updates.append(
@@ -315,18 +435,226 @@ class S2SPanel(FORM_CLASS, QWidget):
                     "metadata": job["metadata"],
                 }
             )
+            self._mark_prefetch_job_completed(job["filename"])
+            self._clear_prefetch_job_state(job["filename"])
         else:
-            self._s2s_prefetch_warnings.append(f"S2S output not found for {job['filename']}.")
+            self._append_prefetch_warning(f"S2S output not found for {job['filename']}.")
 
         self._s2s_prefetch_index += 1
-        self._run_next_s2s_prefetch_job(aoi_feature)
+        self._schedule_next_s2s_prefetch_job(aoi_feature, self.PREFETCH_INTER_JOB_DELAY_MS)
 
     def _on_s2s_prefetch_task_terminated(self, job: dict, aoi_feature: dict) -> None:
         """Handle terminated S2S prefetch tasks and continue queue."""
-        if not self._s2s_prefetch_error_for_current_task:
-            self._s2s_prefetch_warnings.append(f"S2S prefetch task terminated: {job['filename']}")
+        self._release_s2s_gate()
+        if self._s2s_prefetch_error_for_current_task and self._is_transient_prefetch_error(self._s2s_prefetch_last_error_message):
+            attempt = int(job.get("attempt", 1))
+            if attempt < self.PREFETCH_MAX_ATTEMPTS:
+                next_attempt = attempt + 1
+                delay_ms = self._retry_delay_ms(next_attempt)
+                job["attempt"] = next_attempt
+                self.processing_info_label.setText(
+                    f"S2S unavailable for {job['filename']} - retrying "
+                    f"{next_attempt}/{self.PREFETCH_MAX_ATTEMPTS} in {delay_ms / 1000:.1f}s..."
+                )
+                self._schedule_next_s2s_prefetch_job(aoi_feature, delay_ms)
+                return
+
+        if self._s2s_prefetch_error_for_current_task:
+            self._append_prefetch_warning(
+                self._s2s_prefetch_last_error_message or f"S2S prefetch failed: {job['filename']}"
+            )
+        else:
+            self._append_prefetch_warning(f"S2S prefetch task terminated: {job['filename']}")
+
         self._s2s_prefetch_index += 1
-        self._run_next_s2s_prefetch_job(aoi_feature)
+        self._schedule_next_s2s_prefetch_job(aoi_feature, self.PREFETCH_INTER_JOB_DELAY_MS)
+
+    def _schedule_next_s2s_prefetch_job(self, aoi_feature: dict, delay_ms: int) -> None:
+        """Schedule next prefetch job with optional delay."""
+        delay = max(0, int(delay_ms))
+        if delay == 0:
+            self._s2s_prefetch_retry_timer_pending = False
+            self._run_next_s2s_prefetch_job(aoi_feature)
+            return
+
+        if self._s2s_prefetch_retry_timer_pending:
+            return
+
+        self._s2s_prefetch_retry_timer_pending = True
+
+        def _run_delayed():
+            self._s2s_prefetch_retry_timer_pending = False
+            self._run_next_s2s_prefetch_job(aoi_feature)
+
+        QTimer.singleShot(delay, _run_delayed)
+
+    def _release_s2s_gate(self) -> None:
+        """Release global S2S gate lock for panel prefetch task."""
+        if self._s2s_gate_token:
+            S2STaskGate.release(self._s2s_gate_token)
+            self._s2s_gate_token = None
+
+    def _append_prefetch_warning(self, message: str) -> None:
+        """Append a warning once, preventing duplicate warning spam."""
+        normalized = str(message or "").strip()
+        if not normalized:
+            return
+        if normalized in self._s2s_prefetch_warning_keys:
+            return
+        self._s2s_prefetch_warning_keys.add(normalized)
+        self._s2s_prefetch_warnings.append(normalized)
+
+    def _existing_s2s_output_path(self, job: dict) -> str:
+        """Return expected output path for a prefetch job."""
+        return os.path.join(self.working_dir, "study_area", f"{job['filename']}.gpkg")
+
+    @staticmethod
+    def _is_existing_s2s_output_valid(output_path: str, fields: List[str], layer_name: str) -> bool:
+        """Return True when an existing S2S output has required fields and features."""
+        if not output_path or not os.path.exists(output_path):
+            return False
+
+        layer = QgsVectorLayer(f"{output_path}|layername={layer_name}", layer_name, "ogr")
+        if not layer.isValid():
+            layer = QgsVectorLayer(output_path, layer_name, "ogr")
+        if not layer.isValid() or layer.featureCount() <= 0:
+            return False
+
+        required_fields = ["hex_id"] + [field for field in fields if field != "hex_id"]
+        layer_fields = layer.fields()
+        for field in required_fields:
+            if layer_fields.indexFromName(field) == -1:
+                return False
+        return True
+
+    @staticmethod
+    def _is_transient_prefetch_error(message: str) -> bool:
+        """Return True when a prefetch error should be retried."""
+        lowered = str(message or "").lower()
+        return (
+            "503" in lowered
+            or "temporarily unavailable" in lowered
+            or "server error (502)" in lowered
+            or "server error (504)" in lowered
+            or "no http status code" in lowered
+            or "timed out" in lowered
+            or "timeout" in lowered
+            or "connection" in lowered
+        )
+
+    @staticmethod
+    def _retry_delay_ms(attempt: int) -> int:
+        """Return exponential retry delay for a retry attempt number."""
+        if attempt <= 2:
+            return 2000
+        if attempt == 3:
+            return 5000
+        return 10000
+
+    @staticmethod
+    def _load_prefetch_completed_jobs(model: dict) -> List[str]:
+        """Read persisted completed prefetch job filenames from model."""
+        completed = model.get("s2s_prefetch_completed_jobs", [])
+        if not isinstance(completed, list):
+            return []
+        return [str(name).strip() for name in completed if str(name).strip()]
+
+    @staticmethod
+    def _store_prefetch_completed_jobs(model: dict, completed_jobs) -> None:
+        """Persist completed prefetch job filenames in model."""
+        sorted_names = sorted({str(name).strip() for name in completed_jobs if str(name).strip()})
+        model["s2s_prefetch_completed_jobs"] = sorted_names
+
+    @staticmethod
+    def _load_prefetch_job_state(model: dict, filename: str) -> dict:
+        """Read persisted prefetch state for a specific job filename."""
+        if not filename:
+            return {}
+        state = model.get("s2s_prefetch_job_state", {})
+        if not isinstance(state, dict):
+            return {}
+        job_state = state.get(filename, {})
+        return job_state if isinstance(job_state, dict) else {}
+
+    @staticmethod
+    def _store_prefetch_job_state(model: dict, filename: str, state: dict) -> None:
+        """Persist prefetch checkpoint state for a specific job."""
+        if not filename:
+            return
+        all_state = model.get("s2s_prefetch_job_state", {})
+        if not isinstance(all_state, dict):
+            all_state = {}
+        all_state[filename] = state
+        model["s2s_prefetch_job_state"] = all_state
+
+    def _clear_prefetch_job_state(self, filename: str, model: dict = None) -> None:
+        """Clear persisted checkpoint state for a specific job."""
+        if not filename:
+            return
+
+        model_in_use = model if model is not None else self._read_model()
+        if not model_in_use:
+            return
+
+        all_state = model_in_use.get("s2s_prefetch_job_state", {})
+        if not isinstance(all_state, dict) or filename not in all_state:
+            return
+
+        all_state.pop(filename, None)
+        model_in_use["s2s_prefetch_job_state"] = all_state
+        if model is None:
+            self._write_model(model_in_use)
+
+    def _load_study_area_h3_indexes(self) -> List[str]:
+        """Load H3 indexes from study_area_grid for chunked prefetch mode."""
+        gpkg_path = os.path.join(self.working_dir, "study_area", "study_area.gpkg")
+        layer = QgsVectorLayer(f"{gpkg_path}|layername=study_area_grid", "study_area_grid", "ogr")
+        if not layer.isValid() or layer.featureCount() == 0:
+            return []
+
+        field_index = layer.fields().indexFromName("h3_index")
+        if field_index == -1:
+            return []
+
+        values = set()
+        for feature in layer.getFeatures():
+            hex_id = str(feature["h3_index"] or "").strip()
+            if hex_id:
+                values.add(hex_id)
+        return sorted(values)
+
+    def _job_with_fetch_mode(self, job: dict, model: dict) -> dict:
+        """Return a prefetch job enriched with fetch mode and resume state."""
+        enriched = dict(job)
+        use_chunked = self._should_use_chunked_prefetch()
+
+        if use_chunked:
+            state = self._load_prefetch_job_state(model, enriched.get("filename", ""))
+            start_chunk_index = int(state.get("next_chunk_index", 0)) if isinstance(state, dict) else 0
+            enriched["fetch_mode"] = "hex_ids"
+            enriched["hex_ids"] = list(self._s2s_prefetch_hex_ids)
+            enriched["chunk_size"] = self.PREFETCH_CHUNK_SIZE
+            enriched["start_chunk_index"] = max(0, start_chunk_index)
+        else:
+            enriched["fetch_mode"] = "aoi"
+            enriched["start_chunk_index"] = 0
+
+        return enriched
+
+    def _should_use_chunked_prefetch(self) -> bool:
+        """Return True when H3 coverage is large enough to use chunked S2S mode."""
+        return len(self._s2s_prefetch_hex_ids) > self.PREFETCH_CHUNK_THRESHOLD
+
+    def _mark_prefetch_job_completed(self, filename: str) -> None:
+        """Mark a prefetch job as completed and persist to model."""
+        model = self._read_model()
+        if not model:
+            return
+
+        completed_jobs = set(self._load_prefetch_completed_jobs(model))
+        completed_jobs.add(filename)
+        self._store_prefetch_completed_jobs(model, completed_jobs)
+        self._write_model(model)
 
     def _finalize_s2s_prefetch(self) -> None:
         """Write S2S prefetch metadata into model and continue flow."""
@@ -336,7 +664,7 @@ class S2SPanel(FORM_CLASS, QWidget):
                 self._apply_s2s_updates_to_model(model, self._s2s_prefetch_updates)
                 self._write_model(model)
             except Exception as error:
-                self._s2s_prefetch_warnings.append(f"Failed to store S2S prefetch metadata: {error}")
+                self._append_prefetch_warning(f"Failed to store S2S prefetch metadata: {error}")
 
         self.progress_bar.setValue(100)
         self.progress_bar.setFormat("S2S fetch complete")

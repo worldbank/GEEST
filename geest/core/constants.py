@@ -31,4 +31,16 @@ DEFAULT_S2S_ENV_HAZARD_FIELDS = {
     "drought": "drought_spei_1_5_rp100_mean",
 }
 
+# Education proxy fields from S2S urbanization_ghssmod dataset.
+# NOTE: ghs_21_pop (suburban) is intentionally excluded by design.
+DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS = [
+    "ghs_11_pop",
+    "ghs_12_pop",
+    "ghs_13_pop",
+    "ghs_22_pop",
+    "ghs_23_pop",
+    "ghs_30_pop",
+    "ghs_total_pop",
+]
+
 MAX_FEATURES_FOR_VECTOR = 100000

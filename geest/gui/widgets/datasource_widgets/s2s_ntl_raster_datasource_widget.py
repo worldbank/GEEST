@@ -13,6 +13,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QSettings
 from qgis.PyQt.QtWidgets import QFileDialog, QLabel, QMessageBox, QSizePolicy
 
+from geest.core import S2STaskGate
 from geest.core.constants import DEFAULT_S2S_NTL_FIELD
 from geest.core.tasks import S2SDownloaderTask
 
@@ -55,6 +56,7 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         self.layout.setStretchFactor(self.raster_line_edit, 5)
 
         self.s2s_task = None
+        self._s2s_gate_token = None
         self.s2s_vector_output_path = self.attributes.get("s2s_output_path", "")
         self.s2s_raster_output_path = ""
         self._s2s_error_handled = False
@@ -118,6 +120,18 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         self.s2s_vector_output_path = os.path.join(working_directory, "study_area", f"{filename}.gpkg")
         self.s2s_raster_output_path = ""
 
+        gate_label = "widget:nighttime_lights"
+        token = S2STaskGate.acquire(gate_label)
+        if not token:
+            active = S2STaskGate.active_label() or "another panel"
+            QMessageBox.information(
+                self,
+                "S2S Busy",
+                f"Another S2S download is currently running ({active}). Please wait for it to finish.",
+            )
+            return
+        self._s2s_gate_token = token
+
         self.s2s_controls.set_running()
         self._set_status("Fetching S2S data...")
         self._s2s_error_handled = False
@@ -145,6 +159,7 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
     def _on_s2s_error(self, message: str) -> None:
         """Handle S2S task errors."""
         self._s2s_error_handled = True
+        self._release_s2s_gate()
         self._set_status("S2S download failed")
         self.s2s_controls.set_download_failed(message)
         friendly_message = S2SDataSourceWidget._humanize_s2s_error(message)
@@ -152,6 +167,7 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
 
     def _on_s2s_terminated(self) -> None:
         """Handle cancelled/terminated S2S tasks."""
+        self._release_s2s_gate()
         if self._s2s_error_handled:
             return
         self._set_status("S2S task terminated")
@@ -159,6 +175,7 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
 
     def _on_s2s_completed(self) -> None:
         """Record S2S vector output and update attributes for grid-based workflows."""
+        self._release_s2s_gate()
         self.s2s_controls.reset()
 
         if not os.path.exists(self.s2s_vector_output_path):
@@ -182,6 +199,12 @@ class S2SNTLRasterDataSourceWidget(RasterDataSourceWidget):
         self._set_status("S2S nighttime lights downloaded")
         self.s2s_controls.set_downloaded()
         self.update_attributes()
+
+    def _release_s2s_gate(self) -> None:
+        """Release global S2S gate lock for this widget task."""
+        if getattr(self, "_s2s_gate_token", None):
+            S2STaskGate.release(self._s2s_gate_token)
+            self._s2s_gate_token = None
 
     def _set_status(self, message: str) -> None:
         """Set status label text when available."""

@@ -16,6 +16,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QSettings
 from qgis.PyQt.QtWidgets import QLabel, QLineEdit, QMessageBox, QSizePolicy
 
+from geest.core import S2STaskGate
 from geest.core.tasks import S2SDownloaderTask
 
 from .download_task_controls import DownloadTaskControls
@@ -60,6 +61,7 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
 
         self._s2s_error_handled = False
         self.s2s_task = None
+        self._s2s_gate_token = None
         self.s2s_output_path = self.attributes.get("s2s_output_path", "")
         self._load_existing_s2s_output()
 
@@ -113,6 +115,18 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
 
         self.s2s_output_path = os.path.join(working_directory, "study_area", f"s2s_{self.widget_key}.gpkg")
 
+        gate_label = f"widget:{self.widget_key}"
+        token = S2STaskGate.acquire(gate_label)
+        if not token:
+            active = S2STaskGate.active_label() or "another panel"
+            QMessageBox.information(
+                self,
+                "S2S Busy",
+                f"Another S2S download is currently running ({active}). Please wait for it to finish.",
+            )
+            return
+        self._s2s_gate_token = token
+
         self.s2s_controls.set_running()
         self.s2s_status_label.setText("Fetching S2S data...")
 
@@ -141,6 +155,7 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
     def _on_s2s_error(self, message: str) -> None:
         """Handle S2S task errors."""
         self._s2s_error_handled = True
+        self._release_s2s_gate()
         self.s2s_status_label.setText("S2S download failed")
         self.s2s_controls.set_download_failed(message)
         friendly_message = self._humanize_s2s_error(message)
@@ -148,6 +163,7 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
 
     def _on_s2s_terminated(self) -> None:
         """Handle cancelled/terminated S2S tasks."""
+        self._release_s2s_gate()
         if self._s2s_error_handled:
             return
         self.s2s_status_label.setText("S2S task terminated")
@@ -155,6 +171,7 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
 
     def _on_s2s_completed(self) -> None:
         """Load output layer after successful S2S task completion."""
+        self._release_s2s_gate()
         self.s2s_controls.reset()
 
         if not self.s2s_output_path or not os.path.exists(self.s2s_output_path):
@@ -170,10 +187,16 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
             QMessageBox.warning(self, "Invalid S2S Output", "S2S output file exists but could not be loaded.")
             return
 
-        self.layer_combo.setLayer(output_layer)
+        self._switch_to_layer_mode(output_layer)
         self.s2s_status_label.setText("S2S download complete")
         self.s2s_controls.set_downloaded()
         self.update_attributes()
+
+    def _release_s2s_gate(self) -> None:
+        """Release global S2S gate lock for this widget task."""
+        if getattr(self, "_s2s_gate_token", None):
+            S2STaskGate.release(self._s2s_gate_token)
+            self._s2s_gate_token = None
 
     def _load_existing_s2s_output(self) -> None:
         """Auto-select existing S2S output when available."""
@@ -186,8 +209,15 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
             self.s2s_status_label.setText("S2S output invalid")
             return
 
-        self.layer_combo.setLayer(output_layer)
+        self._switch_to_layer_mode(output_layer)
         self.s2s_controls.set_downloaded()
+
+    def _switch_to_layer_mode(self, output_layer: QgsVectorLayer) -> None:
+        """Select downloaded layer and reset manual path input mode."""
+        self.shapefile_line_edit.clear()
+        self.shapefile_line_edit.setVisible(False)
+        self.layer_combo.setVisible(True)
+        self.layer_combo.setLayer(output_layer)
 
     @staticmethod
     def _load_or_reuse_vector_layer(layer_path: str, layer_name: str) -> Optional[QgsVectorLayer]:
@@ -270,6 +300,11 @@ class S2SDataSourceWidget(VectorDataSourceWidget):
     def _humanize_s2s_error(message: str) -> str:
         """Convert low-level S2S errors into user-friendly text."""
         lowered = str(message).lower()
+        if "503" in lowered or "service temporarily unavailable" in lowered or "server error (503)" in lowered:
+            return (
+                "The Space2Stats service is temporarily unavailable (503). "
+                "Please wait a few minutes and try again."
+            )
         if "exterior must be valid" in lowered or "coordinate" in lowered:
             return (
                 "The study area geometry sent to S2S is invalid in WGS84 coordinates. "

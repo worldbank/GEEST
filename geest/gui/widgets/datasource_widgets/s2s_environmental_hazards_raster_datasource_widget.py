@@ -7,6 +7,7 @@ from qgis.core import QgsApplication, QgsVectorLayer
 from qgis.PyQt.QtCore import QSettings
 from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox
 
+from geest.core import S2STaskGate
 from geest.core.constants import DEFAULT_S2S_ENV_HAZARD_FIELDS
 from geest.core.tasks import S2SDownloaderTask
 
@@ -80,6 +81,18 @@ class S2SEnvironmentalHazardsRasterDataSourceWidget(S2SNTLRasterDataSourceWidget
         self.s2s_vector_output_path = os.path.join(working_directory, "study_area", f"{filename}.gpkg")
         self.s2s_raster_output_path = ""
         self.s2s_ntl_field = hazard_field
+
+        gate_label = f"widget:hazard:{self.attributes.get('id', '').lower()}"
+        token = S2STaskGate.acquire(gate_label)
+        if not token:
+            active = S2STaskGate.active_label() or "another panel"
+            QMessageBox.information(
+                self,
+                "S2S Busy",
+                f"Another S2S download is currently running ({active}). Please wait for it to finish.",
+            )
+            return
+        self._s2s_gate_token = token
 
         self.s2s_controls.set_running()
         self._set_status("Fetching S2S data...")

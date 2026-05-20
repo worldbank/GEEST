@@ -631,7 +631,16 @@
                             "use_classify_polygon_into_classes": 1,
                             "use_classify_safety_polygon_into_classes": 0,
                             "use_csv_to_point_layer": 0,
-                            "use_polygon_per_cell": 0,
+                            "use_polygon_per_cell": 1,
+                            "s2s_fields": [
+                                "ghs_11_pop",
+                                "ghs_12_pop",
+                                "ghs_13_pop",
+                                "ghs_22_pop",
+                                "ghs_23_pop",
+                                "ghs_30_pop",
+                                "ghs_total_pop"
+                            ],
                             "use_polyline_per_cell": 0,
                             "use_point_per_cell": 0,
                             "use_nighttime_lights": 0,
