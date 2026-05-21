@@ -6,9 +6,12 @@ This module contains functionality for safety polygon configuration widget.
 
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import (
+    QAbstractSpinBox,
+    QHeaderView,
     QLabel,
     QSizePolicy,
     QSpinBox,
+    QStyleFactory,
     QTableWidget,
     QTableWidgetItem,
 )
@@ -35,6 +38,16 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         polygon_shapefile_line_edit (QLineEdit): Line edit for entering/selecting a polygon layer shapefile.
     """
 
+    def _set_spinbox_style(self, spin_box: QSpinBox, warning: bool) -> None:
+        """Apply minimal styling while preserving native arrow rendering."""
+        text_color = "#d11" if warning else "#000"
+        fusion_style = QStyleFactory.create("Fusion")
+        if fusion_style is not None:
+            spin_box.setStyle(fusion_style)
+        spin_box.setButtonSymbols(QAbstractSpinBox.UpDownArrows)
+        if spin_box.lineEdit() is not None:
+            spin_box.lineEdit().setStyleSheet(f"color: {text_color};")
+
     def add_internal_widgets(self) -> None:
         """
         Adds the internal widgets required for selecting polygon layers and their corresponding shapefiles.
@@ -47,11 +60,17 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.table_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
             # Stop the label being editable
             self.table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
+            self.table_widget.verticalHeader().setVisible(True)
+            self.table_widget.verticalHeader().setDefaultSectionSize(24)
+            self.table_widget.verticalHeader().setMinimumSectionSize(20)
+            self.table_widget.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
+            self.table_widget.verticalHeader().setFixedWidth(28)
             self.internal_layout.addWidget(self.table_widget)
             self.table_widget.setColumnCount(2)
-            self.table_widget.setColumnWidth(1, 80)
+            self.table_widget.setColumnWidth(1, 110)
             self.table_widget.horizontalHeader().setStretchLastSection(False)
-            self.table_widget.horizontalHeader().setSectionResizeMode(0, self.table_widget.horizontalHeader().Stretch)
+            self.table_widget.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+            self.table_widget.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
 
             return self.populate_table()
             self.internal_layout.addWidget(self.table_widget)
@@ -105,9 +124,10 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.table_widget.setItem(row, 0, name_item)
             value_item.setRange(0, 100)  # Set spinner range
             value_item.setValue(value)  # Default value
+            self._set_spinbox_style(value_item, warning=False)
             self.table_widget.setCellWidget(row, 1, value_item)
 
-            def on_value_changed(value):
+            def on_value_changed(value, spin_box=value_item):
                 """🔄 On value changed.
 
                 Args:
@@ -115,10 +135,10 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
                 """
                 # Color handling for current cell
                 if value is None or not (0 <= value <= 100):
-                    value_item.setStyleSheet("color: red;")
-                    value_item.setValue(0)
+                    self._set_spinbox_style(spin_box, warning=True)
+                    spin_box.setValue(0)
                 else:
-                    value_item.setStyleSheet("color: black;")
+                    self._set_spinbox_style(spin_box, warning=False)
                 self.update_cell_colors()
                 self.update_data()
 
@@ -141,7 +161,7 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         for r in range(self.table_widget.rowCount()):
             spin_widget = self.table_widget.cellWidget(r, 1)
             if spin_widget:
-                spin_widget.setStyleSheet("color: red;" if all_zeros else "color: black;")
+                self._set_spinbox_style(spin_widget, warning=all_zeros)
 
     def table_to_dict(self):
         """⚙️ Table to dict.
