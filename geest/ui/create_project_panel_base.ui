@@ -361,8 +361,8 @@ When this option is **not selected**, the analysis focuses on generic employment
          </item>
         </layout>
        </item>
-       <item row="7" column="0">
-        <spacer name="verticalSpacer">
+        <item row="7" column="0">
+         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -374,8 +374,8 @@ When this option is **not selected**, the analysis focuses on generic employment
          </property>
         </spacer>
        </item>
-       <item row="8" column="0">
-        <widget class="QLabel" name="project_path_label">
+        <item row="8" column="0">
+         <widget class="QLabel" name="project_path_label">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -561,9 +561,9 @@ When this option is **not selected**, the analysis focuses on generic employment
   <tabstop>cell_size_spinbox</tabstop>
   <tabstop>layer_combo</tabstop>
   <tabstop>field_combo</tabstop>
-  <tabstop>load_boundary_button</tabstop>
-  <tabstop>use_boundary_crs</tabstop>
-  <tabstop>previous_button</tabstop>
+   <tabstop>load_boundary_button</tabstop>
+   <tabstop>use_boundary_crs</tabstop>
+    <tabstop>previous_button</tabstop>
   <tabstop>next_button</tabstop>
  </tabstops>
  <resources/>

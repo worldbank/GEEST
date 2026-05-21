@@ -95,16 +95,26 @@
         </property>
        </widget>
       </item>
-       <item row="1" column="0">
-        <widget class="QCheckBox" name="filter_study_areas_by_ghsl">
-         <property name="text">
-          <string>Filter study areas by GHSL settlements (skip areas without settlements)</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="filter_study_areas_by_ghsl">
+          <property name="text">
+           <string>Filter study areas by GHSL settlements (skip areas without settlements)</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_ghsl_attribution">
+          <property name="text">
+           <string>Source: GHSL (Global Human Settlement Layer), European Commission JRC.</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
        <item row="2" column="0" colspan="2">
         <widget class="QGroupBox" name="groupBox_ookla">
          <property name="title">
@@ -175,16 +185,26 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0" colspan="2">
-          <widget class="QLabel" name="label_ookla_cache_note">
-           <property name="text">
-            <string>Note: First run downloads large files; later runs reuse the cache.</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
+          <item row="4" column="0" colspan="2">
+           <widget class="QLabel" name="label_ookla_cache_note">
+            <property name="text">
+             <string>Note: First run downloads large files; later runs reuse the cache.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0" colspan="3">
+           <widget class="QLabel" name="label_ookla_attribution">
+            <property name="text">
+             <string>Source: Ookla Open Data (Speedtest Global Performance), subject to provider terms.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          <item row="5" column="0">
           <widget class="QLabel" name="label_ookla_cache_dir">
            <property name="text">

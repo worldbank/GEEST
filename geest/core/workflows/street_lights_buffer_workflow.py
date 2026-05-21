@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """📦 Street Lights Buffer Workflow module.
-
 This module contains functionality for street lights buffer workflow.
 """
-
 import os
 from urllib.parse import unquote
 
@@ -42,20 +40,14 @@ class StreetLightsBufferWorkflow(WorkflowBase):
     ):
         """
         Initialize the workflow with attributes and feedback.
-
         :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
-
         :param cell_size_m: Cell size in meters.
-
         :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
-
         :param feedback: QgsFeedback object for progress reporting and
             cancellation's.
-
         :param context: QgsProcessingContext object for processing.
             This can be used to pass objects to the thread. e.g. the
             QgsProject Instance.
-
         :param working_directory: Folder containing study_area.gpkg where
             the outputs will be placed. If not set, the value will be taken
             from QSettings.
@@ -64,11 +56,9 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         # this item will directly update the tree
         super().__init__(item, cell_size_m, analysis_scale, feedback, context, working_directory)
         self.workflow_name = "use_street_lights"
-
         layer_path = self.attributes.get("street_lights_shapefile", None)
         if layer_path:
             layer_path = unquote(layer_path)
-
         if not layer_path:
             log_message(
                 "Invalid raster found in street_lights_shapefile, trying street_lights_point_layer_source.",
@@ -87,7 +77,6 @@ class StreetLightsBufferWorkflow(WorkflowBase):
                 error += f"Layer Source: {self.street_lights_layer_source} "
                 self.attributes["error"] = error
                 raise Exception(error)
-
         self.features_layer = QgsVectorLayer(layer_path, "points", "ogr")
         if not self.features_layer.isValid():
             log_message("street lights source file not valid", level=Qgis.Critical)
@@ -96,7 +85,6 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             error += f"Layer Source: {self.street_lights_layer_source} "
             self.attributes["error"] = error
             raise Exception(error)
-
         factor_id = None
         if item.isIndicator() and item.parentItem:
             factor_id = item.parentItem.attribute("id", None)
@@ -108,7 +96,6 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         config = mapping.get(analysis_scale, mapping.get("national"))
         if not config:
             raise Exception("Streetlights mapping config not found.")
-
         self.buffer_distance = int(config.get("buffer_distance", 0))
         self.scoring_method = config.get("scoring_method", "")
         self.scores = config.get("scores", {})
@@ -123,29 +110,25 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
+        area_name: str = None,
     ) -> str:
         """
         Executes the actual workflow logic for a single area
         Must be implemented by subclasses.
-
         :current_area: Current polygon from our study area.
         :current_bbox: Bounding box of the above area.
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
-
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
         log_message(f"{self.workflow_name}  Processing Started")
-
         # Step 1: Buffer the selected features
         buffered_layer = self._buffer_features(area_features, f"{self.layer_id}_buffered_{index}")
         # Step 2: Select grid cells that intersect with features
         output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
         area_grid = select_grid_cells_and_count_features(self.grid_layer, area_features, output_path, self.feedback)
-
         # Step 3: Assign scores to the grid layer
         grid_layer = self._score_grid(area_grid, buffered_layer)
-
         # Step 4: Rasterize the grid layer using the assigned scores
         raster_output = self._rasterize(
             grid_layer,
@@ -154,17 +137,14 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             value_field="score",
             default_value=0,
         )
-
         return raster_output
 
     def _buffer_features(self, layer: QgsVectorLayer, output_name: str) -> QgsVectorLayer:
         """
         Buffer the input features by the buffer_distance km.
-
         Args:
             layer (QgsVectorLayer): The input feature layer.
             output_name (str): A name for the output buffered layer.
-
         Returns:
             QgsVectorLayer: The buffered features layer.
         """
@@ -179,7 +159,6 @@ class StreetLightsBufferWorkflow(WorkflowBase):
                 "OUTPUT": output_path,
             },
         )["OUTPUT"]
-
         buffered_layer = QgsVectorLayer(output_path, output_name, "ogr")
         return buffered_layer
 
@@ -191,16 +170,15 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
+        area_name: str = None,
     ):
         """
         Executes the actual workflow logic for a single area using a raster.
-
         :current_area: Current polygon from our study area.
         :clip_area: Polygon to clip the raster to which is aligned to cell edges.
         :current_bbox: Bounding box of the above area.
         :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
         :index: Index of the current area.
-
         :return: Path to the reclassified raster.
         """
         pass
@@ -211,6 +189,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
+        area_name: str = None,
     ):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
@@ -220,12 +199,10 @@ class StreetLightsBufferWorkflow(WorkflowBase):
     def _score_grid(self, grid_layer: QgsVectorLayer, buffered_layer: QgsVectorLayer) -> QgsVectorLayer:
         """
         Assign scores to a grid layer and rasterize it.
-
         Args:
             grid_layer (QgsVectorLayer): The grid layer representing the study area.
             buffered_layer (QgsVectorLayer): Buffered layer to evaluate intersections.
             index (int): Index for output file naming.
-
         Returns:
             str: Path to the output raster file.
         """
@@ -234,45 +211,37 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             tag="GeoE3",
             level=Qgis.Info,
         )
-
         # Add a new attribute to the grid layer for storing the score
         grid_layer.startEditing()
         if not grid_layer.fields().indexFromName("score") >= 0:
             grid_layer.dataProvider().addAttributes([QgsField("score", QVariant.Int)])
             grid_layer.updateFields()
-
         # Assign scores based on intersection with the buffered layer
         for grid_feature in grid_layer.getFeatures():
             grid_geom = grid_feature.geometry()
             max_score = 0
-
             for buffered_feature in buffered_layer.getFeatures():
                 buffered_geom = buffered_feature.geometry()
                 intersection = grid_geom.intersection(buffered_geom)
                 if intersection.isEmpty():
                     continue
-
                 if self.scoring_method == "binary":
                     max_score = max(max_score, self.scores.get("intersects_buffer", 5))
                     continue
-
                 overlap_percent = (intersection.area() / grid_geom.area()) * 100
                 log_message(
                     f"Overlap percentage: {overlap_percent}",
                     tag="GeoE3",
                     level=Qgis.Info,
                 )
-
                 # Determine score based on overlap percentage thresholds
                 if self.scoring_method == "percentage_intersection":
                     for min_pct, score in sorted(self.percentage_scores.items(), reverse=True):
                         if overlap_percent >= min_pct:
                             max_score = max(max_score, score)
                             break
-
             # Update the "score" attribute for the feature
             grid_feature.setAttribute("score", max_score)
             grid_layer.updateFeature(grid_feature)
-
         grid_layer.commitChanges()
         return grid_layer

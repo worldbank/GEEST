@@ -16,6 +16,10 @@ from geest.gui.widgets.datasource_widgets import (
     EPLEXDataSourceWidget,
     FixedValueDataSourceWidget,
     RasterDataSourceWidget,
+    S2SEnvironmentalHazardsRasterDataSourceWidget,
+    S2SDataSourceWidget,
+    S2SEducationDataSourceWidget,
+    S2SNTLRasterDataSourceWidget,
     VectorAndFieldDataSourceWidget,
     VectorDataSourceWidget,
 )
@@ -71,6 +75,11 @@ class DataSourceWidgetFactory:
             if widget_key == "use_single_buffer_point" and value == 1:
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_polygon_per_cell" and value == 1:
+                analysis_scale = attributes.get("analysis_scale")
+                if analysis_scale == "regional":
+                    if str(attributes.get("id", "")).strip().lower() == "education":
+                        return S2SEducationDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
+                    return S2SDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_polyline_per_cell" and value == 1:
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
@@ -87,8 +96,14 @@ class DataSourceWidgetFactory:
             if widget_key == "use_classify_safety_polygon_into_classes" and value == 1:
                 return VectorAndFieldDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_nighttime_lights" and value == 1:
+                analysis_scale = attributes.get("analysis_scale")
+                if analysis_scale == "regional":
+                    return S2SNTLRasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
                 return RasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_environmental_hazards" and value == 1:
+                analysis_scale = attributes.get("analysis_scale")
+                if analysis_scale == "regional":
+                    return S2SEnvironmentalHazardsRasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
                 return RasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_street_lights" and value == 1:
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)

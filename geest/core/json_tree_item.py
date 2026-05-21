@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from typing import Optional
 
 from qgis.core import Qgis
-from qgis.PyQt.QtCore import Qt, QReadWriteLock, QReadLocker, QWriteLocker
+from qgis.PyQt.QtCore import QReadWriteLock, Qt
 from qgis.PyQt.QtGui import QColor, QFont, QIcon
 
 from geest.core.settings import setting
@@ -142,10 +142,61 @@ class JsonTreeItem:
         return self._enabled
 
     def is_only_child(self) -> bool:
-        """Returns the only child status of this item."""
-        siblings_count = len(self.parentItem.childItems)
-        if siblings_count == 1:
-            return True
+        """Returns True if this item is the only child of its parent."""
+        if not self.parentItem:
+            return False
+        return len(self.parentItem.childItems) == 1
+
+    def visible_row(self) -> int:
+        """Returns the visible row position among siblings (excluding hidden siblings).
+
+        This is used when hidden items need to be skipped in the visual tree.
+        """
+        if not self.parentItem:
+            return 0
+        visible_siblings = [c for c in self.parentItem.childItems if c.is_visible()]
+        if self in visible_siblings:
+            return visible_siblings.index(self)
+        return 0
+
+    def get_effective_visible_children(self) -> list:
+        """Returns effective visible children for tree display.
+
+        For normal visible children, returns them directly.
+        For hidden children that have exactly one child, returns their child instead
+        (promoting the grandchild to appear at this level).
+        This enables hiding single-child factors while showing their indicator.
+
+        Returns:
+            list: List of JsonTreeItem objects to display as children.
+        """
+        effective_children = []
+        for child in self.childItems:
+            if child.is_visible():
+                effective_children.append(child)
+            elif len(child.childItems) == 1:
+                # Hidden single-child item: promote its child to this level
+                grandchild = child.childItems[0]
+                if grandchild.is_visible():
+                    effective_children.append(grandchild)
+        return effective_children
+
+    def get_visual_parent(self):
+        """Returns the visual parent for tree display.
+
+        If the actual parent is hidden, returns the grandparent instead.
+        This handles the case where factors are hidden but indicators need
+        to appear under the dimension.
+
+        Returns:
+            JsonTreeItem: The visual parent item.
+        """
+        if not self.parentItem:
+            return None
+        if self.parentItem.is_visible():
+            return self.parentItem
+        # Parent is hidden, return grandparent
+        return self.parentItem.parentItem
 
     def internalPointer(self):
         """Returns a reference to itself, or any unique identifier for the item."""

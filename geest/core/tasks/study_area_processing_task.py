@@ -31,13 +31,14 @@ from qgis.PyQt.QtCore import (
 )
 
 from geest.core.algorithms import GHSLDownloader, GHSLProcessor
+from geest.core.grid_column_utils import add_model_columns_to_grid
+from geest.core.h3_utils import estimate_h3_cells_for_area, get_h3_resolution_for_scale, h3_cell_area_km2
 from geest.core.settings import setting
-from geest.core.h3_utils import get_h3_resolution_for_scale
 from geest.utilities import calculate_utm_zone, log_message
 
 from .grid_chunker_task import GridChunkerTask
-from .grid_from_bbox_task import GridFromBboxTask
 from .grid_from_bbox_h3_task import GridFromBboxH3Task
+from .grid_from_bbox_task import GridFromBboxTask
 
 
 class QtQueue:
@@ -390,6 +391,7 @@ class UnifiedWriterThread(QThread):
             if self.ds:
                 try:
                     self.ds.FlushCache()
+                    self.ds.ExecuteSQL("PRAGMA wal_checkpoint(TRUNCATE)")
                 except Exception as e:
                     log_message(f"UnifiedWriter: Error flushing on cleanup: {e}", level="WARNING")
                 self.ds = None
@@ -709,7 +711,15 @@ class ChunkRunnable(QRunnable):
     """
 
     def __init__(
-        self, chunk, geom, cell_size, feedback, write_callback=None, analysis_scale="national", epsg_code=None
+        self,
+        chunk,
+        geom,
+        cell_size,
+        feedback,
+        write_callback=None,
+        analysis_scale="national",
+        epsg_code=None,
+        h3_resolution=6,
     ):
         """Initialize the chunk runnable.
 
@@ -722,6 +732,7 @@ class ChunkRunnable(QRunnable):
                 the chunk's geometries to the write queue and frees them.
             analysis_scale: Analysis scale ("regional", "national", or "local")
             epsg_code: EPSG code for coordinate transformation
+            h3_resolution: H3 resolution override for regional scale.
         """
         super().__init__()
         self.chunk = chunk
@@ -731,6 +742,7 @@ class ChunkRunnable(QRunnable):
         self.write_callback = write_callback
         self.analysis_scale = analysis_scale
         self.epsg_code = epsg_code
+        self.h3_resolution = h3_resolution
         self.result = None
         self.error = None
         self.setAutoDelete(False)  # We manage lifecycle manually
@@ -743,7 +755,7 @@ class ChunkRunnable(QRunnable):
 
             # Use H3 task for regional scale, regular grid task otherwise
             if self.analysis_scale == "regional":
-                h3_res = get_h3_resolution_for_scale(self.analysis_scale) or 6
+                h3_res = self.h3_resolution
                 task = GridFromBboxH3Task(
                     index,
                     (
@@ -815,6 +827,9 @@ class StudyAreaProcessingTask(QgsTask):
     # Signal emitted when GHSL download fails - allows UI to prompt user to continue or abort
     ghsl_download_failed = pyqtSignal(str)
 
+    MIN_H3_ESTIMATED_CELLS = 3
+    MAX_H3_ESTIMATED_CELLS = 200000
+
     # Signal emitted when waiting for user response about GHSL failure
     ghsl_user_response_ready = pyqtSignal()
 
@@ -827,6 +842,7 @@ class StudyAreaProcessingTask(QgsTask):
         feedback: "QgsFeedback | None" = None,
         crs=None,
         analysis_scale: str = "national",
+        h3_resolution: int = None,
     ):
         """Initialize the study area processing task.
 
@@ -839,6 +855,7 @@ class StudyAreaProcessingTask(QgsTask):
             crs: Target CRS. If None, a UTM zone will be computed.
             analysis_scale: Analysis scale ("regional", "national", or "local").
                 Regional uses H3 hexagonal grids, others use square grids.
+            h3_resolution: Optional H3 resolution override for regional analysis.
 
         Raises:
             RuntimeError: If the input layer cannot be opened with OGR.
@@ -859,18 +876,17 @@ class StudyAreaProcessingTask(QgsTask):
             Exception: If the CRS is not EPSG-based.
         """
         super().__init__("Study Area Preparation", QgsTask.CanCancel)
-
-        # Configure GDAL for optimized GeoPackage writes
-        # These settings trade crash safety for performance - acceptable for processing tasks
-        gdal.SetConfigOption("OGR_SQLITE_JOURNAL", "MEMORY")
-        gdal.SetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF")
-        gdal.SetConfigOption("SQLITE_USE_OGR_VFS", "YES")
-        log_message("Using optimized GeoPackage write settings")
+        self._previous_gdal_sqlite_options = {}
 
         self.input_vector_path = self.export_qgs_layer_to_shapefile(layer, working_dir)
         self.field_name = field_name
         self.cell_size_m = cell_size_m
         self.analysis_scale = analysis_scale
+        self.h3_resolution = (
+            h3_resolution if h3_resolution is not None else (get_h3_resolution_for_scale("regional") or 6)
+        )
+        if self.analysis_scale == "regional":
+            log_message(f"Using H3 resolution: {self.h3_resolution}")
         self.working_dir = working_dir
         self.gpkg_path = os.path.join(working_dir, "study_area", "study_area.gpkg")
         self.counter = 0
@@ -1223,6 +1239,7 @@ class StudyAreaProcessingTask(QgsTask):
         Returns:
             True if processing completed successfully, False otherwise.
         """
+        self._set_sqlite_write_safety_options()
         try:
             # 1) Create the bounding box as a single polygon feature
             #    and save to GeoPackage
@@ -1360,7 +1377,18 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(f"Areas that could not be processed due to errors: {self.error_count}")
             log_message(f"Total cells generated: {self.total_cells}")
 
-            # 4) Create a VRT of all generated raster masks
+            # 4) Add model columns to the grid layer
+            model_path = os.path.join(self.working_dir, "model.json")
+            if os.path.exists(model_path):
+                log_message("Adding model columns to study_area_grid layer...")
+                if add_model_columns_to_grid(self.gpkg_path, model_path):
+                    log_message("Model columns added successfully")
+                else:
+                    log_message("Failed to add model columns to grid", level="WARNING")
+            else:
+                log_message(f"Model file not found at {model_path}, skipping column addition", level="WARNING")
+
+            # 5) Create a VRT of all generated raster masks
             self.create_raster_vrt()
 
         except Exception as e:
@@ -1372,10 +1400,30 @@ class StudyAreaProcessingTask(QgsTask):
             return False
 
         finally:
+            self._restore_sqlite_write_safety_options()
             # Explicit cleanup of GDAL resources to prevent memory leaks
             self._cleanup_gdal_resources()
 
         return True
+
+    def _set_sqlite_write_safety_options(self) -> None:
+        """Configure safer SQLite options for GeoPackage writes.
+
+        These options are process-wide in GDAL, so we snapshot and restore them
+        per task execution to avoid leaking settings into workflow processing.
+        """
+        option_keys = ["OGR_SQLITE_JOURNAL", "OGR_SQLITE_SYNCHRONOUS", "SQLITE_USE_OGR_VFS"]
+        self._previous_gdal_sqlite_options = {key: gdal.GetConfigOption(key) for key in option_keys}
+
+        gdal.SetConfigOption("OGR_SQLITE_JOURNAL", "WAL")
+        gdal.SetConfigOption("OGR_SQLITE_SYNCHRONOUS", "NORMAL")
+        gdal.SetConfigOption("SQLITE_USE_OGR_VFS", "YES")
+        log_message("Configured safer GeoPackage write settings (WAL/NORMAL)")
+
+    def _restore_sqlite_write_safety_options(self) -> None:
+        """Restore GDAL SQLite options captured before task execution."""
+        for key, value in self._previous_gdal_sqlite_options.items():
+            gdal.SetConfigOption(key, value)
 
     def _cleanup_gdal_resources(self):
         """Clean up GDAL/OGR resources to prevent memory leaks and file handle issues."""
@@ -1608,6 +1656,13 @@ class StudyAreaProcessingTask(QgsTask):
         # Check GHSL intersection
         intersects_ghsl = self.check_ghsl_intersection(geom)
         log_message(f"{normalized_name} intersects GHSL: {intersects_ghsl}")
+
+        if self.analysis_scale == "regional" and not self._validate_regional_h3_runtime_guard(geom, normalized_name):
+            self.error_count += 1
+            self.counter += 1
+            progress = int((self.counter / self.parts_count) * 100)
+            self.setProgress(progress)
+            return
 
         # Save the geometry (in the target CRS) to "study_area_polygons"
         self.save_geometry_to_geopackage("study_area_polygons", geom, normalized_name, intersects_ghsl)
@@ -2260,9 +2315,7 @@ class StudyAreaProcessingTask(QgsTask):
             Grid task (GridFromBboxTask or GridFromBboxH3Task)
         """
         if self.analysis_scale == "regional":
-            h3_res = get_h3_resolution_for_scale(self.analysis_scale)
-            if h3_res is None:
-                h3_res = 6  # Default to resolution 6 for regional scale
+            h3_res = self.h3_resolution
             log_message(f"Creating H3 grid task (resolution {h3_res}) for chunk {index}")
             task = GridFromBboxH3Task(
                 index,
@@ -2384,6 +2437,7 @@ class StudyAreaProcessingTask(QgsTask):
                 write_callback=_write_callback,
                 analysis_scale=self.analysis_scale,
                 epsg_code=self.epsg_code,
+                h3_resolution=self.h3_resolution,
             )
             runnables.append(runnable)
             pool.start(runnable)
@@ -2407,13 +2461,13 @@ class StudyAreaProcessingTask(QgsTask):
             task: GridFromBboxTask or GridFromBboxH3Task with generated features
             normalized_name: Area name for this chunk
         """
-        self.track_time("Preparing chunks", task.run_time)
+        self.metrics["Preparing chunks"] += task.run_time
 
         # Check if this is an H3 task (features are tuples of (h3_index, geometry))
         is_h3_task = isinstance(task.features_out[0], tuple) if task.features_out else False
 
         if is_h3_task:
-            h3_resolution = get_h3_resolution_for_scale(self.analysis_scale)
+            h3_resolution = self.h3_resolution
 
         for feature in task.features_out:
             # Get unique grid_id with lock
@@ -2469,7 +2523,7 @@ class StudyAreaProcessingTask(QgsTask):
                 # Add H3 fields for regional scale
                 if self.analysis_scale == "regional":
 
-                    h3_res = get_h3_resolution_for_scale(self.analysis_scale)
+                    h3_res = self.h3_resolution
                     field_defn = ogr.FieldDefn("h3_index", ogr.OFTString)
                     layer.CreateField(field_defn)
                     field_defn = ogr.FieldDefn("h3_resolution", ogr.OFTInteger)
@@ -2697,6 +2751,57 @@ class StudyAreaProcessingTask(QgsTask):
 
                 log_message(f"Created Chunk bbox: {x_start_coord}, {x_end_coord}, {ymin}, {ymax}")
                 yield (x_start_coord, x_end_coord, y_start_coord, y_end_coord)
+
+    def _estimate_geom_area_km2(self, geom):
+        """Estimate geometry area in square kilometers using Mollweide projection."""
+        if geom is None or geom.IsEmpty():
+            return 0.0
+
+        geom_clone = geom.Clone()
+        geom_clone.AssignSpatialReference(self.target_spatial_ref)
+
+        mollweide_srs = osr.SpatialReference()
+        mollweide_srs.SetFromUserInput("ESRI:54009")
+
+        transform_to_mollweide = osr.CoordinateTransformation(self.target_spatial_ref, mollweide_srs)
+        geom_clone.Transform(transform_to_mollweide)
+
+        area_m2 = abs(geom_clone.GetArea())
+        return area_m2 / 1000000.0
+
+    def _validate_regional_h3_runtime_guard(self, geom, normalized_name):
+        """Fail fast at runtime for unsafe H3 density choices."""
+        try:
+            area_km2 = self._estimate_geom_area_km2(geom)
+            estimated_cells = estimate_h3_cells_for_area(area_km2, self.h3_resolution)
+            cell_area_km2 = h3_cell_area_km2(self.h3_resolution)
+
+            if estimated_cells > self.MAX_H3_ESTIMATED_CELLS:
+                log_message(
+                    (
+                        f"Skipping {normalized_name}: H3 resolution {self.h3_resolution} is too fine "
+                        f"for runtime safeguards (estimated {estimated_cells:,} cells from {area_km2:,.2f} km2, "
+                        f"cell area {cell_area_km2:,.6f} km2, max {self.MAX_H3_ESTIMATED_CELLS:,})."
+                    ),
+                    level="WARNING",
+                )
+                return False
+
+            if estimated_cells < self.MIN_H3_ESTIMATED_CELLS:
+                log_message(
+                    (
+                        f"Skipping {normalized_name}: H3 resolution {self.h3_resolution} is too coarse "
+                        f"for runtime safeguards (estimated {estimated_cells} cells from {area_km2:,.2f} km2, "
+                        f"minimum {self.MIN_H3_ESTIMATED_CELLS})."
+                    ),
+                    level="WARNING",
+                )
+                return False
+
+            return True
+        except Exception as e:
+            log_message(f"Runtime H3 safeguard check failed for {normalized_name}: {e}", level="WARNING")
+            return False
 
     ##########################################################################
     # Create Raster Mask

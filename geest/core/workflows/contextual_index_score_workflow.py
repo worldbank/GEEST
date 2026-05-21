@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-
 """
 Specialised index score workflow for use in contextual dimensions.
-"""
 
+Supports grid-first mode where the index score is written directly to
+the study_area_grid column, then optionally rasterized.
+"""
 import os
+from typing import Optional
 
 from qgis import processing  # noqa: F401 # QGIS processing toolbox
 from qgis.core import (  # noqa: F401
@@ -20,6 +22,10 @@ from qgis.core import (  # noqa: F401
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem  # noqa: unused F401
+from geest.core.grid_column_utils import (
+    rasterize_grid_column,
+    write_uniform_value_to_grid,
+)
 from geest.utilities import log_message
 
 from .contextual_index_score_mappings import score_mapping
@@ -52,11 +58,9 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         super().__init__(
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-
         index_score = self.attributes.get("index_score", 0)
         log_message(f"Index score before rescaling to contextual scale: {index_score}")
         # Define mapping rules as (min_score, output_score) pairs
-
         # Find the highest threshold less than or equal to index_score
         for threshold in sorted(score_mapping.keys(), reverse=True):
             if index_score >= threshold:
@@ -68,6 +72,8 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
             True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed
         )
         self.workflow_name = "contextual_index_score"
+        # Grid-first mode: write results to grid columns first, then rasterize
+        self.use_grid_first = True
 
     def _process_features_for_area(
         self,
@@ -76,31 +82,50 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
+        area_name: Optional[str] = None,
     ) -> str:
         """
-        Executes the actual workflow logic for a single area
-        Must be implemented by subclasses.
+        Executes the actual workflow logic for a single area.
+
+        Supports both raster-first (legacy) and grid-first modes.
 
         :current_area: Current polygon from our study area.
         :current_bbox: Bounding box of the above area.
-        :area_features: A vector layer of features to analyse that includes only features in the study area.
+        :area_features: A vector layer of features to analyse (unused for index_score).
         :index: Iteration / number of area being processed.
-
+        :area_name: Name of the area being processed (for grid-first mode).
         :return: Raster file path of the output.
         """
         _ = area_features  # unused
-        log_message(f"Processing area {index} score workflow")
-
+        log_message(f"Processing area {index} contextual score workflow (grid_first={self.use_grid_first})")
         log_message(f"Index score: {self.index_score}")
-        self.progressChanged.emit(10.0)  # We just use nominal intervals for progress updates
+        self.progressChanged.emit(10.0)
 
-        # Create a scored boundary layer filtered by current_area
+        if self.use_grid_first and area_name:
+            return self._process_grid_first(
+                current_bbox=current_bbox,
+                index=index,
+                area_name=area_name,
+            )
+        else:
+            return self._process_raster_first(
+                clip_area=clip_area,
+                current_bbox=current_bbox,
+                index=index,
+            )
+
+    def _process_raster_first(
+        self,
+        clip_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        index: int,
+    ) -> str:
+        """Legacy raster-first processing."""
         scored_layer = self.create_scored_boundary_layer(
             clip_area=clip_area,
             index=index,
         )
-        self.progressChanged.emit(30.0)  # We just use nominal intervals for progress updates
-        # Create a scored boundary layer
+        self.progressChanged.emit(30.0)
         raster_output = self._rasterize(
             scored_layer,
             current_bbox,
@@ -108,21 +133,59 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
             value_field="score",
             default_value=255,
         )
-        self.progressChanged.emit(100.0)  # We just use nominal intervals for progress updates
-
+        self.progressChanged.emit(100.0)
         log_message(f"Raster output: {raster_output}")
         log_message(f"Workflow completed for area {index}")
         return raster_output
 
+    def _process_grid_first(
+        self,
+        current_bbox: QgsGeometry,
+        index: int,
+        area_name: str,
+    ) -> str:
+        """Grid-first processing - writes to grid column, then rasterizes."""
+        self.progressChanged.emit(20.0)
+        log_message(f"Writing contextual index score {self.index_score} to grid column {self.layer_id}")
+
+        write_uniform_value_to_grid(
+            gpkg_path=self.gpkg_path,
+            column_name=self.layer_id,
+            value=self.index_score,
+        )
+
+        self.progressChanged.emit(50.0)
+
+        # Rasterize from grid column
+        output_path = os.path.join(
+            self.workflow_directory,
+            f"{self.layer_id}_{index}.tif",
+        )
+
+        rect = current_bbox.boundingBox()
+        extent = (rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
+
+        rasterize_grid_column(
+            gpkg_path=self.gpkg_path,
+            column_name=self.layer_id,
+            output_raster_path=output_path,
+            cell_size=self.cell_size_m,
+            extent=extent,
+            nodata=-9999.0,
+            area_name=area_name,
+        )
+
+        self.progressChanged.emit(100.0)
+        log_message(f"Rasterized grid column to {output_path}")
+        return output_path
+
     def create_scored_boundary_layer(self, clip_area: QgsGeometry, index: int) -> QgsVectorLayer:
         """
         Create a scored boundary layer, filtering features by the current_area.
-
         :param index: The index of the current processing area.
         :return: A vector layer with a 'score' attribute.
         """
         output_prefix = f"{self.layer_id}_area_{index}"
-
         self.progressChanged.emit(20.0)  # We just use nominal intervals for progress updates
         # Create a new memory layer with the target CRS (EPSG:4326)
         subset_layer = QgsVectorLayer("Polygon", "subset", "memory")
@@ -134,7 +197,6 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         subset_layer_data.addAttributes(fields)
         subset_layer.updateFields()
         self.progressChanged.emit(40.0)  # We just use nominal intervals for progress updates
-
         feature = QgsFeature(subset_layer.fields())
         feature.setGeometry(clip_area)
         score_field_index = subset_layer.fields().indexFromName("score")
@@ -144,7 +206,6 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         subset_layer_data.addFeatures(features)
         subset_layer.commitChanges()
         self.progressChanged.emit(60.0)  # We just use nominal intervals for progress updates
-
         shapefile_path = os.path.join(self.workflow_directory, f"{output_prefix}.shp")
         # Use QgsVectorFileWriter to save the layer to a shapefile
         QgsVectorFileWriter.writeAsVectorFormat(
@@ -156,7 +217,6 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         )
         layer = QgsVectorLayer(shapefile_path, "area_layer", "ogr")
         self.progressChanged.emit(80.0)  # We just use nominal intervals for progress updates
-
         return layer
 
     # Default implementation of the abstract method - not used in this workflow
@@ -167,16 +227,15 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
+        area_name: str = None,
     ):
         """
         Executes the actual workflow logic for a single area using a raster.
-
         :current_area: Current polygon from our study area.
         :clip_area: Polygon to clip the raster to which is aligned to cell edges.
         :current_bbox: Bounding box of the above area.
         :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
         :index: Index of the current area.
-
         :return: Path to the reclassified raster.
         """
         pass
@@ -187,6 +246,7 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
+        area_name: str = None,
     ):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.

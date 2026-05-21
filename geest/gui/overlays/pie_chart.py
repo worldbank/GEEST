@@ -66,6 +66,9 @@ class PieChartItem(QgsMapCanvasItem):
         show_overlay = setting(key="show_pie_overlay", default=False)
         if not show_overlay:
             return
+        pie_data = QSettings().value("geoe3/pie_data", "")
+        if not pie_data:
+            return
         diameter = 100
         image = QImage(diameter, diameter, QImage.Format_ARGB32)
         image.fill(Qt.GlobalColor.white)

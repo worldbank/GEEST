@@ -2,9 +2,14 @@
 """📦 Aggregation Workflow Base module.
 
 This module contains functionality for aggregation workflow base.
+
+Supports both raster-first (legacy) and grid-first aggregation approaches.
+The grid-first approach writes aggregated values directly to study_area_grid
+columns, then optionally rasterizes from the grid.
 """
 
 import os
+from typing import Dict, Optional
 
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from qgis.core import (
@@ -16,6 +21,11 @@ from qgis.core import (
 )
 
 from geest.core import JsonTreeItem
+from geest.core.grid_column_utils import (
+    clear_grid_column,
+    rasterize_grid_column,
+    write_aggregation_to_grid,
+)
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
@@ -51,6 +61,9 @@ class AggregationWorkflowBase(WorkflowBase):
         self.id = None  # This should be set by the child class
         self.weight_key = None  # This should be set by the child class
         self.aggregation = True
+        # Grid-first mode: write results to grid columns first, then rasterize
+        # Set to True to use the new grid-first approach
+        self.use_grid_first = True
         self.feedback.setProgress(10.0)
 
     def aggregate(self, input_files: list, index: int) -> str:
@@ -247,26 +260,256 @@ class AggregationWorkflowBase(WorkflowBase):
         )
         return raster_files
 
+    def get_grid_columns_and_weights(self) -> Dict[str, float]:
+        """Get the list of grid columns and weights for aggregation.
+
+        This is the grid-first alternative to get_raster_dict(). Instead of
+        returning raster file paths, it returns column names from study_area_grid.
+
+        Returns:
+            Dict mapping column names to their weights.
+            Example: {"indicator1": 0.3, "indicator2": 0.3, "indicator3": 0.4}
+        """
+        columns_weights = {}
+        if self.guids is None:
+            raise ValueError("No GUIDs provided for aggregation")
+
+        for guid in self.guids:
+            item = self.item.getItemByGuid(guid)
+            status = item.getStatus() == "Completed successfully"
+            mode = item.attributes().get("analysis_mode", "Do Not Use") == "Do Not Use"
+            excluded = item.getStatus() == "Excluded from analysis"
+            disabled = not item.is_enabled()
+            raw_id = item.attribute("id").lower().replace(" ", "_").replace("-", "_")
+            # Add prefix based on item role to match column naming
+            item_role = item.role if hasattr(item, "role") else ""
+            if item_role == "dimension":
+                item_id = f"dim_{raw_id}"
+            elif item_role == "factor":
+                item_id = f"fac_{raw_id}"
+            else:
+                item_id = raw_id  # indicators keep raw ID
+
+            if not status and not mode and not excluded and not disabled:
+                raise ValueError(
+                    f"{item_id} is not completed successfully and is not set to 'Do Not Use' or 'Excluded from analysis'"
+                )
+
+            if mode:
+                log_message(
+                    f"Skipping {item.attribute('id')} as it is set to 'Do Not Use'",
+                    tag="GeoE3",
+                    level=Qgis.Info,
+                )
+                continue
+            if excluded:
+                log_message(
+                    f"Skipping {item.attribute('id')} as it is excluded from analysis",
+                    tag="GeoE3",
+                    level=Qgis.Info,
+                )
+                continue
+            if disabled:
+                log_message(
+                    f"Skipping {item.attribute('id')} as it is disabled (women considerations)",
+                    tag="GeoE3",
+                    level=Qgis.Info,
+                )
+                continue
+
+            # Get weight for this item
+            weight = item.attribute(self.weight_key, "")
+            try:
+                weight = float(weight)
+            except (ValueError, TypeError):
+                weight = 1.0  # Default fallback to 1.0 if weight is invalid
+
+            # Column name is the sanitized item ID
+            column_name = item_id[:63]  # Match sanitization in grid_column_utils
+            columns_weights[column_name] = weight
+
+            log_message(f"Adding column: {column_name} with weight: {weight}")
+
+        log_message(
+            f"Total columns found for aggregation: {len(columns_weights)}",
+            tag="GeoE3",
+            level=Qgis.Info,
+        )
+        return columns_weights
+
+    def aggregate_grid(self, area_name: str) -> int:
+        """Perform weighted aggregation directly on grid columns.
+
+        This is the grid-first alternative to aggregate(). Instead of using
+        QgsRasterCalculator on raster files, it uses SQL to aggregate values
+        directly in the study_area_grid table.
+
+        Args:
+            area_name: The name of the area being processed.
+
+        Returns:
+            Number of cells updated, or -1 on error.
+        """
+        columns_weights = self.get_grid_columns_and_weights()
+
+        if not columns_weights:
+            log_message(
+                "Error: Found no columns to aggregate.",
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+            return -1
+
+        log_message(
+            f"Aggregating {len(columns_weights)} columns into {self.layer_id} for area {area_name}",
+            tag="GeoE3",
+            level=Qgis.Info,
+        )
+
+        # Clear stale values before writing new aggregation
+        clear_grid_column(self.gpkg_path, self.layer_id)
+
+        # Use the grid-first aggregation function
+        updated_count = write_aggregation_to_grid(
+            gpkg_path=self.gpkg_path,
+            target_column=self.layer_id,
+            source_columns_weights=columns_weights,
+            area_name=area_name,
+            use_coalesce=True,
+        )
+
+        if updated_count >= 0:
+            log_message(
+                f"Grid aggregation completed: updated {updated_count} cells for {self.layer_id}",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
+        else:
+            log_message(
+                f"Grid aggregation failed for {self.layer_id}",
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+
+        return updated_count
+
+    def rasterize_from_grid(
+        self,
+        area_name: str,
+        bbox: QgsGeometry,
+        index: int,
+    ) -> Optional[str]:
+        """Rasterize the grid column to create a raster output.
+
+        This creates a raster from the aggregated grid column using gdal_rasterize.
+
+        Args:
+            area_name: The name of the area being processed.
+            bbox: Bounding box geometry for the output raster extent.
+            index: The index of the area being processed.
+
+        Returns:
+            Path to the output raster, or None on error.
+        """
+        output_path = os.path.join(
+            self.workflow_directory,
+            f"{self.layer_id}_aggregated_{index}.tif",
+        )
+
+        # Get extent from bbox
+        rect = bbox.boundingBox()
+        extent = (rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
+
+        success = rasterize_grid_column(
+            gpkg_path=self.gpkg_path,
+            column_name=self.layer_id,
+            output_raster_path=output_path,
+            cell_size=self.cell_size_m,
+            extent=extent,
+            nodata=-9999.0,
+            area_name=area_name,
+        )
+
+        if success:
+            log_message(
+                f"Rasterized grid column {self.layer_id} to {output_path}",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
+            # Write the output path to attributes
+            self.attributes[self.result_file_key] = output_path
+            return output_path
+        else:
+            log_message(
+                f"Failed to rasterize grid column {self.layer_id}",
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+            return None
+
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,
         clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
+        area_name: Optional[str] = None,
     ):
-        """
-        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
-        """
-        _ = current_area  # Unused in this analysis
-        _ = clip_area  # Unused in this analysis
-        _ = current_bbox  # Unused in this analysis
+        """Execute aggregation workflow for a single area.
 
+        Supports both raster-first (legacy) and grid-first aggregation modes.
+        The mode is controlled by self.use_grid_first flag.
+
+        Args:
+            current_area: Current polygon from our study area.
+            clip_area: Polygon to clip the raster to which is aligned to cell edges.
+            current_bbox: Bounding box of the above area.
+            index: Index of the current area.
+            area_name: Name of the area being processed (for grid-first mode).
+
+        Returns:
+            Path to the aggregated raster file, or None on error.
+        """
         # Log the execution
         log_message(
-            f"Executing {self.analysis_mode} Aggregation Workflow",
+            f"Executing {self.analysis_mode} Aggregation Workflow (grid_first={self.use_grid_first})",
             tag="GeoE3",
             level=Qgis.Info,
         )
+
+        if self.use_grid_first:
+            # Grid-first mode: aggregate directly in grid columns
+            return self._process_aggregate_grid_first(
+                current_area=current_area,
+                clip_area=clip_area,
+                current_bbox=current_bbox,
+                index=index,
+                area_name=area_name,
+            )
+        else:
+            # Legacy raster-first mode
+            return self._process_aggregate_raster_first(
+                current_area=current_area,
+                clip_area=clip_area,
+                current_bbox=current_bbox,
+                index=index,
+            )
+
+    def _process_aggregate_raster_first(
+        self,
+        current_area: QgsGeometry,
+        clip_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        index: int,
+    ) -> Optional[str]:
+        """Legacy raster-first aggregation.
+
+        Uses QgsRasterCalculator to aggregate raster files.
+        """
+        _ = current_area  # Unused
+        _ = clip_area  # Unused
+        _ = current_bbox  # Unused
+
         raster_files = self.get_raster_dict(index)
 
         if not raster_files or not isinstance(raster_files, dict):
@@ -281,13 +524,77 @@ class AggregationWorkflowBase(WorkflowBase):
             return None
 
         log_message(
-            f"Found {len(raster_files)} raster files in 'Result File'. Proceeding with aggregation.",
+            f"Found {len(raster_files)} raster files in 'Result File'. Proceeding with raster aggregation.",
             tag="GeoE3",
             level=Qgis.Info,
         )
 
-        # Perform aggregation only if raster files are provided
+        # Perform aggregation using raster calculator
         result_file = self.aggregate(raster_files, index)
+        return result_file
+
+    def _process_aggregate_grid_first(
+        self,
+        current_area: QgsGeometry,
+        clip_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        index: int,
+        area_name: Optional[str] = None,
+    ) -> Optional[str]:
+        """Grid-first aggregation.
+
+        Aggregates values directly in grid columns using SQL, then
+        optionally rasterizes from the grid.
+        """
+        _ = current_area  # Unused
+
+        # Step 1: Aggregate grid columns
+        try:
+            columns_weights = self.get_grid_columns_and_weights()
+        except ValueError as e:
+            error = str(e)
+            log_message(
+                error,
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+            self.attributes[self.result_key] = f"{self.analysis_mode} Aggregation Workflow Skipped"
+            self.attributes["error"] = error
+            return None
+
+        if not columns_weights:
+            error = "No valid columns found for aggregation. Cannot proceed (likely all factors disabled or excluded)."
+            log_message(
+                error,
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+            self.attributes[self.result_key] = f"{self.analysis_mode} Aggregation Workflow Skipped"
+            self.attributes["error"] = error
+            return None
+
+        log_message(
+            f"Found {len(columns_weights)} columns for grid aggregation: {list(columns_weights.keys())}",
+            tag="GeoE3",
+            level=Qgis.Info,
+        )
+
+        # Perform SQL aggregation on grid
+        updated_count = self.aggregate_grid(area_name)
+        if updated_count < 0:
+            log_message(
+                f"Grid aggregation failed for area {area_name}",
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+            return None
+
+        # Step 2: Rasterize from grid column for VRT generation
+        result_file = self.rasterize_from_grid(
+            area_name=area_name,
+            bbox=current_bbox,
+            index=index,
+        )
 
         return result_file
 

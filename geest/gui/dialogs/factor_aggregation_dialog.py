@@ -4,6 +4,8 @@
 This module contains functionality for factor aggregation dialog.
 """
 
+from typing import Optional, Sequence
+
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import QByteArray, QSettings, Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QFont, QPixmap
@@ -51,7 +53,14 @@ class FactorAggregationDialog(CustomBaseDialog):
         factor_data: Factor data.
     """
 
-    def __init__(self, factor_name, factor_data, factor_item, parent=None):
+    def __init__(
+        self,
+        factor_name,
+        factor_data,
+        factor_item,
+        parent=None,
+        selected_guids: Optional[Sequence[str]] = None,
+    ):
         """🏗️ Initialize the instance.
 
         Args:
@@ -69,6 +78,11 @@ class FactorAggregationDialog(CustomBaseDialog):
 
         # Initialize dictionaries
         self.guids = self.tree_item.getFactorIndicatorGuids()
+        if selected_guids is not None:
+            selected_guid_set = set(selected_guids)
+            self.guids = [guid for guid in self.guids if guid in selected_guid_set]
+            if not self.guids:
+                self.guids = self.tree_item.getFactorIndicatorGuids()
         # If the indicators do not have a usable analysis mode set, iterate through them
         # and set it to the first available usable mode
         for guid in self.guids:
@@ -151,7 +165,7 @@ class FactorAggregationDialog(CustomBaseDialog):
             self.table.setColumnCount(6)
             self.table.setHorizontalHeaderLabels(["Input", "Indicator", "Weight 0-1", "Use", "GUID", ""])
             self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-            self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+            self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Fixed)
             self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
             self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
             self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
@@ -170,6 +184,7 @@ class FactorAggregationDialog(CustomBaseDialog):
             self.table.setColumnWidth(4, 50)
             self.table.setColumnWidth(6, 75)
         else:
+            self.table.setColumnWidth(1, 200)
             self.table.setColumnWidth(2, 100)
             self.table.setColumnWidth(3, 50)
             self.table.setColumnWidth(5, 75)
@@ -359,6 +374,9 @@ class FactorAggregationDialog(CustomBaseDialog):
             row = guid_index
             item = self.tree_item.getItemByGuid(guid)
             attributes = item.attributes()
+            analysis_item = self.tree_item.parentItem.parentItem if self.tree_item.parentItem else None
+            if analysis_item:
+                attributes["analysis_scale"] = analysis_item.attribute("analysis_scale", "")
             log_message(f"Populating table for GUID: {guid}")
             log_message(f"Attributes: {item.attributesAsMarkdown()}")
 

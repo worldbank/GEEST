@@ -127,7 +127,7 @@ class PopulationRasterProcessingTask(QgsTask):
         Clips the population raster using study area masks and records min and max values.
         """
         area_iterator = AreaIterator(self.study_area_gpkg_path)
-        for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
+        for index, (current_area, clip_area, current_bbox, progress, area_name) in enumerate(area_iterator):
             if self.feedback and self.feedback.isCanceled():
                 return
             # create a temporary layer using the clip geometry
@@ -257,7 +257,7 @@ class PopulationRasterProcessingTask(QgsTask):
 
         area_iterator = AreaIterator(self.study_area_gpkg_path)
 
-        for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
+        for index, (current_area, clip_area, current_bbox, progress, area_name) in enumerate(area_iterator):
             if self.feedback and self.feedback.isCanceled():
                 return
 
@@ -334,7 +334,7 @@ class PopulationRasterProcessingTask(QgsTask):
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         range_third = (self.global_max - self.global_min) / 3
 
-        for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
+        for index, (current_area, clip_area, current_bbox, progress, area_name) in enumerate(area_iterator):
             if self.feedback and self.feedback.isCanceled():
                 return
 

@@ -15,3 +15,4 @@ from .study_area_processing_task import StudyAreaProcessingTask
 from .study_area_report_task import StudyAreaReportTask
 from .analysis_report_task import AnalysisReportTask
 from .ghsl_downloader_task import GHSLDownloaderTask
+from .s2s_downloader_task import S2SDownloaderTask

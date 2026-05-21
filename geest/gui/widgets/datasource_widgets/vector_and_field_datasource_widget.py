@@ -156,14 +156,19 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
 
     def select_shapefile(self):
         """
-        Opens a file dialog to select a shapefile and stores the last directory in QSettings.
+        Opens a file dialog to select a vector file and stores the last directory in QSettings.
         """
         try:
             settings = QSettings()
             last_dir = settings.value("GeoE3/lastShapefileDir", "")
 
-            # Open file dialog to select a shapefile
-            file_path, _ = QFileDialog.getOpenFileName(self, "Select Shapefile", last_dir, "Shapefiles (*.shp)")
+            # Open file dialog to select a vector file
+            file_path, _ = QFileDialog.getOpenFileName(
+                self,
+                "Select Vector File",
+                last_dir,
+                "GeoPackage and Shapefiles (*.gpkg *.shp);;GeoPackage (*.gpkg);;Shapefiles (*.shp)",
+            )
 
             if file_path:
                 # Update the line edit with the selected file path
@@ -222,43 +227,86 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
         """
         Updates the selected field in the attributes dictionary when the field selection changes.
         """
-        if not self.field_selection_combo.isEnabled():
-            self.attributes[f"{self.widget_key}_selected_field"] = None
+        try:
+            if not self.field_selection_combo.isEnabled():
+                self.attributes[f"{self.widget_key}_selected_field"] = None
+                self.data_changed.emit(self.attributes)
+                return
+
+            selected_field = (self.field_selection_combo.currentText() or "").strip()
+            self.attributes[f"{self.widget_key}_selected_field"] = selected_field
+            if not selected_field:
+                self.data_changed.emit(self.attributes)
+                return
+
+            # Store the selected field in QSettings
+            self.settings.setValue(f"{self.widget_key}_selected_field", selected_field)
+            if self._supports_unique_value_mapping():
+                vector_layer = self._resolve_layer_for_unique_values()
+                values_dict = {}
+
+                if vector_layer is not None:
+                    fields = vector_layer.fields()
+                    if fields is not None:
+                        idx = fields.indexOf(selected_field)
+                        if idx >= 0:
+                            values = vector_layer.uniqueValues(idx)
+                            # Keep string keys only to avoid QVariant/empty-row artifacts.
+                            for value in values:
+                                if isinstance(value, str):
+                                    values_dict[value] = None
+
+                # Preserve existing values if they exist
+                existing_values = self.attributes.get(f"{self.widget_key}_unique_values", {})
+
+                for key in values_dict.keys():
+                    if key not in existing_values:
+                        values_dict[key] = None
+                    else:
+                        values_dict[key] = existing_values[key]
+                log_message(f"Existing values: {existing_values}")
+                log_message(f"New      values: {values_dict}")
+                # will drop any keys in the json item that are not in values_dict
+                self.attributes[f"{self.widget_key}_unique_values"] = values_dict
             self.data_changed.emit(self.attributes)
+        except (RuntimeError, AttributeError):
+            # Can occur while dialog widgets/layers are being destroyed during close.
             return
 
-        selected_field = self.field_selection_combo.currentText()
-        self.attributes[f"{self.widget_key}_selected_field"] = selected_field
+    def _supports_unique_value_mapping(self) -> bool:
+        """Return True when this widget should maintain unique value mappings."""
+        return (
+            self.attributes.get("id", None) == "Street_Lights"
+            or bool(self.attributes.get("use_classify_polygon_into_classes", 0))
+            or bool(self.attributes.get("use_classify_safety_polygon_into_classes", 0))
+        )
 
-        # Store the selected field in QSettings
-        self.settings.setValue(f"{self.widget_key}_selected_field", selected_field)
-        if self.attributes.get("id", None) == "Street_Lights":
-            # retrieve the unique values for the selected field
+    def _resolve_layer_for_unique_values(self):
+        """Resolve the layer used to derive unique values.
+
+        Priority:
+        1. Active layer selected in combo box.
+        2. Vector file path set in shapefile line edit.
+        """
+        try:
             vector_layer = self.layer_combo.currentLayer()
-            idx = vector_layer.fields().indexOf(selected_field)
-            values = vector_layer.uniqueValues(idx)
-            values_dict = {}
+        except RuntimeError:
+            return None
+        if vector_layer:
+            return vector_layer
 
-            #  list the data type of each value
-            for value in values:
-                # log_message(f"{type(value)} value {value}")
-                # Dont remove this! It cleans to contents to remove QVariants
-                # introduced from empty table rows!
-                if isinstance(value, str):
-                    values_dict[value] = None
-            # Preserve existing values if they exist
-            existing_values = self.attributes.get(f"{self.widget_key}_unique_values", {})
+        try:
+            shapefile_path = unquote(self.shapefile_line_edit.text()).strip()
+        except RuntimeError:
+            return None
+        if not shapefile_path:
+            return None
 
-            for key in values_dict.keys():
-                if key not in existing_values:
-                    values_dict[key] = None
-                else:
-                    values_dict[key] = existing_values[key]
-            log_message(f"Existing values: {existing_values}")
-            log_message(f"New      values: {values_dict}")
-            # will drop any keys in the json item that are not in values_dict
-            self.attributes[f"{self.widget_key}_unique_values"] = values_dict
-        self.data_changed.emit(self.attributes)
+        vector_layer = QgsVectorLayer(shapefile_path, "layer", "ogr")
+        if not vector_layer.isValid():
+            log_message(f"Failed to load vector file for unique value extraction: {shapefile_path}", level=Qgis.Warning)
+            return None
+        return vector_layer
 
     def update_field_combo(self) -> None:
         """

@@ -321,6 +321,53 @@ class JsonTreeModel(QAbstractItemModel):
         # Notify view about layout changes
         self.layoutChanged.emit()
 
+    def toggle_single_child_factors_visibility(self, hide_single_child: bool):
+        """
+        Toggles the visibility of factors that have only one child indicator.
+
+        When hide_single_child is True, factors with exactly one child indicator
+        are hidden, and their indicator is promoted to appear directly under
+        the dimension.
+
+        Args:
+            hide_single_child (bool): If True, hide factors with only one child.
+                                      If False, show all factors.
+        """
+        analysis_item = self.get_analysis_item()
+        if not analysis_item:
+            return
+
+        for dimension in analysis_item.childItems:
+            for factor in dimension.childItems:
+                # Check if factor has exactly one child indicator
+                if len(factor.childItems) == 1:
+                    # Hide the factor if hide_single_child is True
+                    factor.set_visibility(not hide_single_child)
+                else:
+                    # Always show factors with multiple children
+                    factor.set_visibility(True)
+
+        # Notify view about layout changes
+        self.layoutChanged.emit()
+
+    def are_single_child_factors_hidden(self) -> bool:
+        """
+        Check if single-child factors are currently hidden.
+
+        Returns:
+            bool: True if any single-child factor is hidden, False otherwise.
+        """
+        analysis_item = self.get_analysis_item()
+        if not analysis_item:
+            return False
+
+        for dimension in analysis_item.childItems:
+            for factor in dimension.childItems:
+                if len(factor.childItems) == 1:
+                    # Return visibility state of first single-child factor found
+                    return not factor.is_visible()
+        return False
+
     def data(self, index, role):
         """
         Provides data for the given index and role, including displaying custom attributes such as the font color,
@@ -639,21 +686,25 @@ class JsonTreeModel(QAbstractItemModel):
 
     def rowCount(self, parent=QModelIndex()):
         """
-        Returns the number of child items for the given parent, excluding hidden items if visibility is off.
+        Returns the number of effective visible children for the given parent.
+
+        This uses get_effective_visible_children() which handles:
+        - Normal visible children
+        - Promotion of grandchildren when a child is hidden but has exactly one child
 
         Args:
             parent (QModelIndex): The parent index.
 
         Returns:
-            int: The number of visible child items under the parent.
+            int: The number of effective visible child items under the parent.
         """
         if not parent.isValid():
             parentItem = self.rootItem
         else:
             parentItem = parent.internalPointer()
 
-        # Count only visible items
-        return len([child for child in parentItem.childItems if child.is_visible()])
+        # Use effective visible children (handles hidden single-child factors)
+        return len(parentItem.get_effective_visible_children())
 
     def columnCount(self, parent=QModelIndex()):
         """
@@ -691,35 +742,50 @@ class JsonTreeModel(QAbstractItemModel):
         """
         return self._findIndexByGuid(self.rootItem, guid)
 
-    def _findIndexByGuid(self, parent_item, target_guid, parent_index=QModelIndex()):
+    def _findIndexByGuid(self, parent_item, target_guid):
         """
         Recursively searches for the target guid within the children of the given parent item.
+
+        Uses get_effective_visible_children() to calculate the correct visual row
+        position, accounting for hidden single-child factors.
 
         Args:
             parent_item (JsonTreeItem): The parent item to start searching from.
             target_guid (str): The GUID of the item to search for.
-            parent_index (QModelIndex): The QModelIndex of the parent item.
 
         Returns:
             QModelIndex: The QModelIndex of the target item, or an invalid QModelIndex if not found.
         """
-        for row in range(parent_item.childCount()):
-            child_item = parent_item.child(row)
+        # Get effective visible children for correct row calculation
+        effective_children = parent_item.get_effective_visible_children()
 
-            # If the item's UUID matches, return its QModelIndex
+        for row, child_item in enumerate(effective_children):
+            # If the item's GUID matches, return its QModelIndex
             if child_item.guid == target_guid:
                 return self.createIndex(row, 0, child_item)
 
             # Recursively search children
-            child_index = self._findIndexByGuid(child_item, target_guid, self.createIndex(row, 0, parent_item))
+            child_index = self._findIndexByGuid(child_item, target_guid)
             if child_index.isValid():
                 return child_index
+
+        # Also search in hidden children (in case the item is under a hidden factor)
+        for child_item in parent_item.childItems:
+            if not child_item.is_visible():
+                # Search within hidden item's children
+                child_index = self._findIndexByGuid(child_item, target_guid)
+                if child_index.isValid():
+                    return child_index
 
         return QModelIndex()  # Return invalid QModelIndex if not found
 
     def index(self, row, column, parent=QModelIndex()):
         """
         Creates a QModelIndex for the specified row and column under the given parent.
+
+        Uses get_effective_visible_children() to handle:
+        - Normal visible children
+        - Promotion of grandchildren when a child is hidden but has exactly one child
 
         Args:
             row (int): The row of the child item.
@@ -737,14 +803,20 @@ class JsonTreeModel(QAbstractItemModel):
         else:
             parentItem = parent.internalPointer()
 
-        childItem = parentItem.child(row)
-        if childItem:
+        # Use effective visible children (handles hidden single-child factors)
+        effective_children = parentItem.get_effective_visible_children()
+        if row < len(effective_children):
+            childItem = effective_children[row]
             return self.createIndex(row, column, childItem)
         return QModelIndex()
 
     def parent(self, index):
         """
         Returns the parent index of the specified index.
+
+        Uses get_visual_parent() to handle the case where the actual parent
+        is hidden (e.g., a factor with only one child). In this case, the
+        visual parent is the grandparent (dimension).
 
         Args:
             index (QModelIndex): The child index.
@@ -756,12 +828,25 @@ class JsonTreeModel(QAbstractItemModel):
             return QModelIndex()
 
         childItem = index.internalPointer()
-        parentItem = childItem.parent()
+        # Use visual parent which skips hidden parents
+        parentItem = childItem.get_visual_parent()
 
-        if parentItem == self.rootItem:
+        if parentItem is None or parentItem == self.rootItem:
             return QModelIndex()
 
-        return self.createIndex(parentItem.row(), 0, parentItem)
+        # Calculate the visible row position of the parent
+        # We need to find the parent's position in its own parent's effective children
+        grandparent = parentItem.get_visual_parent()
+        if grandparent is None:
+            grandparent = self.rootItem
+
+        effective_siblings = grandparent.get_effective_visible_children()
+        if parentItem in effective_siblings:
+            row = effective_siblings.index(parentItem)
+        else:
+            row = 0
+
+        return self.createIndex(row, 0, parentItem)
 
     def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
         """
@@ -855,20 +940,11 @@ class JsonTreeView(QTreeView):
         self.treeView.setExpanded(index, False)
 
     def toggle_only_child_indicator_nodes(self):
-        """Toggles visibility of indicator nodes if it has no siblings."""
-        indicators_visible = self._indicators_only_child()
-        self.model().toggle_indicator_visibility(not indicators_visible)
+        """Toggles visibility of factors that have only one child indicator.
 
-    def _indicators_only_child(self):
-        """Check if indicators are currently the only child under their parent.
-
-        Returns:
-            bool: True if indicators are only children, False otherwise.
+        When enabled, single-child factors are hidden and their indicator
+        is shown directly under the dimension.
         """
         model = self.model()
-        analysis_item = model.get_analysis_item()
-        for dimension in analysis_item.childItems:
-            for factor in dimension.childItems:
-                for indicator in factor.childItems:
-                    return indicator.is_only_child()
-        return True
+        currently_hidden = model.are_single_child_factors_hidden()
+        model.toggle_single_child_factors_visibility(not currently_hidden)

@@ -140,14 +140,14 @@ class AreaIterator:
         """
         return self.total_features
 
-    def __iter__(self) -> Iterator[Tuple[QgsGeometry, QgsGeometry, float]]:
+    def __iter__(self) -> Iterator[Tuple[QgsGeometry, QgsGeometry, QgsGeometry, float, str]]:
         """
         Iterator that yields pairs of geometries from the polygon layer and the corresponding bbox layer,
-        along with a progress percentage.
+        along with a progress percentage and area name.
 
         Yields:
-            Iterator[Tuple[QgsGeometry, QgsGeometry, float]]: Yields a tuple of polygon and bbox geometries,
-            along with a progress value representing the percentage of the iteration completed.
+            Iterator[Tuple[QgsGeometry, QgsGeometry, QgsGeometry, float, str]]: Yields a tuple of
+            polygon geometry, clip geometry, bbox geometry, progress percentage, and area name.
         """
         try:
             # Ensure all  layers have the same CRS
@@ -224,8 +224,8 @@ class AreaIterator:
                             level=Qgis.Info,
                         )
 
-                    # Yield a tuple with polygon geometry, clip geometry, bbox geometry, and progress percentage
-                    yield polygon_feature.geometry(), clip_geom, bbox_feature.geometry(), progress_percent
+                    # Yield a tuple with polygon geometry, clip geometry, bbox geometry, progress percentage, and area name
+                    yield polygon_feature.geometry(), clip_geom, bbox_feature.geometry(), progress_percent, area_name
 
                 else:
                     log_message(

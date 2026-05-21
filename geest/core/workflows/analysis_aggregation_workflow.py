@@ -47,7 +47,7 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         self.id = (
             self.item.attribute("analysis_name").lower().replace(" ", "_").replace("'", "")
         )  # should not be needed any more
-        self.layer_id = "geoe3"
+        self.layer_id = "geoe3"  # Must match column name in grid_column_utils.get_aggregate_column_names()
         self.weight_key = "analysis_weighting"
         self.workflow_name = "analysis_aggregation"
         # Override the default working directory defined in the base class

@@ -4,8 +4,8 @@ echo "--------------------------------"
 echo "Do you want to enable debug mode?"
 choice=$(gum choose "🪲 Yes" "🐞 No")
 case $choice in
-"🪲 Yes") developer_mode=1 ;;
-"🐞 No") developer_mode=0 ;;
+"🪲 Yes") DEVELOPER_MODE=1 ;;
+"🐞 No") DEVELOPER_MODE=0 ;;
 esac
 echo "Do you want to enable experimental features?"
 choice=$(gum choose "🪲 Yes" "🐞 No")
@@ -21,14 +21,14 @@ rm -f "$GEOE3_LOG"
 #nix-shell -p \
 #  This is the old way using default nix packages with overrides
 #  'qgis.override { extraPythonPackages = (ps: [ ps.pyqtwebengine ps.jsonschema ps.debugpy ps.future ps.psutil ]);}' \
-#  --command "GEEST_LOG=${GEEST_LOG} GEEST_DEBUG=${developer_mode} RUNNING_ON_LOCAL=1 qgis --profile GEEST2"
+#  --command "GEEST_LOG=${GEEST_LOG} GEEST_DEBUG=${DEVELOPER_MODE} RUNNING_ON_LOCAL=1 qgis --profile GEEST2"
 
 # This is the new way, using Ivan Mincis nix spatial project and a flake
 # see flake.nix for implementation details
 # Both GEOE3_* and GEEST_* env vars are set for backward compatibility
 # QT_QPA_PLATFORM flag forces it to run under x11 protocol
 GEOE3_LOG=${GEOE3_LOG} \
-  GEOE3_DEBUG=${developer_mode} \
+  GEOE3_DEBUG=${DEVELOPER_MODE} \
   GEOE3_EXPERIMENTAL=${GEOE3_EXPERIMENTAL} \
   GEOE3_TEST_DIR=${GEOE3_TEST_DIR} \
   RUNNING_ON_LOCAL=1 \

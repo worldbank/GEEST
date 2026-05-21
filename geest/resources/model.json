@@ -133,8 +133,8 @@
                     "dimension_weighting": 0.333333,
                     "indicators": [
                         {
-                            "indicator": "WBL 2024 Entrepeneurship Index Score",
-                            "id": "Entrepeneurship_Index",
+                            "indicator": "WBL 2024 Entrepreneurship Index Score",
+                            "id": "Entrepreneurship_Index",
                             "output_filename": "FIN_output",
                             "description": "",
                             "default_factor_weighting": 1.0,
@@ -333,7 +333,7 @@
                     "indicators": [
                         {
                             "indicator": "Location of public transportation stops, including maritime",
-                            "id": "Pulic_Transport_location",
+                            "id": "Public_Transport_location",
                             "output_filename": "PBT_output",
                             "description": "",
                             "default_factor_weighting": 1.0,
@@ -608,7 +608,7 @@
                     "id": "education",
                     "output_filename": "education",
                     "name": "Education",
-                    "women_enabling": 0,
+                    "women_enabling": 1,
                     "default_dimension_weighting": 0.142857142857143,
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
@@ -631,7 +631,16 @@
                             "use_classify_polygon_into_classes": 1,
                             "use_classify_safety_polygon_into_classes": 0,
                             "use_csv_to_point_layer": 0,
-                            "use_polygon_per_cell": 0,
+                            "use_polygon_per_cell": 1,
+                            "s2s_fields": [
+                                "ghs_11_pop",
+                                "ghs_12_pop",
+                                "ghs_13_pop",
+                                "ghs_22_pop",
+                                "ghs_23_pop",
+                                "ghs_30_pop",
+                                "ghs_total_pop"
+                            ],
                             "use_polyline_per_cell": 0,
                             "use_point_per_cell": 0,
                             "use_nighttime_lights": 0,

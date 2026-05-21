@@ -39,13 +39,14 @@ import logging
 import os
 import pstats
 import subprocess  # nosec B404
+import sys
 import tempfile
 import unittest
 from shutil import which
 from typing import Optional
 
 from qgis.core import Qgis, QgsProject
-from qgis.PyQt.QtCore import QSettings, Qt, pyqtSignal
+from qgis.PyQt.QtCore import QEvent, QObject, QSettings, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import (
     QAction,
@@ -84,6 +85,9 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     level=logging.DEBUG,
 )
+# Suppress PyQt uic module debug spam (push/pop widget, setting property, etc.)
+logging.getLogger("PyQt5.uic").setLevel(logging.WARNING)
+logging.getLogger("PyQt6.uic").setLevel(logging.WARNING)
 date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 log_message("»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
 log_message(f"GeoE3 started at {date}", force=True)
@@ -93,6 +97,25 @@ log_message(f"Logging output to: {log_file_path}", force=True)
 log_message(f"log_path_env: {log_path_env}", force=True)
 log_message("»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
 log_message("QGIS Version: {}".format(Qgis.QGIS_VERSION), force=True)
+
+
+class CanvasOverlayFilter(QObject):
+    """Event filter to clear overlay label when clicking on map canvas."""
+
+    def eventFilter(self, obj, event):
+        """Filter mouse press events on map canvas to clear overlay.
+
+        Args:
+            obj: The object that received the event.
+            event: The event to process.
+
+        Returns:
+            False to let the event propagate normally.
+        """
+        if event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
+            QSettings().setValue("geoe3/overlay_label", "")
+            QSettings().setValue("geoe3/pie_data", "")
+        return False
 
 
 def classFactory(iface):  # pylint: disable=missing-function-docstring
@@ -163,8 +186,6 @@ class GeoE3Plugin:
         Raises:
             ValueError: If GEOE3_TEST_DIR (or GEEST_TEST_DIR) is not set or points to invalid directory
         """
-        import sys
-
         # Get test directory from environment variable (with fallback for backward compatibility)
         env_test_dir = os.getenv("GEOE3_TEST_DIR") or os.getenv("GEEST_TEST_DIR")
 
@@ -286,6 +307,10 @@ class GeoE3Plugin:
         self.iface.registerOptionsWidgetFactory(self.options_factory)
         self.setup_map_canvas_items()
 
+        # Install event filter to clear overlay label on canvas left-click
+        self._canvas_overlay_filter = CanvasOverlayFilter()
+        self.iface.mapCanvas().viewport().installEventFilter(self._canvas_overlay_filter)
+
     def run_tests(self):
         """Run unit tests in the python console."""
 
@@ -334,7 +359,9 @@ for module_name in list(sys.modules.keys()):
 
     def setup_map_canvas_items(self):
         """⚙️ Setup map canvas items."""
-        self.label_overlay = LayerDescriptionItem(self.iface.mapCanvas())
+        # TEMPORARY: Disable layer description overlay creation.
+        # self.label_overlay = LayerDescriptionItem(self.iface.mapCanvas())
+        self.label_overlay = None
         experimental_features = int(os.getenv("GEOE3_EXPERIMENTAL") or os.getenv("GEEST_EXPERIMENTAL", 0))
         if experimental_features:
             self.pie_overlay = PieChartItem(self.iface.mapCanvas())
@@ -755,6 +782,11 @@ for module_name in list(sys.modules.keys()):
             self.iface.unregisterOptionsWidgetFactory(self.options_factory)
             self.options_factory = None
 
+        # Remove canvas event filter
+        if hasattr(self, "_canvas_overlay_filter") and self._canvas_overlay_filter:
+            self.iface.mapCanvas().viewport().removeEventFilter(self._canvas_overlay_filter)
+            self._canvas_overlay_filter = None
+
         # Remove dock widget if it exists
         if self.dock_widget:
             self.iface.removeDockWidget(self.dock_widget)
@@ -838,7 +870,8 @@ for module_name in list(sys.modules.keys()):
                 title="GeoE3",
                 message=f"Visual Studio Code debugger is now attached on port {self.DEBUG_PORT}",
             )
-            self.debug_action.setEnabled(False)  # prevent user starting it twice
+            if self.debug_action:
+                self.debug_action.setEnabled(False)  # prevent user starting it twice
             self.debug_running = True
 
     def run(self):

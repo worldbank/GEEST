@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""📦 Ghsl Downloader module.
+"""📦 GHSL Downloader module.
 
 This module contains functionality for ghsl downloader.
 """

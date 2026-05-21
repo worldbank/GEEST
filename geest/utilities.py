@@ -69,7 +69,17 @@ def theme_stylesheet() -> str:
     # try move it to the top and check that all the subsequent rules work still...
     light_theme_stylesheet = f"""
         QPushButton {{
-            background-color: rgba(62, 121, 155, 25);
+            background-color: rgba(62, 121, 155, 180);
+            color: #ffffff;
+            border: 1px solid #3E799B;
+            border-radius: 3px;
+            padding: 4px 8px;
+        }}
+        QPushButton:hover {{
+            background-color: rgba(62, 121, 155, 220);
+        }}
+        QPushButton:pressed {{
+            background-color: rgba(45, 90, 117, 255);
         }}
         QToolTip {{
             color: #000000;

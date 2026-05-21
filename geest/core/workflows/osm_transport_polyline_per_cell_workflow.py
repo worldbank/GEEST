@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """📦 Osm Transport Polyline Per Cell Workflow module.
-
 This module contains functionality for osm transport polyline per cell workflow.
 """
-
 import os
 from typing import Optional
 from urllib.parse import unquote
@@ -40,7 +38,6 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
     ):
         """
         Initialize the workflow with attributes and feedback.
-
         Args:
             :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
             :param cell_size_m: Cell size in meters
@@ -53,14 +50,11 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_osm_transport_polyline_per_cell"
-
         # Use unified active transport - combines both highway and cycleway with best score logic
         self.osm_processing_type = OSMDownloadType.ACTIVE_TRANSPORT
-
         layer_path = self.attributes.get("osm_transport_polyline_per_cell_shapefile", None)
         if layer_path:
             layer_path = unquote(layer_path)
-
         if not layer_path:
             log_message(
                 "Nothing found in osm_transport_polyline_per_cell_shapefile, trying osm_transport_polyline_per_cell_layer_source.",
@@ -68,7 +62,6 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
                 level=Qgis.Warning,
             )
             layer_path = self.attributes.get("osm_transport_polyline_per_cell_layer_source", None)
-
             if not layer_path:
                 log_message(
                     "No osm_transport_polyline_per_cell_layer_source found, trying road_network_layer_path.",
@@ -76,12 +69,10 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
                     level=Qgis.Warning,
                 )
                 layer_path = self.attributes.get("road_network_layer_path", None)
-
                 if not layer_path:
                     error_msg = "No transport layer found. Please configure a data source or download the active transport network."
                     log_message(error_msg, tag="GeoE3", level=Qgis.Critical)
                     raise ValueError(error_msg)
-
         self.features_layer = QgsVectorLayer(layer_path, "OSM Transport Layer", "ogr")
 
     def _process_features_for_area(
@@ -91,16 +82,15 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
+        area_name: str = None,
     ) -> str:
         """
         Executes the actual workflow logic for a single area
         Must be implemented by subclasses.
-
         :current_area: Current polygon from our study area.
         :current_bbox: Bounding box of the above area.
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
-
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
         area_features_count = area_features.featureCount()
@@ -120,14 +110,12 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
             self.feedback,
             analysis_scale=self.analysis_scale,
         )
-
         log_message(
             "OSM Transport Polyline per Cell - Selected grid cells and assigned transport scores.",
             tag="GeoE3",
             level=Qgis.Info,
         )
         log_message(f"Grid cells with transport scores saved to: {output_path}", tag="GeoE3", level=Qgis.Info)
-
         # Step 2: Rasterize the grid layer using the assigned values
         # Create a scored boundary layer
         self.updateStatus("Rasterizing grid cells...")
@@ -148,16 +136,15 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
+        area_name: str = None,
     ):
         """
         Executes the actual workflow logic for a single area using a raster.
-
         :current_area: Current polygon from our study area.
         :clip_area: Polygon to clip the raster to which is aligned to cell edges.
         :current_bbox: Bounding box of the above area.
         :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
         :index: Index of the current area.
-
         :return: Path to the reclassified raster.
         """
         pass
@@ -168,6 +155,7 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
+        area_name: str = None,
     ):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.

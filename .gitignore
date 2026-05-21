@@ -114,3 +114,4 @@ geoe3/extlibs/*
 geest/extlibs/*
 !geest/extlibs/.gitkeep
 PROMPT.log
+log.txt

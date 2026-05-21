@@ -6,24 +6,34 @@ This module contains functionality for create project panel.
 
 import json
 import os
+import sqlite3
 import shutil
+import time
 import traceback
 
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
+    QgsDistanceArea,
     QgsFeedback,
     QgsFieldProxyModel,
     QgsLayerTreeGroup,
     QgsMapLayerProxyModel,
     QgsProject,
+    QgsUnitTypes,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QPixmap
-from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox, QWidget
+from qgis.PyQt.QtWidgets import QComboBox, QFileDialog, QMessageBox, QWidget
 
 from geest.core import WorkflowQueueManager
+from geest.core.h3_utils import (
+    estimate_h3_cells_for_area,
+    h3_cell_area_km2,
+    suggest_coarser_resolution,
+    suggest_finer_resolution,
+)
 from geest.core.tasks import StudyAreaProcessingTask, StudyAreaReportTask
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (
@@ -52,6 +62,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     # Signal to set the working directory
     working_directory_changed = pyqtSignal(str)
 
+    MIN_H3_ESTIMATED_CELLS = 3
+    MAX_H3_ESTIMATED_CELLS = 200000
+
     def __init__(self):
         """🏗️ Initialize the instance."""
         super().__init__()
@@ -61,10 +74,36 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
         self.working_dir = ""
         self.settings = QSettings()  # Initialize QSettings to store and retrieve settings
+        self._last_map_refresh_ts = 0.0
         # Dynamically load the .ui file
         self.setupUi(self)
         log_message("Loading setup panel")
         self.initUI()
+
+    def _should_skip_map_refresh(self) -> bool:
+        """Rate-limit map refresh attempts while study area is writing."""
+        now = time.monotonic()
+        if now - self._last_map_refresh_ts < 0.5:
+            return True
+        self._last_map_refresh_ts = now
+        return False
+
+    @staticmethod
+    def _gpkg_metadata_ready(gpkg_path: str) -> bool:
+        """Return True when required GeoPackage metadata tables exist."""
+        try:
+            conn = sqlite3.connect(gpkg_path, timeout=0.2)
+            try:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('gpkg_spatial_ref_sys','gpkg_contents')"
+                )
+                names = {row[0] for row in cursor.fetchall()}
+                return "gpkg_spatial_ref_sys" in names and "gpkg_contents" in names
+            finally:
+                conn.close()
+        except Exception:
+            return False
 
     def initUI(self):
         """⚙️ Initui."""
@@ -82,13 +121,39 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.regional_scale.clicked.connect(lambda: self.spatial_scale_changed("regional"))
         self.national_scale.clicked.connect(lambda: self.spatial_scale_changed("national"))
         self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
+        if self.regional_scale.isChecked():
+            self.spatial_scale_changed("regional")
+        elif self.local_scale.isChecked():
+            self.spatial_scale_changed("local")
+        else:
+            self.spatial_scale_changed("national")
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
         # Regional scale uses H3 hexagonal grids (L6 resolution)
         # National and Local scales use square grids
         # Local mode enabled for National vs Local analysis implementation
         # self.local_scale.setEnabled(False)
-        self.regional_scale.setEnabled(False)
+        # self.regional_scale.setEnabled(False)
         self.regional_scale.setStyleSheet("QRadioButton:disabled { color: grey; }")
+
+        self.h3_resolution_label = self.label
+        self.h3_resolution_label.setText("H3 grid resolution")
+        self.h3_resolution_combo = QComboBox()
+        for resolution in range(16):
+            if resolution == 6:
+                self.h3_resolution_combo.addItem(f"{resolution} (recommended)", resolution)
+            else:
+                self.h3_resolution_combo.addItem(str(resolution), resolution)
+        self.h3_resolution_combo.setCurrentIndex(6)
+        self.h3_resolution_combo.setToolTip("Higher H3 resolutions are finer and may require significantly more time.")
+
+        scale_layout = self.groupBox.layout()
+        scale_layout.addWidget(self.h3_resolution_combo, 3, 1, 1, 2)
+        if self.regional_scale.isChecked():
+            self.spatial_scale_changed("regional")
+        elif self.local_scale.isChecked():
+            self.spatial_scale_changed("local")
+        else:
+            self.spatial_scale_changed("national")
 
         # Women Considerations toggle
         self.women_considerations_checkbox.stateChanged.connect(self.women_considerations_changed)
@@ -121,34 +186,46 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # Ensure crs is set on first load
         self.layer_changed(self.layer_combo.currentLayer())
 
+    def _refresh_boundary_crs_checkbox(self, layer: QgsVectorLayer) -> None:
+        """Refresh boundary CRS checkbox state for selected layer."""
+        if not layer:
+            self.use_boundary_crs.setChecked(False)
+            self.use_boundary_crs.setEnabled(False)
+            return
+
+        if layer.crs().authid() == "EPSG:4326":
+            self.use_boundary_crs.setChecked(False)
+            self.use_boundary_crs.setEnabled(False)
+            return
+
+        self.use_boundary_crs.setEnabled(True)
+
     def layer_changed(self, layer):
         """Slot to be called when the layer in the combo box changes.
 
         Args:
             layer: The new layer selected in the combo box.
         """
-        log_message(f"Layer changed: {layer.name() if layer else 'None'}")
-        if self.crs() is None:
-            log_message(
-                "CRS is None, cannot set layer or field combo box.",
-                tag="GeoE3",
-                level=Qgis.Critical,
-            )
-            self.crs_label.setText("Invalid CRS")
-            return
-        log_message(f"Layer crs: {layer.crs().authid() if layer else 'None'}")
-        if layer:
-            self.field_combo.setLayer(layer)
-            # Check if the layer has a valid CRS
-            if layer.crs().authid() == "EPSG:4326":
-                self.use_boundary_crs.setChecked(False)
-                self.use_boundary_crs.setEnabled(False)
-            else:
-                self.use_boundary_crs.setEnabled(True)
+        _ = layer
+        current_layer = self.layer_combo.currentLayer()
+        log_message(f"Layer changed: {current_layer.name() if current_layer else 'None'}")
+
+        log_message(f"Layer crs: {current_layer.crs().authid() if current_layer else 'None'}")
+        if current_layer:
+            self.field_combo.setLayer(current_layer)
         else:
             self.field_combo.clear()
-            self.use_boundary_crs.setEnabled(False)
-        self.crs_label.setText(self.crs().authid())
+        self._refresh_boundary_crs_checkbox(current_layer)
+
+        try:
+            current_crs = self.crs()
+            if current_crs is not None and current_crs.authid():
+                self.crs_label.setText(f"CRS: {current_crs.authid()}")
+            else:
+                self.crs_label.setText("CRS: Not set")
+        except Exception as error:
+            log_message(f"Could not resolve CRS after layer change: {error}", tag="GeoE3", level=Qgis.Warning)
+            self.crs_label.setText("CRS: Not set")
 
     def spatial_scale_changed(self, value: str):
         """Slot to be called when the spatial scale changes.
@@ -160,18 +237,30 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         if value == "regional":
             # Regional scale uses H3 hexagonal grids (resolution L6) - fixed size
             self.cell_size_spinbox.hide()
+            if hasattr(self, "h3_resolution_label"):
+                self.h3_resolution_label.show()
+            if hasattr(self, "h3_resolution_combo"):
+                self.h3_resolution_combo.show()
         elif value == "national":
             self.cell_size_spinbox.show()
             self.description2.show()
             self.cell_size_spinbox.setValue(1000)
             self.cell_size_spinbox.setSingleStep(100)
             self.cell_size_spinbox.setSuffix(" m")
+            if hasattr(self, "h3_resolution_label"):
+                self.h3_resolution_label.hide()
+            if hasattr(self, "h3_resolution_combo"):
+                self.h3_resolution_combo.hide()
         elif value == "local":
             self.cell_size_spinbox.show()
             self.description2.show()
             self.cell_size_spinbox.setValue(100)
             self.cell_size_spinbox.setSingleStep(10)
             self.cell_size_spinbox.setSuffix(" m")
+            if hasattr(self, "h3_resolution_label"):
+                self.h3_resolution_label.hide()
+            if hasattr(self, "h3_resolution_combo"):
+                self.h3_resolution_combo.hide()
 
     def women_considerations_changed(self):
         """Slot to be called when the women considerations checkbox changes."""
@@ -205,6 +294,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             QgsProject.instance().addMapLayer(layer)
             self.layer_combo.setLayer(layer)
             self.field_combo.setLayer(layer)
+            self._refresh_boundary_crs_checkbox(self.layer_combo.currentLayer())
 
     def create_new_project_folder(self):
         """⚙️ Create new project folder."""
@@ -250,6 +340,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 self.enable_widgets()
                 return
 
+            if self.regional_scale.isChecked():
+                if not self._validate_h3_preflight(layer, self.selected_h3_resolution()):
+                    self.enable_widgets()
+                    return
+
             # Copy default model.json if not present
             default_model_path = resources_path("resources", "model.json")
             try:
@@ -264,6 +359,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 model["analysis_cell_size_m"] = self.cell_size_spinbox.value()
                 if self.regional_scale.isChecked():
                     model["analysis_scale"] = "regional"
+                    model["analysis_h3_resolution"] = self.selected_h3_resolution()
                 elif self.local_scale.isChecked():
                     model["analysis_scale"] = "local"
                 else:
@@ -290,6 +386,23 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 else:
                     analysis_scale = "national"
 
+                h3_resolution = self.selected_h3_resolution() if analysis_scale == "regional" else None
+
+                if analysis_scale == "regional" and h3_resolution is not None and h3_resolution >= 9:
+                    reply = QMessageBox.question(
+                        self,
+                        "High H3 Resolution",
+                        (
+                            f"H3 resolution {h3_resolution} can be very computationally expensive and may take "
+                            "a long time to process.\n\nDo you want to continue?"
+                        ),
+                        QMessageBox.Yes | QMessageBox.No,
+                        QMessageBox.No,
+                    )
+                    if reply != QMessageBox.Yes:
+                        self.enable_widgets()
+                        return
+
                 processor = StudyAreaProcessingTask(
                     layer=layer,
                     field_name=field_name,
@@ -298,6 +411,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     working_dir=self.working_dir,
                     feedback=feedback,
                     analysis_scale=analysis_scale,
+                    h3_resolution=h3_resolution,
                 )
                 # Hook up the QTask feedback signal to the progress bar
                 # Measure overall task progress from the task object itself
@@ -310,7 +424,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 feedback.progressChanged.connect(self.subtask_progress_updated)
                 self.disable_widgets()
                 if debug_env:
-                    processor.process_study_area()
+                    processor.run()
                 else:
                     self.queue_manager.add_task(processor)
                     self.queue_manager.start_processing()
@@ -495,7 +609,6 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.child_progress_bar.setMaximum(100)
         self.child_progress_bar.setValue(100)
         self.child_progress_bar.setFormat("Complete")
-
         self.enable_widgets()
         self.switch_to_next_tab.emit()
 
@@ -509,7 +622,6 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.child_progress_bar.setMaximum(100)
         self.child_progress_bar.setValue(0)
         self.child_progress_bar.setFormat("Report failed — continuing")
-
         self.enable_widgets()
         self.switch_to_next_tab.emit()
 
@@ -585,6 +697,8 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.create_project_directory_button.setFont(QFont("Arial", font_size))
         self.load_boundary_button.setFont(QFont("Arial", font_size))
         self.cell_size_spinbox.setFont(QFont("Arial", font_size))
+        self.h3_resolution_label.setFont(QFont("Arial", font_size))
+        self.h3_resolution_combo.setFont(QFont("Arial", font_size))
         self.layer_combo.setFont(QFont("Arial", font_size))
         self.field_combo.setFont(QFont("Arial", font_size))
 
@@ -598,6 +712,85 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # Progress bars use a fixed small font so text never wraps inside the bar
         self.progress_bar.setFont(QFont("Arial", 9))
         self.child_progress_bar.setFont(QFont("Arial", 9))
+
+    def selected_h3_resolution(self) -> int:
+        """Return selected H3 resolution from regional dropdown."""
+        selected_value = self.h3_resolution_combo.currentData()
+        if selected_value is None:
+            selected_value = self.h3_resolution_combo.currentText().split(" ")[0]
+        return int(selected_value)
+
+    def _estimate_layer_area_km2(self, layer: QgsVectorLayer) -> float:
+        """Estimate total polygon area in square kilometers for selected input features."""
+        if not layer:
+            return 0.0
+
+        distance_area = QgsDistanceArea()
+        distance_area.setSourceCrs(layer.crs(), QgsProject.instance().transformContext())
+        if layer.crs().isGeographic():
+            distance_area.setEllipsoid("WGS84")
+        else:
+            distance_area.setEllipsoid(layer.crs().ellipsoidAcronym() or "WGS84")
+
+        area_m2 = 0.0
+        if layer.selectedFeatureCount() > 0:
+            features = layer.getSelectedFeatures()
+        else:
+            features = layer.getFeatures()
+
+        for feature in features:
+            geometry = feature.geometry()
+            if geometry is None or geometry.isEmpty():
+                continue
+            area_m2 += abs(distance_area.measureArea(geometry))
+
+        return distance_area.convertAreaMeasurement(area_m2, QgsUnitTypes.AreaSquareKilometers)
+
+    def _validate_h3_preflight(self, layer: QgsVectorLayer, h3_resolution: int) -> bool:
+        """Validate H3 configuration and block unsafe runs before processing."""
+        area_km2 = self._estimate_layer_area_km2(layer)
+        if area_km2 <= 0:
+            QMessageBox.critical(
+                self,
+                "Invalid Study Area",
+                "Could not estimate study area size. Please verify polygon geometry and try again.",
+            )
+            return False
+
+        estimated_cells = estimate_h3_cells_for_area(area_km2, h3_resolution)
+        cell_area_km2 = h3_cell_area_km2(h3_resolution)
+
+        if estimated_cells > self.MAX_H3_ESTIMATED_CELLS:
+            suggested = suggest_coarser_resolution(area_km2, self.MAX_H3_ESTIMATED_CELLS, h3_resolution)
+            QMessageBox.critical(
+                self,
+                "H3 Resolution Too Fine",
+                (
+                    f"Selected H3 resolution {h3_resolution} is too fine for this study area.\n\n"
+                    f"Estimated area: {area_km2:,.2f} km²\n"
+                    f"Approximate cell area: {cell_area_km2:,.6f} km²\n"
+                    f"Estimated cells: {estimated_cells:,} (max allowed: {self.MAX_H3_ESTIMATED_CELLS:,})\n\n"
+                    f"Please choose a coarser resolution, e.g. {suggested}."
+                ),
+            )
+            return False
+
+        if estimated_cells < self.MIN_H3_ESTIMATED_CELLS:
+            suggested = suggest_finer_resolution(area_km2, self.MIN_H3_ESTIMATED_CELLS, h3_resolution)
+            QMessageBox.critical(
+                self,
+                "H3 Resolution Too Coarse",
+                (
+                    f"Selected H3 resolution {h3_resolution} is too coarse for this study area.\n\n"
+                    f"Estimated area: {area_km2:,.2f} km²\n"
+                    f"Approximate cell area: {cell_area_km2:,.2f} km²\n"
+                    f"Estimated cells: {estimated_cells} (minimum required: {self.MIN_H3_ESTIMATED_CELLS})\n\n"
+                    f"Please choose a finer resolution, e.g. {suggested}."
+                ),
+            )
+            return False
+
+        return True
 
     def add_bboxes_to_map(self):
         """Add the study area layers to the map.
@@ -613,6 +806,37 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             RuntimeError: If the GeoPackage cannot be opened for an unexpected reason.
         """
         gpkg_path = os.path.join(self.working_dir, "study_area", "study_area.gpkg")
+        if self._should_skip_map_refresh():
+            return
+
+        if not os.path.exists(gpkg_path):
+            log_message(
+                f"GeoPackage not yet created: {gpkg_path}",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
+            return
+
+        try:
+            file_size = os.path.getsize(gpkg_path)
+            if file_size < 1024:  # Less than 1KB suggests still initializing
+                log_message(
+                    f"GeoPackage still initializing (size: {file_size} bytes)",
+                    tag="GeoE3",
+                    level=Qgis.Info,
+                )
+                return
+        except OSError:
+            return
+
+        if not self._gpkg_metadata_ready(gpkg_path):
+            log_message(
+                "GeoPackage metadata tables not ready yet; skipping map refresh.",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
+            return
+
         project = QgsProject.instance()
 
         # Check if 'GeoE3' group exists, otherwise create it
@@ -626,29 +850,6 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             "study_area_creation_status",
         ]
         for layer_name in layers:
-            # Check if GeoPackage file exists first
-            if not os.path.exists(gpkg_path):
-                log_message(
-                    f"GeoPackage not yet created: {gpkg_path}",
-                    tag="GeoE3",
-                    level=Qgis.Info,
-                )
-                return
-
-            # Check if file size is stable (not being actively written)
-            # A very small file might still be initializing
-            try:
-                file_size = os.path.getsize(gpkg_path)
-                if file_size < 1024:  # Less than 1KB suggests still initializing
-                    log_message(
-                        f"GeoPackage still initializing (size: {file_size} bytes)",
-                        tag="GeoE3",
-                        level=Qgis.Info,
-                    )
-                    return
-            except OSError:
-                return  # File might be locked
-
             # Check if layer exists in GeoPackage
             from osgeo import ogr
 
@@ -662,10 +863,19 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 ds = None
             except RuntimeError as e:
                 error_str = str(e).lower()
-                # Skip if database is busy or temporarily corrupted during writes
-                if "database is locked" in error_str or "malformed" in error_str:
+                # Skip if database is busy, temporarily corrupted, or still initializing
+                if (
+                    "database is locked" in error_str
+                    or "malformed" in error_str
+                    or "gpkg_spatial_ref_sys" in error_str
+                    or "gpkg_contents" in error_str
+                    or "not recognized as being in a supported file format" in error_str
+                    or "unable to open database file" in error_str
+                    or "readonly database" in error_str
+                    or "required geopackage tables" in error_str
+                ):
                     log_message(
-                        f"Database busy or being written, skipping map refresh for {layer_name}",
+                        f"Database busy or still initializing, skipping map refresh for {layer_name}",
                         tag="GeoE3",
                         level=Qgis.Info,
                     )

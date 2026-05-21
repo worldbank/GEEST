@@ -2,9 +2,13 @@
 """📦 Single Point Buffer Workflow module.
 
 This module contains functionality for single point buffer workflow.
+
+Supports grid-first mode where buffer scores are written directly to
+the study_area_grid column, then rasterized.
 """
 
 import os
+from typing import Optional
 from urllib.parse import unquote
 
 from qgis import processing
@@ -19,6 +23,11 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem
+from geest.core.grid_column_utils import (
+    clear_grid_column,
+    rasterize_grid_column,
+    write_buffer_values_to_grid,
+)
 from geest.core.workflows.mappings import MAPPING_REGISTRY
 from geest.utilities import log_message
 
@@ -52,7 +61,6 @@ class SinglePointBufferWorkflow(WorkflowBase):
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_single_buffer_point"
-
         layer_source = self.attributes.get("single_buffer_point_shapefile", None)
         if layer_source is not None:
             layer_source = unquote(layer_source)
@@ -81,39 +89,69 @@ class SinglePointBufferWorkflow(WorkflowBase):
         config = mapping.get(analysis_scale, mapping.get("national")) if mapping else None
         mapped_distance = config.get("buffer_distance") if config else None
         self.mapped_scores = config.get("scores", {}) if config else {}
-
         # Load scoring method and percentage scores for Regional scale
         self.scoring_method = config.get("scoring_method", "") if config else ""
         self.percentage_scores = config.get("percentage_scores", {}) if config else {}
-
         default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", 0))
         if mapped_distance:
             default_buffer_distance = int(mapped_distance)
-
         buffer_distance = self.attributes.get("single_buffer_point_layer_distance", default_buffer_distance)
         self.buffer_distance = int(buffer_distance) if buffer_distance else int(default_buffer_distance)
+        self.workflow_name = "single_point_buffer"
+        # Grid-first mode: write results to grid columns first, then rasterize
+        self.use_grid_first = True
+        # Track if we've cleared the column (only do once, not per area)
+        self._column_cleared = False
 
     def _process_features_for_area(
         self,
-        current_area: "QgsGeometry",
-        clip_area: "QgsGeometry",
-        current_bbox: "QgsGeometry",
-        area_features: "QgsVectorLayer",
+        current_area: QgsGeometry,
+        clip_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
         index: int,
+        area_name: Optional[str] = None,
     ) -> str:
         """
-        Executes the actual workflow logic for a single area
-        Must be implemented by subclasses.
+        Executes the actual workflow logic for a single area.
+
+        Supports grid-first mode where buffer scores are written directly to study_area_grid.
 
         :current_area: Current polygon from our study area.
         :current_bbox: Bounding box of the above area.
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
+        :area_name: Name of the area being processed.
 
-        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
+        :return: A raster layer file path if processing completes successfully.
         """
-        log_message(f"{self.workflow_name}  Processing Started")
+        log_message(f"{self.workflow_name} Processing Started")
 
+        if self.use_grid_first:
+            return self._process_grid_first(
+                current_bbox=current_bbox,
+                area_features=area_features,
+                index=index,
+                area_name=area_name,
+            )
+        else:
+            return self._process_raster_first(
+                current_area=current_area,
+                clip_area=clip_area,
+                current_bbox=current_bbox,
+                area_features=area_features,
+                index=index,
+            )
+
+    def _process_raster_first(
+        self,
+        current_area: QgsGeometry,
+        clip_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
+        index: int,
+    ) -> str:
+        """Legacy raster-first processing."""
         # Check if we should use percentage-based scoring (Regional scale)
         if self.scoring_method == "percentage_intersection" and self.percentage_scores:
             return self._process_with_percentage_scoring(
@@ -123,26 +161,86 @@ class SinglePointBufferWorkflow(WorkflowBase):
                 area_features=area_features,
                 index=index,
             )
-
         # Original binary scoring approach for National/Local scale
         # Step 1: Buffer the selected features
         buffered_layer = self._buffer_features(area_features, f"{self.layer_id}_buffered_{index}")
+        # Step 2: Assign values to the buffered polygons
+        scored_layer = self._assign_scores(buffered_layer)
+        # Step 3: Rasterize the scored buffer layer
+        raster_output = self._rasterize(scored_layer, current_bbox, index)
+        return raster_output
+
+    def _process_grid_first(
+        self,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
+        index: int,
+        area_name: str,
+    ) -> str:
+        """Grid-first processing - writes buffer scores directly to study_area_grid."""
+        # Clear column once at the start (not per area)
+        if not self._column_cleared:
+            log_message(f"Clearing column {self.layer_id} before processing")
+            clear_grid_column(self.gpkg_path, self.layer_id)
+            self._column_cleared = True
+
+        self.progressChanged.emit(10.0)
+
+        # Step 1: Buffer the selected features
+        log_message(f"Creating buffer with distance {self.buffer_distance}m")
+        buffered_layer = self._buffer_features(area_features, f"{self.layer_id}_buffered_{index}")
+
+        self.progressChanged.emit(30.0)
 
         # Step 2: Assign values to the buffered polygons
         scored_layer = self._assign_scores(buffered_layer)
 
-        # Step 3: Rasterize the scored buffer layer
-        raster_output = self._rasterize(scored_layer, current_bbox, index)
+        self.progressChanged.emit(40.0)
 
-        return raster_output
+        # Step 3: Write buffer scores to grid cells
+        log_message(f"Writing buffer scores to grid column {self.layer_id}")
+        write_buffer_values_to_grid(
+            gpkg_path=self.gpkg_path,
+            column_name=self.layer_id,
+            buffer_layer=scored_layer,
+            value_field="value",
+            aggregation_method="MAX",
+            feedback=self.feedback,
+        )
+
+        self.progressChanged.emit(70.0)
+
+        # Step 4: Rasterize from grid column
+        output_path = os.path.join(
+            self.workflow_directory,
+            f"{self.layer_id}_{index}.tif",
+        )
+
+        rect = current_bbox.boundingBox()
+        extent = (rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
+
+        rasterize_grid_column(
+            gpkg_path=self.gpkg_path,
+            column_name=self.layer_id,
+            output_raster_path=output_path,
+            cell_size=self.cell_size_m,
+            extent=extent,
+            nodata=-9999.0,
+            area_name=area_name,
+        )
+
+        self.progressChanged.emit(100.0)
+        log_message(f"Rasterized grid column to {output_path}")
+        return output_path
 
     def _process_with_percentage_scoring(
         self,
-        current_area: "QgsGeometry",
-        clip_area: "QgsGeometry",
-        current_bbox: "QgsGeometry",
-        area_features: "QgsVectorLayer",
+        current_area: QgsGeometry,
+        clip_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
         index: int,
+        area_name: str = None,
     ) -> str:
         """Process using percentage-based scoring (Regional scale).
 
@@ -165,12 +263,10 @@ class SinglePointBufferWorkflow(WorkflowBase):
             f"Single Point Buffer: Using percentage scoring for Regional scale (buffer: {self.buffer_distance}m)",
             level=Qgis.Info,
         )
-
         # Step 1: Create buffer around points
         buffer_output = os.path.join(self.workflow_directory, f"simple_buffer_{index}.gpkg")
         if os.path.exists(buffer_output):
             os.remove(buffer_output)
-
         buffer_params = {
             "INPUT": area_features,
             "DISTANCE": self.buffer_distance,
@@ -178,14 +274,12 @@ class SinglePointBufferWorkflow(WorkflowBase):
         }
         result = processing.run("native:buffer", buffer_params)
         buffered_layer_path = result["OUTPUT"]
-
         if not buffered_layer_path or not os.path.exists(buffered_layer_path):
             log_message(
                 f"Failed to create buffer for area {index}",
                 level=Qgis.Warning,
             )
             return False
-
         buffered_layer = QgsVectorLayer(buffered_layer_path, "buffered", "ogr")
         if not buffered_layer.isValid():
             log_message(
@@ -193,7 +287,6 @@ class SinglePointBufferWorkflow(WorkflowBase):
                 level=Qgis.Warning,
             )
             return False
-
         # Step 2: Get grid cells for current area
         area_grid = subset_vector_layer(
             self.workflow_directory,
@@ -207,20 +300,17 @@ class SinglePointBufferWorkflow(WorkflowBase):
                 level=Qgis.Warning,
             )
             return False
-
         # Step 3: Score grid cells based on percentage intersection
         scored_grid = self._score_grid_for_percentage(
             grid_layer=area_grid,
             buffered_layer=buffered_layer,
         )
-
         if scored_grid is False:
             log_message(
                 "No scored grid cells were created.",
                 level=Qgis.Warning,
             )
             return False
-
         # Step 4: Rasterize
         raster_output = self._rasterize(
             input_layer=scored_grid,
@@ -228,14 +318,13 @@ class SinglePointBufferWorkflow(WorkflowBase):
             index=index,
             value_field="value",
         )
-
         return raster_output
 
     def _score_grid_for_percentage(
         self,
-        grid_layer: "QgsVectorLayer",
-        buffered_layer: "QgsVectorLayer",
-    ) -> "QgsVectorLayer":
+        grid_layer: QgsVectorLayer,
+        buffered_layer: QgsVectorLayer,
+    ) -> QgsVectorLayer:
         """Score grid cells based on percentage intersection with buffered features.
 
         For Regional scale: calculates what percentage of each grid cell
@@ -249,44 +338,34 @@ class SinglePointBufferWorkflow(WorkflowBase):
             The grid layer with "value" field containing the assigned scores.
         """
         log_message("Scoring grid cells based on percentage intersection")
-
         field_names = [field.name() for field in grid_layer.fields()]
         if "value" not in field_names:
             grid_layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
             grid_layer.updateFields()
-
         grid_layer.startEditing()
         for grid_feature in grid_layer.getFeatures():
             grid_geom = grid_feature.geometry()
             if grid_geom.isNull():
                 continue
-
             grid_area = grid_geom.area()
             if grid_area == 0:
                 continue
-
-            max_score = 0
             max_overlap_percent = 0
-
             for buffered_feature in buffered_layer.getFeatures():
                 buffered_geom = buffered_feature.geometry()
                 if buffered_geom.isNull():
                     continue
-
                 intersection = grid_geom.intersection(buffered_geom)
                 if intersection.isNull() or intersection.area() == 0:
                     continue
-
                 # Calculate % of buffer within hexagon
                 buffer_area = buffered_geom.area()
                 if buffer_area > 0:
                     overlap_percent = (intersection.area() / buffer_area) * 100
                 else:
                     overlap_percent = 0
-
                 if overlap_percent > max_overlap_percent:
                     max_overlap_percent = overlap_percent
-
             # Calculate score based on final max_overlap_percent after all buffers checked
             sorted_items = sorted(self.percentage_scores.items())
             max_score = 0
@@ -304,14 +383,10 @@ class SinglePointBufferWorkflow(WorkflowBase):
                     prev_pct = sorted_items[i - 1][0]
                     if prev_pct < max_overlap_percent <= min_pct:
                         max_score = score
-
             grid_feature.setAttribute("value", max_score)
             grid_layer.updateFeature(grid_feature)
-
         grid_layer.commitChanges()
         return grid_layer
-
-        return raster_output
 
     def _buffer_features(self, layer: QgsVectorLayer, output_name: str) -> QgsVectorLayer:
         """
@@ -335,7 +410,6 @@ class SinglePointBufferWorkflow(WorkflowBase):
                 "OUTPUT": output_path,
             },
         )["OUTPUT"]
-
         buffered_layer = QgsVectorLayer(output_path, output_name, "ogr")
         return buffered_layer
 
@@ -349,21 +423,17 @@ class SinglePointBufferWorkflow(WorkflowBase):
         Returns:
             QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
         """
-
         log_message(f"Assigning scores to {layer.name()}")
         # Create a new field in the layer for the scores
         layer.startEditing()
         layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
         layer.updateFields()
-
         # Assign scores to the buffered polygons
         score = self.mapped_scores.get("intersects", 5)
         for feature in layer.getFeatures():
             feature.setAttribute("value", score)
             layer.updateFeature(feature)
-
         layer.commitChanges()
-
         return layer
 
     # Default implementation of the abstract method - not used in this workflow
@@ -374,6 +444,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
+        area_name: str = None,
     ):
         """
         Executes the actual workflow logic for a single area using a raster.
@@ -394,6 +465,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
+        area_name: str = None,
     ):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.

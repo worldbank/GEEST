@@ -179,7 +179,7 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
         algebra and saves the result for each area.
         """
         area_iterator = AreaIterator(self.study_area_gpkg_path)
-        for index, (_, _, _, _) in enumerate(area_iterator):
+        for index, (_, _, _, _, _) in enumerate(area_iterator):
             if self.isCanceled():
                 return
 

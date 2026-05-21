@@ -18,6 +18,7 @@ from qgis.core import (
 )
 
 from geest.core.algorithms import AreaIterator
+from geest.core.grid_column_utils import clear_grid_column, write_raster_values_to_grid
 from geest.utilities import log_message, resources_path
 
 
@@ -188,9 +189,13 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     def calculate_score(self) -> None:
         """
         Calculates GeoE3 by POP SCORE using raster algebra and saves the result for each area.
+        Also writes the bivariate values to the study_area_grid column 'geoe3_by_population'.
         """
+        # Clear stale values before writing new scores
+        clear_grid_column(self.study_area_gpkg_path, "geoe3_by_population")
+
         area_iterator = AreaIterator(self.study_area_gpkg_path)
-        for index, (_, _, _, _) in enumerate(area_iterator):
+        for index, (_, _, _, _, area_name) in enumerate(area_iterator):
             if self.isCanceled():
                 return
 
@@ -204,6 +209,8 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing raster: {output_path}")
                 self.output_rasters.append(output_path)
+                # Still write to grid even when reusing raster
+                self._write_to_grid(output_path, area_name)
                 continue
 
             log_message(f"Calculating GeoE3 by POP SCORE for area {index}")
@@ -227,6 +234,27 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
             self.output_rasters.append(output_path)
 
             log_message(f"GeoE3 Score raster saved to {output_path}")
+
+            # Write results to grid column
+            self._write_to_grid(output_path, area_name)
+
+    def _write_to_grid(self, raster_path: str, area_name: str) -> None:
+        """Write bivariate score values to the geoe3_by_population column in the grid.
+
+        Args:
+            raster_path: Path to the bivariate score raster file.
+            area_name: Name of the area being processed.
+        """
+        updated = write_raster_values_to_grid(
+            gpkg_path=self.study_area_gpkg_path,
+            raster_path=raster_path,
+            column_name="geoe3_by_population",
+            area_name=area_name,
+        )
+        if updated >= 0:
+            log_message(f"Updated {updated} grid cells with geoe3_by_population values for area {area_name}")
+        else:
+            log_message(f"Failed to write geoe3_by_population values to grid for area {area_name}")
 
     def generate_vrt(self) -> None:
         """

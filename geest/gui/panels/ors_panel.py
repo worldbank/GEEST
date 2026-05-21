@@ -57,6 +57,7 @@ class OrsPanel(FORM_CLASS, QWidget):
 
         self.status_label.setPixmap(QPixmap(resources_path("resources", "images", "ors-not-configured.png")))
         self.next_button.clicked.connect(self.on_next_button_clicked)
+        self.previous_button.clicked.connect(self.on_previous_button_clicked)
         self.next_button.setEnabled(False)
         # Connect the rich text label's linkActivated signal to open URLs in browser
         self.description.linkActivated.connect(self.open_link_in_browser)
