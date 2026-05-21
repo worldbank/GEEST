@@ -51,7 +51,7 @@ pymdown-extensions==10.16.1
 PyQt5==5.15.11
 PyQt5-Qt5==5.15.15
 PyQt5_sip==12.15.0
-pytest==8.1.1
+pytest==9.0.3
 pytest-qt==4.4.0
 python-dateutil==2.9.0.post0
 pytokens==0.4.0
