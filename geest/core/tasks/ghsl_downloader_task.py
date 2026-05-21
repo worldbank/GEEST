@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""📦 Ghsl Downloader Task module.
+"""📦 GHSL Downloader Task module.
 
 This module contains functionality for ghsl downloader task.
 """

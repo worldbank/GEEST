@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""📦 Index Score With Ghsl Workflow module.
+"""📦 Index Score With GHSL Workflow module.
 This module contains functionality for index score with ghsl workflow.
 """
+
 import os
 from typing import Optional
 

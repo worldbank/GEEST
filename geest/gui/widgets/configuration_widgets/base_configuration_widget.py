@@ -43,6 +43,7 @@ class BaseConfigurationWidget(QWidget):
         self.analysis_mode = analysis_mode
         if not humanised_label:
             humanised_label = analysis_mode.replace("_", " ").title()
+            humanised_label = humanised_label.replace("Ghsl", "GHSL")
 
         self.attributes = attributes
         # Main layout
