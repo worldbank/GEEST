@@ -608,7 +608,7 @@
                     "id": "education",
                     "output_filename": "education",
                     "name": "Education",
-                    "women_enabling": 0,
+                    "women_enabling": 1,
                     "default_dimension_weighting": 0.142857142857143,
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
