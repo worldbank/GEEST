@@ -420,8 +420,13 @@ class FactorAggregationDialog(CustomBaseDialog):
                     has_osm_download = True
 
             # Indicator Name
-            name_item = QTableWidgetItem(attributes.get("indicator", ""))
+            indicator_name = attributes.get("indicator", "")
+            indicator_description = attributes.get("description", "")
+            name_item = QTableWidgetItem(indicator_name)
             name_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
+            name_item.setToolTip(
+                indicator_name if not indicator_description else f"{indicator_name}\n\n{indicator_description}"
+            )
             self.table.setItem(row, self.col_indicator, name_item)
 
             if self.weighting_column_visible:
