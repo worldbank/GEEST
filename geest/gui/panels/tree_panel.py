@@ -885,11 +885,14 @@ class TreePanel(QWidget):
                     if indicator:
                         indicator.set_enabled(enabled)
 
-            # Rebalance weights per dimension based on enabled state
+            # Rebalance eligible factors, preserving factors explicitly
+            # excluded by the user so they remain available to re-enable.
             enabled_factors = [
                 dimension.child(idx)
                 for idx in range(dimension.childCount())
-                if dimension.child(idx) and dimension.child(idx).is_enabled()
+                if dimension.child(idx)
+                and dimension.child(idx).is_enabled()
+                and dimension.child(idx).attribute("analysis_mode", "") != "Do Not Use"
             ]
             if enabled_factors:
                 equal_weight = 1.0 / len(enabled_factors)
@@ -900,7 +903,8 @@ class TreePanel(QWidget):
                 factor = dimension.child(factor_idx)
                 if not factor:
                     continue
-                new_weight = equal_weight if factor.is_enabled() else 0.0
+                is_manually_disabled = factor.attribute("analysis_mode", "") == "Do Not Use"
+                new_weight = equal_weight if factor.is_enabled() and not is_manually_disabled else 0.0
                 root_item.updateFactorWeighting(factor.guid, new_weight)
 
         # Force a complete refresh of the tree view
