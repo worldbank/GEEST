@@ -2331,7 +2331,7 @@ class TreePanel(QWidget):
 
         # For the analysis item run the post-processing insights first, so
         # masked products exist before we decide which layer to add to the map.
-        if item.role == "analysis":
+        if item.role == "analysis" and success:
             self.calculate_analysis_insights(item)
 
         # Add layer to map after workflow completes using auto-determined strategy
@@ -2440,26 +2440,38 @@ class TreePanel(QWidget):
             population_processor.run()
         else:
             population_data = item.attribute("population_layer_source", None)
+            population_path = str(population_data or "").split("|")[0]
+            if not population_path or not os.path.exists(population_path):
+                self.on_processing_error("Select a valid population raster before running the analysis.")
+                return False
             population_processor = PopulationRasterProcessingTask(
-                population_raster_path=population_data,
+                population_raster_path=population_path,
                 working_directory=self.working_directory,
                 study_area_gpkg_path=gpkg_path,
                 cell_size_m=self.cell_size_m(),
                 feedback=feedback,
+                force_clear=True,
             )
-            population_processor.run()
+            if not population_processor.run():
+                self.on_processing_error("Population raster processing failed. Check the QGIS log for details.")
+                return False
         geoe3_processor = WEEByPopulationScoreProcessingTask(
             study_area_gpkg_path=gpkg_path,
             working_directory=self.working_directory,
-            force_clear=False,
+            force_clear=True,
         )
-        geoe3_processor.run()
+        if not geoe3_processor.run():
+            self.on_processing_error("GeoE3 by population processing failed. Check the QGIS log for details.")
+            return False
         # Shamelessly hard coded for now, needs to move to the geoe3 processor class
         output = os.path.join(
             self.working_directory,
             "geoe3_by_population_score",
             "geoe3_by_population_score.vrt",
         )
+        if not os.path.exists(output):
+            self.on_processing_error("GeoE3 by population processing did not create an output raster.")
+            return False
         item.setAttribute("geoe3_by_population", output)
 
         # Prepare the polygon mask data if provided

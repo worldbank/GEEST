@@ -138,6 +138,10 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
         try:
             self.calculate_score()
             self.generate_vrt()
+            if not self.output_rasters or not os.path.exists(
+                os.path.join(self.output_dir, "geoe3_by_population_score.vrt")
+            ):
+                raise ValueError("GeoE3 by population processing did not create an output raster.")
             return True
         except Exception as e:
             log_message(f"Task failed: {e}")
