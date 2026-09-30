@@ -18,11 +18,11 @@ from .environmental_hazards_raster_datasource_widget import (  # noqa F401
 from .fixed_value_datasource_widget import FixedValueDataSourceWidget  # noqa F401
 from .raster_datasource_widget import RasterDataSourceWidget  # noqa F401
 from .s2s_datasource_widget import S2SDataSourceWidget  # noqa F401
-from .s2s_education_datasource_widget import S2SEducationDataSourceWidget  # noqa F401
 from .s2s_environmental_hazards_raster_datasource_widget import (  # noqa F401
     S2SEnvironmentalHazardsRasterDataSourceWidget,
 )
 from .s2s_ntl_raster_datasource_widget import S2SNTLRasterDataSourceWidget  # noqa F401
+from .urban_rural_share_datasource_widget import UrbanRuralShareDataSourceWidget  # noqa F401
 from .vector_and_field_datasource_widget import (  # noqa F401
     VectorAndFieldDataSourceWidget,
 )

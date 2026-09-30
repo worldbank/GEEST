@@ -25,6 +25,7 @@ from .polygon_per_cell_workflow import PolygonPerCellWorkflow
 from .polyline_per_cell_workflow import PolylinePerCellWorkflow
 from .osm_transport_polyline_per_cell_workflow import OsmTransportPolylinePerCellWorkflow
 from .raster_reclassification_workflow import RasterReclassificationWorkflow
+from .s2s_urban_rural_share_workflow import S2SUrbanRuralShareWorkflow
 from .safety_polygon_workflow import SafetyPolygonWorkflow
 from .safety_raster_workflow import SafetyRasterWorkflow
 from .single_point_buffer_workflow import SinglePointBufferWorkflow

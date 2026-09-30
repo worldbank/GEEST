@@ -62,4 +62,12 @@ DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS = [
     "ghs_total_pop",
 ]
 
+# Urban/rural population-share measures selectable for the Education indicator.
+# The urban/rural breakdown is carried by the S2S population layer, not a
+# separate education dataset.
+DEFAULT_S2S_URBAN_RURAL_MEASURES = {
+    "urban": "Urban population share",
+    "rural": "Rural population share",
+}
+
 MAX_FEATURES_FOR_VECTOR = 100000

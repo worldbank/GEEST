@@ -122,6 +122,9 @@
                                             "use_nighttime_lights": {
                                                 "type": "integer"
                                             },
+                                            "use_s2s_urban_rural_share": {
+                                                "type": "integer"
+                                            },
                                             "use_environmental_hazards": {
                                                 "type": "integer"
                                             },
@@ -160,6 +163,7 @@
                                             "use_polyline_per_cell",
                                             "use_point_per_cell",
                                             "use_nighttime_lights",
+                                            "use_s2s_urban_rural_share",
                                             "use_environmental_hazards",
                                             "analysis_mode",
                                             "indicator_required"

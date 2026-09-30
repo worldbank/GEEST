@@ -607,6 +607,7 @@ class JsonTreeItem:
                 "use_eplex_score",  # EPLex indicators don't use vector layers
                 "use_index_score_with_ghsl",  # GHSL indicators use raster, not vector
                 "use_nighttime_lights",  # Nighttime lights use raster, not vector
+                "use_s2s_urban_rural_share",  # S2S-based, joins population by H3 key
                 "use_csv_to_point_layer",  # CSV indicators use CSV file key, not vector layer keys
                 "use_osm_transport_polyline_per_cell",  # OSM transport can use dedicated fallback keys
             ]:

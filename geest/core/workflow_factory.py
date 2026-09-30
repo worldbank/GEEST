@@ -25,6 +25,7 @@ from geest.core.workflows import (
     PolygonPerCellWorkflow,
     PolylinePerCellWorkflow,
     RasterReclassificationWorkflow,
+    S2SUrbanRuralShareWorkflow,
     SafetyPolygonWorkflow,
     SafetyRasterWorkflow,
     SinglePointBufferWorkflow,
@@ -125,6 +126,8 @@ class WorkflowFactory:
                 return SafetyPolygonWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_nighttime_lights":
                 return SafetyRasterWorkflow(item, cell_size_m, analysis_scale, feedback, context)
+            elif analysis_mode == "use_s2s_urban_rural_share":
+                return S2SUrbanRuralShareWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_environmental_hazards":
                 return RasterReclassificationWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_street_lights":
