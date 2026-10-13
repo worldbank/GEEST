@@ -7,6 +7,8 @@ on:
 jobs:
   create-release:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     container:
       image: qgis/qgis:release-3_34
     steps:
@@ -36,16 +38,30 @@ jobs:
         run: |
            echo "IS_EXPERIMENTAL=$(python -c "import json; f = open('config.json'); data=json.load(f); print(str(data['general']['experimental']).lower())")" >> "$GITHUB_OUTPUT"
 
-      - name: Create release from tag
+      - name: Create or reuse release from tag
         id: create-release
-        uses: actions/create-release@v1
+        uses: actions/github-script@v7
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IS_EXPERIMENTAL: ${{ steps.get-experimental.outputs.IS_EXPERIMENTAL }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          prerelease: ${{ steps.get-experimental.outputs.IS_EXPERIMENTAL }}
-          draft: false
+          script: |
+            const tag = context.ref.replace(/^refs\/tags\//, '');
+            const { owner, repo } = context.repo;
+            let release;
+            try {
+              release = (await github.rest.repos.getReleaseByTag({ owner, repo, tag })).data;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              release = (await github.rest.repos.createRelease({
+                owner,
+                repo,
+                tag_name: tag,
+                name: `Release ${tag}`,
+                prerelease: process.env.IS_EXPERIMENTAL === 'true',
+                draft: false,
+              })).data;
+            }
+            core.setOutput('upload_url', release.upload_url);
 
       - name: Generate zip
         run: python admin.py generate-zip
