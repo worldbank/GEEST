@@ -100,10 +100,16 @@ class PopulationRasterProcessingTask(QgsTask):
             bool: True if the task completed successfully, False otherwise.
         """
         try:
+            if not self.population_raster_path or not os.path.exists(self.population_raster_path):
+                raise ValueError("Population raster does not exist.")
             self.clip_population_rasters()
             self.resample_population_rasters()
             self.reclassify_resampled_rasters()
             self.generate_vrts()
+            if not self.reclassified_rasters or not os.path.exists(
+                os.path.join(self.output_dir, "reclassified_population.vrt")
+            ):
+                raise ValueError("Population processing did not create a reclassified raster.")
             return True
         except Exception as e:
             log_message(f"Task failed: {e}")

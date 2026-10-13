@@ -16,6 +16,7 @@ from qgis.core import (
     QgsGeometry,
     QgsMapLayerProxyModel,
     QgsProject,
+    QgsRasterLayer,
     QgsVectorLayer,
 )
 from qgis.gui import QgsMapLayerComboBox
@@ -947,6 +948,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
+        previous_population_source = self._persisted_population_input_source()
         self.save_use_state_to_model()
         self.saveWeightingsToModel()  # Assign weightings when changes are accepted
         self.save_combo_to_model(self.aggregation_combo, self.aggregation_lineedit, "aggregation")
@@ -955,6 +957,11 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         # the combo: if it is the S2S demographics layer, use the S2S vector
         # pipeline; otherwise (raster selected) use the raster pipeline.
         self._save_population_source_from_combo()
+        if self._population_input_source() != previous_population_source:
+            # A population change affects the analysis-derived products. Clearing
+            # the completed result makes the normal Run action queue the analysis.
+            self.tree_item.clear()
+            self.tree_item.setAttribute("geoe3_by_population", "")
         self.save_combo_to_model(self.point_combo, self.point_lineedit, "point_mask")
         self.save_combo_to_model(self.polygon_combo, self.polygon_lineedit, "polygon_mask")
         self.save_combo_to_model(self.raster_combo, self.raster_lineedit, "raster_mask")
@@ -995,6 +1002,20 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             self.tree_item.setAttribute("population_source", "s2s")
         else:
             self.tree_item.setAttribute("population_source", "raster")
+
+    def _population_input_source(self) -> str:
+        """Return the normalized effective population input source."""
+        layer = self.population_combo.currentLayer()
+        if layer:
+            return self._layer_source_path(layer)
+        return self._layer_source_path_from_string(self.population_lineedit.text())
+
+    def _persisted_population_input_source(self) -> str:
+        """Return the normalized population source currently stored in the model."""
+        source = self.tree_item.attribute("population_layer_source", "") or self.tree_item.attribute(
+            "population_raster", ""
+        )
+        return self._layer_source_path_from_string(source)
 
     @staticmethod
     def _layer_source_path(layer) -> str:
@@ -1054,6 +1075,10 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         layer = combo.currentLayer()
         if not layer:
             item.setAttribute(f"{prefix}_layer", None)
+            item.setAttribute(f"{prefix}_layer_id", "")
+            item.setAttribute(f"{prefix}_layer_name", "")
+            item.setAttribute(f"{prefix}_layer_provider_type", "")
+            item.setAttribute(f"{prefix}_layer_crs", "")
         else:
             item.setAttribute(f"{prefix}_layer_name", layer.name())
             item.setAttribute(f"{prefix}_layer_source", layer.source())
@@ -1062,8 +1087,10 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             if layer.providerType() != "gdal":
                 item.setAttribute(f"{prefix}_layer_wkb_type", layer.wkbType())
             item.setAttribute(f"{prefix}_layer_id", layer.id())
-        if lineedit.objectName() == "raster_lineedit":
+        if lineedit.objectName() in ("raster_lineedit", "population_lineedit"):
             item.setAttribute(f"{prefix}_raster", lineedit.text())
+            if prefix == "population" and lineedit.text() and not layer:
+                item.setAttribute(f"{prefix}_layer_source", lineedit.text())
         else:
             item.setAttribute(f"{prefix}_shapefile", lineedit.text())
 
@@ -1081,6 +1108,14 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             layer = QgsProject.instance().mapLayer(layer_id)
             if layer:
                 combo.setLayer(layer)
+                return
+        source = item.attribute(f"{prefix}_layer_source", "")
+        if prefix == "population" and source and os.path.exists(self._layer_source_path_from_string(source)):
+            layer = QgsRasterLayer(source, os.path.basename(self._layer_source_path_from_string(source)))
+            if layer.isValid():
+                QgsProject.instance().addMapLayer(layer)
+                combo.setLayer(layer)
+                return
         if item.attribute(f"{prefix}_shapefile", False):
             lineedit.setText(unquote(item.attribute(f"{prefix}_shapefile")))
             lineedit.setVisible(True)
