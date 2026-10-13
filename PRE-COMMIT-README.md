@@ -1,42 +1,43 @@
 
 # Setting Up Pre-Commit for Python Code Formatting
 
-This guide will walk you through setting up a `pre-commit` hook for automatically formatting all Python files within the `geoe3` directory using `black`.
+This repo's `pre-commit` hooks run automatically against all Python files using
+`black`, `flake8`, `isort` and more — see `.pre-commit-config.yaml` for the
+full list.
 
 ## Prerequisites
 
-- **Python 3.x**: Ensure you have Python 3 installed on your machine.
-- **pip**: Python's package installer.
+- `nix develop` (or direnv, via `.envrc`). **Do not `pip install pre-commit`
+  or any hook tool directly** — every tool a hook shells out to (`black`,
+  `flake8`, `isort`, `end-of-file-fixer`, ...) is provisioned by the flake's
+  devShell, and `.pre-commit-config.yaml` only ever uses `repo: local` /
+  `language: system` hooks that call those binaries. Hooks must never fetch
+  their own copies from PyPI or GitHub.
 
-## Step 1: Install `pre-commit`
-
-First, you'll need to install the `pre-commit` package. You can do this using `pip`:
+## Step 1: Enter the dev shell
 
 ```bash
-pip install pre-commit
+nix develop
 ```
 
-## Step 2: Create `.pre-commit-config.yaml`
+This installs `pre-commit` itself plus every tool its hooks call, and
+installs the git hook automatically.
 
-In the root of your repository, create a file named `.pre-commit-config.yaml`. Add the following configuration to set up `black` as the pre-commit hook for Python code formatting:
+## Step 2: `.pre-commit-config.yaml`
+
+Already present at the repo root. If you add a new hook, add the tool to
+`flake.nix`'s `devShells.default` package list first, then wire it up as a
+`repo: local` hook with `language: system`, e.g.:
 
 ```yaml
-# .pre-commit-config.yaml
-repos:
-  - repo: https://github.com/psf/black
-    rev: 24.4.0  # Replace with the version of black you are using
-    hooks:
-      - id: black
-        name: black
-        language_version: python3
-        # Restrict black to only the `geoe3` directory
-        additional_dependencies: []
-        args: [geoe3]
+- repo: local
+  hooks:
+    - id: black
+      name: "🖤 black"
+      entry: black
+      language: system
+      types: [python]
 ```
-
-- **`repos`**: Defines the hooks to use. Here, we use the `black` formatter from its GitHub repository.
-- **`rev`**: Specifies the version of `black`. Make sure to replace it with the version you are using.
-- **`args`**: Restricts `black` to format only the Python files within the `geoe3` directory.
 
 ## Step 3: Install the Pre-Commit Hook
 
