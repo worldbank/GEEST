@@ -155,19 +155,31 @@ class OSMDataDownloaderBase(ABC):
         self.formatted_query = final_query
         log_message("OSM Query Set")
 
+    # Tags checked in order when a feature has no 'name' tag, e.g. an
+    # unnamed pharmacy node tagged only amenity=pharmacy.
+    _ENTITY_NAME_FALLBACK_TAGS = ("amenity", "shop", "healthcare")
+
     @staticmethod
     def _get_entity_name(element) -> str:
-        """Extract the OSM 'name' tag value from a node/way XML element.
+        """Extract an entity name from a node/way XML element's tags.
+
+        Prefers the 'name' tag. Many OSM features (e.g. an unnamed
+        pharmacy) have no 'name' tag at all, so fall back to other
+        descriptive tags such as 'amenity' or 'shop'.
 
         Args:
             element: An XML element representing an OSM node or way.
 
         Returns:
-            str: The value of the 'name' tag, or an empty string if not present.
+            str: The entity name, or an empty string if none of the
+                checked tags are present.
         """
-        for tag in element.findall("tag"):
-            if tag.get("k") == "name":
-                return tag.get("v") or ""
+        tags = {tag.get("k"): tag.get("v") or "" for tag in element.findall("tag")}
+        if tags.get("name"):
+            return tags["name"]
+        for key in OSMDataDownloaderBase._ENTITY_NAME_FALLBACK_TAGS:
+            if tags.get(key):
+                return tags[key]
         return ""
 
     def _set_output_type(self, output_type: str) -> None:
