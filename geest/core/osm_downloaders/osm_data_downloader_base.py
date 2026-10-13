@@ -155,6 +155,21 @@ class OSMDataDownloaderBase(ABC):
         self.formatted_query = final_query
         log_message("OSM Query Set")
 
+    @staticmethod
+    def _get_entity_name(element) -> str:
+        """Extract the OSM 'name' tag value from a node/way XML element.
+
+        Args:
+            element: An XML element representing an OSM node or way.
+
+        Returns:
+            str: The value of the 'name' tag, or an empty string if not present.
+        """
+        for tag in element.findall("tag"):
+            if tag.get("k") == "name":
+                return tag.get("v") or ""
+        return ""
+
     def _set_output_type(self, output_type: str) -> None:
         """Set the output type for the data.
 
@@ -379,7 +394,7 @@ class OSMDataDownloaderBase(ABC):
         root = ET.fromstring(response_data)  # nosec B314
         layer = QgsVectorLayer("Point?crs=EPSG:4326", "OSM Point Data", "memory")
         provider = layer.dataProvider()
-        provider.addAttributes([QgsField("id", QVariant.String)])
+        provider.addAttributes([QgsField("id", QVariant.String), QgsField("name", QVariant.String)])
         layer.updateFields()
         features_added = 0
         log_message("Finding and processing all nodes...")
@@ -390,7 +405,7 @@ class OSMDataDownloaderBase(ABC):
             lon = float(node.get("lon"))
             feature = QgsFeature()
             feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
-            feature.setAttributes([node_id])
+            feature.setAttributes([node_id, self._get_entity_name(node)])
             provider.addFeature(feature)
             features_added += 1
             if features_added % 1000 == 0:
@@ -439,7 +454,7 @@ class OSMDataDownloaderBase(ABC):
         # Create output layer
         layer = QgsVectorLayer("Polygon?crs=EPSG:4326", "OSM Polygon Data", "memory")
         provider = layer.dataProvider()
-        provider.addAttributes([QgsField("id", QVariant.String)])
+        provider.addAttributes([QgsField("id", QVariant.String), QgsField("name", QVariant.String)])
         layer.updateFields()
         features_added = 0
         log_message("Processing polygon features...")
@@ -460,7 +475,7 @@ class OSMDataDownloaderBase(ABC):
             if coords and coords[0] == coords[-1]:
                 feature = QgsFeature()
                 feature.setGeometry(QgsGeometry.fromPolygonXY([coords]))
-                feature.setAttributes([way_id])
+                feature.setAttributes([way_id, self._get_entity_name(way)])
                 provider.addFeature(feature)
                 features_added += 1
                 if features_added % 1000 == 0:
@@ -514,7 +529,13 @@ class OSMDataDownloaderBase(ABC):
         provider = layer.dataProvider()
 
         # Define attribute schema
-        provider.addAttributes([QgsField("osm_id", QVariant.String), QgsField("geom_type", QVariant.String)])
+        provider.addAttributes(
+            [
+                QgsField("osm_id", QVariant.String),
+                QgsField("geom_type", QVariant.String),
+                QgsField("name", QVariant.String),
+            ]
+        )
         layer.updateFields()
 
         features_added = 0
@@ -531,7 +552,7 @@ class OSMDataDownloaderBase(ABC):
 
             feature = QgsFeature()
             feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
-            feature.setAttributes([node_id, "point"])
+            feature.setAttributes([node_id, "point", self._get_entity_name(node)])
             provider.addFeature(feature)
             features_added += 1
 
@@ -566,7 +587,7 @@ class OSMDataDownloaderBase(ABC):
 
                     feature = QgsFeature()
                     feature.setGeometry(centroid)
-                    feature.setAttributes([way_id, "polygon_centroid"])
+                    feature.setAttributes([way_id, "polygon_centroid", self._get_entity_name(way)])
                     provider.addFeature(feature)
                     features_added += 1
                     polygon_count += 1

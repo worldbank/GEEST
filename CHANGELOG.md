@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.7] - 2026-10-13
+
+### Fixed
+
+- OSM point and mixed-to-point downloads (health facilities, schools,
+  pharmacies, financial services, kindergartens, grocery stores, green
+  spaces, public transport, water points) now retain the OSM `name` tag
+  as an entity name attribute, instead of only the feature `id`. Polygon
+  downloads gain the same `name` attribute (#453).
+
 ## [2.0.6] - 2026-10-13
 
 ### Added
