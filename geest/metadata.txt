@@ -15,8 +15,28 @@ about = The Geospatial Enabling Environments for Employment Spatial Tool, develo
 author = Kartoza for and with The World Bank
 email = info@kartoza.com, gost@worldbank.org
 description = Geospatial Enabling Environments for Employment Spatial Tool
-version = 2.0.5
-changelog = Version 2.0.5 - Regional Data, Flood & UI Fixes
+version = 2.0.6
+changelog = Version 2.0.6 - QGIS 4 Compatibility & Reliability Fixes
+
+	## Bug Fixes
+	* GeoE3 by population yields no result in national-scale analyses (#455)
+	* A disabled factor no longer re-enables itself unexpectedly (#450)
+	* The indicator description window now updates dynamically when switching indicators (#446)
+	* A broken or missing data source on one indicator no longer aborts a multi-indicator run with a raw error
+	* GHSL tile download failures now show a clear error message and auto-retry instead of leaving a corrupt cache
+	* Hardened GeoPackage writes during analysis runs to prevent corruption from concurrent writers
+	* GeoPackage self-healing no longer mistakes a busy/locked database for a corrupt one
+	* Fixed several QGIS 4 crashes and plugin-load failures caused by PyQt6 enum changes (open-project panel, data-source widgets, dock layout restore)
+	* Active Transport no longer reports "unconfigured" when a layer was set under a related mode
+	* Fixed a crash when running an indicator with no data source configured
+	* Reloading the plugin no longer stacks duplicate dock widgets or toolbar buttons
+
+	## Improvements
+	* Analysis report redesigned: cleaner World Bank visual language, proper map neatlines and minimap grids, styled closing page, no more blank pages, works without a project CRS
+
+	---
+
+	Version 2.0.5 - Regional Data, Flood & UI Fixes
 
 	## New Features
 	* Environmental-hazard indicators link to the source dataset in the World Bank Data Catalog (fire, flood, landslide, cyclone, drought)
