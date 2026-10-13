@@ -7,19 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- The analysis report has been completely redesigned: a flat, World Bank-
-  appropriate visual language (navy/cyan bands, hairline footers, page
-  numbers), a proper horizontal bar chart for processing times, clean map
-  neatlines with outside-frame coordinate annotations, and minimap grids —
-  the overview page shows the overall score plus dimension minimaps, each
-  dimension page its factor minimaps, and each factor page its indicator
-  minimaps. Funding/attribution moved to a styled closing page, blank pages
-  are impossible (layer validity is checked first), the cover typo is fixed,
-  and report maps no longer depend on the project CRS (which also hung
-  report generation when no project CRS was set). `export_pdf` gained an
-  optional dpi override for fast draft exports.
+## [2.0.6] - 2026-10-13
 
 ### Added
 
@@ -47,18 +35,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   WAL checkpoint in the process is serialised behind one lock, all layers
   (including `chunks`) are pre-created before worker threads start, and
   map refreshes are deferred while the writer is active.
-- Environmental-hazard indicators now expose a clickable link to the source
-  dataset in the World Bank Data Catalog for the selected hazard (fire,
-  flood, landslide, cyclone, drought) (#398).
-- Regional analyses now pull population demographics automatically from S2S
-  when the population source is S2S — new population-vector processing task
-  plus a population-source UI in the analysis aggregation dialog (#431).
-- Nighttime Lights supports NOAA threshold classification (fixed Black
-  Marble value ranges, 5 classes) alongside Jenks Natural Breaks; the binary
-  option was replaced by the NOAA thresholds option (#396).
+- `admin.py generate-zip` now runs pre-flight checks before packaging:
+  aborts if the version in `config.json` is already published on
+  plugins.qgis.org, or if the checked-in `geest/metadata.txt` has drifted
+  from `config.json` (`--skip-checks` to bypass for local iteration).
+- Categorised `nix develop` command reference covering the full plugin
+  lifecycle (`scripts/dev-help.sh`), replacing the old ad-hoc banner text.
 
 ### Changed
 
+- The analysis report has been completely redesigned: a flat, World Bank-
+  appropriate visual language (navy/cyan bands, hairline footers, page
+  numbers), a proper horizontal bar chart for processing times, clean map
+  neatlines with outside-frame coordinate annotations, and minimap grids —
+  the overview page shows the overall score plus dimension minimaps, each
+  dimension page its factor minimaps, and each factor page its indicator
+  minimaps. Funding/attribution moved to a styled closing page, blank pages
+  are impossible (layer validity is checked first), the cover typo is fixed,
+  and report maps no longer depend on the project CRS (which also hung
+  report generation when no project CRS was set). `export_pdf` gained an
+  optional dpi override for fast draft exports.
 - The flake now sources QGIS from nixpkgs: `qgis` 4.x (latest) and
   `qgis-ltr` 3.44.x; the geospatial-nix and qgis-source inputs were removed
   and `flake.lock` updated accordingly. nixpkgs is pinned to the last
@@ -69,16 +65,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The dev shell recreates `.venv` automatically when the nix python
   interpreter changes (a stale venv made pip write into the read-only
   store).
-- Flood data sources now work at both analysis scales: the raster (DDH
-  0–900) path is available in regional analyses and the S2S path in
-  national/local ones, with the S2S join using intersection-MAX; the source
-  is auto-derived from the indicator configuration (#423).
-- Tree headings are now consistently Title Case (acronym/apostrophe-safe),
-  normalised at render time so existing projects' stored model.json is
-  unaffected.
+- All pre-commit hook tooling (`black`, `flake8` + `flake8-docstrings` +
+  `pydocstyle`, `isort`, and the `pre-commit-hooks` basics) is now
+  provisioned by the nix flake instead of pre-commit fetching its own
+  copies from PyPI/GitHub on every machine; the dev shell reinstalls the
+  git hook on every `nix develop` so a nixpkgs pin bump can no longer leave
+  a hook with a dangling store-path shebang.
 
 ### Fixed
 
+- GeoE3 by population yields no result in national-scale analyses (#455).
+- A disabled factor no longer re-enables itself unexpectedly (#450).
+- The indicator description window now updates dynamically when switching
+  indicators (#446).
 - A broken or missing data source on one indicator no longer aborts a
   multi-indicator run with a raw Python traceback: workflow start-up
   errors are trapped at the queue boundary, the indicator's status icon
@@ -145,6 +144,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`test/test_geoe3_dock_construction.py`) builds the complete dock — all
   panels — on both PyQt5 and PyQt6 images so constructor-time porting
   regressions fail the suite instead of plugin load.
+
+## [2.0.5] - 2026-09-01
+
+### Added
+
+- Environmental-hazard indicators now expose a clickable link to the source
+  dataset in the World Bank Data Catalog for the selected hazard (fire,
+  flood, landslide, cyclone, drought) (#398).
+- Regional analyses now pull population demographics automatically from S2S
+  when the population source is S2S — new population-vector processing task
+  plus a population-source UI in the analysis aggregation dialog (#431).
+- Nighttime Lights supports NOAA threshold classification (fixed Black
+  Marble value ranges, 5 classes) alongside Jenks Natural Breaks; the binary
+  option was replaced by the NOAA thresholds option (#396).
+
+### Changed
+
+- Flood data sources now work at both analysis scales: the raster (DDH
+  0–900) path is available in regional analyses and the S2S path in
+  national/local ones, with the S2S join using intersection-MAX; the source
+  is auto-derived from the indicator configuration (#423).
+- Tree headings are now consistently Title Case (acronym/apostrophe-safe),
+  normalised at render time so existing projects' stored model.json is
+  unaffected.
+
+### Fixed
+
 - GHSL masking (#420, #421): the GHSL options mask now uses the
   `ghsl_settlements` layer already stored in the study-area GeoPackage
   (clipped and reprojected at project setup) instead of depending on the
