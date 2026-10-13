@@ -2,23 +2,40 @@
 # See https://pre-commit.com/hooks.html for more hooks
 ---
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+  # Tool binaries below are provisioned by the nix flake (devShells.default)
+  # — pre-commit must never fetch its own copies from PyPI/GitHub.
+  - repo: local
     hooks:
       - id: end-of-file-fixer
+        name: "🧹 end-of-file-fixer"
+        entry: end-of-file-fixer
+        language: system
+        types: [text]
         exclude: ^(geoe3/tests/data/)
       - id: trailing-whitespace
+        name: "🧽 trailing-whitespace"
+        entry: trailing-whitespace-fixer
+        language: system
+        types: [text]
         exclude: ^(geoe3/tests/data/)
       - id: check-yaml
+        name: "✅ check-yaml"
+        entry: check-yaml
+        language: system
+        types: [yaml]
       - id: check-json
+        name: "🧾 check-json"
+        entry: check-json
+        language: system
+        types: [json]
         exclude: ^(.vscode)
-  - repo: https://github.com/psf/black
-    rev: 24.4.0
+  - repo: local
     hooks:
       - id: black
         name: "🖤 black"
-        language_version: python3
-        additional_dependencies: []
+        entry: black
+        language: system
+        types: [python]
   - repo: local
     hooks:
       - id: remove-core-file
@@ -43,21 +60,19 @@ repos:
         language: system
         types: [python]
         stages: [pre-commit]
-  - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+  - repo: local
     hooks:
       - id: flake8
         name: "🐍 flake8 Python Linter"
-        language_version: python3
-        additional_dependencies: ['flake8-docstrings', 'pydocstyle']
-
-  - repo: https://github.com/PyCQA/isort
-    rev: 6.0.1
+        entry: flake8
+        language: system
+        types: [python]
+  - repo: local
     hooks:
       - id: isort
         name: "📦 isort - sort Python imports"
         entry: isort
-        language: python
+        language: system
         types: [python]
         stages: [pre-commit]
   - repo: local

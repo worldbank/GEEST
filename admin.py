@@ -189,6 +189,7 @@ def generate_zip(
     context: typer.Context,
     version: str = None,
     output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "dist",
+    skip_checks: bool = False,
 ):
     """Generate plugin zip folder that can be used to install the plugin in QGIS.
 
@@ -196,13 +197,18 @@ def generate_zip(
         context: Application context.
         version: Plugin version.
         output_directory: Directory where the zip folder will be saved.
+        skip_checks: Skip the pre-flight metadata/published-version checks.
 
     Returns:
         Path to the generated zip file.
     """
-    build_dir = build(context)
     metadata = _get_metadata()["general"]
     plugin_version = metadata["version"] if version is None else version
+
+    if not skip_checks:
+        _run_release_checks(plugin_version, context=context)
+
+    build_dir = build(context)
     output_directory.mkdir(parents=True, exist_ok=True)
     zip_path = output_directory / f"{SRC_NAME}.{plugin_version}.zip"
     with zipfile.ZipFile(
@@ -462,6 +468,113 @@ def _changelog() -> str:
         changelog_file = fh.read()
 
     return changelog_file
+
+
+def _metadata_mismatches() -> typing.List[str]:
+    """Compare the checked-in metadata.txt against config.json.
+
+    QGIS reads this file directly (e.g. for `admin.py symlink` installs),
+    so it must be regenerated whenever config.json changes rather than
+    left to drift. The dynamically-generated "changelog" field is excluded
+    since it is expected to change on every release and is not sourced
+    from config.json.
+
+    Returns:
+        Human-readable descriptions of any field that is out of sync;
+        empty when metadata.txt matches what `generate-metadata` would
+        produce from config.json.
+    """
+    checked_in_path = LOCAL_ROOT_DIR / SRC_NAME / "metadata.txt"
+    if not checked_in_path.is_file():
+        return [f"{checked_in_path} does not exist"]
+
+    expected = dict(_get_metadata()["general"])
+    expected.pop("changelog", None)
+
+    actual_parser = configparser.ConfigParser()
+    actual_parser.optionxform = str
+    actual_parser.read(checked_in_path, encoding="utf-8")
+    if not actual_parser.has_section("general"):
+        return [f"{checked_in_path} has no [general] section"]
+    actual = dict(actual_parser["general"])
+    actual.pop("changelog", None)
+
+    mismatches = []
+    for key, expected_value in expected.items():
+        expected_str = str(expected_value)
+        actual_str = actual.get(key)
+        if actual_str is None:
+            mismatches.append(f"{key!r} is missing from {checked_in_path}")
+        elif actual_str != expected_str:
+            mismatches.append(f"{key!r}: metadata.txt has {actual_str!r}, config.json expects {expected_str!r}")
+    return mismatches
+
+
+def _published_version(package_name: str) -> typing.Optional[str]:
+    """Fetch the latest version of this plugin published on plugins.qgis.org.
+
+    Args:
+        package_name: The plugin's package/slug name on plugins.qgis.org.
+
+    Returns:
+        The latest published version string, or None if it could not be
+        determined (plugin not yet published, or no network access).
+    """
+    url = f"https://plugins.qgis.org/plugins/{package_name}/json"
+    try:
+        response = httpx.get(url, timeout=10.0)
+    except httpx.HTTPError:
+        return None
+    if response.status_code != 200:
+        return None
+    return response.json().get("latest_version")
+
+
+def _run_release_checks(plugin_version: str, context: typing.Optional[typer.Context] = None) -> None:
+    """Run pre-flight checks before packaging a release zip.
+
+    Verifies that the checked-in metadata.txt matches config.json, and that
+    the local version has been bumped past whatever is already published
+    on plugins.qgis.org.
+
+    Args:
+        plugin_version: The version about to be packaged.
+        context: Application context.
+
+    Raises:
+        typer.Exit: If either check fails.
+    """
+    problems = []
+
+    metadata_mismatches = _metadata_mismatches()
+    if metadata_mismatches:
+        problems.append(
+            f"{SRC_NAME}/metadata.txt is out of sync with config.json:\n    - "
+            + "\n    - ".join(metadata_mismatches)
+            + f"\n  Fix with: python admin.py generate-metadata --output-directory {SRC_NAME}"
+        )
+
+    published_version = _published_version(PACKAGE_NAME)
+    if published_version is None:
+        _log(
+            f"Could not determine the published version of {PACKAGE_NAME!r} on plugins.qgis.org "
+            "(no network access, or not yet published) — skipping that check.",
+            context=context,
+        )
+    elif published_version == plugin_version:
+        problems.append(
+            f"version {plugin_version!r} is already published on plugins.qgis.org "
+            f"(https://plugins.qgis.org/plugins/{PACKAGE_NAME}/) — bump the version in config.json first."
+        )
+
+    if problems:
+        typer.echo("Pre-flight checks failed:\n")
+        for problem in problems:
+            typer.echo(f"✗ {problem}\n")
+        typer.echo("Pass --skip-checks to generate-zip to bypass (not recommended for releases).")
+        raise typer.Exit(code=1)
+
+    typer.echo(f"✓ metadata.txt is in sync with config.json; version {plugin_version!r} is not yet published.")
 
 
 def _add_to_zip(directory: Path, zip_handler: zipfile.ZipFile, arc_path_base: Path):

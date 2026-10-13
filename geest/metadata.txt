@@ -8,58 +8,77 @@ deprecated = False
 homepage = https://github.com/worldbank/GEOE3
 tracker = https://github.com/worldbank/GEOE3/issues
 repository = https://github.com/worldbank/GEOE3
-tags = 
+tags =
 category = ['plugins']
 hasProcessingProvider = no
 about = The Geospatial Enabling Environments for Employment Spatial Tool, developed by the World Bank, supports the evaluation of locations based on its supportiveness for employment and entrepreneurship. It allows for a generic analysis of foundational infrastructure and mobility aspects but also supports the inclusion of women specific considerations that can act as barriers in their economic empowerment. By analyzing spatial factors across three dimensions (Contextual/ Accessibility and Place Characterization) GeoE3 is a stepping stone to identifying the critical employment investments required in cities and regions.
 author = Kartoza for and with The World Bank
 email = info@kartoza.com, gost@worldbank.org
 description = Geospatial Enabling Environments for Employment Spatial Tool
-version = 2.0.4
-changelog = Version 2.0.3 - NTL Classification and UI Fixes
-	
+version = 2.0.5
+changelog = Version 2.0.5 - Regional Data, Flood & UI Fixes
+
+	## New Features
+	* Environmental-hazard indicators link to the source dataset in the World Bank Data Catalog (fire, flood, landslide, cyclone, drought)
+	* Regional analyses pull population demographics automatically from S2S when the population source is S2S
+	* Nighttime Lights supports NOAA threshold classification (fixed Black Marble ranges, 5 classes) alongside Jenks Natural Breaks
+
+	## Bug Fixes
+	* Flood scoring now works at both scales (raster DDH 0-900 in regional, S2S in national/local) with the S2S join using intersection-MAX
+	* GHSL masking uses the ghsl_settlements layer in the study-area GeoPackage instead of the parquet download path
+	* Landslide scoring in regional analyses was reversed and is now corrected
+	* Regional S2S Nighttime Lights scored inaccurately — now uses six dynamic classes from the data's own value range
+	* Clicking the GeoE3 Score node re-shows the last run result (masked score when a mask is active)
+	* Fixed dropdown/row alignment issues in the factor, dimension and environmental-hazards windows
+
+	## Improvements
+	* Tree headings are now consistently Title Case (acronym/apostrophe-safe)
+
+	---
+
+	Version 2.0.3 - NTL Classification and UI Fixes
+
 	## New Features
 	* Added user-controlled NTL classification mode toggle (Jenks vs Binary) with live UI updates
-	
+
 	## Bug Fixes
 	* Fixed NTL binary classification to use explicit split behavior (0 -> class 0, > 0 -> class 5)
 	* Fixed EPLEX input flow with normalized input (0.00-0.99) and backward compatibility for older saved values
 	* Fixed road-network panel gating bug after failed OSM download
-	
+
 	## Improvements
 	* Reduced plugin size by removing h3 from bundled dependencies
 	* Improved build cleanup by excluding __pycache__, .pyc, and .xcf files from plugin zip
 	* Updated pygments dependency to 2.20.0
-	
+
 	---
-	
+
 	Version 2.0.2 - Stability Fixes
-	
+
 	## Bug Fixes
 	* Fixed QGIS crashes in ACLED workflow by adding context and feedback to processing.run calls
 	* Fixed thread-safety issues in workflow_base.py processing operations
 	* Fixed ID handling in aggregation workflow to handle spaces in names
-	
+
 	## Improvements
 	* Added logging for masked raster path checking in aggregation workflow
 	* Cleaned up duplicate environment variables in start script
 	* Added tailspin package for log viewing
-	
+
 	---
-	
+
 	Version 2.0.1 - Minor Bug Fixes and Improvements
-	
+
 	## Bug Fixes
 	* Fixed road network CRS issues
 	* Fixed AttributeError in RoadNetworkPanel by reordering attribute initialization
-	
+
 	## Improvements
 	* Improved banner text rendering and refined button styling
 	* Updated font sizing for women's considerations section
 	* Open existing project no longer shows women's options incorrectly
 	* Move EPLEX Score to contextual only
 	* Auto-balance weights under dimension
-	
+
 server = False
 license = GPLv2
-
