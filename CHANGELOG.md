@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.8] - 2026-10-13
+
+### Fixed
+
+- S2S download is no longer offered for flood hazards at local or
+  national analysis scale. Flood now follows the same regional-only S2S
+  gating as every other environmental hazard (#449).
+
 ## [2.0.7] - 2026-10-13
 
 ### Fixed
