@@ -691,23 +691,45 @@ class TreePanel(QWidget):
             QSettings().setValue("geoe3/pie_data", "")
             self.working_directory_changed(working_directory)
 
-    @pyqtSlot()
+    @pyqtSlot(str)
     def set_road_network_layer_path(self, network_layer_path):
         """⚙️ Set road network layer path.
 
+        Validates the layer before storing it. An empty/None path clears the
+        previously stored value instead of being silently ignored, so a
+        broken reference detected by the Road Network panel (e.g. the file
+        was deleted outside GeoE3) doesn't linger forever in model.json.
+
         Args:
-            network_layer_path: Network layer path.
+            network_layer_path: Network layer path, or empty/None to clear it.
         """
+        analysis_item = self.model.rootItem.child(0)
         if network_layer_path:
+            base_path = network_layer_path.split("|")[0] if "|" in network_layer_path else network_layer_path
+            if not os.path.exists(base_path):
+                self.show_validation_error(
+                    "Road Network Issue",
+                    f"Road network layer file not found: {base_path}. "
+                    "Please select or download a road network layer again.",
+                )
+                log_message(
+                    f"Refusing to set road_network_layer_path - file not found: {base_path}",
+                    level=Qgis.Warning,
+                )
+                return
             log_message(f"Setting road_network_layer_path in model to {network_layer_path}")
-            analysis_item = self.model.rootItem.child(0)
             try:
                 analysis_item.setAttribute("road_network_layer_path", network_layer_path)
                 self.save_json_to_working_directory()
             except Exception as e:
                 log_message(f"Error setting road network path: {str(e)}", level=Qgis.Critical)
         else:
-            log_message("No road network layer path provided.")
+            log_message("Clearing road_network_layer_path in model (no layer selected).")
+            try:
+                analysis_item.setAttribute("road_network_layer_path", "")
+                self.save_json_to_working_directory()
+            except Exception as e:
+                log_message(f"Error clearing road network path: {str(e)}", level=Qgis.Critical)
 
     def qgis_project_path(self) -> Optional[str]:
         """Get the associated QGIS project path from the analysis item.

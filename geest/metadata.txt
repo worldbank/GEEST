@@ -15,7 +15,7 @@ about = The Geospatial Enabling Environments for Employment Spatial Tool, develo
 author = Kartoza for and with The World Bank
 email = info@kartoza.com, gost@worldbank.org
 description = Geospatial Enabling Environments for Employment Spatial Tool
-version = 2.0.8
+version = 2.0.9
 changelog = Version 2.0.6 - QGIS 4 Compatibility & Reliability Fixes
 
 	## Bug Fixes

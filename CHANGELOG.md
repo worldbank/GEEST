@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.9] - 2026-10-13
+
+### Fixed
+
+- A broken/missing road network layer reference could linger silently in
+  `model.json` forever: when the Road Network panel detected the file was
+  gone it tried to clear the stored path, but the clear signal's value was
+  discarded by the receiving slot (which re-fetched the combo box selection
+  instead) and the slot also silently ignored empty/`None` values, so the
+  stale path was never actually removed. Setting the road network layer now
+  validates the file exists before storing it (showing a clear error if
+  not), clearing is no longer a no-op, and a missing file detected on
+  restore now also surfaces a message-bar warning instead of only a log
+  line.
+
 ## [2.0.8] - 2026-10-13
 
 ### Fixed
