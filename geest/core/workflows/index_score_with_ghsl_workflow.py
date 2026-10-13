@@ -148,8 +148,11 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         # "No settlement data" means no enablement → score 0 (not enabling).
         ds = None
         try:
-            from geest.core.grid_column_utils import _open_gpkg_for_write, _execute_sql_with_retry
-            from geest.core.grid_column_utils import _sanitize_column_name
+            from geest.core.grid_column_utils import (
+                _execute_sql_with_retry,
+                _open_gpkg_for_write,
+                _sanitize_column_name,
+            )
 
             sanitized = _sanitize_column_name(self.layer_id)
             ds = _open_gpkg_for_write(self.gpkg_path)
