@@ -368,8 +368,8 @@ class RasterReclassificationWorkflow(WorkflowBase):
             # is highly enabling (score 5). Set NULL → 0 so the reclassification rule
             # [-1, 0, 5.00] correctly maps those cells to score 5.
             from geest.core.grid_column_utils import (
-                _open_gpkg_for_write,
                 _execute_sql_with_retry,
+                _open_gpkg_for_write,
                 _sanitize_column_name,
             )
 

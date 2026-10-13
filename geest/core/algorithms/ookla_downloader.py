@@ -8,8 +8,8 @@ This module contains functionality for ookla downloader.
 import os
 import timeit
 import urllib.request
-from urllib.parse import urlparse
 from typing import Optional
+from urllib.parse import urlparse
 
 from osgeo import gdal, ogr, osr
 from qgis.core import (
@@ -289,8 +289,8 @@ class OoklaDownloader:
             f"Filtering Records by Bounding Box\n"
             f"We're narrowing the dataset from the Parquet file\n"
             f"to only those geometries intersecting the bounding box below.\n"
-            f"Mobile Threshold: [bold]{self.mobile_threshold_kbps} kbps ({self.mobile_threshold_kbps/1000} Mbps)\n"
-            f"Fixed Threshold: [bold]{self.fixed_threshold_kbps} kbps ({self.fixed_threshold_kbps/1000} Mbps)\n"
+            f"Mobile Threshold: [bold]{self.mobile_threshold_kbps} kbps ({self.mobile_threshold_kbps / 1000} Mbps)\n"
+            f"Fixed Threshold: [bold]{self.fixed_threshold_kbps} kbps ({self.fixed_threshold_kbps / 1000} Mbps)\n"
             f"Bounding Box Coordinates:\n"
             f"  Min X: {self.extents.xMinimum()}\n"
         )
