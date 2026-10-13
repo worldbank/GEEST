@@ -5,7 +5,6 @@ import time
 import uuid
 from typing import Optional
 
-
 __copyright__ = "Copyright 2024, Tim Sutton"
 __license__ = "GPL version 3"
 __email__ = "tim@kartoza.com"

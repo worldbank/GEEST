@@ -15,7 +15,6 @@ from qgis.core import Qgis
 
 from geest.utilities import log_message
 
-
 # Fallback average H3 cell areas in km^2 (approximate)
 H3_CELL_AREA_KM2 = {
     0: 4250546.848,
