@@ -1631,6 +1631,27 @@ def rasterize_grid_column(
         # Apply filter to get correct extent
         if area_name:
             layer.SetAttributeFilter(f"area_name = '{area_name}'")
+            matched = layer.GetFeatureCount()
+            if matched == 0:
+                # Some study areas never populate area_name on their grid rows
+                # at all (a single, un-partitioned area) - there, the filter
+                # matching nothing is expected, not a sign of a missing area.
+                # Only bail out when OTHER rows in this grid do carry a real
+                # area_name, which means this specific area's cells are
+                # genuinely missing (e.g. a sliver too small to have been
+                # gridded) rather than area_name simply being unused here.
+                layer.SetAttributeFilter("area_name IS NOT NULL")
+                area_partitioning_in_use = layer.GetFeatureCount() > 0
+                layer.SetAttributeFilter(f"area_name = '{area_name}'")
+                if area_partitioning_in_use:
+                    log_message(
+                        f"No study_area_grid cells found for area '{area_name}'; "
+                        "skipping rasterization rather than burning an empty/placeholder raster.",
+                        level=Qgis.Warning,
+                    )
+                    ds = None
+                    return False
+                layer.SetAttributeFilter(None)
 
         # Get extent if not provided
         if extent is None:

@@ -64,6 +64,13 @@ class AggregationWorkflowBase(WorkflowBase):
         # Grid-first mode: write results to grid columns first, then rasterize
         # Set to True to use the new grid-first approach
         self.use_grid_first = True
+        # Areas with no matching study_area_grid cells (e.g. slivers too small
+        # to receive a grid cell) fall back to a neutral/zero raster instead
+        # of aborting the whole workflow.
+        self.supports_empty_features_fallback = True
+        # aggregate_grid's SQL ignores area_name and updates the whole grid in
+        # one UPDATE - only needs to run once, not once per area.
+        self._grid_aggregated = False
         self.feedback.setProgress(10.0)
 
     def aggregate(self, input_files: list, index: int) -> str:
@@ -350,6 +357,12 @@ class AggregationWorkflowBase(WorkflowBase):
         Returns:
             Number of cells updated, or -1 on error.
         """
+        # write_aggregation_to_grid ignores area_name and aggregates every row
+        # in study_area_grid in one SQL UPDATE, so re-running it (and the
+        # clear beforehand) for every area is redundant - do it once.
+        if self._grid_aggregated:
+            return 0
+
         columns_weights = self.get_grid_columns_and_weights()
 
         if not columns_weights:
@@ -379,6 +392,7 @@ class AggregationWorkflowBase(WorkflowBase):
         )
 
         if updated_count >= 0:
+            self._grid_aggregated = True
             log_message(
                 f"Grid aggregation completed: updated {updated_count} cells for {self.layer_id}",
                 tag="GeoE3",

@@ -1204,6 +1204,30 @@ class WorkflowBase(QObject):
             context=self.context,
             feedback=QgsProcessingFeedback(),
         )
+        if not os.path.exists(output_path) or not QgsRasterLayer(output_path).isValid():
+            # CROP_TO_CUTLINE snaps the crop window to pixel boundaries. For a
+            # geometrically thin area (narrow coastal strip, sliver islet) that
+            # window can round down to zero rows/columns even though the
+            # source raster itself is fine, and gdalwarp then refuses to
+            # create a 0-sized dataset. Retrying without cropping keeps the
+            # source raster's own extent (already known to be valid) and just
+            # masks values outside the polygon to nodata, so the area isn't
+            # silently dropped from the combined VRT.
+            log_message(
+                f"Crop-to-cutline produced no valid raster for area {index} "
+                "(area narrower than one pixel); retrying without cropping.",
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+            params["CROP_TO_CUTLINE"] = False
+            processing.run(
+                "gdal:cliprasterbymasklayer",
+                params,
+                context=self.context,
+                feedback=QgsProcessingFeedback(),
+            )
+            if not os.path.exists(output_path) or not QgsRasterLayer(output_path).isValid():
+                raise QgsProcessingException(f"Masking raster for area {index} failed to produce a valid output")
         log_message(f"Masked raster created: {output_path}")
         return output_path
 

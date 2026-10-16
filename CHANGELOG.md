@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Grid-first workflows (`ContextualIndexScoreWorkflow`, `AggregationWorkflowBase`
+  - index scores, factor/dimension/analysis aggregation) wrote their value
+  to `study_area_grid` with one whole-table SQL `UPDATE` per area, even
+  though that SQL has no area filter and produces an identical result every
+  time - for a 27-area study area that meant running the same multi-second
+  `UPDATE` 27 times over. It now runs once per workflow; per-area
+  rasterizing, masking, and VRT-combining (needed to keep the output raster
+  sparse rather than one dense bounding-box raster) are unchanged.
+
+## [2.0.12] - 2026-10-16
+
+### Fixed
+
+- `factor_aggregation` and `dimension_aggregation` (the workflows behind
+  every factor/dimension/analysis rollup, e.g. workplace discrimination's
+  factor score) aborted the *entire* indicator with "produced no raster
+  output for area cv_part20" whenever one area had no matching
+  `study_area_grid` cells - the same sliver-area condition fixed in 2.0.10,
+  but `AggregationWorkflowBase` lacked the `supports_empty_features_fallback`
+  flag that lets a single ungridded area fall back to a neutral raster
+  instead of failing the whole run. It now sets that flag like the other
+  grid-first workflows, so one gridless sliver no longer blocks the
+  factor/dimension/analysis score for the other 26 areas.
+
+## [2.0.11] - 2026-10-15
+
+### Fixed
+
+- Masking a raster to a geometrically thin area (a narrow coastal strip or
+  sliver islet, not necessarily a small one) could fail entirely:
+  `gdal:cliprasterbymasklayer` with `CROP_TO_CUTLINE` snaps the crop window
+  to pixel boundaries, which can round down to zero rows or columns even
+  when the source raster is perfectly valid, so `gdalwarp` refused to
+  create a 0-sized dataset and no masked file was written. `_mask_raster`
+  silently returned that nonexistent path anyway, so the area vanished from
+  the combined VRT with no error reported (seen as `entrepreneurship_index`
+  dropping several Cabo Verde islands while still reporting success).
+  `_mask_raster` now detects a failed/degenerate crop and retries without
+  `CROP_TO_CUTLINE`, keeping the source raster's own (already-valid) extent
+  and masking only the pixel values - and raises clearly if that still
+  doesn't produce a valid raster, instead of returning a bogus path.
+
+## [2.0.10] - 2026-10-15
+
+### Fixed
+
+- Contextual index-score indicators (e.g. workplace discrimination) could
+  fail with "VRT Layer generation failed" when a study area contained a
+  sliver/island fragment too small to have been assigned any
+  `study_area_grid` cells. `rasterize_grid_column` silently fell back to
+  rasterizing the whole study area's extent for such an area (burning
+  nothing, since no grid rows matched), producing a degenerate raster that
+  broke downstream masking and VRT combination - either aborting the whole
+  indicator or corrupting its combined output depending on exact pixel
+  rounding. `rasterize_grid_column` now detects the zero-matching-cells
+  case up front and refuses to rasterize, and
+  `ContextualIndexScoreWorkflow` treats that as "no features for this
+  area" and falls back to a neutral (zero) raster for just that one area,
+  matching the existing fallback behaviour used elsewhere for areas with
+  no input features. A single, un-partitioned study area can legitimately
+  leave `area_name` NULL on every `study_area_grid` row while still naming
+  the area itself - that case is distinguished from a genuinely missing
+  sliver (grid cells exist for other areas, just not this one) so it still
+  rasterizes normally instead of being skipped.
+
 ## [2.0.9] - 2026-10-13
 
 ### Fixed
