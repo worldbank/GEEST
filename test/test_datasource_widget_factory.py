@@ -58,5 +58,34 @@ class TestEnvironmentalHazardsWidgetSelection(unittest.TestCase):
         mock_raster_widget.assert_not_called()
 
 
+class TestNighttimeLightsWidgetSelection(unittest.TestCase):
+    """Regional scale gets the S2S widget; local/national get the in-app downloader."""
+
+    def _create(self, analysis_scale):
+        attributes = {"analysis_scale": analysis_scale}
+        return DataSourceWidgetFactory.create_widget(widget_key="use_nighttime_lights", value=1, attributes=attributes)
+
+    @patch(f"{MODULE}.S2SNTLRasterDataSourceWidget")
+    @patch(f"{MODULE}.NTLDownloadRasterDataSourceWidget")
+    def test_local_scale_uses_download_widget(self, mock_download_widget, mock_s2s_widget):
+        self._create("local")
+        mock_download_widget.assert_called_once()
+        mock_s2s_widget.assert_not_called()
+
+    @patch(f"{MODULE}.S2SNTLRasterDataSourceWidget")
+    @patch(f"{MODULE}.NTLDownloadRasterDataSourceWidget")
+    def test_national_scale_uses_download_widget(self, mock_download_widget, mock_s2s_widget):
+        self._create("national")
+        mock_download_widget.assert_called_once()
+        mock_s2s_widget.assert_not_called()
+
+    @patch(f"{MODULE}.S2SNTLRasterDataSourceWidget")
+    @patch(f"{MODULE}.NTLDownloadRasterDataSourceWidget")
+    def test_regional_scale_uses_s2s_widget(self, mock_download_widget, mock_s2s_widget):
+        self._create("regional")
+        mock_s2s_widget.assert_called_once()
+        mock_download_widget.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()

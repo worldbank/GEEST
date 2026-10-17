@@ -71,6 +71,7 @@
     "GPKG",
     "gridless",
     "heigit",
+    "Hengl",
     "hotspot",
     "hotspots",
     "hrsh",
@@ -197,9 +198,12 @@
     "virtualenv",
     "Virtualenv",
     "V\u00edctor",
+    "vsicurl",
     "walkability",
     "WEAF",
-    "womens"
+    "womens",
+    "worldbank",
+    "Zenodo"
   ],
   "ignorePaths": [
     "srs/**"

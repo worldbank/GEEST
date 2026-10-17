@@ -50,6 +50,26 @@ ENV_HAZARD_SOURCE_LABELS = {
     "drought": "Global Drought Hazard (based on SPEI)",
 }
 
+# Annual VIIRS nighttime lights composite (OpenGeoHub / Hengl, CC-BY 4.0),
+# a public no-login mirror of the EOG VNL V2 "average_masked" radiance
+# product on Zenodo. One global GeoTIFF per year (~60 MB), downloaded in
+# full via QgsNetworkAccessManager's blocking GET (same pattern as
+# S2SClient) rather than GDAL's /vsicurl/ driver - some network/proxy
+# environments block the HTTP Range requests /vsicurl/ needs to read a
+# Cloud-Optimized GeoTIFF remotely, so a plain synchronous download is more
+# portable even though it means fetching the whole file.
+# Verified empirically (gdallocationinfo) that pixel values are already in
+# the original EOG radiance-like units - no rescale needed before feeding
+# the fixed NOAA threshold table in safety_raster_workflow.py.
+NTL_VNL_DATASET_PAGE_URL = "https://zenodo.org/records/17294744"
+NTL_VNL_SOURCE_LABEL = "Annual VIIRS Nighttime Lights (OpenGeoHub, 2000-2024)"
+NTL_VNL_SOURCE_URL_TEMPLATE = (
+    "https://zenodo.org/records/17294744/files/"
+    "nightlights.average_viirs.v21_m_500m_s_{year}0101_{year}1231_go_epsg4326_v20250904.tif"
+)
+NTL_VNL_LATEST_YEAR = 2024
+NTL_VNL_EARLIEST_YEAR = 2000
+
 # Education proxy fields from S2S urbanization_ghssmod dataset.
 # NOTE: ghs_21_pop (suburban) is intentionally excluded by design.
 DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS = [
