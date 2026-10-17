@@ -52,8 +52,8 @@ class TestNTLDownloaderTask(unittest.TestCase):
         with self.assertRaises(ValueError):
             NTLDownloaderTask(extent=self.extent, extent_crs_authid="EPSG:32626", working_dir="")
 
-    @patch("geest.core.tasks.ntl_downloader_task.gdal.Translate")
-    @patch("geest.core.tasks.ntl_downloader_task.QgsNetworkAccessManager")
+    @patch("geest.core.tasks.raster_download_utils.gdal.Translate")
+    @patch("geest.core.tasks.raster_download_utils.QgsNetworkAccessManager")
     def test_run_success_writes_output(self, mock_network_access_manager, mock_translate):
         manager = MagicMock()
         manager.blockingGet.return_value = _FakeReply(200, b"fake-global-tif-bytes")
@@ -81,7 +81,7 @@ class TestNTLDownloaderTask(unittest.TestCase):
         # The downloaded global temp file must be cleaned up afterwards.
         self.assertFalse(os.path.exists(task._temp_global_path))
 
-    @patch("geest.core.tasks.ntl_downloader_task.QgsNetworkAccessManager")
+    @patch("geest.core.tasks.raster_download_utils.QgsNetworkAccessManager")
     def test_run_fails_on_permanent_http_error(self, mock_network_access_manager):
         manager = MagicMock()
         manager.blockingGet.return_value = _FakeReply(404, b"")
@@ -104,8 +104,8 @@ class TestNTLDownloaderTask(unittest.TestCase):
         manager.blockingGet.assert_called_once()  # no retries for a permanent 404
         self.assertTrue(os.path.exists(os.path.join(self.temp_dir, "ntl_download_error.txt")))
 
-    @patch("geest.core.tasks.ntl_downloader_task.time.sleep")
-    @patch("geest.core.tasks.ntl_downloader_task.QgsNetworkAccessManager")
+    @patch("geest.core.tasks.raster_download_utils.time.sleep")
+    @patch("geest.core.tasks.raster_download_utils.QgsNetworkAccessManager")
     def test_run_retries_transient_http_error_then_succeeds(self, mock_network_access_manager, mock_sleep):
         manager = MagicMock()
         manager.blockingGet.side_effect = [
@@ -115,7 +115,7 @@ class TestNTLDownloaderTask(unittest.TestCase):
         ]
         mock_network_access_manager.instance.return_value = manager
 
-        with patch("geest.core.tasks.ntl_downloader_task.gdal.Translate") as mock_translate:
+        with patch("geest.core.tasks.raster_download_utils.gdal.Translate") as mock_translate:
 
             def fake_translate(destination, source_path, **kwargs):
                 with open(destination, "wb") as handle:
@@ -137,8 +137,8 @@ class TestNTLDownloaderTask(unittest.TestCase):
         self.assertEqual(manager.blockingGet.call_count, 3)
         self.assertEqual(mock_sleep.call_count, 2)
 
-    @patch("geest.core.tasks.ntl_downloader_task.time.sleep")
-    @patch("geest.core.tasks.ntl_downloader_task.QgsNetworkAccessManager")
+    @patch("geest.core.tasks.raster_download_utils.time.sleep")
+    @patch("geest.core.tasks.raster_download_utils.QgsNetworkAccessManager")
     def test_run_fails_after_exhausting_retries(self, mock_network_access_manager, mock_sleep):
         manager = MagicMock()
         manager.blockingGet.return_value = _FakeReply(503, b"")
@@ -160,8 +160,8 @@ class TestNTLDownloaderTask(unittest.TestCase):
         self.assertTrue(errors)
         self.assertEqual(manager.blockingGet.call_count, 4)
 
-    @patch("geest.core.tasks.ntl_downloader_task.gdal.Translate")
-    @patch("geest.core.tasks.ntl_downloader_task.QgsNetworkAccessManager")
+    @patch("geest.core.tasks.raster_download_utils.gdal.Translate")
+    @patch("geest.core.tasks.raster_download_utils.QgsNetworkAccessManager")
     def test_requested_year_is_used_in_source_url(self, mock_network_access_manager, mock_translate):
         manager = MagicMock()
         requested_urls = []

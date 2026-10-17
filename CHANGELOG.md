@@ -39,6 +39,19 @@ version per the policy above.
   needed no changes: the download writes to the same
   `nighttime_lights_raster` attribute the manual file picker already
   populated.
+- All five environmental hazard indicators (fire, flood, landslide, cyclone,
+  drought) can now download their own raster directly in-app at
+  local/national scale, the same button/`QgsTask` pattern as the nighttime
+  lights downloader above - previously only a manual "visit the source page
+  and download it yourself" link was offered. Each hazard's source is its
+  direct, no-login World Bank Data Catalog (DDH) file
+  (`ENV_HAZARD_DOWNLOAD_URLS` in `geest/core/constants.py`), downloaded in
+  full via `QgsNetworkAccessManager`'s blocking GET and then cropped locally
+  to the study area. The download/crop logic shared with the nighttime
+  lights downloader was extracted into `geest.core.tasks.raster_download_utils`
+  rather than duplicated. Source files range from ~3 MB (fire, cyclone) to
+  ~1 GB (drought); the button warns and asks for confirmation before
+  starting any download at or above 100 MB.
 
 ### Fixed
 

@@ -50,6 +50,37 @@ ENV_HAZARD_SOURCE_LABELS = {
     "drought": "Global Drought Hazard (based on SPEI)",
 }
 
+# Direct, no-login World Bank Data Catalog (DDH) file URLs for each hazard,
+# verified reachable via plain HTTPS GET (no auth, no Range-request
+# dependency). Downloaded in full via QgsNetworkAccessManager, same pattern
+# as NTL_VNL_SOURCE_URL_TEMPLATE, then cropped locally to the study area.
+# The literal "(" / ")" in the landslide filename are percent-encoded since
+# QUrl's tolerant parsing is not guaranteed across Qt versions.
+ENV_HAZARD_DOWNLOAD_URLS = {
+    "fire": "https://datacatalogfiles.worldbank.org/ddh-published/0067117/DR0096159/fires_density_total.tif",
+    "flood": "https://datacatalogfiles.worldbank.org/ddh-published/0067118/DR0096180/fl_hazard_100_yrp.tif",
+    "landslide": (
+        "https://datacatalogfiles.worldbank.org/ddh-published/0067119/DR0096160/"
+        "global-landslide-susceptibility-map-2-27-23_%281%29.tif"
+    ),
+    "cyclone": "https://datacatalogfiles.worldbank.org/ddh-published/0067120/DR0096161/cy_frequency.tif",
+    "drought": (
+        "https://datacatalogfiles.worldbank.org/ddh-published/0067121/DR0096162/"
+        "global-drought-spei-1.5-return-period-100-years.tif"
+    ),
+}
+
+# Approximate source file sizes in MB, shown to the user before downloading.
+# Drought is a ~1 GB global raster (much larger than the others) so the
+# button warns about it up front rather than surprising the user mid-download.
+ENV_HAZARD_DOWNLOAD_SIZE_MB = {
+    "fire": 4,
+    "flood": 50,
+    "landslide": 32,
+    "cyclone": 3,
+    "drought": 1000,
+}
+
 # Annual VIIRS nighttime lights composite (OpenGeoHub / Hengl, CC-BY 4.0),
 # a public no-login mirror of the EOG VNL V2 "average_masked" radiance
 # product on Zenodo. One global GeoTIFF per year (~60 MB), downloaded in

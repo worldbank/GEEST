@@ -3,27 +3,16 @@
 
 import datetime
 import os
-import random
-import time
 import traceback
 import uuid
 from typing import Optional
 
-from osgeo import gdal
-from qgis.core import QgsNetworkAccessManager, QgsRectangle, QgsTask
-from qgis.PyQt.QtCore import QUrl, pyqtSignal
-from qgis.PyQt.QtNetwork import QNetworkRequest
+from qgis.core import QgsRectangle, QgsTask
+from qgis.PyQt.QtCore import pyqtSignal
 
 from geest.core.constants import NTL_VNL_LATEST_YEAR, NTL_VNL_SOURCE_URL_TEMPLATE
+from geest.core.tasks.raster_download_utils import crop_raster_to_extent, download_file_with_retry
 from geest.utilities import log_message
-
-# Some network/proxy environments block the HTTP Range requests GDAL's
-# /vsicurl/ driver needs, so the global composite is downloaded in full
-# with QGIS's own networking stack first; retries handle Zenodo's
-# occasional transient 429/502/503/504.
-RETRYABLE_STATUS_CODES = {429, 502, 503, 504}
-MAX_ATTEMPTS = 4
-BACKOFF_BASE_SECONDS = 2.0
 
 
 class NTLDownloaderTask(QgsTask):
@@ -84,7 +73,8 @@ class NTLDownloaderTask(QgsTask):
         try:
             self.setProgress(5)
             source_url = NTL_VNL_SOURCE_URL_TEMPLATE.format(year=self.year)
-            self.progress_updated.emit(f"Downloading {self.year} nighttime lights composite (~60 MB)...")
+            description = f"{self.year} nighttime lights composite"
+            self.progress_updated.emit(f"Downloading {description} (~60 MB)...")
 
             if self.isCanceled():
                 return False
@@ -92,39 +82,29 @@ class NTLDownloaderTask(QgsTask):
             self._temp_global_path = os.path.join(
                 self.study_area_dir, f".ntl_global_{self.year}_{uuid.uuid4().hex}.tif"
             )
-            self._download_with_retry(source_url, self._temp_global_path)
-
-            if self.isCanceled():
+            downloaded = download_file_with_retry(
+                url=source_url,
+                destination=self._temp_global_path,
+                is_canceled=self.isCanceled,
+                on_progress=self.progress_updated.emit,
+                description=description,
+            )
+            if not downloaded:
                 return False
 
             self.setProgress(70)
             self.progress_updated.emit("Cropping nighttime lights to study area...")
 
-            # A small buffer avoids edge gaps when the output is later
-            # reprojected/resampled by the per-area raster pipeline.
-            buffered_extent = self.extent.buffered(max(self.extent.width(), self.extent.height()) * 0.02)
-
             temp_filename = f"{self.filename}.{uuid.uuid4().hex}.tmp.tif"
             self._temp_output_path = os.path.join(self.study_area_dir, temp_filename)
 
-            dataset = gdal.Translate(
-                self._temp_output_path,
-                self._temp_global_path,
-                format="GTiff",
-                projWin=[
-                    buffered_extent.xMinimum(),
-                    buffered_extent.yMaximum(),
-                    buffered_extent.xMaximum(),
-                    buffered_extent.yMinimum(),
-                ],
-                projWinSRS=self.extent_crs_authid,
+            crop_raster_to_extent(
+                source_path=self._temp_global_path,
+                destination_path=self._temp_output_path,
+                extent=self.extent,
+                extent_crs_authid=self.extent_crs_authid,
+                description=description,
             )
-            if dataset is None:
-                raise RuntimeError(
-                    f"Failed to crop {self.year} nighttime lights composite: "
-                    f"{gdal.GetLastErrorMsg() or 'gdal.Translate returned no dataset.'}"
-                )
-            dataset = None
 
             if self.isCanceled():
                 return False
@@ -150,51 +130,6 @@ class NTLDownloaderTask(QgsTask):
 
         finally:
             self._cleanup_temp_files()
-
-    def _download_with_retry(self, url: str, destination: str) -> None:
-        """Download a URL to a local file, retrying transient HTTP failures.
-
-        Args:
-            url: The HTTPS URL of the global composite.
-            destination: Local file path to write the downloaded bytes to.
-        """
-        network_manager = QgsNetworkAccessManager.instance()
-        last_error_message = ""
-
-        for attempt in range(1, MAX_ATTEMPTS + 1):
-            if self.isCanceled():
-                return
-
-            request = QNetworkRequest(QUrl(url))
-            reply = network_manager.blockingGet(request)
-            status_code = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
-
-            if status_code == 200:
-                content = bytes(reply.content())
-                if not content:
-                    last_error_message = "Downloaded nighttime lights composite was empty."
-                else:
-                    with open(destination, "wb") as handle:
-                        handle.write(content)
-                    return
-            elif status_code in RETRYABLE_STATUS_CODES:
-                last_error_message = f"HTTP {status_code} (temporarily unavailable)"
-            else:
-                raise RuntimeError(
-                    f"Failed to download {self.year} nighttime lights composite " f"(HTTP {status_code}) from {url}"
-                )
-
-            if attempt >= MAX_ATTEMPTS:
-                raise RuntimeError(
-                    f"Failed to download {self.year} nighttime lights composite after "
-                    f"{attempt} attempts: {last_error_message}"
-                )
-
-            delay = BACKOFF_BASE_SECONDS * (2 ** (attempt - 1)) + random.uniform(0.0, 1.0)  # nosec B311
-            self.progress_updated.emit(
-                f"Nighttime lights source busy, retrying in {delay:.0f}s (attempt {attempt}/{MAX_ATTEMPTS})..."
-            )
-            time.sleep(delay)
 
     def _cleanup_temp_files(self) -> None:
         """Remove temporary global and partial output files."""
