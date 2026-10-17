@@ -110,6 +110,52 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
         self.assertTrue(result_file)
         self.assertTrue(os.path.exists(result_file))
 
+    def test_road_network_cache_reused_across_clip_calls(self):
+        """_clip_network_to_area must reuse the cached network layer object
+
+        across multiple calls (multiple areas) rather than reloading and
+        re-reprojecting the source file each time. Regression for the
+        performance cliff in worldbank/GeoE3#445/#448.
+        """
+        from qgis.core import QgsGeometry
+
+        workflow = MultiBufferDistancesNativeWorkflow(
+            item=self.indicator_item,
+            cell_size_m=10.0,
+            analysis_scale="local",
+            feedback=self.feedback,
+            context=self.context,
+            working_directory=self.working_directory,
+        )
+        self.assertIsNone(workflow._cached_road_network_layer, "cache must start empty")
+
+        # Use a geometry covering the whole network's extent so clipping succeeds.
+        network_extent_geom = QgsGeometry.fromRect(self._network_layer_extent(workflow))
+
+        # The clip itself succeeding isn't the point of this test (that's
+        # covered by test_run); what matters is that the expensive
+        # load+reproject step only happens once no matter how many areas
+        # call _clip_network_to_area afterwards.
+        workflow._clip_network_to_area(network_extent_geom, area_index=0)
+        self.assertIsNotNone(workflow._cached_road_network_layer, "network must be cached after first use")
+        cached_after_first = workflow._cached_road_network_layer
+
+        workflow._clip_network_to_area(network_extent_geom, area_index=1)
+        self.assertIs(
+            workflow._cached_road_network_layer,
+            cached_after_first,
+            "the second area must reuse the same cached layer object, not reload it",
+        )
+
+    @staticmethod
+    def _network_layer_extent(workflow):
+        from qgis.core import QgsVectorLayer
+
+        layer = QgsVectorLayer(workflow.road_network_layer_path, "network", "ogr")
+        extent = layer.extent()
+        extent.grow(1000)
+        return extent
+
 
 if __name__ == "__main__":
     unittest.main()

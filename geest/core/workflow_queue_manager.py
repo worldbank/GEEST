@@ -10,7 +10,11 @@ from typing import Optional
 from qgis.core import Qgis, QgsProcessingContext, QgsProject, QgsTask
 from qgis.PyQt.QtCore import QObject, pyqtSignal
 
-from geest.utilities import log_message
+from geest.utilities import (
+    apply_sqlite_write_safety_options,
+    log_message,
+    restore_sqlite_write_safety_options,
+)
 
 from .json_tree_item import JsonTreeItem
 from .workflow_job import WorkflowJob
@@ -40,6 +44,10 @@ class WorkflowQueueManager(QObject):
         """
         super().__init__(parent=parent)
         self.workflow_queue = WorkflowQueue(pool_size)
+        # Snapshot of GDAL SQLite options from before analysis started, so
+        # they can be restored once the whole run completes. None means no
+        # hardening is currently applied.
+        self._sqlite_safety_snapshot = None
 
         # Connect signals to manage queue updates
         self.workflow_queue.status_changed.connect(self.update_status)
@@ -146,9 +154,31 @@ class WorkflowQueueManager(QObject):
         except Exception:  # nosec B110 — display bookkeeping must never raise
             pass
 
+    def _ensure_sqlite_safety_options_applied(self) -> None:
+        """Harden GDAL SQLite options for the duration of an analysis run.
+
+        Every indicator's workflow opens its own AreaIterator (3 fresh
+        QgsVectorLayer reads) against the same study_area.gpkg that
+        grid_column_utils is concurrently writing to; running many
+        indicators back-to-back (a whole dimension/factor/analysis) without
+        this hardening has been seen to corrupt the GeoPackage or hand back
+        a stale GDAL dataset handle (Windows access violation inside
+        getFeatures() - worldbank/GeoE3#447, #448). Idempotent: a second
+        call before the matching restore is a no-op.
+        """
+        if self._sqlite_safety_snapshot is None:
+            self._sqlite_safety_snapshot = apply_sqlite_write_safety_options()
+
+    def _restore_sqlite_safety_options_if_applied(self) -> None:
+        """Undo _ensure_sqlite_safety_options_applied, if it was applied."""
+        if self._sqlite_safety_snapshot is not None:
+            restore_sqlite_write_safety_options(self._sqlite_safety_snapshot)
+            self._sqlite_safety_snapshot = None
+
     def start_processing(self) -> None:
         """Start processing the tasks in the WorkflowQueue."""
         log_message("Starting workflow queue processing...")
+        self._ensure_sqlite_safety_options_applied()
         self.workflow_queue.start_processing()
 
     def start_processing_in_foreground(self) -> None:
@@ -161,13 +191,20 @@ class WorkflowQueueManager(QObject):
             tag="GeoE3",
             level=Qgis.Info,
         )
-        for job in self.workflow_queue.job_queue:
-            job._workflow.execute()
+        self._ensure_sqlite_safety_options_applied()
+        try:
+            for job in self.workflow_queue.job_queue:
+                job._workflow.execute()
+        finally:
+            self._restore_sqlite_safety_options_if_applied()
 
     def cancel_processing(self) -> None:
         """Cancels all tasks in the WorkflowQueue."""
         log_message("Cancelling workflow queue...")
         self.workflow_queue.cancel_processing()
+        # cancel_processing() never emits processing_completed, so the
+        # restore there would otherwise never run.
+        self._restore_sqlite_safety_options_if_applied()
 
     def update_status(self) -> None:
         """Update the status of the workflow queue (for UI updates, etc.)."""
@@ -180,6 +217,7 @@ class WorkflowQueueManager(QObject):
         Args:
             success: Indicates whether all tasks completed successfully.
         """
+        self._restore_sqlite_safety_options_if_applied()
         if success:
             log_message(
                 "All workflow tasks completed successfully.",

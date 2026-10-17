@@ -156,6 +156,7 @@
     "reparents",
     "reproject",
     "reprojected",
+    "reprojection",
     "rowids",
     "rtree",
     "runing",

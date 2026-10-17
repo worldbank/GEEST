@@ -35,7 +35,12 @@ from geest.core.algorithms import GHSLDownloader, GHSLProcessor
 from geest.core.grid_column_utils import add_model_columns_to_grid
 from geest.core.h3_utils import estimate_h3_cells_for_area, get_h3_resolution_for_scale, h3_cell_area_km2
 from geest.core.settings import setting
-from geest.utilities import calculate_utm_zone, log_message
+from geest.utilities import (
+    apply_sqlite_write_safety_options,
+    calculate_utm_zone,
+    log_message,
+    restore_sqlite_write_safety_options,
+)
 
 from .grid_chunker_task import GridChunkerTask
 from .grid_from_bbox_h3_task import GridFromBboxH3Task
@@ -1692,26 +1697,20 @@ class StudyAreaProcessingTask(QgsTask):
     def _set_sqlite_write_safety_options(self) -> None:
         """Configure safer SQLite options for GeoPackage writes.
 
-        These options are process-wide in GDAL, so we snapshot and restore them
-        per task execution to avoid leaking settings into workflow processing.
+        Delegates to the shared geest.utilities helper - see that module for
+        why SQLITE_USE_OGR_VFS must stay off. These options are process-wide
+        in GDAL, so the caller snapshots and restores them per task
+        execution; note the same hardening is also applied around workflow
+        (analysis) execution in WorkflowQueueManager, since AreaIterator
+        reads and grid_column_utils writes against the same GeoPackage there
+        are exactly the kind of concurrent access this guards against.
         """
-        option_keys = ["OGR_SQLITE_JOURNAL", "OGR_SQLITE_SYNCHRONOUS", "SQLITE_USE_OGR_VFS"]
-        self._previous_gdal_sqlite_options = {key: gdal.GetConfigOption(key) for key in option_keys}
-
-        gdal.SetConfigOption("OGR_SQLITE_JOURNAL", "WAL")
-        gdal.SetConfigOption("OGR_SQLITE_SYNCHRONOUS", "NORMAL")
-        # SQLITE_USE_OGR_VFS must stay OFF: the OGR VSI layer does not
-        # implement SQLite file locking, so with it enabled concurrent write
-        # connections (unified writer + chunk/layer creation) can interleave
-        # page writes unprotected and corrupt the GeoPackage (duplicated
-        # sqlite_master pages, "trigger ... already exists" schema errors).
-        gdal.SetConfigOption("SQLITE_USE_OGR_VFS", "NO")
+        self._previous_gdal_sqlite_options = apply_sqlite_write_safety_options()
         log_message("Configured safer GeoPackage write settings (WAL/NORMAL, OGR VFS off)")
 
     def _restore_sqlite_write_safety_options(self) -> None:
         """Restore GDAL SQLite options captured before task execution."""
-        for key, value in self._previous_gdal_sqlite_options.items():
-            gdal.SetConfigOption(key, value)
+        restore_sqlite_write_safety_options(self._previous_gdal_sqlite_options)
 
     def _cleanup_gdal_resources(self):
         """Clean up GDAL/OGR resources to prevent memory leaks and file handle issues."""

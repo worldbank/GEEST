@@ -75,6 +75,16 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
                     log_message(error_msg, tag="GeoE3", level=Qgis.Critical)
                     raise WorkflowNotConfiguredError(error_msg)
         self.features_layer = QgsVectorLayer(layer_path, "OSM Transport Layer", "ogr")
+        if not self.features_layer.isValid():
+            log_message(
+                f"OSM transport layer is not valid: {layer_path}",
+                tag="GeoE3",
+                level=Qgis.Critical,
+            )
+            raise WorkflowNotConfiguredError(
+                f"The transport layer for this indicator could not be opened ({layer_path}). "
+                "Re-select the data source in the indicator's settings."
+            )
 
     def _process_features_for_area(
         self,

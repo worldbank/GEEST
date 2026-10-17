@@ -92,6 +92,16 @@ class PolylinePerCellWorkflow(WorkflowBase):
             )
             raise WorkflowNotConfiguredError("No polyline layer configured for this indicator")
         self.features_layer = QgsVectorLayer(layer_path, "polyline_per_cell Layer", "ogr")
+        if not self.features_layer.isValid():
+            log_message(
+                f"Polyline per cell layer is not valid: {layer_path}",
+                tag="GeoE3",
+                level=Qgis.Critical,
+            )
+            raise WorkflowNotConfiguredError(
+                f"The polyline layer for this indicator could not be opened ({layer_path}). "
+                "Re-select the data source in the indicator's settings."
+            )
         self.workflow_name = "polyline_per_cell"
         self.supports_empty_features_fallback = True
         # Grid-first mode: write results to grid columns first, then rasterize

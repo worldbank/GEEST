@@ -1187,6 +1187,15 @@ def write_spatial_join_to_grid(
     Returns:
         Number of cells updated, or -1 on error.
     """
+    from qgis.core import (
+        QgsCoordinateTransform,
+        QgsFeature,
+        QgsFeatureRequest,
+        QgsGeometry,
+        QgsProject,
+        QgsSpatialIndex,
+    )
+
     if not os.path.exists(gpkg_path):
         log_message(f"GeoPackage not found: {gpkg_path}", level=Qgis.Warning)
         return -1
@@ -1195,70 +1204,107 @@ def write_spatial_join_to_grid(
         log_message(f"Features GeoPackage not found: {features_gpkg}", level=Qgis.Warning)
         return -1
 
+    sanitized_column = _sanitize_column_name(column_name)
+    _ensure_column_exists(gpkg_path, sanitized_column)
+
     try:
-        # Open the main GeoPackage for updating
-        ds = _open_gpkg_for_write(gpkg_path)
-        if not ds:
-            log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
+        grid_layer = QgsVectorLayer(f"{gpkg_path}|layername=study_area_grid", "grid", "ogr")
+        if not grid_layer.isValid():
+            log_message("Could not load study_area_grid layer", level=Qgis.Critical)
             return -1
 
-        layer, field_idx = _get_grid_layer_and_field_index(ds, column_name)
-        if layer is None or field_idx < 0:
-            ds = None
+        features_qlayer = QgsVectorLayer(f"{features_gpkg}|layername={features_layer}", features_layer, "ogr")
+        if not features_qlayer.isValid():
+            log_message(f"Features layer not found: {features_layer} in {features_gpkg}", level=Qgis.Critical)
             return -1
 
-        sanitized_column = _sanitize_column_name(column_name)
+        # Reproject features on the fly when their CRS differs from the grid -
+        # a silent mismatch would otherwise intersect nothing.
+        transform = None
+        if features_qlayer.crs().isValid() and grid_layer.crs() != features_qlayer.crs():
+            log_message(
+                f"Features layer CRS {features_qlayer.crs().authid()} differs from grid CRS "
+                f"{grid_layer.crs().authid()} — reprojecting features on the fly",
+                level=Qgis.Warning,
+            )
+            transform = QgsCoordinateTransform(features_qlayer.crs(), grid_layer.crs(), QgsProject.instance())
 
-        # Open the features GeoPackage
-        features_ds = ogr.Open(features_gpkg, 0)
-        if not features_ds:
-            log_message(f"Could not open features GeoPackage: {features_gpkg}", level=Qgis.Critical)
-            ds = None
-            return -1
+        is_callable_score = callable(score_expression)
 
-        features_lyr = features_ds.GetLayerByName(features_layer)
-        if not features_lyr:
-            log_message(f"Features layer not found: {features_layer}", level=Qgis.Critical)
-            features_ds = None
-            ds = None
-            return -1
+        # Normalise features once: reproject, repair invalid geometries, and
+        # resolve each feature's score up front.
+        feature_geoms = {}
+        feature_scores = {}
+        repaired = 0
+        for feature in features_qlayer.getFeatures():
+            geometry = QgsGeometry(feature.geometry())
+            if geometry.isEmpty():
+                continue
+            if transform is not None:
+                geometry.transform(transform)
+            if not geometry.isGeosValid():
+                geometry = geometry.makeValid()
+                repaired += 1
+                if geometry.isEmpty():
+                    continue
 
-        # Build spatial index for features if not already indexed
-        # Note: GeoPackage layers should have spatial index by default
-
-        # Set attribute filter on grid layer
-        if area_name:
-            layer.SetAttributeFilter(f"area_name = '{area_name}'")
-
-        # First pass: collect FIDs and compute scores
-        fid_scores = {}
-        for grid_feature in layer:
-            grid_geom = grid_feature.GetGeometryRef()
-            if not grid_geom:
+            score = score_expression(feature) if is_callable_score else feature.attribute(score_expression)
+            if score is None:
                 continue
 
-            fid = grid_feature.GetFID()
+            feature_geoms[feature.id()] = geometry
+            feature_scores[feature.id()] = float(score)
+        if repaired:
+            log_message(f"Repaired {repaired} invalid geometries before spatial join scoring")
 
-            # Find intersecting features
-            features_lyr.SetSpatialFilter(grid_geom)
+        if save_buffers and workflow_directory:
+            try:
+                from qgis.core import QgsVectorFileWriter
+
+                buffer_output = os.path.join(workflow_directory, f"{features_layer}_buffers.gpkg")
+                if os.path.exists(buffer_output):
+                    os.remove(buffer_output)
+                QgsVectorFileWriter.writeAsVectorFormat(
+                    features_qlayer, buffer_output, "UTF-8", features_qlayer.crs(), "GPKG"
+                )
+                log_message(f"Saved intermediate buffers to {buffer_output}")
+            except Exception as e:
+                log_message(f"Could not save intermediate buffers: {e}", level=Qgis.Warning)
+
+        if not feature_geoms:
+            log_message(f"No usable scored features found in {features_layer}", level=Qgis.Warning)
+            return 0
+
+        # Build the spatial index once over the (typically much smaller)
+        # features layer, then do one indexed lookup per grid cell - rather
+        # than re-querying the features layer with SetSpatialFilter for every
+        # one of up to hundreds of thousands of grid cells.
+        feature_index = QgsSpatialIndex()
+        for fid, geometry in feature_geoms.items():
+            index_feature = QgsFeature(fid)
+            index_feature.setGeometry(geometry)
+            feature_index.addFeature(index_feature)
+
+        request = QgsFeatureRequest()
+        if area_name:
+            request.setFilterExpression(f"area_name = '{area_name}'")
+
+        grid_scores = {}
+        for grid_feature in grid_layer.getFeatures(request):
+            grid_geom = grid_feature.geometry()
+            if grid_geom.isEmpty():
+                continue
+
+            candidate_ids = feature_index.intersects(grid_geom.boundingBox())
+            if not candidate_ids:
+                continue
+
             scores = []
+            for candidate_id in candidate_ids:
+                feature_geom = feature_geoms.get(candidate_id)
+                if feature_geom is not None and feature_geom.intersects(grid_geom):
+                    scores.append(feature_scores[candidate_id])
 
-            for feat in features_lyr:
-                feat_geom = feat.GetGeometryRef()
-                if feat_geom and grid_geom.Intersects(feat_geom):
-                    # Get score from expression
-                    if callable(score_expression):
-                        score = score_expression(feat)
-                    else:
-                        # It's a field name
-                        score = feat.GetField(score_expression)
-
-                    if score is not None:
-                        scores.append(float(score))
-
-            features_lyr.SetSpatialFilter(None)
-
-            # Aggregate scores
             if scores:
                 if aggregation_method == "MAX":
                     final_score = max(scores)
@@ -1273,51 +1319,31 @@ def write_spatial_join_to_grid(
                 else:
                     final_score = max(scores)
 
-                fid_scores[fid] = final_score
+                grid_scores[grid_feature.id()] = final_score
 
-        log_message(f"Found {len(fid_scores)} grid cells with intersecting features for spatial join")
+        log_message(f"Found {len(grid_scores)} grid cells with intersecting features for spatial join")
 
-        # Reset filter before updating
-        layer.SetAttributeFilter(None)
-        layer.ResetReading()
-
-        # Second pass: update features by FID
-        updated_count = 0
-        layer.StartTransaction()
-
-        try:
-            for fid, score in fid_scores.items():
-                feature = layer.GetFeature(fid)
-                if feature:
-                    feature.SetField(sanitized_column, score)
-                    if layer.SetFeature(feature) == 0:
-                        updated_count += 1
-
-            layer.CommitTransaction()
-
-        except Exception as e:
-            layer.RollbackTransaction()
-            log_message(f"Error in spatial join: {e}", level=Qgis.Critical)
-            features_ds = None
-            ds = None
+        ds = _open_gpkg_for_write(gpkg_path)
+        if not ds:
+            log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
             return -1
 
-        # Save intermediate buffers if requested
-        if save_buffers and workflow_directory:
-            buffer_output = os.path.join(workflow_directory, f"{features_layer}_buffers.gpkg")
-            try:
-                driver = ogr.GetDriverByName("GPKG")
-                if os.path.exists(buffer_output):
-                    driver.DeleteDataSource(buffer_output)
-                buffer_ds = driver.CreateDataSource(buffer_output)
-                buffer_ds.CopyLayer(features_lyr, features_layer)
-                buffer_ds = None
-                log_message(f"Saved intermediate buffers to {buffer_output}")
-            except Exception as e:
-                log_message(f"Could not save intermediate buffers: {e}", level=Qgis.Warning)
+        updated_count = 0
+        batch_size = 500
+        fids = list(grid_scores.keys())
 
-        features_ds = None
-        ds.FlushCache()
+        for batch_start in range(0, len(fids), batch_size):
+            batch_fids = fids[batch_start : batch_start + batch_size]
+            case_parts = [f"WHEN fid = {fid} THEN {grid_scores[fid]}" for fid in batch_fids]
+            fid_list = ",".join(str(f) for f in batch_fids)
+            sql = (
+                f"UPDATE study_area_grid "  # nosec B608
+                f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
+                f"WHERE fid IN ({fid_list})"
+            )
+            _execute_sql_with_retry(ds, sql)
+            updated_count += len(batch_fids)
+
         ds = None
 
         log_message(f"Updated {updated_count} grid cells via spatial join for column {sanitized_column}")
@@ -1325,154 +1351,6 @@ def write_spatial_join_to_grid(
 
     except Exception as e:
         log_message(f"Error in write_spatial_join_to_grid: {e}", level=Qgis.Critical)
-        return -1
-
-
-def write_point_count_to_grid(
-    gpkg_path: str,
-    column_name: str,
-    features_gpkg: str,
-    features_layer: str,
-    area_name: Optional[str] = None,
-    count_to_score_mapping: Optional[Dict[int, float]] = None,
-    max_count_score: float = 5.0,
-) -> int:
-    """Count points per grid cell and map counts to scores.
-
-    This function counts point features within each grid cell and converts
-    the count to a score using the provided mapping or a default linear scale.
-
-    Args:
-        gpkg_path: Path to the GeoPackage containing study_area_grid.
-        column_name: Name of the column to write values to.
-        features_gpkg: Path to the GeoPackage containing the point features.
-        features_layer: Name of the layer containing point features.
-        area_name: Optional area name to filter grid cells.
-        count_to_score_mapping: Dict mapping count values to scores.
-            Example: {0: 0, 1: 3, 2: 5} means 0 points = score 0,
-            1 point = score 3, 2+ points = score 5.
-            If None, uses default {0: 0, 1: 3} with max as 5.
-        max_count_score: Score to assign when count exceeds all mappings.
-
-    Returns:
-        Number of cells updated, or -1 on error.
-    """
-    # Default mapping based on typical GeoE3 point per cell scoring
-    if count_to_score_mapping is None:
-        count_to_score_mapping = {0: 0, 1: 3}
-
-    if not os.path.exists(gpkg_path):
-        log_message(f"GeoPackage not found: {gpkg_path}", level=Qgis.Warning)
-        return -1
-
-    if not os.path.exists(features_gpkg):
-        log_message(f"Features GeoPackage not found: {features_gpkg}", level=Qgis.Warning)
-        return -1
-
-    try:
-        # Open the main GeoPackage for updating
-        ds = _open_gpkg_for_write(gpkg_path)
-        if not ds:
-            log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
-            return -1
-
-        layer, field_idx = _get_grid_layer_and_field_index(ds, column_name)
-        if layer is None or field_idx < 0:
-            ds = None
-            return -1
-
-        sanitized_column = _sanitize_column_name(column_name)
-
-        # Open the features GeoPackage
-        features_ds = ogr.Open(features_gpkg, 0)
-        if not features_ds:
-            log_message(f"Could not open features GeoPackage: {features_gpkg}", level=Qgis.Critical)
-            ds = None
-            return -1
-
-        features_lyr = features_ds.GetLayerByName(features_layer)
-        if not features_lyr:
-            log_message(f"Features layer not found: {features_layer}", level=Qgis.Critical)
-            features_ds = None
-            ds = None
-            return -1
-
-        # Set attribute filter on grid layer
-        if area_name:
-            layer.SetAttributeFilter(f"area_name = '{area_name}'")
-
-        # Get sorted mapping keys for lookup
-        sorted_counts = sorted(count_to_score_mapping.keys())
-
-        # First pass: collect FIDs and compute scores
-        fid_scores = {}
-        for grid_feature in layer:
-            grid_geom = grid_feature.GetGeometryRef()
-            if not grid_geom:
-                continue
-
-            fid = grid_feature.GetFID()
-
-            # Count intersecting features
-            features_lyr.SetSpatialFilter(grid_geom)
-            point_count = 0
-
-            for feat in features_lyr:
-                feat_geom = feat.GetGeometryRef()
-                if feat_geom and grid_geom.Intersects(feat_geom):
-                    point_count += 1
-
-            features_lyr.SetSpatialFilter(None)
-
-            # Map count to score
-            score = max_count_score  # Default to max if count exceeds all mappings
-            for count_threshold in sorted_counts:
-                if point_count <= count_threshold:
-                    score = count_to_score_mapping[count_threshold]
-                    break
-
-            # If point_count exceeds all thresholds, use max_count_score
-            if point_count > max(sorted_counts):
-                score = max_count_score
-
-            fid_scores[fid] = score
-
-        log_message(f"Found {len(fid_scores)} grid cells to update with point counts")
-
-        # Reset filter before updating
-        layer.SetAttributeFilter(None)
-        layer.ResetReading()
-
-        # Second pass: update features by FID
-        updated_count = 0
-        layer.StartTransaction()
-
-        try:
-            for fid, score in fid_scores.items():
-                feature = layer.GetFeature(fid)
-                if feature:
-                    feature.SetField(sanitized_column, score)
-                    if layer.SetFeature(feature) == 0:
-                        updated_count += 1
-
-            layer.CommitTransaction()
-
-        except Exception as e:
-            layer.RollbackTransaction()
-            log_message(f"Error in point count: {e}", level=Qgis.Critical)
-            features_ds = None
-            ds = None
-            return -1
-
-        features_ds = None
-        ds.FlushCache()
-        ds = None
-
-        log_message(f"Updated {updated_count} grid cells with point counts for column {sanitized_column}")
-        return updated_count
-
-    except Exception as e:
-        log_message(f"Error in write_point_count_to_grid: {e}", level=Qgis.Critical)
         return -1
 
 
@@ -2024,6 +1902,7 @@ def write_percentage_scores_to_grid(
             dissolved = dissolved.makeValid()
 
         log_message(f"Dissolved {len(buffer_geoms)} buffers into unified polygon")
+        dissolved_bbox = dissolved.boundingBox()
 
         sorted_thresholds = sorted(percentage_scores.items())
 
@@ -2050,6 +1929,13 @@ def write_percentage_scores_to_grid(
 
             grid_area = grid_geom.area()
             if grid_area == 0:
+                continue
+
+            # Cheap bbox reject before the expensive exact GEOS intersection -
+            # most cells are nowhere near any buffer (buffers cluster around
+            # POIs, leaving large gaps), and this is the dominant cost when
+            # the grid has hundreds of thousands of cells (local scale).
+            if not grid_geom.boundingBox().intersects(dissolved_bbox):
                 continue
 
             intersection = grid_geom.intersection(dissolved)

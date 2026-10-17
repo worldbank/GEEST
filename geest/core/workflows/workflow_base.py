@@ -634,157 +634,204 @@ class WorkflowBase(QObject):
             log_layer_count()  # For performance tuning, write the number of open layers to a log file
 
             areas_processed = 0
+            failed_areas = []  # [(area_name, index, error_message), ...]
 
             try:
                 total_areas = area_iterator.area_count()
                 for index, (current_area, clip_area, current_bbox, progress, area_name) in enumerate(area_iterator):
-                    areas_processed += 1
-                    message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"  # noqa E231
-                    self.updateStatus(f"Processing area {index + 1}/{total_areas}")
-                    feedback.pushInfo(message)
-                    log_message(message)
                     if self.feedback.isCanceled():
                         log_message(
                             f"{self.class_name} Processing was canceled by the user.",
                             tag="GeoE3",
                             level=Qgis.Warning,
                         )
-                    raster_output = None
-                    # Step 1: Select features that intersect with the current area
-                    if self.features_layer:  # we are processing a vector input
-                        area_features = self._subset_vector_layer(
-                            current_area,
-                            output_prefix=f"{self.layer_id}_area_features_{index}",
-                        )
+                        break
+
+                    areas_processed += 1
+                    message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"  # noqa E231
+                    self.updateStatus(f"Processing area {index + 1}/{total_areas}")
+                    feedback.pushInfo(message)
+                    log_message(message)
+
+                    # Isolate each area: an unexpected failure here (a bad
+                    # geometry, a GDAL/GEOS error, a transient data-source
+                    # issue, ...) must not discard every other area already
+                    # processed nor skip every area still to come. Log it
+                    # clearly against this specific area and move on - the
+                    # final VRT/grid is built from whatever areas succeeded,
+                    # and failed_areas is surfaced to the user afterwards.
+                    try:
                         raster_output = None
-                        # Some workflows do not take in vector data (a features layer)
-                        # but are not raster based. e.g. index_score_workflow
-                        # Logic below is a check for that
-                        if (
-                            not isinstance(self.features_layer, bool)  # noqa W503
-                            and area_features.featureCount() == 0  # noqa W503
-                        ):
-                            if self.supports_empty_features_fallback:
-                                log_message(
-                                    f"No area features for {self.workflow_name} in area {area_name}; using neutral fallback output.",
-                                    tag="GeoE3",
-                                    level=Qgis.Warning,
-                                )
-                                raster_output = self._build_empty_features_neutral_raster(
-                                    current_area=current_area,
-                                    current_bbox=current_bbox,
-                                    index=index,
-                                    area_name=area_name,
-                                )
-                                if self.use_grid_first and area_name:
-                                    self._apply_grid_column_zero_fallback(area_name)
-                                if not raster_output:
+                        # Step 1: Select features that intersect with the current area
+                        if self.features_layer:  # we are processing a vector input
+                            area_features = self._subset_vector_layer(
+                                current_area,
+                                output_prefix=f"{self.layer_id}_area_features_{index}",
+                            )
+                            raster_output = None
+                            # Some workflows do not take in vector data (a features layer)
+                            # but are not raster based. e.g. index_score_workflow
+                            # Logic below is a check for that
+                            if (
+                                not isinstance(self.features_layer, bool)  # noqa W503
+                                and area_features.featureCount() == 0  # noqa W503
+                            ):
+                                if self.supports_empty_features_fallback:
                                     log_message(
-                                        f"Neutral fallback failed for {self.workflow_name} in area {area_name}; skipping area.",
+                                        f"No area features for {self.workflow_name} in area {area_name}; using neutral fallback output.",
+                                        tag="GeoE3",
+                                        level=Qgis.Warning,
+                                    )
+                                    raster_output = self._build_empty_features_neutral_raster(
+                                        current_area=current_area,
+                                        current_bbox=current_bbox,
+                                        index=index,
+                                        area_name=area_name,
+                                    )
+                                    if self.use_grid_first and area_name:
+                                        self._apply_grid_column_zero_fallback(area_name)
+                                    if not raster_output:
+                                        log_message(
+                                            f"Neutral fallback failed for {self.workflow_name} in area {area_name}; skipping area.",
+                                            tag="GeoE3",
+                                            level=Qgis.Warning,
+                                        )
+                                        continue
+                                else:
+                                    log_message(
+                                        "No area features ... skipping",
                                         tag="GeoE3",
                                         level=Qgis.Warning,
                                     )
                                     continue
-                            else:
-                                log_message(
-                                    "No area features ... skipping",
-                                    tag="GeoE3",
-                                    level=Qgis.Warning,
-                                )
-                                continue
 
-                        # Step 2: Process the area features - work happens in concrete class
-                        if raster_output is None:
-                            raster_output = self._process_features_for_area(
+                            # Step 2: Process the area features - work happens in concrete class
+                            if raster_output is None:
+                                raster_output = self._process_features_for_area(
+                                    current_area=current_area,
+                                    clip_area=clip_area,
+                                    current_bbox=current_bbox,
+                                    area_features=area_features,
+                                    index=index,
+                                    area_name=area_name,
+                                )
+                        elif not self.aggregation:  # assumes we are processing a raster input
+                            area_raster = self._subset_raster_layer(bbox=current_bbox, index=index)
+                            raster_output = self._process_raster_for_area(
                                 current_area=current_area,
                                 clip_area=clip_area,
                                 current_bbox=current_bbox,
-                                area_features=area_features,
+                                area_raster=area_raster,
                                 index=index,
                                 area_name=area_name,
                             )
-                    elif not self.aggregation:  # assumes we are processing a raster input
-                        area_raster = self._subset_raster_layer(bbox=current_bbox, index=index)
-                        raster_output = self._process_raster_for_area(
-                            current_area=current_area,
-                            clip_area=clip_area,
-                            current_bbox=current_bbox,
-                            area_raster=area_raster,
-                            index=index,
-                            area_name=area_name,
-                        )
-                    elif self.aggregation:  # we are processing an aggregate
-                        raster_output = self._process_aggregate_for_area(
-                            current_area=current_area,
-                            clip_area=clip_area,
-                            current_bbox=current_bbox,
-                            index=index,
-                            area_name=area_name,
-                        )
-
-                    if not raster_output and self.supports_empty_features_fallback:
-                        # e.g. points exist but none are reachable from the road
-                        # network, so no isochrones/buffers could be produced.
-                        log_message(
-                            f"{self.workflow_name} produced no raster output for area {area_name} "
-                            f"(index {index}); using neutral (0 score) fallback output.",
-                            tag="GeoE3",
-                            level=Qgis.Warning,
-                        )
-                        raster_output = self._build_empty_features_neutral_raster(
-                            current_area=current_area,
-                            current_bbox=current_bbox,
-                            index=index,
-                            area_name=area_name,
-                        )
-                        if self.use_grid_first and area_name:
-                            self._apply_grid_column_zero_fallback(area_name)
-                    if not raster_output:
-                        raise RuntimeError(
-                            f"{self.workflow_name} produced no raster output for area {area_name} (index {index})."
-                        )
-
-                    # clip the area by its matching mask layer in study_area geopackage
-                    self.updateStatus(f"Masking area {index + 1}...")
-                    masked_layer = self._mask_raster(
-                        raster_path=raster_output,
-                        area_geometry=clip_area,
-                        index=index,
-                    )
-                    output_rasters.append(masked_layer)
-
-                    # Write raster values to grid for this area
-                    # Skip this step for grid-first workflows since grid was already populated
-                    if not self.use_grid_first and masked_layer and os.path.exists(masked_layer):
-                        self.updateStatus(f"Writing grid values for area {index + 1}...")
-                        updated_cells = write_raster_values_to_grid(
-                            gpkg_path=self.gpkg_path,
-                            raster_path=masked_layer,
-                            column_name=self.layer_id,
-                            area_name=area_name,
-                        )
-                        if updated_cells >= 0:
-                            log_message(
-                                f"Updated {updated_cells} grid cells for {self.layer_id} in area {area_name}",
-                                tag="GeoE3",
-                                level=Qgis.Info,
+                        elif self.aggregation:  # we are processing an aggregate
+                            raster_output = self._process_aggregate_for_area(
+                                current_area=current_area,
+                                clip_area=clip_area,
+                                current_bbox=current_bbox,
+                                index=index,
+                                area_name=area_name,
                             )
-                        else:
+
+                        if not raster_output and self.supports_empty_features_fallback:
+                            # e.g. points exist but none are reachable from the road
+                            # network, so no isochrones/buffers could be produced.
                             log_message(
-                                f"Failed to update grid cells for {self.layer_id} in area {area_name}",
+                                f"{self.workflow_name} produced no raster output for area {area_name} "
+                                f"(index {index}); using neutral (0 score) fallback output.",
                                 tag="GeoE3",
                                 level=Qgis.Warning,
                             )
+                            raster_output = self._build_empty_features_neutral_raster(
+                                current_area=current_area,
+                                current_bbox=current_bbox,
+                                index=index,
+                                area_name=area_name,
+                            )
+                            if self.use_grid_first and area_name:
+                                self._apply_grid_column_zero_fallback(area_name)
+                        if not raster_output:
+                            raise RuntimeError(
+                                f"{self.workflow_name} produced no raster output for area {area_name} (index {index})."
+                            )
 
-                    # Note: We don't emit area iterator progress here because it would
-                    # override the sub-task progress in the Task Progress bar.
-                    # The sub-task progress (0-100%) is more useful to the user.
+                        # clip the area by its matching mask layer in study_area geopackage
+                        self.updateStatus(f"Masking area {index + 1}...")
+                        masked_layer = self._mask_raster(
+                            raster_path=raster_output,
+                            area_geometry=clip_area,
+                            index=index,
+                        )
+                        output_rasters.append(masked_layer)
+
+                        # Write raster values to grid for this area
+                        # Skip this step for grid-first workflows since grid was already populated
+                        if not self.use_grid_first and masked_layer and os.path.exists(masked_layer):
+                            self.updateStatus(f"Writing grid values for area {index + 1}...")
+                            updated_cells = write_raster_values_to_grid(
+                                gpkg_path=self.gpkg_path,
+                                raster_path=masked_layer,
+                                column_name=self.layer_id,
+                                area_name=area_name,
+                            )
+                            if updated_cells >= 0:
+                                log_message(
+                                    f"Updated {updated_cells} grid cells for {self.layer_id} in area {area_name}",
+                                    tag="GeoE3",
+                                    level=Qgis.Info,
+                                )
+                            else:
+                                log_message(
+                                    f"Failed to update grid cells for {self.layer_id} in area {area_name}",
+                                    tag="GeoE3",
+                                    level=Qgis.Warning,
+                                )
+
+                        # Note: We don't emit area iterator progress here because it would
+                        # override the sub-task progress in the Task Progress bar.
+                        # The sub-task progress (0-100%) is more useful to the user.
+
+                    except Exception as area_error:
+                        failed_areas.append((area_name, index, str(area_error)))
+                        log_message(
+                            f"{self.workflow_name} failed on area {area_name} (index {index}): "
+                            f"{area_error}. Skipping this area; the rest of the run continues.",
+                            tag="GeoE3",
+                            level=Qgis.Critical,
+                        )
+                        log_message(traceback.format_exc(), tag="GeoE3", level=Qgis.Critical)
+                        continue
+
                 # Combine all area rasters into a VRT
                 self.updateStatus("Combining area rasters...")
                 vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
+
+                if not vrt_filepath and not output_rasters:
+                    # Every area failed (or none existed) - this is a real
+                    # failure, not a completion, even though the per-area
+                    # try/except above kept the loop running to the end.
+                    failure_summary = "; ".join(f"{name} (index {idx}): {err}" for name, idx, err in failed_areas)
+                    raise RuntimeError(
+                        f"{self.workflow_name} produced no usable output for any area "
+                        f"({len(failed_areas)} area(s) failed: {failure_summary})"
+                    )
+
                 with self.item.atomicAttributeUpdate() as attrs:
                     attrs[self.result_file_key] = vrt_filepath
-                    attrs[self.result_key] = f"{self.workflow_name} Workflow Completed"
+                    if failed_areas:
+                        failed_names = ", ".join(f"{name} ({err})" for name, _idx, err in failed_areas)
+                        attrs[self.result_key] = (
+                            f"{self.workflow_name} Workflow Completed with {len(failed_areas)} area(s) skipped"
+                        )
+                        attrs["warning"] = f"Skipped areas: {failed_names}"
+                        log_message(
+                            f"{self.workflow_name} completed with {len(failed_areas)} area(s) skipped: {failed_names}",
+                            tag="GeoE3",
+                            level=Qgis.Warning,
+                        )
+                    else:
+                        attrs[self.result_key] = f"{self.workflow_name} Workflow Completed"
 
                 self.updateStatus(f"{self.workflow_name} complete")
                 log_message(
@@ -796,7 +843,8 @@ class WorkflowBase(QObject):
                 # Log processing summary
                 if areas_processed > 0:
                     log_message(
-                        f"Processing Summary - Areas processed: {areas_processed}",
+                        f"Processing Summary - Areas processed: {areas_processed}, "
+                        f"succeeded: {areas_processed - len(failed_areas)}, failed: {len(failed_areas)}",
                         tag="GeoE3",
                         level=Qgis.Info,
                     )

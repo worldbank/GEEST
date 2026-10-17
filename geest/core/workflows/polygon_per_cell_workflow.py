@@ -93,6 +93,16 @@ class PolygonPerCellWorkflow(WorkflowBase):
                 )
                 raise WorkflowNotConfiguredError("No polygon layer configured for this indicator")
         self.features_layer = QgsVectorLayer(layer_path, "polygon_per_cell_layer", "ogr")
+        if not self.features_layer.isValid():
+            log_message(
+                f"Polygon per cell layer is not valid: {layer_path}",
+                tag="GeoE3",
+                level=Qgis.Critical,
+            )
+            raise WorkflowNotConfiguredError(
+                f"The polygon layer for this indicator could not be opened ({layer_path}). "
+                "Re-select the data source in the indicator's settings."
+            )
         self.workflow_name = "polygon_per_cell"
         self.supports_empty_features_fallback = True
         # Grid-first mode: write results to grid columns first, then rasterize
@@ -297,9 +307,9 @@ class PolygonPerCellWorkflow(WorkflowBase):
         self.progressChanged.emit(60.0)
 
         # Compute Likert score from urban share.
-        from osgeo import ogr
+        from geest.core.grid_column_utils import _execute_sql_with_retry, _open_gpkg_for_write
 
-        ds = ogr.Open(self.gpkg_path, 1)
+        ds = _open_gpkg_for_write(self.gpkg_path)
         if not ds:
             raise RuntimeError(f"Could not open GeoPackage for Education proxy update: {self.gpkg_path}")
 
@@ -327,7 +337,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
             )
 
             sql = f"UPDATE study_area_grid SET {target} = {score_expr} WHERE {where_area}"  # nosec B608
-            ds.ExecuteSQL(sql, dialect="SQLite")
+            _execute_sql_with_retry(ds, sql, dialect="SQLite")
         finally:
             ds = None
 

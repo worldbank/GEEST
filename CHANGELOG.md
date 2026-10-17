@@ -42,6 +42,63 @@ version per the policy above.
 
 ### Fixed
 
+- **Windows crash running a whole dimension (#447, #448):** every indicator's
+  workflow opened its own `AreaIterator` (three fresh `QgsVectorLayer` reads)
+  against `study_area.gpkg` while `grid_column_utils` concurrently wrote to
+  the same file - safe in isolation, but running many indicators back-to-back
+  (a whole dimension/factor/analysis) raised the odds of hitting a GDAL/OGR
+  SQLite handle corruption window, surfacing on Windows as an access
+  violation inside `getFeatures()`. The SQLite write-safety hardening (WAL
+  journal + `SQLITE_USE_OGR_VFS=NO`) that already fixed this exact class of
+  corruption for study-area *creation* was explicitly scoped out of the later
+  analysis/workflow *execution* phase - closed that gap by applying the same
+  hardening around `WorkflowQueueManager`'s run lifecycle (extracted into a
+  shared `geest.utilities` helper so both call sites share one
+  implementation).
+- **One bad area no longer aborts the whole indicator.** `WorkflowBase`'s
+  per-area loop wrapped all ~27 areas in a single `try/except`, so any
+  unhandled exception from one area (a degenerate geometry, a transient
+  data-source hiccup, ...) discarded every area already processed and
+  skipped every area still to come - the "hard to reproduce, whole run just
+  fails" shape of several field reports. Each area is now isolated in its
+  own `try/except`: a failure is logged clearly against that specific area
+  and the run continues; the final result records which areas (if any) were
+  skipped. If literally every area fails, that's still reported as a real
+  failure, not a false "Completed". Also: a user-cancelled run previously
+  kept processing all remaining areas regardless (the cancellation flag was
+  checked but never acted on) - it now stops promptly.
+- **Local-scale (100m grid) analysis could take 7.5+ hours and still not
+  finish, versus 7 minutes at national (1000m) scale on the same country
+  (#445) - roughly 100x more grid cells causing a much-worse-than-linear
+  slowdown.** Root cause: `write_spatial_join_to_grid` (environmental
+  hazards, GHSL/Ookla masking, vector-fallback nighttime lights) re-queried
+  the features layer with `SetSpatialFilter` for *every* grid cell instead
+  of indexing once; `write_percentage_scores_to_grid` (multi-buffer
+  accessibility scoring, the WTP dimension from #448) ran a full exact GEOS
+  intersection against the dissolved buffer polygon for *every* grid cell
+  with no cheap bounding-box reject first. Both now build/check a spatial
+  index once and do indexed lookups per cell, matching the pattern
+  `write_buffer_values_to_grid` already used correctly. Also found and fixed
+  the same anti-pattern in dead code (`write_point_count_to_grid`, unused -
+  removed rather than fixed, per YAGNI).
+- `multi_buffer_distances_native_workflow.py` (the WTP/accessibility
+  workflow) reopened the road network file and re-ran a full-layer CRS
+  reprojection from scratch for every area (up to 27x per indicator, times
+  every indicator in the dimension), even though the network and its CRS
+  don't change between areas. Now loaded and reprojected once and cached.
+- Five workflows (`polyline_per_cell`, `polygon_per_cell`,
+  `osm_transport_polyline_per_cell`, `classified_polygon`, `safety_polygon`)
+  loaded their input layer without checking `.isValid()`, unlike every other
+  per-cell workflow - a corrupt or no-longer-reachable source file didn't
+  fail loudly; it surfaced as "0 features in every area", silently absorbed
+  by the empty-features fallback into an all-zero result with nothing
+  pointing at the real cause. Now raises a clear `WorkflowNotConfiguredError`
+  naming the broken path, matching the existing `point_per_cell` pattern.
+- The S2S Education-proxy grid update (`polygon_per_cell_workflow.py`) used
+  a raw `ogr.Open`/`ExecuteSQL` call with no retry on a transient "database
+  is locked" error, unlike every other grid-writing function in this
+  codebase. Now goes through the same `_open_gpkg_for_write`/
+  `_execute_sql_with_retry` helpers as everything else.
 - OSM point and mixed-to-point downloads (health facilities, schools,
   pharmacies, financial services, kindergartens, grocery stores, green
   spaces, public transport, water points) now retain the OSM `name` tag
