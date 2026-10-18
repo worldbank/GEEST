@@ -439,6 +439,54 @@ def _ensure_meta_table(ds) -> None:
     )
 
 
+def _uniform_column_value(ds, table_name: str, sanitized_column: str) -> Tuple[bool, Optional[float]]:
+    """Check whether every row of table_name's column holds the exact same value.
+
+    A uniform base column (e.g. an indicator whose result is a flat flood
+    fill, no spatial variation at all) means every pyramid level's MIN of
+    that column is trivially the same constant too, recursively, at every
+    coarser level - there is no need to run the real per-level
+    correlated-subquery aggregation to discover what a single
+    SELECT MIN/MAX already tells us up front. Deliberately conservative:
+    any NULL mixed with non-NULL values, or an empty table, reports
+    not-uniform, falling back to the real aggregation - this is only a
+    shortcut for the unambiguous all-same-value case.
+
+    Args:
+        ds: Open OGR DataSource for the GeoPackage.
+        table_name: The table to check (typically study_area_grid).
+        sanitized_column: The already-sanitized column name.
+
+    Returns:
+        (True, value) if every row holds the same non-NULL value, or
+        (True, None) if every row is NULL. (False, None) otherwise -
+        including an empty table, which has nothing to shortcut.
+    """
+    sql = (
+        f'SELECT MIN("{sanitized_column}") AS lo, MAX("{sanitized_column}") AS hi, '  # nosec B608
+        f'COUNT(*) AS total, COUNT("{sanitized_column}") AS non_null '
+        f"FROM {table_name}"
+    )
+    result = _execute_sql_with_retry(ds, sql)
+    if result is None:
+        return False, None
+    try:
+        feature = result.GetNextFeature()
+        if feature is None:
+            return False, None
+        total = feature.GetField("total")
+        non_null = feature.GetField("non_null")
+        if not total:
+            return False, None
+        if non_null == 0:
+            return True, None
+        if non_null == total and feature.GetField("lo") == feature.GetField("hi"):
+            return True, feature.GetField("lo")
+        return False, None
+    finally:
+        ds.ReleaseResultSet(result)
+
+
 def refresh_pyramid_column(gpkg_path: str, column_name: str, base_cell_size_m: float) -> bool:
     """(Re)populate one column across every pyramid level table, cascading from the base grid.
 
@@ -497,34 +545,46 @@ def refresh_pyramid_column(gpkg_path: str, column_name: str, base_cell_size_m: f
             ds = None
             return False
 
+        # If every base cell already holds the exact same value (or is
+        # uniformly NULL), every level's MIN is trivially that same value
+        # too, recursively - a flat UPDATE per level, no per-row
+        # correlated subquery needed, since there's nothing left to
+        # discover that SELECT MIN/MAX didn't already tell us.
+        is_uniform, uniform_value = _uniform_column_value(ds, "study_area_grid", sanitized)
+
         source_table = "study_area_grid"
         for level_cs in level_sizes[1:]:
             table_name = _ensure_level_table_scaffold(ds, level_cs, source_table, srs)
             _sync_level_table_columns(ds, table_name, source_table)
             _ensure_level_column(ds, table_name, quoted_column, sanitized)
 
-            # Child bounds computed by multiplying the parent index (never
-            # dividing the child index), so this is exact integer arithmetic
-            # with no floor/truncation ambiguity. The composite
-            # (row_index, col_index) index on source_table is what makes
-            # this a cheap range seek instead of a near-full scan per row -
-            # but SQLite's planner has no ANALYZE statistics on this
-            # connection and reliably picks the single-column col_index
-            # index instead (benchmarked ~22x slower), so it has to be
-            # forced with INDEXED BY rather than left to the planner.
-            update_sql = (
-                f"UPDATE {table_name} "  # nosec B608
-                f'SET "{sanitized}" = ('
-                f'SELECT MIN(b."{sanitized}") FROM {source_table} AS b '
-                f"INDEXED BY idx_{source_table}_rowcol "
-                f"WHERE b.row_index >= {table_name}.row_index * 2 "
-                f"AND b.row_index <= {table_name}.row_index * 2 + 1 "
-                f"AND b.col_index >= {table_name}.col_index * 2 "
-                f"AND b.col_index <= {table_name}.col_index * 2 + 1 "
-                f'AND b."{sanitized}" IS NOT NULL'
-                f")"
-            )
-            _execute_sql_with_retry(ds, update_sql)
+            if is_uniform:
+                literal = "NULL" if uniform_value is None else repr(float(uniform_value))
+                _execute_sql_with_retry(ds, f'UPDATE {table_name} SET "{sanitized}" = {literal}')  # nosec B608
+            else:
+                # Child bounds computed by multiplying the parent index
+                # (never dividing the child index), so this is exact
+                # integer arithmetic with no floor/truncation ambiguity.
+                # The composite (row_index, col_index) index on
+                # source_table is what makes this a cheap range seek
+                # instead of a near-full scan per row - but SQLite's
+                # planner has no ANALYZE statistics on this connection and
+                # reliably picks the single-column col_index index instead
+                # (benchmarked ~22x slower), so it has to be forced with
+                # INDEXED BY rather than left to the planner.
+                update_sql = (
+                    f"UPDATE {table_name} "  # nosec B608
+                    f'SET "{sanitized}" = ('
+                    f'SELECT MIN(b."{sanitized}") FROM {source_table} AS b '
+                    f"INDEXED BY idx_{source_table}_rowcol "
+                    f"WHERE b.row_index >= {table_name}.row_index * 2 "
+                    f"AND b.row_index <= {table_name}.row_index * 2 + 1 "
+                    f"AND b.col_index >= {table_name}.col_index * 2 "
+                    f"AND b.col_index <= {table_name}.col_index * 2 + 1 "
+                    f'AND b."{sanitized}" IS NOT NULL'
+                    f")"
+                )
+                _execute_sql_with_retry(ds, update_sql)
 
             source_table = table_name
 

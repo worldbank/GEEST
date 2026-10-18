@@ -19,6 +19,7 @@ __revision__ = "$Format:%H$"
 # ---------------------------------------------------------------------
 
 import os
+from typing import Optional
 
 from qgis.core import (
     Qgis,
@@ -484,15 +485,138 @@ def add_pyramid_layer_to_map(
     )
 
 
+def add_study_area_grid_pyramid_to_map(
+    working_directory: str,
+    cell_size_m: float,
+    analysis_scale: str = "national",
+    layer_name: str = "study_area_grid",
+    group: str = "GeoE3 Study Area",
+) -> bool:
+    """Add the study area grid itself as a scale-dependent pyramid group.
+
+    Unlike add_pyramid_layer_to_map(), there is no particular score
+    column to symbolize here - every level just shows the grid's own
+    geometry at that resolution, styled with the same QML the base grid's
+    flat layer already uses. The pyramid scaffold (geometry only, no score
+    columns) is built eagerly at study-area creation time
+    (StudyAreaProcessingTask.run()), so this only needs to enumerate the
+    already-built levels, never build/refresh anything itself.
+
+    Regional (H3) analyses have no pyramid (H3's 7-child hex hierarchy
+    doesn't support 2x2 quad aggregation) - callers should keep showing
+    the single flat study_area_grid layer for those instead of calling
+    this.
+
+    Args:
+        working_directory: Path to the working directory containing study_area.gpkg.
+        cell_size_m: The analysis grid's native cell size. Ignored for H3
+            projects, whose resolution comes from model.json instead.
+        analysis_scale: "national" or "local" - "regional" is rejected,
+            see above.
+        layer_name: Display name for the output group.
+        group: The top-level group name. Defaults to "GeoE3 Study Area" to
+            match add_study_area_to_map()'s existing group.
+
+    Returns:
+        True if the pyramid group was built, False otherwise (regional
+        scale, missing working directory/GeoPackage, or no H3 resolution
+        configured).
+    """
+    if analysis_scale == "regional":
+        log_message("Regional analyses have no grid pyramid.", tag="GeoE3", level=Qgis.Info)
+        return False
+
+    if not working_directory:
+        log_message(
+            "Working directory is not set. Cannot add study area grid pyramid.", tag="GeoE3", level=Qgis.Warning
+        )
+        return False
+
+    gpkg_path = os.path.join(working_directory, "study_area", "study_area.gpkg")
+    if not os.path.exists(gpkg_path):
+        log_message(f"GeoPackage not found: {gpkg_path}", tag="GeoE3", level=Qgis.Warning)
+        return False
+
+    from geest.core import grid_type_utils
+    from geest.core.grid_pyramid_utils import scale_denominator_for_cell_size
+
+    grid_type = grid_type_utils.get_grid_type(working_directory)
+
+    if grid_type == "h3":
+        from geest.core.h3_pyramid_utils import get_exposed_h3_levels, h3_effective_cell_size_m
+
+        h3_resolution = grid_type_utils.get_h3_resolution(working_directory)
+        if h3_resolution is None:
+            log_message("No H3 resolution configured for this project.", tag="GeoE3", level=Qgis.Warning)
+            return False
+
+        levels = get_exposed_h3_levels(gpkg_path, "", h3_resolution, analysis_scale=analysis_scale)
+        scales = [scale_denominator_for_cell_size(h3_effective_cell_size_m(res)) for res, _table in levels]
+        level_suffixes = [f"res {res}" for res, _table in levels]
+    else:
+        from geest.core.grid_pyramid_utils import get_exposed_levels
+
+        levels = get_exposed_levels(gpkg_path, "", cell_size_m)
+        scales = [scale_denominator_for_cell_size(cs) for cs, _table in levels]
+        level_suffixes = [f"{int(cs)}m" for cs, _table in levels]
+
+    # get_exposed_levels()/get_exposed_h3_levels() compute every
+    # theoretically possible level from cell size/resolution alone - they
+    # never touch the GeoPackage, so a level whose scaffold was never
+    # built (e.g. a project predating the eager scaffold build) would
+    # otherwise show up as a level pointing at a table that doesn't
+    # actually exist yet. Filter those out here, up front, rather than
+    # let _build_pyramid_level_group() silently skip each invalid layer
+    # one by one while still reporting success.
+    from osgeo import ogr
+
+    ds = ogr.Open(gpkg_path)
+    existing_table_names = {ds.GetLayer(i).GetName() for i in range(ds.GetLayerCount())} if ds else set()
+    ds = None
+    filtered = [
+        (level_key, table_name, scale, suffix)
+        for (level_key, table_name), scale, suffix in zip(levels, scales, level_suffixes)
+        if table_name is None or table_name in existing_table_names
+    ]
+    levels = [(level_key, table_name) for level_key, table_name, _scale, _suffix in filtered]
+    scales = [scale for _level_key, _table_name, scale, _suffix in filtered]
+    level_suffixes = [suffix for _level_key, _table_name, _scale, suffix in filtered]
+
+    if len(levels) <= 1:
+        log_message(
+            "Study area grid pyramid has no coarser levels yet - nothing to show as a group.",
+            tag="GeoE3",
+            level=Qgis.Info,
+        )
+        return False
+
+    from geest.utilities import resources_path
+
+    style_path = resources_path("resources", "qml", "study_area_grid.qml")
+    _build_pyramid_level_group(
+        item=None,
+        column_name=None,
+        gpkg_path=gpkg_path,
+        layer_name=layer_name,
+        group=group,
+        levels=levels,
+        scales=scales,
+        level_suffixes=level_suffixes,
+        style_path=style_path,
+    )
+    return True
+
+
 def _build_pyramid_level_group(
-    item: "JsonTreeItem",
-    column_name: str,
+    item: Optional["JsonTreeItem"],
+    column_name: Optional[str],
     gpkg_path: str,
     layer_name: str,
     group: str,
     levels: list,
     scales: list,
     level_suffixes: list,
+    style_path: Optional[str] = None,
 ) -> None:
     """Build/refresh the scale-dependent QgsLayerTreeGroup for one pyramid.
 
@@ -501,9 +625,17 @@ def _build_pyramid_level_group(
     list of scale denominators/display-name suffixes, it is entirely
     agnostic of the pyramid's grid shape.
 
+    Also used by add_study_area_grid_pyramid_to_map() to show the grid's
+    own geometry (no particular score column) - that caller passes
+    item=None (add directly under group, no indicator-path nesting) and
+    column_name=None (no "IS NOT NULL" filter, no per-column QML
+    templating; style_path is loaded verbatim on every level instead).
+
     Args:
-        item: The tree item (indicator/factor/dimension/analysis) to display.
-        column_name: The column in study_area_grid to symbolize.
+        item: The tree item (indicator/factor/dimension/analysis) to
+            display, or None to add directly under group with no nesting.
+        column_name: The column in study_area_grid to symbolize, or None
+            to show every cell styled with style_path instead.
         gpkg_path: Path to the GeoPackage containing study_area_grid.
         layer_name: Display name for the output group.
         group: The top-level group name.
@@ -514,17 +646,22 @@ def _build_pyramid_level_group(
         scales: Parallel list of scale denominators, one per level.
         level_suffixes: Parallel list of human-readable suffixes (e.g.
             "200m" or "res 6") used to name each level's layer.
+        style_path: QML style file loaded verbatim on every level when
+            column_name is None. Ignored when column_name is given (the
+            indicator-vector-template.qml template is used instead).
     """
     import tempfile
 
     from geest.utilities import resources_path
 
-    template_path = resources_path("resources", "qml", "indicator-vector-template.qml")
-    if not os.path.exists(template_path):
-        log_message(f"QML template not found: {template_path}", tag="GeoE3", level=Qgis.Warning)
-        return
-    with open(template_path, "r") as f:
-        qml_template = f.read()
+    qml_template = None
+    if column_name is not None:
+        template_path = resources_path("resources", "qml", "indicator-vector-template.qml")
+        if not os.path.exists(template_path):
+            log_message(f"QML template not found: {template_path}", tag="GeoE3", level=Qgis.Warning)
+            return
+        with open(template_path, "r") as f:
+            qml_template = f.read()
 
     project = QgsProject.instance()
     root = project.layerTreeRoot()
@@ -533,14 +670,15 @@ def _build_pyramid_level_group(
         geoe3_group = root.insertGroup(0, group)
         geoe3_group.setIsMutuallyExclusive(True)
 
-    path_list = item.getPaths()[:-1]
     parent_group = geoe3_group
-    for path in path_list:
-        sub_group = parent_group.findGroup(path)
-        if sub_group is None:
-            sub_group = parent_group.addGroup(path)
-            sub_group.setIsMutuallyExclusive(True)
-        parent_group = sub_group
+    if item is not None:
+        path_list = item.getPaths()[:-1]
+        for path in path_list:
+            sub_group = parent_group.findGroup(path)
+            if sub_group is None:
+                sub_group = parent_group.addGroup(path)
+                sub_group.setIsMutuallyExclusive(True)
+            parent_group = sub_group
 
     # Replace any previously-added pyramid group for this output so re-runs
     # don't accumulate duplicate groups/layers. removeChildNode() alone only
@@ -571,21 +709,26 @@ def _build_pyramid_level_group(
             log_message(f"Pyramid level layer is invalid: {layer_uri}", tag="GeoE3", level=Qgis.Warning)
             continue
 
-        vlayer.setSubsetString(f'"{column_name}" IS NOT NULL')
+        if column_name is not None:
+            vlayer.setSubsetString(f'"{column_name}" IS NOT NULL')
 
-        qml_content = qml_template.replace("[attribute]", column_name)
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".qml", delete=False) as tmp:
-            tmp.write(qml_content)
-            tmp_path = tmp.name
-        try:
-            result = vlayer.loadNamedStyle(tmp_path)
+            qml_content = qml_template.replace("[attribute]", column_name)
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".qml", delete=False) as tmp:
+                tmp.write(qml_content)
+                tmp_path = tmp.name
+            try:
+                result = vlayer.loadNamedStyle(tmp_path)
+                if not result[0]:
+                    log_message(f"Failed to apply style to {level_layer_name}: {result[1]}", level=Qgis.Warning)
+            finally:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+        elif style_path and os.path.exists(style_path):
+            result = vlayer.loadNamedStyle(style_path)
             if not result[0]:
                 log_message(f"Failed to apply style to {level_layer_name}: {result[1]}", level=Qgis.Warning)
-        finally:
-            try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
 
         # Finest level has no inner (zoomed-in) limit; coarsest has no outer
         # (zoomed-out) limit. Adjacent levels share their boundary scale
@@ -605,7 +748,8 @@ def _build_pyramid_level_group(
         current_group.setItemVisibilityChecked(True)
         current_group = current_group.parent()
 
-    iface.mapCanvas().refresh()
+    if iface is not None:
+        iface.mapCanvas().refresh()
     log_message(f"Added pyramid layer group '{layer_name}' with {len(levels)} scale-dependent levels.")
 
     log_message(

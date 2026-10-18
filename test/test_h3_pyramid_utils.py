@@ -508,6 +508,42 @@ class TestH3PyramidEndToEnd(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
+    def test_uniform_column_flood_fills_every_level_without_per_row_aggregation(self):
+        # Every base cell holds the exact same score - every level's MIN
+        # is trivially that same constant too, via the flat-UPDATE fast
+        # path in _refresh_h3_level_column_values() rather than the
+        # Python-side per-parent CASE-WHEN aggregation.
+        n_cells = _build_h3_grid(self.gpkg_path, h3_resolution=9, score_fields=("jobs",))
+        self.assertGreater(n_cells, 1, "Test bbox must yield more than one base H3 cell to exercise aggregation.")
+        ds = ogr.Open(self.gpkg_path, 1)
+        ds.ExecuteSQL('UPDATE study_area_grid SET "jobs" = 42.0')
+        ds = None
+
+        self.assertTrue(refresh_h3_pyramid_column(self.gpkg_path, "jobs", 9))
+
+        ds = ogr.Open(self.gpkg_path, 0)
+        for table_name in ("study_area_grid_h3_res8", "study_area_grid_h3_res7", "study_area_grid_h3_res6"):
+            layer = ds.GetLayerByName(table_name)
+            self.assertIsNotNone(layer)
+            for feature in layer:
+                self.assertAlmostEqual(feature.GetField("jobs"), 42.0)
+        ds = None
+
+    def test_uniform_null_column_sets_every_level_to_null_via_fast_path(self):
+        _build_h3_grid(self.gpkg_path, h3_resolution=9, score_fields=("jobs",))
+        ds = ogr.Open(self.gpkg_path, 1)
+        ds.ExecuteSQL('UPDATE study_area_grid SET "jobs" = NULL')
+        ds = None
+
+        self.assertTrue(refresh_h3_pyramid_column(self.gpkg_path, "jobs", 9))
+
+        ds = ogr.Open(self.gpkg_path, 0)
+        for table_name in ("study_area_grid_h3_res8", "study_area_grid_h3_res7", "study_area_grid_h3_res6"):
+            layer = ds.GetLayerByName(table_name)
+            for feature in layer:
+                self.assertIsNone(feature.GetField("jobs"))
+        ds = None
+
     def test_refresh_is_idempotent(self):
         _build_h3_grid(self.gpkg_path, h3_resolution=9, score_fields=("jobs",))
         self.assertTrue(refresh_h3_pyramid_column(self.gpkg_path, "jobs", 9))

@@ -40,7 +40,7 @@ from geest.core.grid_column_utils import (
     _quote_sql_literal,
     _sanitize_column_name,
 )
-from geest.core.grid_pyramid_utils import PYRAMID_META_TABLE, _ensure_meta_table
+from geest.core.grid_pyramid_utils import PYRAMID_META_TABLE, _ensure_meta_table, _uniform_column_value
 from geest.core.h3_utils import h3_cell_area_km2, transform_wgs84_to_target
 from geest.core.settings import setting
 from geest.utilities import log_message
@@ -398,6 +398,17 @@ def _refresh_h3_level_column_values(
             cell's parent via h3.cell_to_parent().
     """
     quoted_column = _quote_sql_identifier(sanitized_column)
+
+    # If every row of source_table already holds the exact same value (or
+    # is uniformly NULL), this level's MIN is trivially that same value
+    # too - skip reading every child row into Python and building
+    # per-parent CASE-WHEN batches just to discover what a single
+    # SELECT MIN/MAX already told us.
+    is_uniform, uniform_value = _uniform_column_value(ds, source_table, sanitized_column)
+    if is_uniform:
+        literal = "NULL" if uniform_value is None else repr(float(uniform_value))
+        _execute_sql_with_retry(ds, f"UPDATE {table_name} SET {quoted_column} = {literal}")  # nosec B608
+        return
 
     result = _execute_sql_with_retry(ds, f"SELECT h3_index, {quoted_column} FROM {source_table}")  # nosec B608
     aggregated = {}

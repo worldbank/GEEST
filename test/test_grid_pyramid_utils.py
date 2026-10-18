@@ -16,6 +16,7 @@ from osgeo import ogr, osr
 from qgis.core import QgsVectorLayer
 
 from geest.core.grid_pyramid_utils import (
+    _uniform_column_value,
     build_pyramid_scaffold,
     compute_level_cell_sizes,
     get_exposed_levels,
@@ -142,6 +143,69 @@ class TestBuildPyramidScaffold(unittest.TestCase):
         after_refresh_count = ds.GetLayerByName("study_area_grid_200").GetFeatureCount()
         ds = None
         self.assertEqual(scaffold_count, after_refresh_count)
+
+
+class TestUniformColumnValue(unittest.TestCase):
+    """Direct unit tests for _uniform_column_value()."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="test_uniform_column_value_")
+        self.gpkg_path = os.path.join(self.temp_dir, "study_area.gpkg")
+
+    def tearDown(self):
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
+    def test_all_same_value_is_uniform(self):
+        _build_grid(self.gpkg_path, rows=4, cols=4)
+        ds = ogr.Open(self.gpkg_path, 1)
+        ds.ExecuteSQL('UPDATE study_area_grid SET "score" = 3.0')
+
+        is_uniform, value = _uniform_column_value(ds, "study_area_grid", "score")
+
+        self.assertTrue(is_uniform)
+        self.assertAlmostEqual(value, 3.0)
+
+    def test_all_null_is_uniform_with_none_value(self):
+        _build_grid(self.gpkg_path, rows=4, cols=4)
+        ds = ogr.Open(self.gpkg_path, 1)
+        ds.ExecuteSQL('UPDATE study_area_grid SET "score" = NULL')
+
+        is_uniform, value = _uniform_column_value(ds, "study_area_grid", "score")
+
+        self.assertTrue(is_uniform)
+        self.assertIsNone(value)
+
+    def test_varying_values_are_not_uniform(self):
+        _build_grid(self.gpkg_path, rows=4, cols=4)
+        ds = ogr.Open(self.gpkg_path, 1)
+
+        is_uniform, value = _uniform_column_value(ds, "study_area_grid", "score")
+
+        self.assertFalse(is_uniform)
+        self.assertIsNone(value)
+
+    def test_mixed_null_and_constant_is_not_uniform(self):
+        # A hole leaves some rows NULL while the rest share a value - the
+        # fast path must not treat this as uniform, since the NULL cells
+        # must stay NULL, not get flood-filled with the constant.
+        _build_grid(self.gpkg_path, rows=4, cols=4, hole={(0, 0)})
+        ds = ogr.Open(self.gpkg_path, 1)
+        ds.ExecuteSQL('UPDATE study_area_grid SET "score" = 5.0 WHERE "score" IS NOT NULL')
+
+        is_uniform, value = _uniform_column_value(ds, "study_area_grid", "score")
+
+        self.assertFalse(is_uniform)
+        self.assertIsNone(value)
+
+    def test_empty_table_is_not_uniform(self):
+        _build_grid(self.gpkg_path, rows=0, cols=0)
+        ds = ogr.Open(self.gpkg_path, 1)
+
+        is_uniform, value = _uniform_column_value(ds, "study_area_grid", "score")
+
+        self.assertFalse(is_uniform)
+        self.assertIsNone(value)
 
 
 class TestRefreshPyramidColumn(unittest.TestCase):
@@ -273,6 +337,54 @@ class TestRefreshPyramidColumn(unittest.TestCase):
 
         remaining = [r + c for r in range(4) for c in range(4) if (r, c) not in {(0, 0), (0, 1), (1, 0), (1, 1)}]
         self.assertAlmostEqual(values_by_cell[(0, 0)], min(remaining))
+
+    def test_uniform_column_flood_fills_every_level_without_per_row_aggregation(self):
+        # Every base cell holds the exact same score (e.g. a flat flood
+        # fill with no spatial variation) - every level's MIN is trivially
+        # that same constant too, via the flat-UPDATE fast path rather
+        # than the correlated-subquery aggregation.
+        _build_grid(self.gpkg_path, rows=16, cols=16)
+        ds = ogr.Open(self.gpkg_path, 1)
+        ds.ExecuteSQL('UPDATE study_area_grid SET "score" = 7.5')
+        ds = None
+
+        self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))
+
+        levels = get_exposed_levels(self.gpkg_path, "score", 100.0)
+        tables_by_size = dict(levels)
+        for cell_size, table_name in levels:
+            if table_name is None:
+                continue
+            layer = self._level_layer(cell_size, table_name)
+            self.assertTrue(layer.isValid())
+            for feature in layer.getFeatures():
+                self.assertAlmostEqual(feature["score"], 7.5)
+        self.assertGreater(len(tables_by_size), 1)
+
+    def test_uniform_null_column_sets_every_level_to_null_via_fast_path(self):
+        _build_grid(self.gpkg_path, rows=16, cols=16)
+        ds = ogr.Open(self.gpkg_path, 1)
+        ds.ExecuteSQL('UPDATE study_area_grid SET "score" = NULL')
+        ds = None
+
+        self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))
+
+        levels = get_exposed_levels(self.gpkg_path, "score", 100.0)
+        for cell_size, table_name in levels:
+            if table_name is None:
+                continue
+            layer = self._level_layer(cell_size, table_name)
+            for feature in layer.getFeatures():
+                self.assertIsNone(feature["score"])
+
+    def test_non_uniform_column_still_uses_real_aggregation(self):
+        # Sanity check that the fast path doesn't fire for the normal
+        # (varying-value) case - test_refresh_builds_correct_min_scores
+        # already covers correctness there in detail; this just confirms
+        # the uniform check doesn't misfire for non-uniform data.
+        _build_grid(self.gpkg_path, rows=16, cols=16)
+        is_uniform, _value = _uniform_column_value(ogr.Open(self.gpkg_path, 0), "study_area_grid", "score")
+        self.assertFalse(is_uniform)
 
     def test_rebuild_reverts_stale_cells_to_null_not_deleted(self):
         # When children become entirely NULL since the last build, the

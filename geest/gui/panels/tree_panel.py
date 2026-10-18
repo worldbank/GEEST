@@ -62,7 +62,13 @@ from geest.core.i18n import tr
 from geest.core.reports import StudyAreaReport
 from geest.core.settings import set_setting, setting
 from geest.core.tasks import AnalysisReportTask
-from geest.core.utilities import add_grid_layer_to_map, add_pyramid_layer_to_map, add_to_map, validate_network_layer
+from geest.core.utilities import (
+    add_grid_layer_to_map,
+    add_pyramid_layer_to_map,
+    add_study_area_grid_pyramid_to_map,
+    add_to_map,
+    validate_network_layer,
+)
 from geest.core.women_considerations import resolve_women_enabling_for_factor
 from geest.gui.dialogs import (
     AnalysisAggregationDialog,
@@ -1963,7 +1969,13 @@ class TreePanel(QWidget):
     def add_study_area_to_map(self):
         """Add the study area layers to the map.
 
-        Note that the area grid layer can be slow to draw!.
+        study_area_grid is added as a scale-dependent pyramid group (one
+        layer per resolution, switching over at zoom, exactly like an
+        indicator's own result layers) rather than a single flat layer -
+        that flat layer is what used to be slow to draw at every zoom
+        level. Regional analyses have no pyramid (H3's 7-child hierarchy
+        doesn't support 2x2 quad aggregation), so they keep the single
+        flat layer.
         """
         gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         project = QgsProject.instance()
@@ -1974,16 +1986,29 @@ class TreePanel(QWidget):
         if geoe3_group is None:
             geoe3_group = root.insertGroup(0, "GeoE3 Study Area")  # Insert at the top of the layers panel
 
+        analysis_scale = self.analysis_scale()
         layers = [
             "ghsl_settlements",
             "study_area_polygons",
             "study_area_clip_polygons",
-            "study_area_grid",
             "study_area_bboxes",
             "study_area_bbox",
             "study_area_creation_status",
             "chunks",
         ]
+        if analysis_scale == "regional":
+            layers.insert(3, "study_area_grid")
+        else:
+            added_pyramid = add_study_area_grid_pyramid_to_map(
+                self.working_directory,
+                cell_size_m=self.cell_size_m(),
+                analysis_scale=analysis_scale,
+            )
+            if not added_pyramid:
+                # No coarser levels yet (e.g. a project predating the eager
+                # scaffold build) - fall back to the single flat layer
+                # rather than silently showing nothing.
+                layers.insert(3, "study_area_grid")
         for layer_name in layers:
             gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
             layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")

@@ -23,6 +23,32 @@ version per the policy above.
 
 ### Added
 
+- Pyramid refresh (`grid_pyramid_utils.refresh_pyramid_column()` and
+  `h3_pyramid_utils.refresh_h3_pyramid_column()`) now skips the real
+  per-level aggregation entirely when a column's base-grid values are all
+  exactly the same (or all NULL) - a flood-filled result with no spatial
+  variation. A single `SELECT MIN/MAX/COUNT` up front already tells us
+  every coarser level's MIN would be that identical constant too, so each
+  level gets one flat `UPDATE level SET col = constant` instead of the
+  square grid's correlated-subquery-per-row aggregation or the H3 path's
+  read-every-child-into-Python-then-CASE-WHEN-batch approach. New shared
+  `grid_pyramid_utils._uniform_column_value()` helper, reused by both grid
+  types. Deliberately conservative: any NULL mixed with non-NULL values
+  falls straight back to the real aggregation unchanged.
+- "Add Study Area to Map" (analysis node context menu) now adds
+  `study_area_grid` as a scale-dependent pyramid group - one layer per
+  resolution, switching over at zoom - the same mechanism an indicator's
+  own result layers already use, instead of one flat layer covering every
+  cell at every zoom level (previously "slow to draw"). Regional analyses
+  keep the single flat layer (H3's 7-child hierarchy has no pyramid).
+  Falls back to the flat layer for local/national projects too if their
+  pyramid scaffold was never built (projects predating the eager scaffold
+  build). `geest/core/utilities.py` gained
+  `add_study_area_grid_pyramid_to_map()`, reusing the same
+  `_build_pyramid_level_group()` helper `add_pyramid_layer_to_map()` uses,
+  now generalized to support a column-agnostic group (no score to
+  symbolize or filter by - every level just shows the grid's own
+  geometry).
 - New local/national study areas default to an H3 hexagonal analysis grid
   instead of the square grid, with the H3 resolution automatically picked
   to match the chosen cell size by hexagon area. A new "Use an H3
