@@ -52,6 +52,40 @@ version per the policy above.
   rather than duplicated. Source files range from ~3 MB (fire, cyclone) to
   ~1 GB (drought); the button warns and asks for confirmation before
   starting any download at or above 100 MB.
+- New "Download all resources" option on the Run button's dropdown menu:
+  walks every indicator, and for any backed by a downloadable external
+  resource, checks for an existing cached file under
+  `working_directory/study_area/` and downloads it only if missing, then
+  sets it as that indicator's configured source - the same attribute each
+  resource's own in-app "Download ..." button would write. Covers
+  nighttime lights and environmental hazard rasters, and OSM-matched
+  buffer-point indicators (schools, health facilities, pharmacies, grocery
+  stores, financial services, kindergartens, green spaces, water points,
+  public transport - the same keyword-matched categories the in-dialog
+  "Download from OSM" button already offers, now extracted into
+  `geest.core.osm_downloaders.resolve_point_osm_download_type` as a single
+  source of truth shared by both). Unlike the raster resources, an OSM
+  indicator's configured source is an actual QGIS project layer, not a
+  file path - the downloaded GeoPackage is loaded and added to the
+  project, then wired up via the same `{widget_key}_layer_*` attributes
+  `VectorDataSourceWidget.update_attributes()` itself writes. It also
+  covers environmental hazard indicators left at "Do Not Use" (the
+  unconfigured default) but checked on in their factor's aggregation
+  dialog - status "Required and not configured" - rather than only ones
+  that already had a datasource mode explicitly picked: if such an
+  indicator's id matches a known hazard type, downloading its data also
+  switches its mode to "Environmental Hazard" at the same time, so it
+  comes out "ready to run" instead of staying stuck on "required". While a
+  download is in progress, its indicator's row shows the same animated
+  throbber a normal single-indicator run already shows, and the tree view
+  is refreshed via `layoutChanged` (not a full model reset) once
+  downloads/wiring finish, so newly-configured indicators immediately show
+  their updated status without collapsing every expanded node or losing
+  the current selection/scroll position. Deliberately not covered yet
+  (documented in `geest/core/download_all_resources.py`'s module
+  docstring): GHSL/Ookla, transport/generic polyline/point modes, and the
+  regional S2S-backed equivalents of nighttime lights/environmental
+  hazards.
 
 ### Fixed
 
