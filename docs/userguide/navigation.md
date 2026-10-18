@@ -89,7 +89,7 @@ Option 2: **Create a New Project**:
 >
 > - **Choose the Scale of Analysis**:
 >   - **Regional** always builds an H3 hexagonal grid at a fixed resolution, tuned for broad, multi-country coverage with global datasets.
->   - **National** and **Local** build an H3 hexagonal grid automatically, with the resolution chosen to match the analysis cell size you set below. This choice is made once, when the study area is created, and cannot be changed afterwards without starting a new project.
+>   - **National** and **Local** build an H3 hexagonal grid by default, with the resolution chosen to match the analysis cell size you set below. A checkbox, **"Use an H3 hexagonal grid for this analysis"** (checked by default), lets you switch to the classic square grid instead if you prefer. This choice is made once, when the study area is created, and cannot be changed afterwards without starting a new project.
 >
 > - **Set the Analysis Cell Size**:
 >   - Enter a value between **100m and 1000m**:

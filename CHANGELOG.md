@@ -23,18 +23,26 @@ version per the policy above.
 
 ### Added
 
-- New local/national study areas now default to an H3 hexagonal analysis
-  grid instead of the square grid, with the H3 resolution automatically
-  picked to match the chosen cell size by hexagon area. This is additive -
-  grid type is recorded once in `model.json`'s `grid_type` key at
-  study-area creation time and never migrated afterwards, so every
-  existing project (which has no `grid_type` key at all) keeps resolving
-  to "square" and is completely unaffected; regional analyses are
-  untouched too, and keep using a fixed-resolution H3 grid as before. Map
-  visualization for H3-grid local/national projects gets the same
-  scale-dependent multi-resolution pyramid as square-grid projects
+- New local/national study areas default to an H3 hexagonal analysis grid
+  instead of the square grid, with the H3 resolution automatically picked
+  to match the chosen cell size by hexagon area. A new "Use an H3
+  hexagonal grid for this analysis" checkbox on the Create Project page
+  (checked by default) lets this be a per-project choice - uncheck it to
+  use the classic square grid instead. This is additive - grid type is
+  recorded once in `model.json`'s `grid_type` key at study-area creation
+  time and never migrated afterwards, so every existing project (which
+  has no `grid_type` key at all) keeps resolving to "square" and is
+  completely unaffected; regional analyses are untouched too, and keep
+  using a fixed-resolution H3 grid as before. Map visualization for
+  H3-grid local/national projects gets the same scale-dependent
+  multi-resolution pyramid as square-grid projects
   (`geest/core/h3_pyramid_utils.py`), cascading coarser H3 resolutions via
   `h3.cell_to_parent()` MAX-aggregation instead of 2x2 quad aggregation.
+- Fixed a bug where `grid_type`/`analysis_h3_resolution` were silently
+  dropped from `model.json` on the first save after study-area creation
+  (`JsonTreeModel.loadJsonData()` only carried forward a fixed list of
+  known analysis-level keys), reverting H3-grid projects back to the
+  square-grid pyramid code path on every subsequent run.
 - Safety Perception's nighttime lights indicator can now download its own
   raster directly in-app at local/national scale (worldbank/GeoE3#452),
   following the same button/`QgsTask` pattern as the existing S2S

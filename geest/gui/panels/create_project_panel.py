@@ -25,7 +25,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QPixmap
-from qgis.PyQt.QtWidgets import QComboBox, QFileDialog, QMessageBox, QWidget
+from qgis.PyQt.QtWidgets import QCheckBox, QComboBox, QFileDialog, QMessageBox, QWidget
 
 from geest.core import WorkflowQueueManager
 from geest.core.h3_utils import (
@@ -161,9 +161,10 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.layer_combo.setFilters(QgsMapLayerProxyModel.Filter.PolygonLayer)
         if hasattr(self.layer_combo, "setAllowEmptyLayer"):
             self.layer_combo.setAllowEmptyLayer(True)
-        # Regional scale uses H3 hexagonal grids (L6 resolution)
-        # National and Local scales use H3 hexagonal grids too, at a
-        # resolution matching the chosen cell size (see get_h3_resolution_for_cell_size)
+        # Regional scale always uses H3 hexagonal grids (L6 resolution).
+        # National and Local scales default to an H3 grid too (resolution
+        # matching the chosen cell size, see get_h3_resolution_for_cell_size)
+        # but this is a per-project choice via h3_grid_checkbox below.
         # Local mode enabled for National vs Local analysis implementation
         # self.local_scale.setEnabled(False)
         # self.regional_scale.setEnabled(False)
@@ -180,8 +181,23 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.h3_resolution_combo.setCurrentIndex(6)
         self.h3_resolution_combo.setToolTip("Higher H3 resolutions are finer and may require significantly more time.")
 
+        # Local/national analyses default to an H3 hexagonal grid
+        # (resolution auto-picked from the chosen cell size), but this is a
+        # per-project choice - uncheck to use the classic square grid
+        # instead. Grid type is decided once, here, at study-area creation
+        # time and never migrated afterwards. Regional always uses H3 at a
+        # fixed resolution and never shows this control.
+        self.h3_grid_checkbox = QCheckBox("Use an H3 hexagonal grid for this analysis")
+        self.h3_grid_checkbox.setChecked(True)
+        self.h3_grid_checkbox.setToolTip(
+            "Checked (default): use an H3 hexagonal grid, with resolution automatically matched to the "
+            "analysis cell size below. Unchecked: use the classic square grid instead. This choice is made "
+            "once, now, and cannot be changed after the study area is created."
+        )
+
         scale_layout = self.groupBox.layout()
         scale_layout.addWidget(self.h3_resolution_combo, 3, 1, 1, 2)
+        scale_layout.addWidget(self.h3_grid_checkbox, 4, 0, 1, 3)
         if self.regional_scale.isChecked():
             self.spatial_scale_changed("regional")
         elif self.local_scale.isChecked():
@@ -282,10 +298,12 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 self.h3_resolution_label.show()
             if hasattr(self, "h3_resolution_combo"):
                 self.h3_resolution_combo.show()
+            if hasattr(self, "h3_grid_checkbox"):
+                self.h3_grid_checkbox.hide()
         elif value == "national":
             self.description2.setText(
-                "National scale uses an H3 hexagonal grid and is designed for country-wide analysis with a balance "
-                "between spatial detail and runtime.\n\n"
+                "National scale is designed for country-wide analysis with a balance between spatial detail and "
+                "runtime. Uses an H3 hexagonal grid by default (recommended), or a square grid if unchecked below.\n\n"
                 "Set the analysis grid size (m). Smaller sizes require longer processing times but produce more "
                 "detailed analysis results. Recommended grid sizes are available by default."
             )
@@ -298,9 +316,12 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 self.h3_resolution_label.hide()
             if hasattr(self, "h3_resolution_combo"):
                 self.h3_resolution_combo.hide()
+            if hasattr(self, "h3_grid_checkbox"):
+                self.h3_grid_checkbox.show()
         elif value == "local":
             self.description2.setText(
-                "Local scale uses an H3 hexagonal grid for subnational or city-level analysis where fine detail is most important.\n\n"
+                "Local scale is for subnational or city-level analysis where fine detail is most important. Uses "
+                "an H3 hexagonal grid by default (recommended), or a square grid if unchecked below.\n\n"
                 "Set a small analysis grid size (m) for higher spatial precision. Smaller sizes significantly increase "
                 "processing time, so start with recommended values and refine as needed."
             )
@@ -313,6 +334,8 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 self.h3_resolution_label.hide()
             if hasattr(self, "h3_resolution_combo"):
                 self.h3_resolution_combo.hide()
+            if hasattr(self, "h3_grid_checkbox"):
+                self.h3_grid_checkbox.show()
 
     def women_considerations_changed(self):
         """Slot to be called when the women considerations checkbox changes."""
@@ -429,15 +452,18 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 model["analysis_h3_resolution"] = self.selected_h3_resolution()
             else:
                 model["analysis_scale"] = "local" if self.local_scale.isChecked() else "national"
-                # New local/national study areas default to an H3
-                # hexagonal grid (resolution auto-picked to match the
-                # chosen cell size). Grid type is decided once, here, at
-                # creation time, and never migrated afterwards - existing
-                # projects created before this had no "grid_type" key at
-                # all and keep resolving to "square" via
+                # Local/national study areas default to an H3 hexagonal
+                # grid (resolution auto-picked to match the chosen cell
+                # size), but h3_grid_checkbox lets this be a per-project
+                # choice. Grid type is decided once, here, at creation
+                # time, and never migrated afterwards - existing projects
+                # created before this had no "grid_type" key at all and
+                # keep resolving to "square" via
                 # grid_type_utils.get_grid_type()'s documented default.
-                model["grid_type"] = "h3"
-                model["analysis_h3_resolution"] = get_h3_resolution_for_cell_size(self.cell_size_spinbox.value())
+                use_h3 = not hasattr(self, "h3_grid_checkbox") or self.h3_grid_checkbox.isChecked()
+                model["grid_type"] = "h3" if use_h3 else "square"
+                if use_h3:
+                    model["analysis_h3_resolution"] = get_h3_resolution_for_cell_size(self.cell_size_spinbox.value())
             # Save women considerations settings
             model["women_considerations_enabled"] = self.women_considerations_checkbox.isChecked()
             # Save reference layer source path
@@ -462,9 +488,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
             h3_resolution = self.selected_h3_resolution() if analysis_scale == "regional" else None
 
-            # New local/national study areas default to an H3 grid (mirrors
-            # the model.json write above); regional behaviour is untouched.
-            grid_type = "h3" if analysis_scale in ("local", "national") else "square"
+            # Mirrors the model.json write above; regional behaviour is untouched.
+            use_h3 = not hasattr(self, "h3_grid_checkbox") or self.h3_grid_checkbox.isChecked()
+            grid_type = "h3" if analysis_scale in ("local", "national") and use_h3 else "square"
             if grid_type == "h3":
                 h3_resolution = get_h3_resolution_for_cell_size(self.cell_size_spinbox.value())
 
@@ -858,6 +884,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.cell_size_spinbox.setFont(QFont("Arial", control_size))
         self.h3_resolution_label.setFont(QFont("Arial", control_size))
         self.h3_resolution_combo.setFont(QFont("Arial", control_size))
+        self.h3_grid_checkbox.setFont(QFont("Arial", content_size))
         self.layer_combo.setFont(QFont("Arial", control_size))
         self.field_combo.setFont(QFont("Arial", control_size))
         self.use_boundary_crs.setFont(QFont("Arial", content_size))

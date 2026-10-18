@@ -70,6 +70,13 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_description = json_data.get("description", "No Description")
         analysis_scale = json_data.get("analysis_scale", "local")
         analysis_cell_size_m = json_data.get("analysis_cell_size_m", 100.0)
+        # Grid type is decided once at study-area creation time (see
+        # geest.core.grid_type_utils) and must round-trip through every
+        # save unchanged - without loading it here, to_json() below has
+        # nothing to re-serialize and it silently vanishes from model.json
+        # on the very first save after creation.
+        grid_type = json_data.get("grid_type", "square")
+        analysis_h3_resolution = json_data.get("analysis_h3_resolution")
         # START I don't love that this list of layer paths is hard coded here
         road_network_layer_path = json_data.get("road_network_layer_path", "")
         # END
@@ -114,6 +121,8 @@ class JsonTreeModel(QAbstractItemModel):
             "working_folder": working_folder,
             "analysis_cell_size_m": analysis_cell_size_m,
             "analysis_scale": analysis_scale,
+            "grid_type": grid_type,
+            "analysis_h3_resolution": analysis_h3_resolution,
             "road_network_layer_path": road_network_layer_path,
             "result": analysis_result,
             "result_file": analysis_result_file,
