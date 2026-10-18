@@ -29,7 +29,7 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Bundle dependencies
-        run: python admin.py bundle-deps --packages "h3==4.4.2"
+        run: python admin.py bundle-deps
 
       - name: Get experimental info
         id: get-experimental

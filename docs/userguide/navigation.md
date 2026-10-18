@@ -87,6 +87,10 @@ Option 2: **Create a New Project**:
 > - **Select a Layer**:
 >   - Click on the three dots button to choose a layer containing your Admin0 areas (country or region boundaries). The input layer must be in either SHP or GPKG format. Once selected, use the dropdown menu to specify the column that contains the names of the areas. Ensure the column is correctly populated to avoid errors during analysis.
 >
+> - **Choose the Scale of Analysis**:
+>   - **Regional** always builds an H3 hexagonal grid at a fixed resolution, tuned for broad, multi-country coverage with global datasets.
+>   - **National** and **Local** build an H3 hexagonal grid automatically, with the resolution chosen to match the analysis cell size you set below. This choice is made once, when the study area is created, and cannot be changed afterwards without starting a new project.
+>
 > - **Set the Analysis Cell Size**:
 >   - Enter a value between **100m and 1000m**:
 >     - Smaller values (e.g., 100m) will provide **more detailed results but require longer processing times**.

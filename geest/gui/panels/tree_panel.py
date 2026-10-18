@@ -1830,7 +1830,7 @@ class TreePanel(QWidget):
         from osgeo import ogr
 
         from geest.core.grid_column_utils import get_all_column_names
-        from geest.core.grid_pyramid_utils import OUT_OF_SCOPE_PYRAMID_COLUMNS, has_pyramid_structure
+        from geest.core.grid_pyramid_utils import OUT_OF_SCOPE_PYRAMID_COLUMNS
 
         model_path = os.path.join(self.working_directory, "model.json")
         candidate_columns = [c for c in get_all_column_names(model_path) if c not in OUT_OF_SCOPE_PYRAMID_COLUMNS]
@@ -1854,12 +1854,31 @@ class TreePanel(QWidget):
         # scored - a column the analysis has never written to is not
         # "missing its pyramid", there's simply nothing to show yet. This is
         # a one-time migration offer, so it checks whether the pyramid
-        # structure was EVER built (has_pyramid_structure), not whether it
-        # is currently fresh (is_pyramid_fresh) - every successful analysis
-        # run invalidates freshness, and a merely-stale column is rebuilt
-        # transparently on demand the next time it's viewed.
+        # structure was EVER built (has_pyramid_structure/
+        # has_h3_pyramid_structure), not whether it is currently fresh
+        # (is_pyramid_fresh) - every successful analysis run invalidates
+        # freshness, and a merely-stale column is rebuilt transparently on
+        # demand the next time it's viewed.
         scored_columns = [c for c in candidate_columns if c in field_names]
-        missing = [c for c in scored_columns if not has_pyramid_structure(gpkg_path, c, cell_size_m)]
+
+        if self.grid_type() == "h3":
+            from geest.core import grid_type_utils
+            from geest.core.h3_pyramid_utils import has_h3_pyramid_structure, refresh_h3_pyramid_column
+
+            h3_resolution = grid_type_utils.get_h3_resolution(self.working_directory)
+            missing = [c for c in scored_columns if not has_h3_pyramid_structure(gpkg_path, c, h3_resolution)]
+
+            def _refresh_column(column: str) -> bool:
+                return refresh_h3_pyramid_column(gpkg_path, column, h3_resolution)
+
+        else:
+            from geest.core.grid_pyramid_utils import has_pyramid_structure, refresh_pyramid_column
+
+            missing = [c for c in scored_columns if not has_pyramid_structure(gpkg_path, c, cell_size_m)]
+
+            def _refresh_column(column: str) -> bool:
+                return refresh_pyramid_column(gpkg_path, column, cell_size_m)
+
         if not missing:
             return
 
@@ -1879,14 +1898,12 @@ class TreePanel(QWidget):
             return
 
         def _build(task) -> dict:
-            from geest.core.grid_pyramid_utils import refresh_pyramid_column
-
             succeeded, failed = [], []
             total = len(missing)
             for index, column in enumerate(missing):
                 if task.isCanceled():
                     break
-                if refresh_pyramid_column(gpkg_path, column, cell_size_m):
+                if _refresh_column(column):
                     succeeded.append(column)
                 else:
                     failed.append(column)
@@ -2102,6 +2119,17 @@ class TreePanel(QWidget):
         """
         analysis_scale = self.model.get_analysis_item().attributes().get("analysis_scale", "national")
         return analysis_scale
+
+    def grid_type(self) -> str:
+        """Get the grid type ("square" or "h3") configured for this project.
+
+        Returns:
+            str: "square" (the default, for any project with no "grid_type"
+                key in model.json) or "h3".
+        """
+        from geest.core import grid_type_utils
+
+        return grid_type_utils.get_grid_type(self.working_directory)
 
     def _get_study_area_area_km2(self) -> float:
         """Get total study area area in km² from study_area_clip_polygons layer.

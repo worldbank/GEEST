@@ -389,11 +389,19 @@ def add_pyramid_layer_to_map(
     Regional (H3) analyses fall back to add_grid_layer_to_map(): H3's
     7-child hex hierarchy doesn't support 2x2 quad aggregation.
 
+    Local/national analyses whose project uses the H3 grid type (see
+    geest.core.grid_type_utils) build/refresh an H3-resolution pyramid
+    (geest.core.h3_pyramid_utils) instead of the square-grid one; both
+    pyramid shapes feed the same scale-dependent layer-tree builder below,
+    which only needs a list of exposed (table_or_None) levels and a
+    parallel list of scale denominators - it has no notion of grid shape.
+
     Args:
         item: The tree item (indicator/factor/dimension/analysis) to display.
         column_name: The column in study_area_grid to symbolize.
         working_directory: Path to the working directory containing study_area.gpkg.
-        cell_size_m: The analysis grid's native cell size.
+        cell_size_m: The analysis grid's native cell size. Ignored for H3
+            projects, whose resolution comes from model.json instead.
         analysis_scale: "national"/"local" or "regional".
         layer_name: Optional display name for the output group. Defaults to item name.
         group: The top-level group name. Defaults to "GeoE3".
@@ -411,27 +419,95 @@ def add_pyramid_layer_to_map(
         log_message(f"GeoPackage not found: {gpkg_path}", tag="GeoE3", level=Qgis.Warning)
         return
 
-    from geest.core.grid_pyramid_utils import (
-        get_exposed_levels,
-        is_pyramid_fresh,
-        refresh_pyramid_column,
-        scale_denominator_for_cell_size,
-    )
+    from geest.core import grid_type_utils
+    from geest.core.grid_pyramid_utils import is_pyramid_fresh, scale_denominator_for_cell_size
 
-    if not is_pyramid_fresh(gpkg_path, column_name):
-        if not refresh_pyramid_column(gpkg_path, column_name, cell_size_m):
-            log_message(
-                f"Failed to build pyramid for column '{column_name}'.",
-                tag="GeoE3",
-                level=Qgis.Warning,
-            )
-            return
+    grid_type = grid_type_utils.get_grid_type(working_directory)
 
-    levels = get_exposed_levels(gpkg_path, column_name, cell_size_m)  # finest first: [(cs, table_or_None), ...]
+    if grid_type == "h3":
+        from geest.core.h3_pyramid_utils import (
+            get_exposed_h3_levels,
+            h3_effective_cell_size_m,
+            refresh_h3_pyramid_column,
+        )
+
+        h3_resolution = grid_type_utils.get_h3_resolution(working_directory)
+        if not is_pyramid_fresh(gpkg_path, column_name):
+            if not refresh_h3_pyramid_column(gpkg_path, column_name, h3_resolution):
+                log_message(
+                    f"Failed to build H3 pyramid for column '{column_name}'.",
+                    tag="GeoE3",
+                    level=Qgis.Warning,
+                )
+                return
+
+        # Finest first: [(h3_resolution, table_or_None), ...].
+        levels = get_exposed_h3_levels(gpkg_path, column_name, h3_resolution)
+        scales = [scale_denominator_for_cell_size(h3_effective_cell_size_m(res)) for res, _table in levels]
+        level_suffixes = [f"res {res}" for res, _table in levels]
+    else:
+        from geest.core.grid_pyramid_utils import get_exposed_levels, refresh_pyramid_column
+
+        if not is_pyramid_fresh(gpkg_path, column_name):
+            if not refresh_pyramid_column(gpkg_path, column_name, cell_size_m):
+                log_message(
+                    f"Failed to build pyramid for column '{column_name}'.",
+                    tag="GeoE3",
+                    level=Qgis.Warning,
+                )
+                return
+
+        # Finest first: [(cell_size_m, table_or_None), ...].
+        levels = get_exposed_levels(gpkg_path, column_name, cell_size_m)
+        scales = [scale_denominator_for_cell_size(cs) for cs, _table in levels]
+        level_suffixes = [f"{int(cs)}m" for cs, _table in levels]
 
     if not layer_name:
         layer_name = item.data(0)
 
+    _build_pyramid_level_group(
+        item=item,
+        column_name=column_name,
+        gpkg_path=gpkg_path,
+        layer_name=layer_name,
+        group=group,
+        levels=levels,
+        scales=scales,
+        level_suffixes=level_suffixes,
+    )
+
+
+def _build_pyramid_level_group(
+    item: "JsonTreeItem",
+    column_name: str,
+    gpkg_path: str,
+    layer_name: str,
+    group: str,
+    levels: list,
+    scales: list,
+    level_suffixes: list,
+) -> None:
+    """Build/refresh the scale-dependent QgsLayerTreeGroup for one pyramid.
+
+    Shared tail of add_pyramid_layer_to_map() for both the square-grid and
+    H3 pyramids: given the exposed levels (finest first) and a parallel
+    list of scale denominators/display-name suffixes, it is entirely
+    agnostic of the pyramid's grid shape.
+
+    Args:
+        item: The tree item (indicator/factor/dimension/analysis) to display.
+        column_name: The column in study_area_grid to symbolize.
+        gpkg_path: Path to the GeoPackage containing study_area_grid.
+        layer_name: Display name for the output group.
+        group: The top-level group name.
+        levels: List of (level_key, table_name_or_None) tuples, finest
+            first. table_name_or_None is None for the base level, meaning
+            "use study_area_grid itself". level_key is only consumed by the
+            caller (to build level_suffixes) and is otherwise unused here.
+        scales: Parallel list of scale denominators, one per level.
+        level_suffixes: Parallel list of human-readable suffixes (e.g.
+            "200m" or "res 6") used to name each level's layer.
+    """
     import tempfile
 
     from geest.utilities import resources_path
@@ -470,21 +546,19 @@ def add_pyramid_layer_to_map(
         if stale_layer_ids:
             project.removeMapLayers(stale_layer_ids)
         parent_group.removeChildNode(existing_output_group)
-    # Deliberately NOT mutually exclusive: all 3 levels stay checked
+    # Deliberately NOT mutually exclusive: all levels stay checked
     # simultaneously, and setScaleBasedVisibility() on each layer is what
     # decides which one actually renders at the current zoom.
     output_group = parent_group.addGroup(layer_name)
 
-    scales = [scale_denominator_for_cell_size(cs) for cs, _table in levels]
-
-    for index, (cell_size, table_name) in enumerate(levels):
+    for index, (_level_key, table_name) in enumerate(levels):
         # Every level table (including the base study_area_grid itself) is
         # a wide table using the same real column name - there's no
         # separate "value" field, so filtering/styling is identical at
         # every level.
         layer_uri = f"{gpkg_path}|layername={table_name or 'study_area_grid'}"
 
-        level_layer_name = f"{layer_name} ({int(cell_size)}m)"
+        level_layer_name = f"{layer_name} ({level_suffixes[index]})"
         vlayer = QgsVectorLayer(layer_uri, level_layer_name, "ogr")
         if not vlayer.isValid():
             log_message(f"Pyramid level layer is invalid: {layer_uri}", tag="GeoE3", level=Qgis.Warning)

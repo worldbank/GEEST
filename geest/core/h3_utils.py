@@ -36,17 +36,23 @@ H3_CELL_AREA_KM2 = {
 }
 
 
-def get_h3_resolution_for_scale(analysis_scale: str) -> Optional[int]:
+def get_h3_resolution_for_scale(analysis_scale: str, cell_size_m: Optional[float] = None) -> Optional[int]:
     """Get H3 resolution for a given analysis scale.
 
     Args:
         analysis_scale: The analysis scale ("regional", "national", or "local")
+        cell_size_m: Optional target cell size in metres, used only for
+            "local"/"national" scales that have opted into an H3 grid.
+            Ignored for "regional", which always returns resolution 6.
 
     Returns:
-        H3 resolution integer (6 for regional), or None if not applicable
+        H3 resolution integer (6 for regional; derived from cell_size_m for
+        local/national when provided), or None if not applicable.
     """
     if analysis_scale == "regional":
         return 6
+    if analysis_scale in ("local", "national") and cell_size_m is not None:
+        return get_h3_resolution_for_cell_size(cell_size_m)
     return None
 
 
@@ -68,6 +74,25 @@ def h3_cell_area_km2(h3_resolution: int) -> float:
         return float(h3.average_hexagon_area(h3_resolution, unit="km^2"))
     except Exception:
         return H3_CELL_AREA_KM2[h3_resolution]
+
+
+def get_h3_resolution_for_cell_size(cell_size_m: float) -> int:
+    """Pick the H3 resolution whose average cell area best matches a target cell size.
+
+    Area (not edge length) is the right equivalence metric: it is what
+    directly determines cell density/count, which is what a square-grid
+    cell_size_m is really standing in for here.
+
+    Args:
+        cell_size_m: Target (square) cell size in metres, e.g. an analysis
+            grid's base cell size.
+
+    Returns:
+        H3 resolution (0-15) whose average hexagon area is closest to
+        (cell_size_m / 1000)**2 square kilometres.
+    """
+    target_area_km2 = (cell_size_m / 1000.0) ** 2
+    return min(range(16), key=lambda r: abs(h3_cell_area_km2(r) - target_area_km2))
 
 
 def estimate_h3_cells_for_area(area_km2: float, h3_resolution: int) -> int:

@@ -51,7 +51,7 @@ def _ignore_patterns(directory: str, files: list) -> set:
 # Vendored dependencies to bundle with the plugin
 # These will be downloaded for multiple platforms
 VENDORED_PACKAGES = [
-    # "h3",  # Removed to reduce bundle size - users can install separately if needed
+    "h3==4.4.2",
 ]
 # Platform tags for wheel downloads (covers most QGIS installations)
 WHEEL_PLATFORMS = [

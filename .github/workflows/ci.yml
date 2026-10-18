@@ -77,6 +77,10 @@ jobs:
           docker compose up -d
           sleep 10
 
+      - name: Install h3 in test container
+        run: |
+          docker compose exec -T -e PIP_BREAK_SYSTEM_PACKAGES=1 qgis-testing-environment pip3 install --quiet h3==4.4.2
+
       - name: Run test suite
         run: |
           docker compose exec -T qgis-testing-environment qgis_testrunner.sh test_suite.test_package

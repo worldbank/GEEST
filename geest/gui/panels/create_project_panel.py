@@ -30,6 +30,7 @@ from qgis.PyQt.QtWidgets import QComboBox, QFileDialog, QMessageBox, QWidget
 from geest.core import WorkflowQueueManager
 from geest.core.h3_utils import (
     estimate_h3_cells_for_area,
+    get_h3_resolution_for_cell_size,
     h3_cell_area_km2,
     suggest_coarser_resolution,
     suggest_finer_resolution,
@@ -161,7 +162,8 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         if hasattr(self.layer_combo, "setAllowEmptyLayer"):
             self.layer_combo.setAllowEmptyLayer(True)
         # Regional scale uses H3 hexagonal grids (L6 resolution)
-        # National and Local scales use square grids
+        # National and Local scales use H3 hexagonal grids too, at a
+        # resolution matching the chosen cell size (see get_h3_resolution_for_cell_size)
         # Local mode enabled for National vs Local analysis implementation
         # self.local_scale.setEnabled(False)
         # self.regional_scale.setEnabled(False)
@@ -282,7 +284,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 self.h3_resolution_combo.show()
         elif value == "national":
             self.description2.setText(
-                "National scale uses square grid cells and is designed for country-wide analysis with a balance "
+                "National scale uses an H3 hexagonal grid and is designed for country-wide analysis with a balance "
                 "between spatial detail and runtime.\n\n"
                 "Set the analysis grid size (m). Smaller sizes require longer processing times but produce more "
                 "detailed analysis results. Recommended grid sizes are available by default."
@@ -298,7 +300,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 self.h3_resolution_combo.hide()
         elif value == "local":
             self.description2.setText(
-                "Local scale uses square grid cells for subnational or city-level analysis where fine detail is most important.\n\n"
+                "Local scale uses an H3 hexagonal grid for subnational or city-level analysis where fine detail is most important.\n\n"
                 "Set a small analysis grid size (m) for higher spatial precision. Smaller sizes significantly increase "
                 "processing time, so start with recommended values and refine as needed."
             )
@@ -425,10 +427,17 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             if self.regional_scale.isChecked():
                 model["analysis_scale"] = "regional"
                 model["analysis_h3_resolution"] = self.selected_h3_resolution()
-            elif self.local_scale.isChecked():
-                model["analysis_scale"] = "local"
             else:
-                model["analysis_scale"] = "national"
+                model["analysis_scale"] = "local" if self.local_scale.isChecked() else "national"
+                # New local/national study areas default to an H3
+                # hexagonal grid (resolution auto-picked to match the
+                # chosen cell size). Grid type is decided once, here, at
+                # creation time, and never migrated afterwards - existing
+                # projects created before this had no "grid_type" key at
+                # all and keep resolving to "square" via
+                # grid_type_utils.get_grid_type()'s documented default.
+                model["grid_type"] = "h3"
+                model["analysis_h3_resolution"] = get_h3_resolution_for_cell_size(self.cell_size_spinbox.value())
             # Save women considerations settings
             model["women_considerations_enabled"] = self.women_considerations_checkbox.isChecked()
             # Save reference layer source path
@@ -452,6 +461,12 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 analysis_scale = "national"
 
             h3_resolution = self.selected_h3_resolution() if analysis_scale == "regional" else None
+
+            # New local/national study areas default to an H3 grid (mirrors
+            # the model.json write above); regional behaviour is untouched.
+            grid_type = "h3" if analysis_scale in ("local", "national") else "square"
+            if grid_type == "h3":
+                h3_resolution = get_h3_resolution_for_cell_size(self.cell_size_spinbox.value())
 
             if analysis_scale == "regional" and h3_resolution is not None and h3_resolution >= 9:
                 reply = QMessageBox.question(
@@ -477,6 +492,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 feedback=feedback,
                 analysis_scale=analysis_scale,
                 h3_resolution=h3_resolution,
+                grid_type=grid_type,
             )
             self.study_area_task = processor
             # Hook up the QTask feedback signal to the progress bar

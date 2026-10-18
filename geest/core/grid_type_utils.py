@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+"""Grid type lookup utilities for model.json.
+
+This module provides lightweight, safe-by-default helpers for determining
+which grid type ("square" or "h3") a project was created with, and - for
+H3 projects - which H3 resolution was selected. Grid type is decided once,
+at study-area creation time, and never migrated afterwards: a project
+without a "grid_type" key in its model.json is an existing square-grid
+project and must keep behaving exactly as it does today.
+
+Deliberately dependency-free (stdlib only, no QGIS/GDAL imports) so it can
+be imported from anywhere - GUI code, workflows, or visualization code
+paths - without pulling in the QGIS runtime.
+"""
+
+import json
+import os
+from typing import Optional
+
+DEFAULT_GRID_TYPE = "square"
+
+
+def get_grid_type(working_directory: str) -> str:
+    """Return the grid type ("square" or "h3") configured for a project.
+
+    Reads the top-level "grid_type" key from <working_directory>/model.json.
+    Existing projects with no such key (and any project whose model.json is
+    missing or unreadable) default to "square" - there is no migration path,
+    grid type is decided once, at study-area creation time, forever.
+
+    Args:
+        working_directory: The project's working directory, containing
+            model.json at its top level.
+
+    Returns:
+        "square" or "h3" (or whatever string is stored), defaulting to
+        DEFAULT_GRID_TYPE on any missing/unreadable model.json.
+    """
+    model_path = os.path.join(working_directory, "model.json")
+    try:
+        with open(model_path, "r") as f:
+            model = json.load(f)
+    except Exception:
+        return DEFAULT_GRID_TYPE
+
+    return model.get("grid_type", DEFAULT_GRID_TYPE)
+
+
+def get_h3_resolution(working_directory: str) -> Optional[int]:
+    """Return the H3 resolution configured for an H3-grid project.
+
+    Args:
+        working_directory: The project's working directory, containing
+            model.json at its top level.
+
+    Returns:
+        The "analysis_h3_resolution" value from model.json, or None if the
+        key is absent, the project's grid type is not "h3", or model.json
+        is missing/unreadable.
+    """
+    model_path = os.path.join(working_directory, "model.json")
+    try:
+        with open(model_path, "r") as f:
+            model = json.load(f)
+    except Exception:
+        return None
+
+    if model.get("grid_type", DEFAULT_GRID_TYPE) != "h3":
+        return None
+
+    return model.get("analysis_h3_resolution")
