@@ -232,6 +232,38 @@ def _ensure_h3_level_column(ds, table_name: str, sanitized_column: str) -> None:
         layer.CreateField(ogr.FieldDefn(sanitized_column, ogr.OFTReal))
 
 
+def _sync_h3_level_table_columns(ds, table_name: str, source_table: str) -> None:
+    """Add every score column that exists on source_table but is missing
+    from table_name, so each H3 pyramid level stays a complete, scaled
+    mirror of the layer below it - not just whichever columns have
+    happened to be explicitly refresh_h3_pyramid_column()'d so far. A
+    column a workflow hasn't run yet is simply NULL on both tables,
+    exactly like the base grid itself. See the matching
+    grid_pyramid_utils._sync_level_table_columns() for the square-grid
+    equivalent of this same invariant.
+
+    Called on every refresh, not just when a level table is first
+    scaffolded, so a column added to study_area_grid after a level table
+    already exists still gets picked up.
+    """
+    from geest.core.grid_pyramid_utils import OUT_OF_SCOPE_PYRAMID_COLUMNS
+
+    source_layer = ds.GetLayerByName(source_table)
+    level_layer = ds.GetLayerByName(table_name)
+    level_defn = level_layer.GetLayerDefn()
+    existing = {level_defn.GetFieldDefn(i).GetName().lower() for i in range(level_defn.GetFieldCount())}
+    source_defn = source_layer.GetLayerDefn()
+    for i in range(source_defn.GetFieldCount()):
+        field_defn = source_defn.GetFieldDefn(i)
+        if field_defn.GetType() != ogr.OFTReal:
+            continue
+        name = field_defn.GetName()
+        if name.lower() in OUT_OF_SCOPE_PYRAMID_COLUMNS or name.lower() in existing:
+            continue
+        level_layer.CreateField(ogr.FieldDefn(name, ogr.OFTReal))
+        existing.add(name.lower())
+
+
 def _refresh_h3_level_column_values(
     ds, h3_module, table_name: str, source_table: str, sanitized_column: str, resolution: int
 ) -> None:
@@ -367,6 +399,7 @@ def refresh_h3_pyramid_column(gpkg_path: str, column_name: str, base_h3_resoluti
             if not table_name:
                 ds = None
                 return False
+            _sync_h3_level_table_columns(ds, table_name, source_table)
             _ensure_h3_level_column(ds, table_name, sanitized)
             _refresh_h3_level_column_values(ds, h3, table_name, source_table, sanitized, resolution)
             source_table = table_name

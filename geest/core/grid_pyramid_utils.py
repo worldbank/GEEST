@@ -291,6 +291,40 @@ def _ensure_level_column(ds, table_name: str, quoted_column: str, sanitized_colu
     _ = quoted_column  # kept for signature symmetry with callers that already have it quoted
 
 
+def _sync_level_table_columns(ds, table_name: str, source_table: str) -> None:
+    """Add every score column that exists on source_table but is missing
+    from table_name, so each pyramid level stays a complete, scaled
+    mirror of the layer below it - not just whichever columns have
+    happened to be explicitly refresh_pyramid_column()'d so far. A column
+    a workflow hasn't run yet is simply NULL on both tables, exactly like
+    the base grid itself.
+
+    Called on every refresh, not just when a level table is first
+    scaffolded, so a column added to study_area_grid after a level table
+    already exists still gets picked up.
+
+    Args:
+        ds: Open OGR DataSource for the GeoPackage.
+        table_name: The level table to bring up to date.
+        source_table: The immediately finer table (study_area_grid or a
+            previous pyramid level) whose columns to mirror.
+    """
+    source_layer = ds.GetLayerByName(source_table)
+    level_layer = ds.GetLayerByName(table_name)
+    level_defn = level_layer.GetLayerDefn()
+    existing = {level_defn.GetFieldDefn(i).GetName().lower() for i in range(level_defn.GetFieldCount())}
+    source_defn = source_layer.GetLayerDefn()
+    for i in range(source_defn.GetFieldCount()):
+        field_defn = source_defn.GetFieldDefn(i)
+        if field_defn.GetType() != ogr.OFTReal:
+            continue
+        name = field_defn.GetName()
+        if name.lower() in OUT_OF_SCOPE_PYRAMID_COLUMNS or name.lower() in existing:
+            continue
+        level_layer.CreateField(ogr.FieldDefn(name, ogr.OFTReal))
+        existing.add(name.lower())
+
+
 def is_pyramid_fresh(gpkg_path: str, column_name: str) -> bool:
     """Return True if column_name's pyramid is already built and up to date."""
     if not os.path.exists(gpkg_path):
@@ -447,6 +481,7 @@ def refresh_pyramid_column(gpkg_path: str, column_name: str, base_cell_size_m: f
         source_table = "study_area_grid"
         for level_cs in level_sizes[1:]:
             table_name = _ensure_level_table_scaffold(ds, level_cs, source_table, srs)
+            _sync_level_table_columns(ds, table_name, source_table)
             _ensure_level_column(ds, table_name, quoted_column, sanitized)
 
             # Child bounds computed by multiplying the parent index (never

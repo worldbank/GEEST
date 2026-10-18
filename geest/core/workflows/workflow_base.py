@@ -45,7 +45,6 @@ from geest.core.grid_column_utils import (
     rasterize_grid_column,
     write_raster_values_to_grid,
 )
-from geest.core.grid_pyramid_utils import invalidate_pyramid
 from geest.utilities import log_layer_count, log_message, resources_path
 
 
@@ -928,9 +927,29 @@ class WorkflowBase(QObject):
                     attrs["execution_end_time"] = datetime.datetime.now().isoformat()
                     attrs["error_file"] = None
                 if self.analysis_scale != "regional":
-                    # H3 pyramiding is out of scope (7-child hex hierarchy, not
-                    # 2x2 quad aggregation); only local/national grids qualify.
-                    invalidate_pyramid(self.gpkg_path, self.layer_id)
+                    # Rebuild the pyramid now, in this background QgsTask,
+                    # rather than just invalidating it and leaving the
+                    # rebuild for whichever UI click happens to view this
+                    # column next - that used to block the UI thread for
+                    # however long a full rebuild takes (regressed clicking
+                    # into a dialog from instant to tens of seconds). The
+                    # refresh functions update the pyr_meta freshness row
+                    # themselves, so there's no need to invalidate first.
+                    # A failed rebuild is logged and ignored, never fatal
+                    # to the workflow itself - mirrors how
+                    # add_pyramid_layer_to_map() already treats it.
+                    from geest.core import grid_type_utils
+
+                    grid_type = grid_type_utils.get_grid_type(self.working_directory)
+                    if grid_type == "h3":
+                        from geest.core.h3_pyramid_utils import refresh_h3_pyramid_column
+
+                        h3_resolution = grid_type_utils.get_h3_resolution(self.working_directory)
+                        refresh_h3_pyramid_column(self.gpkg_path, self.layer_id, h3_resolution)
+                    else:
+                        from geest.core.grid_pyramid_utils import refresh_pyramid_column
+
+                        refresh_pyramid_column(self.gpkg_path, self.layer_id, self.cell_size_m)
                 log_layer_count()  # For performance tuning, write the number of open layers to a log file
                 return True
 

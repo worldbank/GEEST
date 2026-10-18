@@ -96,11 +96,20 @@ class TestWorkflowJobEndToEnd(unittest.TestCase):
         # geest.core.grid_pyramid_utils), so completion is now verified
         # against the grid column directly rather than a raster file.
         from geest.core.grid_column_utils import get_grid_column_values
+        from geest.core.grid_pyramid_utils import is_pyramid_fresh
 
         self.assertFalse(item.attribute("result_file", ""))
         gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         values = get_grid_column_values(gpkg_path, "e2e_points_per_cell")
         self.assertTrue(values, "completed workflow must have scored grid cells")
+        # The pyramid must already be built by the time execute() returns -
+        # it must not be left merely invalidated for the next UI click to
+        # rebuild synchronously (that used to block the UI thread for the
+        # full rebuild duration on the very next click anywhere in the tree).
+        self.assertTrue(
+            is_pyramid_fresh(gpkg_path, "e2e_points_per_cell"),
+            "pyramid must be rebuilt as part of the background workflow run, not left stale",
+        )
 
     def test_mode_switch_does_not_orphan_configured_layer(self):
         """A polyline indicator configured through the OSM transport mode
@@ -253,6 +262,111 @@ class TestWorkflowJobEndToEnd(unittest.TestCase):
         self.assertIsNone(job)
         self.assertEqual(item.getStatus(), "Workflow failed")
         self.assertIn("boom", item.attribute("error", ""))
+
+    def test_h3_grid_pyramid_is_built_by_end_of_run(self):
+        """Same production path, but for a project that opted into an H3 grid.
+
+        Rebuilds the fixture's study_area_grid as real H3 hexagons and
+        marks the project grid_type="h3" in model.json, so the workflow's
+        end-of-run pyramid rebuild exercises the H3 branch
+        (geest.core.h3_pyramid_utils.refresh_h3_pyramid_column) through the
+        exact same WorkflowQueueManager -> WorkflowJob -> execute() chain
+        as the square-grid test above, not a hand-rolled shortcut.
+        """
+        import json
+        import os
+        import sqlite3
+
+        import h3
+        from osgeo import ogr, osr
+
+        from geest.core.h3_pyramid_utils import has_h3_pyramid_structure
+
+        test_dir = prepare_fixtures()
+        working_dir = os.path.join(test_dir, "wee_score")
+        gpkg_path = os.path.join(working_dir, "study_area", "study_area.gpkg")
+
+        model_path = os.path.join(working_dir, "model.json")
+        with open(model_path) as f:
+            model = json.load(f)
+        model["grid_type"] = "h3"
+        model["analysis_h3_resolution"] = 9
+        with open(model_path, "w") as f:
+            json.dump(model, f)
+
+        connection = sqlite3.connect(gpkg_path)
+        connection.execute("DELETE FROM study_area_grid")
+        connection.commit()
+        connection.close()
+
+        ds = ogr.Open(gpkg_path, 1)
+        layer = ds.GetLayer("study_area_grid")
+        layer_defn = layer.GetLayerDefn()
+        existing_fields = {layer_defn.GetFieldDefn(i).GetName().lower() for i in range(layer_defn.GetFieldCount())}
+        # The fixture's base study_area_grid predates H3 support and has no
+        # h3_index/h3_resolution fields - add them, same as
+        # study_area_processing_task.py does for a real H3-grid project.
+        if "h3_index" not in existing_fields:
+            h3_field = ogr.FieldDefn("h3_index", ogr.OFTString)
+            h3_field.SetWidth(16)
+            layer.CreateField(h3_field)
+        if "h3_resolution" not in existing_fields:
+            layer.CreateField(ogr.FieldDefn("h3_resolution", ogr.OFTInteger))
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(4326)
+        shape = h3.LatLngPoly([(-1.30, 36.80), (-1.30, 36.82), (-1.28, 36.82), (-1.28, 36.80)])
+        cells = list(h3.h3shape_to_cells(shape, 9))
+        self.assertGreater(len(cells), 1, "test bbox must yield more than one H3 cell")
+        for grid_id, cell in enumerate(cells):
+            boundary = h3.cell_to_boundary(cell)
+            ring = ogr.Geometry(ogr.wkbLinearRing)
+            for lat, lon in boundary:
+                ring.AddPoint(lon, lat)
+            ring.CloseRings()
+            polygon = ogr.Geometry(ogr.wkbPolygon)
+            polygon.AddGeometry(ring)
+            feature = ogr.Feature(layer.GetLayerDefn())
+            # Matches the fixture's existing study_area_bboxes/polygons
+            # area_name (AreaIterator's synthetic name for an
+            # unpartitioned single study area), not an arbitrary value.
+            feature.SetField("area_name", "none_part0")
+            feature.SetField("h3_index", cell)
+            feature.SetField("h3_resolution", 9)
+            feature.SetGeometry(polygon)
+            layer.CreateFeature(feature)
+            feature = None
+        ds = None
+
+        settings = QSettings()
+        previous = settings.value("last_working_directory", "")
+        settings.setValue("last_working_directory", working_dir)
+        try:
+            points = os.path.join(os.path.dirname(__file__), "test_data", "points", "points.shp")
+            item = make_indicator(
+                {
+                    "analysis_mode": "use_point_per_cell",
+                    "id": "e2e_h3_points_per_cell",
+                    "factor_weighting": 1.0,
+                    "description": "E2E H3 point per cell",
+                    "result": "Not Run",
+                    "point_per_cell_shapefile": points,
+                }
+            )
+            manager = WorkflowQueueManager(pool_size=1)
+            job = manager.add_workflow(item, cell_size_m=100.0, analysis_scale="local")
+            self.assertIsNotNone(job, "configured H3-grid indicator must be accepted by the queue")
+
+            manager.start_processing_in_foreground()
+
+            result = item.attribute("result", "")
+            error = item.attribute("error", "")
+            self.assertIn("Completed", result, msg=f"workflow did not complete: result={result!r} error={error!r}")
+            self.assertTrue(
+                has_h3_pyramid_structure(gpkg_path, "e2e_h3_points_per_cell", 9),
+                "H3 pyramid must be built as part of the background workflow run",
+            )
+        finally:
+            settings.setValue("last_working_directory", previous)
 
 
 if __name__ == "__main__":

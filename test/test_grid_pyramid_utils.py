@@ -139,6 +139,38 @@ class TestRefreshPyramidColumn(unittest.TestCase):
         self.assertIn("score", field_names)
         self.assertIn("other_score", field_names)
 
+    def test_level_tables_mirror_every_base_column_even_if_never_refreshed(self):
+        # Each level must be a complete, scaled mirror of the base grid's
+        # current column set - not a sparse table that only grows the
+        # columns someone happened to explicitly refresh_pyramid_column().
+        # A column whose indicator hasn't run yet is NULL on both the base
+        # grid and every level, exactly the same as a column that HAS run.
+        _build_grid(self.gpkg_path, rows=16, cols=16)
+        ds = ogr.Open(self.gpkg_path, 1)
+        # never_refreshed is added to the base grid but refresh_pyramid_column
+        # is deliberately never called for it below.
+        ds.ExecuteSQL("ALTER TABLE study_area_grid ADD COLUMN never_refreshed REAL")
+        ds = None
+
+        self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))
+
+        ds = ogr.Open(self.gpkg_path, 0)
+        for table_name in (
+            "study_area_grid_200",
+            "study_area_grid_400",
+            "study_area_grid_800",
+            "study_area_grid_1600",
+        ):
+            layer = ds.GetLayer(table_name)
+            layer_defn = layer.GetLayerDefn()
+            field_names = {layer_defn.GetFieldDefn(i).GetName() for i in range(layer_defn.GetFieldCount())}
+            self.assertIn(
+                "never_refreshed",
+                field_names,
+                f"{table_name} must mirror every base-grid score column, including ones never explicitly refreshed",
+            )
+        ds = None
+
     def test_refresh_builds_correct_max_scores(self):
         _build_grid(self.gpkg_path, rows=16, cols=16)
         self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))

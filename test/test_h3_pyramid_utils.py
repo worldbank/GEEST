@@ -134,6 +134,32 @@ class TestH3PyramidEndToEnd(unittest.TestCase):
         self.assertTrue(has_h3_pyramid_structure(self.gpkg_path, "jobs", 9))
         self.assertTrue(is_pyramid_fresh(self.gpkg_path, "jobs"))
 
+    def test_level_tables_mirror_every_base_column_even_if_never_refreshed(self):
+        # Each H3 level must be a complete, scaled mirror of the base
+        # grid's current column set - not a sparse table that only grows
+        # the columns someone happened to explicitly
+        # refresh_h3_pyramid_column() for. A column whose indicator hasn't
+        # run yet is NULL on both the base grid and every level.
+        _build_h3_grid(self.gpkg_path, h3_resolution=9, score_fields=("jobs",))
+        ds = ogr.Open(self.gpkg_path, 1)
+        ds.ExecuteSQL("ALTER TABLE study_area_grid ADD COLUMN never_refreshed REAL")
+        ds = None
+
+        self.assertTrue(refresh_h3_pyramid_column(self.gpkg_path, "jobs", 9))
+
+        ds = ogr.Open(self.gpkg_path, 0)
+        for table_name in ("study_area_grid_h3_res8", "study_area_grid_h3_res7", "study_area_grid_h3_res6"):
+            layer = ds.GetLayer(table_name)
+            self.assertIsNotNone(layer, f"expected level table {table_name} to exist")
+            layer_defn = layer.GetLayerDefn()
+            field_names = {layer_defn.GetFieldDefn(i).GetName() for i in range(layer_defn.GetFieldCount())}
+            self.assertIn(
+                "never_refreshed",
+                field_names,
+                f"{table_name} must mirror every base-grid score column, including ones never explicitly refreshed",
+            )
+        ds = None
+
     def test_refresh_missing_column_fails_cleanly(self):
         _build_h3_grid(self.gpkg_path, h3_resolution=9, score_fields=())
         self.assertFalse(refresh_h3_pyramid_column(self.gpkg_path, "nonexistent", 9))
