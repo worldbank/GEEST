@@ -264,6 +264,11 @@ class TreePanel(QWidget):
         run_incomplete_action.triggered.connect(self.run_incomplete)
         prepare_analysis_menu.addAction(run_incomplete_action)
 
+        # Add "Download all resources" action
+        download_all_resources_action = QAction("Download all resources", self)
+        download_all_resources_action.triggered.connect(self.download_all_resources)
+        prepare_analysis_menu.addAction(download_all_resources_action)
+
         # Set the menu on the tool button
         self.prepare_analysis_button.setMenu(prepare_analysis_menu)
 
@@ -2850,6 +2855,88 @@ class TreePanel(QWidget):
             self.queue_manager.start_processing_in_foreground()
         else:
             self.queue_manager.start_processing()
+
+    def download_all_resources(self):
+        """Walk every indicator and download any missing cached resource.
+
+        Covers nighttime lights and environmental hazard rasters today -
+        see geest.core.download_all_resources' module docstring for what's
+        not covered yet and why. Already-cached resources are left alone;
+        only missing ones are downloaded, one at a time.
+        """
+        if not self.working_directory:
+            self.show_message("No working directory set.", level=Qgis.Warning)
+            return
+
+        from geest.core.download_all_resources import DownloadAllResourcesController, collect_missing_resources
+
+        missing = collect_missing_resources(self.model.rootItem, self.working_directory)
+        if not missing:
+            self.show_message("All downloadable resources are already cached.", level=Qgis.Info)
+            return
+
+        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+        bbox_layer = QgsVectorLayer(f"{gpkg_path}|layername=study_area_bboxes", "study_area_bboxes", "ogr")
+        if not bbox_layer.isValid() or bbox_layer.featureCount() == 0:
+            self.show_message("Could not load study_area_bboxes from study_area.gpkg.", level=Qgis.Warning)
+            return
+        extent = bbox_layer.extent()
+        extent_crs_authid = bbox_layer.crs().authid()
+
+        self.overall_progress_bar.setVisible(True)
+        self.workflow_progress_bar.setVisible(True)
+        self.status_label.setVisible(True)
+        self.status_label.setText("Starting downloads...")
+        self.prepare_analysis_button.setVisible(False)
+        self.help_button.setVisible(False)
+        self.project_button.setVisible(False)
+        self.overall_progress_bar.setValue(0)
+        self.overall_progress_bar.setMaximum(len(missing))
+        self.workflow_progress_bar.setValue(0)
+
+        def _on_item_started(item, spec):
+            self.status_label.setText(f"Downloading {spec.label}...")
+            self.status_label.setToolTip(spec.label)
+            self.workflow_progress_bar.setValue(0)
+
+        def _on_item_progress(item, spec, message):
+            self.status_label.setText(message[:60])
+            self.status_label.setToolTip(message)
+
+        def _on_item_finished(item, spec, success, message):
+            self.overall_progress_bar.setValue(self.overall_progress_bar.value() + 1)
+            self.workflow_progress_bar.setValue(100)
+            if not success:
+                log_message(f"Download failed for {spec.label}: {message}", tag="GeoE3", level=Qgis.Warning)
+
+        def _on_all_finished(succeeded, failed):
+            self.overall_progress_bar.setVisible(False)
+            self.workflow_progress_bar.setVisible(False)
+            self.status_label.setVisible(False)
+            self.status_label.setText("")
+            self.prepare_analysis_button.setVisible(True)
+            self.help_button.setVisible(True)
+            self.project_button.setVisible(True)
+            self.save_json_to_working_directory()
+            summary = f"Downloaded {len(succeeded)} resource(s)."
+            if failed:
+                failed_labels = ", ".join(spec.label for _item, spec in failed)
+                summary += f" {len(failed)} failed: {failed_labels}"
+                self.show_message(summary, level=Qgis.Warning)
+            else:
+                self.show_message(summary, level=Qgis.Info)
+
+        self._download_all_resources_controller = DownloadAllResourcesController(
+            items_and_specs=missing,
+            working_directory=self.working_directory,
+            extent=extent,
+            extent_crs_authid=extent_crs_authid,
+            on_item_started=_on_item_started,
+            on_item_progress=_on_item_progress,
+            on_item_finished=_on_item_finished,
+            on_all_finished=_on_all_finished,
+        )
+        self._download_all_resources_controller.start()
 
     def expand_all_nodes(self, index=None):
         """
