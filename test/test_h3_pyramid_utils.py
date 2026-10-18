@@ -245,16 +245,30 @@ class TestGetExposedH3Levels(unittest.TestCase):
         levels = get_exposed_h3_levels("unused.gpkg", "jobs", 9)
         self.assertEqual(levels[0], (9, None))
 
-    def test_returns_three_levels_when_resolution_is_high_enough(self):
+    def test_returns_every_built_level_not_a_curated_subset(self):
+        # Every level refresh_h3_pyramid_column() builds is exposed - no
+        # point building optimized scale-dependent levels and hiding most
+        # of them from the actual scale-dependent visualization.
         levels = get_exposed_h3_levels("unused.gpkg", "jobs", 9)
-        self.assertEqual([res for res, _table in levels], [9, 7, 5])
-        self.assertEqual([table for _res, table in levels][1:], ["study_area_grid_h3_res7", "study_area_grid_h3_res5"])
+        self.assertEqual([res for res, _table in levels], [9, 8, 7, 6, 5])
+        self.assertEqual(
+            [table for _res, table in levels][1:],
+            [
+                "study_area_grid_h3_res8",
+                "study_area_grid_h3_res7",
+                "study_area_grid_h3_res6",
+                "study_area_grid_h3_res5",
+            ],
+        )
 
     def test_deduplicates_once_resolution_clamps_to_zero(self):
-        levels = get_exposed_h3_levels("unused.gpkg", "jobs", 1)
-        # resolution 1 -> steps 0,2,4 give [1, max(0,-1)=0, max(0,-3)=0];
-        # the two clamped-to-0 levels must collapse into a single entry.
-        self.assertEqual(levels, [(1, None), (0, "study_area_grid_h3_res0")])
+        levels = get_exposed_h3_levels("unused.gpkg", "jobs", 2)
+        # resolution 2 -> steps of 1 give [2, 1, 0, max(0,-1)=0, max(0,-2)=0];
+        # the three clamped-to-0 levels must collapse into a single entry.
+        self.assertEqual(
+            levels,
+            [(2, None), (1, "study_area_grid_h3_res1"), (0, "study_area_grid_h3_res0")],
+        )
 
     def test_none_resolution_returns_empty_list(self):
         self.assertEqual(get_exposed_h3_levels("unused.gpkg", "jobs", None), [])

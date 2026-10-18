@@ -49,6 +49,7 @@ class GridFromBboxH3Task(QgsTask):
         target_epsg: int,
         h3_resolution: int,
         feedback: "QgsFeedback | None" = None,
+        clip_to_boundary: bool = False,
     ):
         """Initialize the instance.
 
@@ -59,6 +60,12 @@ class GridFromBboxH3Task(QgsTask):
             target_epsg: EPSG code of target CRS.
             h3_resolution: H3 resolution level (6 for Regional).
             feedback: OptionalQgsFeedback for progress reporting.
+            clip_to_boundary: If True, an edge hexagon that only partially
+                intersects geom is clipped to geom's boundary instead of
+                being kept as a full hexagon. Defaults to False (Regional's
+                existing, unchanged behavior) - local/national H3 grids
+                opt into this to match the square grid's own clip-to-AOI
+                behavior.
         """
         super().__init__(f"CreateH3GridChunkTask-{chunk_id}", QgsTask.CanCancel)
         self.chunk_id = chunk_id
@@ -67,6 +74,7 @@ class GridFromBboxH3Task(QgsTask):
         self.target_epsg = target_epsg
         self.h3_resolution = h3_resolution
         self.feedback = feedback
+        self.clip_to_boundary = clip_to_boundary
 
         # Ensure geometry is 2D (not 2.5D or 3D)
         if self.geom.GetCoordinateDimension() == 3:
@@ -157,8 +165,16 @@ class GridFromBboxH3Task(QgsTask):
 
             # Check precise intersection with study area geometry
             if self.geom.Intersects(polygon):
-                # Keep full H3 hexagon geometry (do not clip to study area boundary)
-                self.features_out.append((h3_index, polygon))
+                if self.clip_to_boundary:
+                    # Edge hexagon: clip to the study area boundary rather
+                    # than keeping the full hexagon, matching the square
+                    # grid's own clip-to-AOI behavior.
+                    clipped = self.geom.Intersection(polygon)
+                    if clipped is not None and not clipped.IsEmpty():
+                        self.features_out.append((h3_index, clipped))
+                else:
+                    # Regional keeps the full H3 hexagon geometry (no clip).
+                    self.features_out.append((h3_index, polygon))
 
             processed += 1
 

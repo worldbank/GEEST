@@ -77,6 +77,7 @@ class JsonTreeModel(QAbstractItemModel):
         # on the very first save after creation.
         grid_type = json_data.get("grid_type", "square")
         analysis_h3_resolution = json_data.get("analysis_h3_resolution")
+        h3_clip_to_boundary = json_data.get("h3_clip_to_boundary", False)
         # START I don't love that this list of layer paths is hard coded here
         road_network_layer_path = json_data.get("road_network_layer_path", "")
         # END
@@ -123,6 +124,7 @@ class JsonTreeModel(QAbstractItemModel):
             "analysis_scale": analysis_scale,
             "grid_type": grid_type,
             "analysis_h3_resolution": analysis_h3_resolution,
+            "h3_clip_to_boundary": h3_clip_to_boundary,
             "road_network_layer_path": road_network_layer_path,
             "result": analysis_result,
             "result_file": analysis_result_file,

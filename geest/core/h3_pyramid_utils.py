@@ -42,8 +42,7 @@ from geest.core.grid_pyramid_utils import PYRAMID_META_TABLE, _ensure_meta_table
 from geest.core.h3_utils import h3_cell_area_km2, transform_wgs84_to_target
 from geest.utilities import log_message
 
-H3_PYRAMID_RESOLUTION_STEPS = 4  # base -> -1 -> -2 -> -3 -> -4 resolution steps
-EXPOSED_RESOLUTION_STEP_INDICES = (0, 2, 4)  # base, 2 steps coarser, 4 steps coarser
+H3_PYRAMID_RESOLUTION_STEPS = 4  # base -> -1 -> -2 -> -3 -> -4 resolution steps, every level exposed
 H3_PYRAMID_TABLE_PREFIX = "study_area_grid_h3_res"  # study_area_grid_h3_res5, ...
 H3_LEVEL_BATCH_SIZE = 500
 
@@ -426,7 +425,11 @@ def refresh_h3_pyramid_column(gpkg_path: str, column_name: str, base_h3_resoluti
 def get_exposed_h3_levels(
     gpkg_path: str, column_name: str, base_h3_resolution: Optional[int]
 ) -> List[Tuple[int, Optional[str]]]:
-    """Return the exposed (map-visualized) H3 pyramid levels, finest first.
+    """Return every built H3 pyramid level, finest first, for map visualization.
+
+    Every level built by refresh_h3_pyramid_column() is exposed - there is
+    no point building optimized scale-dependent levels and then hiding
+    most of them from the actual scale-dependent visualization.
 
     Args:
         gpkg_path: Path to the GeoPackage containing study_area_grid (kept
@@ -447,16 +450,9 @@ def get_exposed_h3_levels(
         return []
 
     resolutions = compute_h3_level_resolutions(base_h3_resolution)
-    levels: List[Tuple[int, Optional[str]]] = []
-    seen_resolutions = set()
-    for index in EXPOSED_RESOLUTION_STEP_INDICES:
-        if index >= len(resolutions):
-            continue
-        resolution = resolutions[index]
-        if index == 0:
-            levels.append((resolution, None))
-            seen_resolutions.add(resolution)
-            continue
+    levels: List[Tuple[int, Optional[str]]] = [(resolutions[0], None)]
+    seen_resolutions = {resolutions[0]}
+    for resolution in resolutions[1:]:
         if resolution in seen_resolutions:
             continue
         levels.append((resolution, _h3_level_table_name(resolution)))

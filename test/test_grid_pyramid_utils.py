@@ -177,15 +177,15 @@ class TestRefreshPyramidColumn(unittest.TestCase):
         self.assertTrue(is_pyramid_fresh(self.gpkg_path, "score"))
 
         levels = get_exposed_levels(self.gpkg_path, "score", 100.0)
-        self.assertEqual([cs for cs, _ in levels], [100.0, 400.0, 1600.0])
+        # Every built level is exposed, not a curated subset.
+        self.assertEqual([cs for cs, _ in levels], [100.0, 200.0, 400.0, 800.0, 1600.0])
+        tables_by_size = dict(levels)
 
         # Base level still goes through study_area_grid itself.
-        _, base_table = levels[0]
-        self.assertIsNone(base_table)
+        self.assertIsNone(tables_by_size[100.0])
 
         # Mid level (400m) takes the max over a 4x4 block of base cells -> 16 rows total.
-        _, mid_table = levels[1]
-        mid_layer = self._level_layer(400.0, mid_table)
+        mid_layer = self._level_layer(400.0, tables_by_size[400.0])
         self.assertTrue(mid_layer.isValid())
         self.assertEqual(mid_layer.featureCount(), 16)
         values_by_cell = {(f["row_index"], f["col_index"]): f["score"] for f in mid_layer.getFeatures()}
@@ -194,8 +194,7 @@ class TestRefreshPyramidColumn(unittest.TestCase):
         self.assertAlmostEqual(values_by_cell[(0, 0)], expected)
 
         # Coarse level (1600m) collapses the whole 16x16 grid to one row.
-        _, coarse_table = levels[2]
-        coarse_layer = self._level_layer(1600.0, coarse_table)
+        coarse_layer = self._level_layer(1600.0, tables_by_size[1600.0])
         self.assertTrue(coarse_layer.isValid())
         self.assertEqual(coarse_layer.featureCount(), 1)
         overall_expected = max(r + c for r in range(16) for c in range(16))
@@ -211,8 +210,8 @@ class TestRefreshPyramidColumn(unittest.TestCase):
         self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))
 
         levels = get_exposed_levels(self.gpkg_path, "score", 100.0)
-        _, mid_table = levels[1]
-        mid_layer = self._level_layer(400.0, mid_table)
+        tables_by_size = dict(levels)
+        mid_layer = self._level_layer(400.0, tables_by_size[400.0])
         values_by_cell = {(f["row_index"], f["col_index"]): f["score"] for f in mid_layer.getFeatures()}
 
         remaining = [r + c for r in range(4) for c in range(4) if (r, c) not in {(3, 3), (3, 2), (2, 3), (2, 2)}]
@@ -225,7 +224,7 @@ class TestRefreshPyramidColumn(unittest.TestCase):
         _build_grid(self.gpkg_path, rows=4, cols=4)
         self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))
         levels = get_exposed_levels(self.gpkg_path, "score", 100.0)
-        _, coarse_table = levels[2]
+        coarse_table = dict(levels)[1600.0]
         coarse_layer = self._level_layer(1600.0, coarse_table)
         self.assertEqual(coarse_layer.featureCount(), 1)
 
@@ -300,8 +299,7 @@ class TestRefreshPyramidColumn(unittest.TestCase):
         _build_grid(self.gpkg_path, rows=1, cols=1)
         self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))
         levels = get_exposed_levels(self.gpkg_path, "score", 100.0)
-        _, mid_table = levels[1]
-        mid_layer = self._level_layer(400.0, mid_table)
+        mid_layer = self._level_layer(400.0, dict(levels)[400.0])
         self.assertTrue(mid_layer.isValid())
         self.assertEqual(mid_layer.featureCount(), 1)
         self.assertAlmostEqual(next(mid_layer.getFeatures())["score"], 0.0)
@@ -340,8 +338,7 @@ class TestRefreshPyramidColumn(unittest.TestCase):
 
         self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))
         levels = get_exposed_levels(self.gpkg_path, "score", 100.0)
-        _, mid_table = levels[1]
-        mid_layer = self._level_layer(400.0, mid_table)
+        mid_layer = self._level_layer(400.0, dict(levels)[400.0])
         self.assertEqual(mid_layer.featureCount(), 1)
         self.assertAlmostEqual(next(mid_layer.getFeatures())["score"], 40.0)  # max of all 4, both areas
 

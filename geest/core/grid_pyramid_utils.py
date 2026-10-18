@@ -32,8 +32,7 @@ from geest.core.grid_column_utils import (
 )
 from geest.utilities import log_message
 
-PYRAMID_DOUBLINGS = 4  # base -> 2x -> 4x -> 8x -> 16x
-EXPOSED_DOUBLING_INDICES = (0, 2, 4)  # base, 4x, 16x - the 3 levels added to the map
+PYRAMID_DOUBLINGS = 4  # base -> 2x -> 4x -> 8x -> 16x - every level is exposed on the map
 PYRAMID_TABLE_PREFIX = "study_area_grid_"  # study_area_grid_200, study_area_grid_400, ...
 PYRAMID_META_TABLE = "pyr_meta"
 
@@ -529,7 +528,11 @@ def refresh_pyramid_column(gpkg_path: str, column_name: str, base_cell_size_m: f
 
 
 def get_exposed_levels(gpkg_path: str, column_name: str, base_cell_size_m: float) -> List[Tuple[float, Optional[str]]]:
-    """Return the exposed (map-visualized) pyramid levels, finest first.
+    """Return every built pyramid level, finest first, for map visualization.
+
+    Every level built by refresh_pyramid_column() is exposed - there is no
+    point building optimized scale-dependent levels and then hiding most
+    of them from the actual scale-dependent visualization.
 
     Args:
         gpkg_path: Path to the GeoPackage containing study_area_grid.
@@ -543,10 +546,7 @@ def get_exposed_levels(gpkg_path: str, column_name: str, base_cell_size_m: float
     """
     _ = gpkg_path, column_name
     level_sizes = compute_level_cell_sizes(base_cell_size_m)
-    levels = []
-    for index in EXPOSED_DOUBLING_INDICES:
-        if index == 0:
-            levels.append((level_sizes[0], None))
-        else:
-            levels.append((level_sizes[index], _level_table_name(level_sizes[index])))
+    levels: List[Tuple[float, Optional[str]]] = [(level_sizes[0], None)]
+    for cell_size in level_sizes[1:]:
+        levels.append((cell_size, _level_table_name(cell_size)))
     return levels

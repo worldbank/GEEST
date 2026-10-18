@@ -733,6 +733,7 @@ class ChunkRunnable(QRunnable):
         epsg_code=None,
         h3_resolution=6,
         grid_type="square",
+        h3_clip_to_boundary=False,
     ):
         """Initialize the chunk runnable.
 
@@ -749,6 +750,9 @@ class ChunkRunnable(QRunnable):
             grid_type: Grid type ("square" or "h3"). Local/national analyses
                 that opted into an H3 grid pass "h3" here; regional always
                 uses H3 regardless of this value.
+            h3_clip_to_boundary: If True, edge hexagons are clipped to the
+                study area boundary. Only meaningful for local/national
+                grid_type "h3" - regional always keeps full hexagons.
         """
         super().__init__()
         self.chunk = chunk
@@ -760,6 +764,7 @@ class ChunkRunnable(QRunnable):
         self.epsg_code = epsg_code
         self.h3_resolution = h3_resolution
         self.grid_type = grid_type
+        self.h3_clip_to_boundary = h3_clip_to_boundary
         self.result = None
         self.error = None
         self.setAutoDelete(False)  # We manage lifecycle manually
@@ -786,6 +791,7 @@ class ChunkRunnable(QRunnable):
                     int(self.epsg_code) if self.epsg_code else 4326,
                     h3_res,
                     self.feedback,
+                    clip_to_boundary=self.h3_clip_to_boundary,
                 )
             else:
                 task = GridFromBboxTask(
@@ -862,6 +868,7 @@ class StudyAreaProcessingTask(QgsTask):
         analysis_scale: str = "national",
         h3_resolution: int = None,
         grid_type: str = "square",
+        h3_clip_to_boundary: bool = False,
     ):
         """Initialize the study area processing task.
 
@@ -882,6 +889,10 @@ class StudyAreaProcessingTask(QgsTask):
                 "h3"). Ignored for regional, which always uses H3. Defaults
                 to "square" so pre-existing projects without a "grid_type"
                 key in model.json keep their current square-grid behavior.
+            h3_clip_to_boundary: If True (only meaningful when grid_type is
+                "h3"), edge hexagons are clipped to the study area boundary
+                instead of kept as full hexagons. Ignored for regional,
+                which always keeps full hexagons. Defaults to False.
 
         Raises:
             RuntimeError: If the input layer cannot be opened with OGR.
@@ -912,6 +923,9 @@ class StudyAreaProcessingTask(QgsTask):
         self.cell_size_m = cell_size_m
         self.analysis_scale = analysis_scale
         self.grid_type = grid_type
+        # Only ever applies to local/national H3 grids - Regional always
+        # keeps full hexagons regardless of this flag.
+        self.h3_clip_to_boundary = h3_clip_to_boundary and self.grid_type == "h3" and self.analysis_scale != "regional"
         if self.analysis_scale == "regional":
             self.h3_resolution = (
                 h3_resolution if h3_resolution is not None else (get_h3_resolution_for_scale("regional") or 6)
@@ -2639,6 +2653,7 @@ class StudyAreaProcessingTask(QgsTask):
                 int(self.epsg_code),
                 h3_res,
                 feedback,
+                clip_to_boundary=self.h3_clip_to_boundary,
             )
         else:
             task = GridFromBboxTask(
@@ -2754,6 +2769,7 @@ class StudyAreaProcessingTask(QgsTask):
                 epsg_code=self.epsg_code,
                 h3_resolution=self.h3_resolution,
                 grid_type=self.grid_type,
+                h3_clip_to_boundary=self.h3_clip_to_boundary,
             )
             runnables.append(runnable)
             pool.start(runnable)
