@@ -407,12 +407,12 @@ class RasterReclassificationWorkflow(WorkflowBase):
             level=Qgis.Info,
         )
 
-        return self._rasterize_grid_column(
-            column_name=self.layer_id,
-            bbox=current_bbox,
-            area_name=area_name,
-            index=index,
-        )
+        # Rasterization (when still needed - regional/H3, which has no
+        # pyramid) is performed centrally by WorkflowBase.execute() from the
+        # grid column this method just wrote; local/national visualization
+        # comes from the pyramid instead, so this method's job ends here.
+        _ = current_bbox
+        return True
 
     def _process_aggregate_for_area(
         self,

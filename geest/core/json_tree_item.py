@@ -472,7 +472,11 @@ class JsonTreeItem:
             qgis_layer_shapefile_key = analysis_mode.replace("use_", "") + "_shapefile"
             qgis_layer_raster_key = analysis_mode.replace("use_", "") + "_raster"
 
-            if "Workflow Completed" in data.get("result", "") and data.get("result_file", ""):
+            # Note: result_file is intentionally empty for grid-first
+            # workflows that skip rasterization (local/national scale -
+            # visualization now comes from the gpkg pyramid, not a raster
+            # file), so success is judged by "result" alone.
+            if "Workflow Completed" in data.get("result", ""):
                 return "Completed successfully"
 
             # First check if the item weighting is 0, or its parent factor is zero

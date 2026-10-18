@@ -461,6 +461,23 @@ class AggregationWorkflowBase(WorkflowBase):
             )
             return None
 
+    def _rasterize_result_for_area(
+        self,
+        current_bbox: QgsGeometry,
+        area_name: str,
+        index: int,
+    ) -> Optional[str]:
+        """Override: aggregates use the "{layer_id}_aggregated_*" filename.
+
+        This exact filename is a real contract, not just a visualization
+        convenience: wee_by_population_score_processor.py and friends read
+        "geoe3_aggregated_{index}.tif" directly as their own input, so the
+        "geoe3" analysis score must keep producing it - the generic
+        WorkflowBase._rasterize_grid_column naming would silently break
+        that downstream read.
+        """
+        return self.rasterize_from_grid(area_name=area_name, bbox=current_bbox, index=index)
+
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,
@@ -603,14 +620,10 @@ class AggregationWorkflowBase(WorkflowBase):
             )
             return None
 
-        # Step 2: Rasterize from grid column for VRT generation
-        result_file = self.rasterize_from_grid(
-            area_name=area_name,
-            bbox=current_bbox,
-            index=index,
-        )
-
-        return result_file
+        # Rasterization (when still needed - see _rasterize_result_for_area)
+        # is performed centrally by WorkflowBase.execute() from the grid
+        # column just aggregated above.
+        return True
 
     def _process_features_for_area(self):
         pass

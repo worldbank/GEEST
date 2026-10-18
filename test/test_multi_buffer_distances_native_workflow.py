@@ -86,10 +86,15 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
 
     def test_run_no_isochrones_uses_zero_score_fallback(self):
         """No isochrones (e.g. no points reachable from the road network)
-        should produce a neutral 0-scored raster rather than an error.
+        should produce a neutral 0-score in the grid rather than an error.
 
-        Regression test for issue #381.
+        Regression test for issue #381. Local/national indicators no longer
+        rasterize per area at all (visualization comes from the pyramid
+        instead - see geest.core.grid_pyramid_utils), so the fallback is now
+        verified against the grid column directly rather than a raster file.
         """
+        from geest.core.grid_column_utils import get_grid_column_values
+
         workflow = MultiBufferDistancesNativeWorkflow(
             item=self.indicator_item,
             cell_size_m=10.0,
@@ -106,9 +111,10 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
             self.indicator_item.attribute("result"),
             f"{workflow.workflow_name} Workflow Completed",
         )
-        result_file = self.indicator_item.attribute("result_file")
-        self.assertTrue(result_file)
-        self.assertTrue(os.path.exists(result_file))
+        self.assertFalse(self.indicator_item.attribute("result_file"))
+        values = get_grid_column_values(workflow.gpkg_path, "street_crossings")
+        self.assertTrue(values)
+        self.assertTrue(all(value == 0 for value in values))
 
     def test_road_network_cache_reused_across_clip_calls(self):
         """_clip_network_to_area must reuse the cached network layer object

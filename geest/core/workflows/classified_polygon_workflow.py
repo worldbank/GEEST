@@ -7,7 +7,6 @@ Supports grid-first mode where polygon classification scores are written
 directly to the study_area_grid column, then rasterized.
 """
 
-import os
 from typing import Optional
 from urllib.parse import unquote
 
@@ -25,7 +24,6 @@ from qgis.PyQt.QtCore import QVariant
 from geest.core import JsonTreeItem
 from geest.core.grid_column_utils import (
     clear_grid_column,
-    rasterize_grid_column,
     write_buffer_values_to_grid,
 )
 from geest.utilities import log_message
@@ -190,30 +188,11 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
             feedback=self.feedback,
         )
 
-        self.progressChanged.emit(70.0)
-
-        # Step 3: Rasterize from grid column
-        output_path = os.path.join(
-            self.workflow_directory,
-            f"{self.layer_id}_{index}.tif",
-        )
-
-        rect = current_bbox.boundingBox()
-        extent = (rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
-
-        rasterize_grid_column(
-            gpkg_path=self.gpkg_path,
-            column_name=self.layer_id,
-            output_raster_path=output_path,
-            cell_size=self.cell_size_m,
-            extent=extent,
-            nodata=-9999.0,
-            area_name=area_name,
-        )
-
+        # Rasterization (when still needed) is performed centrally by
+        # WorkflowBase.execute() from the grid column just written above.
+        _ = current_bbox, index, area_name
         self.progressChanged.emit(100.0)
-        log_message(f"Rasterized grid column to {output_path}")
-        return output_path
+        return True
 
     def _assign_reclassification_to_safety(self, layer: QgsVectorLayer) -> QgsVectorLayer:
         """

@@ -45,6 +45,7 @@ from geest.core.grid_column_utils import (
     rasterize_grid_column,
     write_raster_values_to_grid,
 )
+from geest.core.grid_pyramid_utils import invalidate_pyramid
 from geest.utilities import log_layer_count, log_message, resources_path
 
 
@@ -113,8 +114,12 @@ class WorkflowBase(QObject):
             self.working_directory = self.settings.value("last_working_directory", "")
         if not self.working_directory:
             raise ValueError("Working directory not set.")
-        # This is the lower level directory for this workflow's outputs
-        self.workflow_directory = self._create_workflow_directory()
+        # This is the lower level directory for this workflow's outputs.
+        # Created lazily (see the workflow_directory property below) - grid-
+        # first workflows that never write a file to disk should not leave
+        # an empty dimension/factor/indicator folder behind.
+        self._workflow_directory_path = self._compute_workflow_directory()
+        self._workflow_directory_created = False
         self.gpkg_path: str = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         if not os.path.exists(self.gpkg_path):
             raise ValueError(f"Study area geopackage not found at {self.gpkg_path}.")
@@ -164,6 +169,45 @@ class WorkflowBase(QObject):
         self.updateProgress(0.0)
         self.output_filename = self.attributes.get("output_filename", "")
         self.feedback.progressChanged.connect(self.updateProgress)
+
+    def _should_skip_rasterization(self) -> bool:
+        """Return True when this workflow should skip per-area rasterization.
+
+        Grid-first indicator/factor/dimension workflows at local/national
+        scale are now visualized via the scale-dependent pyramid
+        (geest.core.grid_pyramid_utils) instead of a rasterized GeoTIFF, so
+        generating one during the run is pure wasted work. The top-level
+        "geoe3" analysis score is the one exception: its raster is a real
+        input to downstream population-weighted/opportunity-masked scoring
+        (geest/core/algorithms/wee_by_population_score_processor.py and
+        friends), not just visualization, so it still needs to exist on
+        disk after the run. Regional (H3) analyses never use the pyramid
+        (no 2x2 quad aggregation over a hex grid) and keep rasterizing.
+        """
+        return getattr(self, "use_grid_first", False) and self.analysis_scale != "regional" and self.layer_id != "geoe3"
+
+    def _rasterize_result_for_area(
+        self,
+        current_bbox: QgsGeometry,
+        area_name: str,
+        index: int,
+    ) -> Optional[str]:
+        """Rasterize this workflow's grid column for one area.
+
+        Called centrally by execute() for grid-first workflows that still
+        need a raster (currently: only "geoe3", and any regional/H3
+        workflow), so indicator/factor/dimension workflow subclasses never
+        need their own rasterization code at all. Override this in a
+        subclass whose raster output has a real downstream filename
+        contract (see AggregationWorkflowBase, whose "geoe3_aggregated_*"
+        output is read directly by wee_by_population_score_processor.py).
+        """
+        return self._rasterize_grid_column(
+            column_name=self.layer_id,
+            bbox=current_bbox,
+            area_name=area_name,
+            index=index,
+        )
 
     def _study_area_bbox(self) -> QgsRectangle:
         """
@@ -635,6 +679,7 @@ class WorkflowBase(QObject):
 
             areas_processed = 0
             failed_areas = []  # [(area_name, index, error_message), ...]
+            areas_rasterization_skipped = 0
 
             try:
                 total_areas = area_iterator.area_count()
@@ -682,21 +727,10 @@ class WorkflowBase(QObject):
                                         tag="GeoE3",
                                         level=Qgis.Warning,
                                     )
-                                    raster_output = self._build_empty_features_neutral_raster(
-                                        current_area=current_area,
-                                        current_bbox=current_bbox,
-                                        index=index,
-                                        area_name=area_name,
-                                    )
-                                    if self.use_grid_first and area_name:
-                                        self._apply_grid_column_zero_fallback(area_name)
-                                    if not raster_output:
-                                        log_message(
-                                            f"Neutral fallback failed for {self.workflow_name} in area {area_name}; skipping area.",
-                                            tag="GeoE3",
-                                            level=Qgis.Warning,
-                                        )
-                                        continue
+                                    # raster_output stays None here - the
+                                    # unified fallback below (shared with
+                                    # "features existed but processing
+                                    # itself produced nothing") builds it.
                                 else:
                                     log_message(
                                         "No area features ... skipping",
@@ -704,9 +738,8 @@ class WorkflowBase(QObject):
                                         level=Qgis.Warning,
                                     )
                                     continue
-
-                            # Step 2: Process the area features - work happens in concrete class
-                            if raster_output is None:
+                            else:
+                                # Step 2: Process the area features - work happens in concrete class
                                 raster_output = self._process_features_for_area(
                                     current_area=current_area,
                                     clip_area=clip_area,
@@ -735,22 +768,58 @@ class WorkflowBase(QObject):
                             )
 
                         if not raster_output and self.supports_empty_features_fallback:
-                            # e.g. points exist but none are reachable from the road
-                            # network, so no isochrones/buffers could be produced.
+                            # Covers both "no area features at all" and
+                            # "features existed but processing itself
+                            # produced nothing" (e.g. points exist but none
+                            # are reachable from the road network, so no
+                            # isochrones/buffers could be built).
                             log_message(
-                                f"{self.workflow_name} produced no raster output for area {area_name} "
-                                f"(index {index}); using neutral (0 score) fallback output.",
+                                f"{self.workflow_name} produced no output for area {area_name} "
+                                f"(index {index}); using neutral (0 score) fallback.",
                                 tag="GeoE3",
                                 level=Qgis.Warning,
                             )
-                            raster_output = self._build_empty_features_neutral_raster(
-                                current_area=current_area,
-                                current_bbox=current_bbox,
-                                index=index,
-                                area_name=area_name,
-                            )
-                            if self.use_grid_first and area_name:
+                            if self.use_grid_first:
                                 self._apply_grid_column_zero_fallback(area_name)
+                                raster_output = True
+                            else:
+                                raster_output = self._build_empty_features_neutral_raster(
+                                    current_area=current_area,
+                                    current_bbox=current_bbox,
+                                    index=index,
+                                    area_name=area_name,
+                                )
+
+                        if self.use_grid_first:
+                            # Grid-first workflows write their score directly
+                            # to study_area_grid via SQL inside
+                            # _process_*_for_area; raster_output from those
+                            # methods (and the fallback above) is just a
+                            # truthy/falsy success signal, never a file path
+                            # - any actual rasterization happens here,
+                            # centrally, so individual workflow subclasses
+                            # never need their own rasterization code at all.
+                            if not raster_output:
+                                raise RuntimeError(
+                                    f"{self.workflow_name} produced no grid output for area "
+                                    f"{area_name} (index {index})."
+                                )
+                            if self._should_skip_rasterization():
+                                # Local/national visualization now comes
+                                # from the pyramid - no raster needed.
+                                areas_rasterization_skipped += 1
+                                continue
+                            raster_output = self._rasterize_result_for_area(
+                                current_bbox=current_bbox,
+                                area_name=area_name,
+                                index=index,
+                            )
+                            if not raster_output:
+                                raise RuntimeError(
+                                    f"{self.workflow_name} failed to rasterize grid column for area "
+                                    f"{area_name} (index {index})."
+                                )
+
                         if not raster_output:
                             raise RuntimeError(
                                 f"{self.workflow_name} produced no raster output for area {area_name} (index {index})."
@@ -803,11 +872,18 @@ class WorkflowBase(QObject):
                         log_message(traceback.format_exc(), tag="GeoE3", level=Qgis.Critical)
                         continue
 
-                # Combine all area rasters into a VRT
-                self.updateStatus("Combining area rasters...")
-                vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
+                if areas_rasterization_skipped and not output_rasters:
+                    # Every successfully-processed area intentionally
+                    # skipped rasterization (grid-first visualization now
+                    # comes from the pyramid) - no VRT to build, and this
+                    # is success, not a missing-output failure.
+                    vrt_filepath = ""
+                else:
+                    # Combine all area rasters into a VRT
+                    self.updateStatus("Combining area rasters...")
+                    vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
 
-                if not vrt_filepath and not output_rasters:
+                if not vrt_filepath and not output_rasters and not areas_rasterization_skipped:
                     # Every area failed (or none existed) - this is a real
                     # failure, not a completion, even though the per-area
                     # try/except above kept the loop running to the end.
@@ -851,6 +927,10 @@ class WorkflowBase(QObject):
                 with self.item.atomicAttributeUpdate() as attrs:
                     attrs["execution_end_time"] = datetime.datetime.now().isoformat()
                     attrs["error_file"] = None
+                if self.analysis_scale != "regional":
+                    # H3 pyramiding is out of scope (7-child hex hierarchy, not
+                    # 2x2 quad aggregation); only local/national grids qualify.
+                    invalidate_pyramid(self.gpkg_path, self.layer_id)
                 log_layer_count()  # For performance tuning, write the number of open layers to a log file
                 return True
 
@@ -932,21 +1012,34 @@ class WorkflowBase(QObject):
             area_name=area_name,
         )
 
-    def _create_workflow_directory(self) -> str:
+    def _compute_workflow_directory(self) -> str:
         """
-        Creates the directory for this workflow if it doesn't already exist.
+        Computes (but does not create) the directory for this workflow.
         It will be in the scheme of working_dir/dimension/factor/indicator
 
         Returns:
             The path to the workflow directory
         """
         paths = self.item.getPaths()
-        directory = os.path.join(self.working_directory, *paths)
-        # Create the directory if it doesn't exist
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        return os.path.join(self.working_directory, *paths)
 
-        return directory
+    @property
+    def workflow_directory(self) -> str:
+        """
+        The directory for this workflow's file outputs, created on first
+        access. Grid-first workflows that only ever write to the study area
+        geopackage never touch this property, so no empty
+        dimension/factor/indicator folder is left on disk for them.
+        """
+        if not self._workflow_directory_created:
+            os.makedirs(self._workflow_directory_path, exist_ok=True)
+            self._workflow_directory_created = True
+        return self._workflow_directory_path
+
+    @workflow_directory.setter
+    def workflow_directory(self, value: str) -> None:
+        self._workflow_directory_path = value
+        self._workflow_directory_created = False
 
     def _subset_vector_layer(self, area_geom: QgsGeometry, output_prefix: str) -> QgsVectorLayer:
         """

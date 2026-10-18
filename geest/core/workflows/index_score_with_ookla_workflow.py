@@ -17,7 +17,6 @@ from geest.core import JsonTreeItem
 from geest.core.algorithms.ookla_downloader import OoklaDownloader
 from geest.core.grid_column_utils import (
     clear_grid_column,
-    rasterize_grid_column,
     write_spatial_join_to_grid,
 )
 from geest.utilities import log_message
@@ -211,25 +210,11 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
         finally:
             ds = None
 
-        # Rasterize from grid column for VRT output
-        output_path = os.path.join(
-            self.workflow_directory,
-            f"{self.layer_id}_ookla_scored_{index}.tif",
-        )
-        rect = current_bbox.boundingBox()
-        extent = (rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
-        rasterize_grid_column(
-            gpkg_path=self.gpkg_path,
-            column_name=self.layer_id,
-            output_raster_path=output_path,
-            cell_size=self.cell_size_m,
-            extent=extent,
-            nodata=-9999.0,
-            area_name=area_name,
-        )
+        # Rasterization (when still needed) is performed centrally by
+        # WorkflowBase.execute() from the grid column just written above.
+        _ = current_bbox
         self.progressChanged.emit(100.0)
-        log_message(f"Rasterized grid column to {output_path}")
-        return output_path
+        return True
 
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(

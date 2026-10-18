@@ -175,6 +175,7 @@ class SafetyRasterWorkflow(WorkflowBase):
         """Process S2S regional nighttime lights by writing raw values to the H3 grid."""
         _ = current_area
         _ = clip_area
+        _ = current_bbox
         _ = area_features
 
         if not self._use_s2s_grid_path and not self._use_vector_path:
@@ -233,12 +234,11 @@ class SafetyRasterWorkflow(WorkflowBase):
                 level=Qgis.Info,
             )
 
-        return self._rasterize_grid_column(
-            column_name=self.layer_id,
-            bbox=current_bbox,
-            area_name=area_name,
-            index=index,
-        )
+        # Rasterization (when still needed - regional/H3, which has no
+        # pyramid) is performed centrally by WorkflowBase.execute() from the
+        # grid column this method just wrote; local/national visualization
+        # comes from the pyramid instead, so this method's job ends here.
+        return True
 
     def _apply_s2s_ntl_likert_mapping(self, area_name: str) -> int:
         """Map joined S2S NTL values to the same Likert scale as raster mode."""

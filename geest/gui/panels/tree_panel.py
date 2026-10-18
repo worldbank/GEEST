@@ -62,7 +62,7 @@ from geest.core.i18n import tr
 from geest.core.reports import StudyAreaReport
 from geest.core.settings import set_setting, setting
 from geest.core.tasks import AnalysisReportTask
-from geest.core.utilities import add_grid_layer_to_map, add_to_map, validate_network_layer
+from geest.core.utilities import add_grid_layer_to_map, add_pyramid_layer_to_map, add_to_map, validate_network_layer
 from geest.core.women_considerations import resolve_women_enabling_for_factor
 from geest.gui.dialogs import (
     AnalysisAggregationDialog,
@@ -368,13 +368,23 @@ class TreePanel(QWidget):
             else:
                 column_name = None
 
-            if column_name is None or self._get_render_strategy() == "raster":
+            if column_name is None:
                 if item.role == "analysis":
                     add_to_map(item, key=analysis_raster_key, layer_name="GeoE3 Score", group="GeoE3")
                 else:
                     add_to_map(item)
-            else:
+            elif column_name == "geoe3_masked":
+                # Raster-algebra derived (opportunity-mask processor) - out of
+                # scope for the pyramid experiment, keep the single-resolution path.
                 add_grid_layer_to_map(item, column_name, self.working_directory)
+            else:
+                add_pyramid_layer_to_map(
+                    item,
+                    column_name,
+                    self.working_directory,
+                    cell_size_m=self.cell_size_m(),
+                    analysis_scale=self.analysis_scale(),
+                )
         # TEMPORARY: Disable writing layer name into top-left overlay label.
         # show_overlay = setting(key="show_overlay", default=False)
         # if show_overlay:
@@ -517,6 +527,9 @@ class TreePanel(QWidget):
         # loading layer misdetects as an orphan). Wait until the load has
         # fully settled.
         QTimer.singleShot(3000, self.prompt_remove_orphaned_layers)
+        # Staggered later than the orphaned-layers prompt so the two modal
+        # dialogs don't stack if a project happens to need both.
+        QTimer.singleShot(6000, self.prompt_build_missing_pyramids)
         model_path = os.path.join(new_directory, "model.json")
 
         project_path = QgsProject.instance().fileName()
@@ -1057,7 +1070,11 @@ class TreePanel(QWidget):
             menu.addAction(add_geoe3_score)
 
             add_geoe3_score_grid = QAction("Add GeoE3 Score to Map (Grid)")
-            add_geoe3_score_grid.triggered.connect(lambda: add_grid_layer_to_map(item, "geoe3", self.working_directory))
+            add_geoe3_score_grid.triggered.connect(
+                lambda: add_pyramid_layer_to_map(
+                    item, "geoe3", self.working_directory, self.cell_size_m(), self.analysis_scale()
+                )
+            )
             menu.addAction(add_geoe3_score_grid)
 
             add_geoe3_by_population = QAction("Add GeoE3 by Pop to Map")
@@ -1121,7 +1138,9 @@ class TreePanel(QWidget):
             add_grid_to_map_action = QAction("Add to map (Grid)", self)
             column_name = f"dim_{item.attribute('id').lower().replace(' ', '_').replace('-', '_')}"
             add_grid_to_map_action.triggered.connect(
-                lambda _, col=column_name, i=item: add_grid_layer_to_map(i, col, self.working_directory)
+                lambda _, col=column_name, i=item: add_pyramid_layer_to_map(
+                    i, col, self.working_directory, self.cell_size_m(), self.analysis_scale()
+                )
             )
 
             # Connect actions
@@ -1148,7 +1167,9 @@ class TreePanel(QWidget):
             add_grid_to_map_action = QAction("Add to map (Grid)", self)
             column_name = f"fac_{item.attribute('id').lower().replace(' ', '_').replace('-', '_')}"
             add_grid_to_map_action.triggered.connect(
-                lambda _, col=column_name, i=item: add_grid_layer_to_map(i, col, self.working_directory)
+                lambda _, col=column_name, i=item: add_pyramid_layer_to_map(
+                    i, col, self.working_directory, self.cell_size_m(), self.analysis_scale()
+                )
             )
 
             # Connect actions
@@ -1177,7 +1198,9 @@ class TreePanel(QWidget):
             add_grid_to_map_action = QAction("Add to map (Grid)", self)
             column_name = item.attribute("id").lower().replace(" ", "_").replace("-", "_")
             add_grid_to_map_action.triggered.connect(
-                lambda _, col=column_name, i=item: add_grid_layer_to_map(i, col, self.working_directory)
+                lambda _, col=column_name, i=item: add_pyramid_layer_to_map(
+                    i, col, self.working_directory, self.cell_size_m(), self.analysis_scale()
+                )
             )
 
             # Connect actions
@@ -1776,6 +1799,133 @@ class TreePanel(QWidget):
             except Exception:  # nosec B110 — headless/test environments have no iface
                 pass
 
+    def prompt_build_missing_pyramids(self) -> None:
+        """Offer to build missing grid pyramids when an older project is opened.
+
+        Projects created before scale-dependent pyramid visualization existed
+        have no row_index/col_index backfill and no pyramid tables for their
+        already-scored columns, so they still fall back to a single-resolution
+        grid layer. Opening such a project is the natural moment to offer a
+        one-time upgrade, mirroring prompt_remove_orphaned_layers().
+        """
+        # This runs from a QTimer.singleShot, so the panel may have been
+        # destroyed (plugin reload) before the timer fired.
+        if sip.isdeleted(self):
+            return
+        if not self.working_directory:
+            return
+        # H3 regional analyses never use the pyramid system (no 2x2 quad
+        # aggregation over a hex grid).
+        if self.analysis_scale() == "regional":
+            return
+        # Never kick off a rebuild while other background tasks run.
+        if QgsApplication.taskManager().countActiveTasks() > 0:
+            log_message("Skipping pyramid migration check: background tasks are running")
+            return
+
+        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+        if not os.path.exists(gpkg_path):
+            return
+
+        from osgeo import ogr
+
+        from geest.core.grid_column_utils import get_all_column_names
+        from geest.core.grid_pyramid_utils import OUT_OF_SCOPE_PYRAMID_COLUMNS, has_pyramid_structure
+
+        model_path = os.path.join(self.working_directory, "model.json")
+        candidate_columns = [c for c in get_all_column_names(model_path) if c not in OUT_OF_SCOPE_PYRAMID_COLUMNS]
+        if not candidate_columns:
+            return
+
+        ds = ogr.Open(gpkg_path, 0)
+        if ds is None:
+            return
+        layer = ds.GetLayerByName("study_area_grid")
+        if layer is None:
+            ds = None
+            return
+        layer_defn = layer.GetLayerDefn()
+        field_names = {layer_defn.GetFieldDefn(i).GetName() for i in range(layer_defn.GetFieldCount())}
+        ds = None
+
+        cell_size_m = self.cell_size_m()
+
+        # Only offer to pyramid columns that actually exist and have been
+        # scored - a column the analysis has never written to is not
+        # "missing its pyramid", there's simply nothing to show yet. This is
+        # a one-time migration offer, so it checks whether the pyramid
+        # structure was EVER built (has_pyramid_structure), not whether it
+        # is currently fresh (is_pyramid_fresh) - every successful analysis
+        # run invalidates freshness, and a merely-stale column is rebuilt
+        # transparently on demand the next time it's viewed.
+        scored_columns = [c for c in candidate_columns if c in field_names]
+        missing = [c for c in scored_columns if not has_pyramid_structure(gpkg_path, c, cell_size_m)]
+        if not missing:
+            return
+
+        answer = QMessageBox.question(
+            self,
+            tr("GeoE3"),
+            tr(
+                "This project was created before GeoE3's fast multi-resolution grid "
+                "visualization existed. {count} scored output(s) don't have it built yet, "
+                "so they'd still render the old single-resolution way until this runs "
+                "once.\n\nBuild it now?"
+            ).format(count=len(missing)),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        def _build(task) -> dict:
+            from geest.core.grid_pyramid_utils import refresh_pyramid_column
+
+            succeeded, failed = [], []
+            total = len(missing)
+            for index, column in enumerate(missing):
+                if task.isCanceled():
+                    break
+                if refresh_pyramid_column(gpkg_path, column, cell_size_m):
+                    succeeded.append(column)
+                else:
+                    failed.append(column)
+                task.setProgress(int((index + 1) / total * 100))
+            return {"succeeded": succeeded, "failed": failed}
+
+        def _finished(exception, result=None) -> None:
+            if sip.isdeleted(self):
+                return
+            if exception is not None or result is None:
+                log_message(f"Pyramid migration task failed: {exception}", level=Qgis.Critical)
+                return
+            if result["failed"]:
+                log_message(
+                    f"Pyramid migration: failed to build pyramid(s) for {result['failed']}",
+                    level=Qgis.Warning,
+                )
+            try:
+                iface.messageBar().pushMessage(
+                    tr("GeoE3"),
+                    tr("Built fast grid visualization for {count} output(s).{failed_note}").format(
+                        count=len(result["succeeded"]),
+                        failed_note=(
+                            tr(" ({count} failed — see log)").format(count=len(result["failed"]))
+                            if result["failed"]
+                            else ""
+                        ),
+                    ),
+                    level=Qgis.Info if not result["failed"] else Qgis.Warning,
+                    duration=8,
+                )
+            except Exception:  # nosec B110 — headless/test environments have no iface
+                pass
+
+        task = QgsTask.fromFunction("GeoE3 pyramid migration", _build, on_finished=_finished)
+        # Keep a reference so the task is not garbage collected mid-run.
+        self._pyramid_migration_task = task
+        QgsApplication.taskManager().addTask(task)
+
     def add_study_area_to_map(self):
         """Add the study area layers to the map.
 
@@ -2099,7 +2249,10 @@ class TreePanel(QWidget):
         # Include the GHSL layer in the attributes by default
         attributes["ghsl_layer_path"] = self.ghsl_layer_path()
 
-        if attributes.get("result_file", None) and self.run_only_incomplete:
+        # Grid-first workflows leave result_file empty on success (no raster
+        # is produced any more), so "already done" has to be judged the same
+        # way the tree's status icon judges it, not by result_file alone.
+        if item.getStatus() == "Completed successfully" and self.run_only_incomplete:
             return
         if role == item.role and role == "factor":
             attributes["analysis_mode"] = "factor_aggregation"
@@ -2379,10 +2532,20 @@ class TreePanel(QWidget):
                 layer_name="GeoE3 Score",
                 group="GeoE3",
             )
-        elif column_name is None or self._get_render_strategy() == "raster":
+        elif column_name is None:
             add_to_map(item)
-        else:
+        elif column_name == "geoe3_masked":
+            # Raster-algebra derived (opportunity-mask processor) - out of
+            # scope for the pyramid experiment, keep the single-resolution path.
             add_grid_layer_to_map(item, column_name, self.working_directory)
+        else:
+            add_pyramid_layer_to_map(
+                item,
+                column_name,
+                self.working_directory,
+                cell_size_m=self.cell_size_m(),
+                analysis_scale=self.analysis_scale(),
+            )
 
         # Now cancel the animated icon
         node_index = self.model.itemIndex(item)

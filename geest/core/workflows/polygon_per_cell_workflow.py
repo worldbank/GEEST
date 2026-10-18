@@ -24,7 +24,6 @@ from geest.core.constants import DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS
 from geest.core.grid_column_utils import (
     clear_grid_column,
     count_features_per_grid_cell,
-    rasterize_grid_column,
     write_joined_values_to_grid,
 )
 from geest.utilities import log_message
@@ -205,30 +204,11 @@ class PolygonPerCellWorkflow(WorkflowBase):
             feedback=self.feedback,
         )
 
-        self.progressChanged.emit(50.0)
-
-        # Rasterize from grid column
-        output_path = os.path.join(
-            self.workflow_directory,
-            f"{self.layer_id}_{index}.tif",
-        )
-
-        rect = current_bbox.boundingBox()
-        extent = (rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
-
-        rasterize_grid_column(
-            gpkg_path=self.gpkg_path,
-            column_name=self.layer_id,
-            output_raster_path=output_path,
-            cell_size=self.cell_size_m,
-            extent=extent,
-            nodata=-9999.0,
-            area_name=area_name,
-        )
-
+        # Rasterization (when still needed) is performed centrally by
+        # WorkflowBase.execute() from the grid column just written above.
+        _ = current_bbox, area_name, index
         self.progressChanged.emit(100.0)
-        log_message(f"Rasterized grid column to {output_path}")
-        return output_path
+        return True
 
     def _resolve_s2s_fields(self):
         """Resolve ordered S2S fields configured for this indicator."""
@@ -341,34 +321,17 @@ class PolygonPerCellWorkflow(WorkflowBase):
         finally:
             ds = None
 
-        self.progressChanged.emit(85.0)
-
-        # Rasterize from computed Education proxy column.
-        output_path = os.path.join(
-            self.workflow_directory,
-            f"{self.layer_id}_{index}.tif",
-        )
-
-        rect = current_bbox.boundingBox()
-        extent = (rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
-
-        rasterize_grid_column(
-            gpkg_path=self.gpkg_path,
-            column_name=self.layer_id,
-            output_raster_path=output_path,
-            cell_size=self.cell_size_m,
-            extent=extent,
-            nodata=-9999.0,
-            area_name=area_name,
-        )
-
+        # Rasterization (when still needed - regional/H3, which has no
+        # pyramid) is performed centrally by WorkflowBase.execute() from the
+        # grid column just written above.
+        _ = current_bbox, index
         self.progressChanged.emit(100.0)
         log_message(
             f"Processed Education (S2S urbanization proxy) for area {area_name} into column {self.layer_id}",
             tag="GeoE3",
             level=Qgis.Info,
         )
-        return output_path
+        return True
 
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(

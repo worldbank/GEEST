@@ -24,8 +24,8 @@ The Contextual Dimension refers to the laws and policies that shape workplace ge
 ---
 #### > If the analysis is tailored for Women's Enabling Environments, GeoE3 utilizes data from the WBL database, as follows:
 <p align="justify">
-    
-<strong>Workplace Discrimination</strong> involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields and it is btained from the Workplace Index score of the WBL.
+
+<strong>Workplace Discrimination</strong> involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields and it is obtained from the Workplace Index score of the WBL.
 </p>
 <p align="justify">
 <strong>Regulatory Frameworks</strong> pertain to laws and policies that protect women’s employment rights, such as childcare support and parental leave, influencing their workforce participation.This indicator is composed by the Workplace Index score of the WBL database.
@@ -33,7 +33,7 @@ The Contextual Dimension refers to the laws and policies that shape workplace ge
 <p align="justify">
 <strong>Finacial Inclusion</strong> involves laws concerning women’s access to financial resources like loans and credit, which is crucial for starting businesses and investing in economic opportunities. This indicator is composed by the Workplace Index score of the WBL 2024.
 </p>
-The conversion of the WBL scores to the corresponding GeoWEAF classess is represented below.
+The conversion of the WBL scores to the corresponding GeoWEAF classes is represented below.
 <p align="center">
 <img width="420" height="209" alt="image" src="https://github.com/user-attachments/assets/d6b223bf-25dc-4e86-bb60-77c93762782c" />
 </p>

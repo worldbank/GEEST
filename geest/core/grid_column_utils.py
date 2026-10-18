@@ -979,9 +979,9 @@ def clear_grid_column(gpkg_path: str, column_name: str) -> bool:
 def fill_grid_column_zero_for_area(
     gpkg_path: str,
     column_name: str,
-    area_name: str,
+    area_name: Optional[str] = None,
 ) -> bool:
-    """Set all NULL values to 0 in a grid column for a specific area.
+    """Set all NULL values to 0 in a grid column, optionally for one area.
 
     Used when a workflow produces no features for an area (e.g. OSM points
     outside the AOI).  Score 0 ("not enabling") is a meaningful result and
@@ -992,6 +992,13 @@ def fill_grid_column_zero_for_area(
         gpkg_path: Path to the GeoPackage containing study_area_grid.
         column_name: Name of the column to fill.
         area_name: The area_name value identifying which cells to update.
+            Some study areas never populate area_name on their grid rows at
+            all (a single, un-partitioned area) even though the caller
+            (AreaIterator) still synthesizes a non-null name like
+            "none_part0" for iteration bookkeeping - filtering on that
+            synthetic name would match zero real rows. When area_name is
+            falsy, OR this grid genuinely has no real area_name values,
+            every NULL cell in the column is filled instead.
 
     Returns:
         True if successful, False otherwise.
@@ -1008,14 +1015,23 @@ def fill_grid_column_zero_for_area(
             log_message(f"Could not open GeoPackage for write: {gpkg_path}", level=Qgis.Critical)
             return False
 
+        area_predicate = ""
+        if area_name:
+            layer = ds.GetLayerByName("study_area_grid")
+            layer.SetAttributeFilter("area_name IS NOT NULL")
+            area_partitioning_in_use = layer.GetFeatureCount() > 0
+            layer.SetAttributeFilter(None)
+            if area_partitioning_in_use:
+                area_predicate = f"area_name = {_quote_sql_literal(area_name)} AND "
+
         sql = (
             f'UPDATE study_area_grid SET "{sanitized_column}" = 0 '  # nosec B608
-            f"WHERE area_name = '{area_name}' AND \"{sanitized_column}\" IS NULL"
+            f'WHERE {area_predicate}"{sanitized_column}" IS NULL'
         )
         _execute_sql_with_retry(ds, sql)
         ds = None
         log_message(
-            f"Set score 0 for NULL cells in column {sanitized_column} for area {area_name}",
+            f"Set score 0 for NULL cells in column {sanitized_column} for area {area_name or '(all areas)'}",
         )
         return True
 

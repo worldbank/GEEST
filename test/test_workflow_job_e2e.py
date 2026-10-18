@@ -91,9 +91,16 @@ class TestWorkflowJobEndToEnd(unittest.TestCase):
             result,
             msg=f"workflow did not complete: result={result!r} error={error!r}",
         )
-        result_file = item.attribute("result_file", "")
-        self.assertTrue(result_file, "completed workflow must record a result_file")
-        self.assertTrue(os.path.exists(result_file), f"missing output: {result_file}")
+        # Local/national indicators no longer rasterize per area at all
+        # (visualization comes from the pyramid instead - see
+        # geest.core.grid_pyramid_utils), so completion is now verified
+        # against the grid column directly rather than a raster file.
+        from geest.core.grid_column_utils import get_grid_column_values
+
+        self.assertFalse(item.attribute("result_file", ""))
+        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+        values = get_grid_column_values(gpkg_path, "e2e_points_per_cell")
+        self.assertTrue(values, "completed workflow must have scored grid cells")
 
     def test_mode_switch_does_not_orphan_configured_layer(self):
         """A polyline indicator configured through the OSM transport mode

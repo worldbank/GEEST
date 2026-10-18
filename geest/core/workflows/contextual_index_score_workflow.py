@@ -22,10 +22,7 @@ from qgis.core import (  # noqa: F401
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem  # noqa: unused F401
-from geest.core.grid_column_utils import (
-    rasterize_grid_column,
-    write_uniform_value_to_grid,
-)
+from geest.core.grid_column_utils import write_uniform_value_to_grid
 from geest.utilities import log_message
 
 from .contextual_index_score_mappings import score_mapping
@@ -163,37 +160,11 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
             )
             self._grid_value_written = True
 
-        self.progressChanged.emit(50.0)
-
-        # Rasterize from grid column
-        output_path = os.path.join(
-            self.workflow_directory,
-            f"{self.layer_id}_{index}.tif",
-        )
-
-        rect = current_bbox.boundingBox()
-        extent = (rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
-
-        success = rasterize_grid_column(
-            gpkg_path=self.gpkg_path,
-            column_name=self.layer_id,
-            output_raster_path=output_path,
-            cell_size=self.cell_size_m,
-            extent=extent,
-            nodata=-9999.0,
-            area_name=area_name,
-        )
-        if not success:
-            log_message(
-                f"No grid cells to rasterize for {self.layer_id} in area {area_name}; "
-                "falling back to a neutral raster output.",
-                level=Qgis.Warning,
-            )
-            return None
-
+        # Rasterization (when still needed) is performed centrally by
+        # WorkflowBase.execute() from the grid column just written above.
+        _ = current_bbox, area_name
         self.progressChanged.emit(100.0)
-        log_message(f"Rasterized grid column to {output_path}")
-        return output_path
+        return True
 
     def create_scored_boundary_layer(self, clip_area: QgsGeometry, index: int) -> QgsVectorLayer:
         """

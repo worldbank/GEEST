@@ -367,6 +367,166 @@ def add_grid_layer_to_map(
     repaint_layer.triggerRepaint()
     iface.mapCanvas().refresh()
 
+
+def add_pyramid_layer_to_map(
+    item: "JsonTreeItem",
+    column_name: str,
+    working_directory: str,
+    cell_size_m: float,
+    analysis_scale: str = "national",
+    layer_name: str = None,
+    group: str = "GeoE3",
+):
+    """Add a scale-dependent pyramid of grid layers for one output column.
+
+    Replaces add_grid_layer_to_map() for local/national (square-grid)
+    analyses: instead of one single-resolution layer, builds/refreshes a
+    multi-resolution vector pyramid (see geest.core.grid_pyramid_utils) and
+    adds one QgsLayerTreeGroup containing one layer per exposed pyramid
+    level, each scale-dependent so only one renders at a given zoom -
+    replacing the need to ever rasterize/mask a GeoTIFF for visualization.
+
+    Regional (H3) analyses fall back to add_grid_layer_to_map(): H3's
+    7-child hex hierarchy doesn't support 2x2 quad aggregation.
+
+    Args:
+        item: The tree item (indicator/factor/dimension/analysis) to display.
+        column_name: The column in study_area_grid to symbolize.
+        working_directory: Path to the working directory containing study_area.gpkg.
+        cell_size_m: The analysis grid's native cell size.
+        analysis_scale: "national"/"local" or "regional".
+        layer_name: Optional display name for the output group. Defaults to item name.
+        group: The top-level group name. Defaults to "GeoE3".
+    """
+    if analysis_scale == "regional":
+        add_grid_layer_to_map(item, column_name, working_directory, layer_name, group)
+        return
+
+    if not working_directory:
+        log_message("Working directory is not set. Cannot add pyramid layer.", tag="GeoE3", level=Qgis.Warning)
+        return
+
+    gpkg_path = os.path.join(working_directory, "study_area", "study_area.gpkg")
+    if not os.path.exists(gpkg_path):
+        log_message(f"GeoPackage not found: {gpkg_path}", tag="GeoE3", level=Qgis.Warning)
+        return
+
+    from geest.core.grid_pyramid_utils import (
+        get_exposed_levels,
+        is_pyramid_fresh,
+        refresh_pyramid_column,
+        scale_denominator_for_cell_size,
+    )
+
+    if not is_pyramid_fresh(gpkg_path, column_name):
+        if not refresh_pyramid_column(gpkg_path, column_name, cell_size_m):
+            log_message(
+                f"Failed to build pyramid for column '{column_name}'.",
+                tag="GeoE3",
+                level=Qgis.Warning,
+            )
+            return
+
+    levels = get_exposed_levels(gpkg_path, column_name, cell_size_m)  # finest first: [(cs, table_or_None), ...]
+
+    if not layer_name:
+        layer_name = item.data(0)
+
+    import tempfile
+
+    from geest.utilities import resources_path
+
+    template_path = resources_path("resources", "qml", "indicator-vector-template.qml")
+    if not os.path.exists(template_path):
+        log_message(f"QML template not found: {template_path}", tag="GeoE3", level=Qgis.Warning)
+        return
+    with open(template_path, "r") as f:
+        qml_template = f.read()
+
+    project = QgsProject.instance()
+    root = project.layerTreeRoot()
+    geoe3_group = root.findGroup(group)
+    if geoe3_group is None:
+        geoe3_group = root.insertGroup(0, group)
+        geoe3_group.setIsMutuallyExclusive(True)
+
+    path_list = item.getPaths()[:-1]
+    parent_group = geoe3_group
+    for path in path_list:
+        sub_group = parent_group.findGroup(path)
+        if sub_group is None:
+            sub_group = parent_group.addGroup(path)
+            sub_group.setIsMutuallyExclusive(True)
+        parent_group = sub_group
+
+    # Replace any previously-added pyramid group for this output so re-runs
+    # don't accumulate duplicate groups/layers. removeChildNode() alone only
+    # detaches the tree node - it does not deregister the underlying
+    # QgsMapLayer objects from QgsProject, which would otherwise leak one
+    # set of 3 layers per repeat click.
+    existing_output_group = parent_group.findGroup(layer_name)
+    if existing_output_group is not None:
+        stale_layer_ids = [child.layerId() for child in existing_output_group.children() if hasattr(child, "layerId")]
+        if stale_layer_ids:
+            project.removeMapLayers(stale_layer_ids)
+        parent_group.removeChildNode(existing_output_group)
+    # Deliberately NOT mutually exclusive: all 3 levels stay checked
+    # simultaneously, and setScaleBasedVisibility() on each layer is what
+    # decides which one actually renders at the current zoom.
+    output_group = parent_group.addGroup(layer_name)
+
+    scales = [scale_denominator_for_cell_size(cs) for cs, _table in levels]
+
+    for index, (cell_size, table_name) in enumerate(levels):
+        # Every level table (including the base study_area_grid itself) is
+        # a wide table using the same real column name - there's no
+        # separate "value" field, so filtering/styling is identical at
+        # every level.
+        layer_uri = f"{gpkg_path}|layername={table_name or 'study_area_grid'}"
+
+        level_layer_name = f"{layer_name} ({int(cell_size)}m)"
+        vlayer = QgsVectorLayer(layer_uri, level_layer_name, "ogr")
+        if not vlayer.isValid():
+            log_message(f"Pyramid level layer is invalid: {layer_uri}", tag="GeoE3", level=Qgis.Warning)
+            continue
+
+        vlayer.setSubsetString(f'"{column_name}" IS NOT NULL')
+
+        qml_content = qml_template.replace("[attribute]", column_name)
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".qml", delete=False) as tmp:
+            tmp.write(qml_content)
+            tmp_path = tmp.name
+        try:
+            result = vlayer.loadNamedStyle(tmp_path)
+            if not result[0]:
+                log_message(f"Failed to apply style to {level_layer_name}: {result[1]}", level=Qgis.Warning)
+        finally:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
+        # Finest level has no inner (zoomed-in) limit; coarsest has no outer
+        # (zoomed-out) limit. Adjacent levels share their boundary scale
+        # exactly, for a seamless handoff with neither gap nor overlap.
+        vlayer.setScaleBasedVisibility(True)
+        vlayer.setMaximumScale(0 if index == 0 else scales[index - 1])
+        vlayer.setMinimumScale(0 if index == len(levels) - 1 else scales[index])
+
+        project.addMapLayer(vlayer, False)
+        layer_tree_layer = output_group.addLayer(vlayer)
+        layer_tree_layer.setItemVisibilityChecked(True)
+
+    output_group.setExpanded(False)
+    current_group = parent_group
+    while current_group is not None:
+        current_group.setExpanded(True)
+        current_group.setItemVisibilityChecked(True)
+        current_group = current_group.parent()
+
+    iface.mapCanvas().refresh()
+    log_message(f"Added pyramid layer group '{layer_name}' with {len(levels)} scale-dependent levels.")
+
     log_message(
         f"Grid layer {layer_name} for column {column_name} added to map.",
         tag="GeoE3",
