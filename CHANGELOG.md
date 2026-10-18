@@ -86,6 +86,29 @@ version per the policy above.
   docstring): GHSL/Ookla, transport/generic polyline/point modes, and the
   regional S2S-backed equivalents of nighttime lights/environmental
   hazards.
+- `pyarrow` added to the nix dev shell (devShell tooling and the
+  QGIS-bundled Python both). A benchmark comparing GeoPackage, Shapefile,
+  FlatGeobuf and GeoParquet writes/reads found the file format made
+  almost no difference to speed - the bottleneck was GDAL/OGR's
+  per-feature Python API (`CreateFeature()`/feature iteration), not the
+  on-disk format - so rather than migrate formats, the plugin's biggest
+  bulk vector writes now try GDAL's columnar Arrow-batch API
+  (`Layer.WritePyArrow()`) first, which got ~1.75x faster writes on the
+  SAME GeoPackage files. New `geest/core/arrow_batch_writer.py` helper:
+  if pyarrow isn't importable (not every QGIS install bundles it, though
+  OSGeo4W's Windows installer does by default), it returns `False` and
+  every call site falls straight back to its original per-feature
+  `CreateFeature()` loop - no format change, no hard dependency. Wired
+  into `UnifiedWriterThread._write_grid_batch`/`_write_geometry_batch`
+  (`study_area_processing_task.py`) - the base study-area grid write, the
+  biggest cell counts every study area creation produces.
+- Separately, H3 grid generation's `bbox_to_wgs84()`/
+  `transform_wgs84_to_target()` (`geest/core/h3_utils.py`) were rebuilding
+  a fresh `osr.CoordinateTransformation` on every single call - and both
+  run once per grid cell, tens to hundreds of thousands of times per
+  study area. Benchmarked ~20-30x slower than reusing one for the same
+  EPSG pair; now cached thread-locally (keyed by source/target EPSG),
+  cutting H3 grid generation time roughly 4x in testing.
 
 ### Fixed
 
