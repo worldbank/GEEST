@@ -433,7 +433,8 @@ def add_pyramid_layer_to_map(
 
         h3_resolution = grid_type_utils.get_h3_resolution(working_directory)
         if not is_pyramid_fresh(gpkg_path, column_name):
-            if not refresh_h3_pyramid_column(gpkg_path, column_name, h3_resolution):
+            clip_to_boundary = grid_type_utils.get_h3_clip_to_boundary(working_directory)
+            if not refresh_h3_pyramid_column(gpkg_path, column_name, h3_resolution, clip_to_boundary=clip_to_boundary):
                 log_message(
                     f"Failed to build H3 pyramid for column '{column_name}'.",
                     tag="GeoE3",

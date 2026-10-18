@@ -945,7 +945,10 @@ class WorkflowBase(QObject):
                         from geest.core.h3_pyramid_utils import refresh_h3_pyramid_column
 
                         h3_resolution = grid_type_utils.get_h3_resolution(self.working_directory)
-                        refresh_h3_pyramid_column(self.gpkg_path, self.layer_id, h3_resolution)
+                        clip_to_boundary = grid_type_utils.get_h3_clip_to_boundary(self.working_directory)
+                        refresh_h3_pyramid_column(
+                            self.gpkg_path, self.layer_id, h3_resolution, clip_to_boundary=clip_to_boundary
+                        )
                     else:
                         from geest.core.grid_pyramid_utils import refresh_pyramid_column
 

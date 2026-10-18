@@ -139,7 +139,7 @@ class GridFromBboxH3Task(QgsTask):
 
             # Transform boundary coordinates to target CRS
             transformed_coords = []
-            for lon, lat in boundary:
+            for lat, lon in boundary:
                 tx, ty = transform_wgs84_to_target(lon, lat, self.target_epsg)
                 transformed_coords.append((tx, ty))
 

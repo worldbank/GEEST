@@ -170,9 +170,11 @@ def bbox_to_wgs84(
     """
     source_srs = osr.SpatialReference()
     source_srs.ImportFromEPSG(source_epsg)
+    source_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     target_srs = osr.SpatialReference()
     target_srs.ImportFromEPSG(4326)
+    target_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     transform = osr.CoordinateTransformation(source_srs, target_srs)
 
@@ -186,7 +188,7 @@ def bbox_to_wgs84(
 
     wgs84_points = []
     for px, py in points:
-        lat, lon, _ = transform.TransformPoint(px, py)
+        lon, lat, _ = transform.TransformPoint(px, py)
         wgs84_points.append((lon, lat))
 
     wgs84_xmin = min(p[0] for p in wgs84_points)
@@ -214,9 +216,11 @@ def transform_wgs84_to_target(
     """
     source_srs = osr.SpatialReference()
     source_srs.ImportFromEPSG(4326)
+    source_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     target_srs = osr.SpatialReference()
     target_srs.ImportFromEPSG(target_epsg)
+    target_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     transform = osr.CoordinateTransformation(source_srs, target_srs)
     tx, ty, _ = transform.TransformPoint(x, y)

@@ -138,8 +138,64 @@ def has_h3_pyramid_structure(gpkg_path: str, column_name: str, base_h3_resolutio
         return False
 
 
+def _load_clip_boundary_geom(ds):
+    """Load the union of every study_area_clip_polygons feature, or None.
+
+    Mirrors the geometry GridFromBboxH3Task clips the base grid against
+    (see StudyAreaProcessingTask's dissolved AOI), so a coarser pyramid
+    level's edge cells are clipped to the exact same boundary the base
+    grid itself was clipped to - not an approximation of it.
+
+    Args:
+        ds: Open OGR DataSource for the GeoPackage.
+
+    Returns:
+        A single (possibly multi-part) OGR geometry, or None if the layer
+        is missing/empty.
+    """
+    layer = ds.GetLayerByName("study_area_clip_polygons")
+    if layer is None:
+        return None
+    union_geom = None
+    layer.ResetReading()
+    feature = layer.GetNextFeature()
+    while feature is not None:
+        geom = feature.GetGeometryRef()
+        if geom is not None and not geom.IsEmpty():
+            clone = geom.Clone()
+            union_geom = clone if union_geom is None else union_geom.Union(clone)
+        feature = layer.GetNextFeature()
+    return union_geom
+
+
+def _clip_to_boundary(polygon_geometry, boundary_geom):
+    """Return polygon_geometry, clipped to boundary_geom if it crosses the edge.
+
+    A cell fully inside the boundary is returned unchanged - Intersection()
+    is only computed for genuine edge cells, since it is pure wasted work
+    for interior ones. A cell with no overlap at all returns None (should
+    not normally happen: every coarser cell is derived from finer cells
+    that already overlap the boundary).
+
+    Args:
+        polygon_geometry: The cell geometry, already in the target CRS.
+        boundary_geom: The study area boundary geometry, same CRS.
+
+    Returns:
+        A geometry to store, or None if the cell has no overlap at all.
+    """
+    if boundary_geom.Contains(polygon_geometry):
+        return polygon_geometry
+    if not boundary_geom.Intersects(polygon_geometry):
+        return None
+    clipped = boundary_geom.Intersection(polygon_geometry)
+    if clipped is None or clipped.IsEmpty():
+        return None
+    return clipped
+
+
 def _ensure_h3_level_table_scaffold(
-    ds, h3_module, resolution: int, source_table: str, srs, target_epsg
+    ds, h3_module, resolution: int, source_table: str, srs, target_epsg, boundary_geom=None
 ) -> Optional[str]:
     """Ensure one H3 level's wide table exists with its h3_index/geometry scaffold.
 
@@ -156,6 +212,10 @@ def _ensure_h3_level_table_scaffold(
             previous pyramid level) to derive this level's cells from.
         srs: Spatial reference to create the table with.
         target_epsg: EPSG code of srs, or None if unknown (assumed WGS84).
+        boundary_geom: If given, edge cells are clipped to this geometry -
+            matches the base grid's own clip_to_boundary behavior (see
+            geest.core.grid_type_utils.get_h3_clip_to_boundary). None
+            (the default) keeps every cell as a full, unclipped hexagon.
 
     Returns:
         The level table's name, or None on failure.
@@ -204,6 +264,11 @@ def _ensure_h3_level_table_scaffold(
             ring.CloseRings()
             polygon_geometry = ogr.Geometry(ogr.wkbPolygon)
             polygon_geometry.AddGeometry(ring)
+
+            if boundary_geom is not None:
+                polygon_geometry = _clip_to_boundary(polygon_geometry, boundary_geom)
+                if polygon_geometry is None:
+                    continue
 
             feature = ogr.Feature(layer_defn)
             feature.SetField("h3_index", parent_cell)
@@ -320,7 +385,9 @@ def _refresh_h3_level_column_values(
         _execute_sql_with_retry(ds, sql)
 
 
-def refresh_h3_pyramid_column(gpkg_path: str, column_name: str, base_h3_resolution: Optional[int]) -> bool:
+def refresh_h3_pyramid_column(
+    gpkg_path: str, column_name: str, base_h3_resolution: Optional[int], clip_to_boundary: bool = False
+) -> bool:
     """(Re)populate one column across every H3 pyramid level table, cascading from the base grid.
 
     Idempotent and safe to call repeatedly, exactly like
@@ -330,6 +397,12 @@ def refresh_h3_pyramid_column(gpkg_path: str, column_name: str, base_h3_resoluti
         gpkg_path: Path to the GeoPackage containing study_area_grid.
         column_name: The study_area_grid score column to pyramid.
         base_h3_resolution: The analysis grid's native H3 resolution.
+        clip_to_boundary: If True, every level's edge cells are clipped to
+            study_area_clip_polygons, matching the base grid's own
+            clip_to_boundary behavior - see
+            geest.core.grid_type_utils.get_h3_clip_to_boundary. Only
+            meaningful the first time a level table is scaffolded; an
+            already-built level table is never retroactively re-clipped.
 
     Returns:
         True on success, False on failure.
@@ -392,9 +465,13 @@ def refresh_h3_pyramid_column(gpkg_path: str, column_name: str, base_h3_resoluti
         srs = grid_layer.GetSpatialRef()
         target_epsg = _epsg_from_srs(srs)
 
+        boundary_geom = _load_clip_boundary_geom(ds) if clip_to_boundary else None
+
         source_table = "study_area_grid"
         for resolution in resolutions[1:]:
-            table_name = _ensure_h3_level_table_scaffold(ds, h3, resolution, source_table, srs, target_epsg)
+            table_name = _ensure_h3_level_table_scaffold(
+                ds, h3, resolution, source_table, srs, target_epsg, boundary_geom
+            )
             if not table_name:
                 ds = None
                 return False
@@ -419,6 +496,91 @@ def refresh_h3_pyramid_column(gpkg_path: str, column_name: str, base_h3_resoluti
 
     except Exception as error:
         log_message(f"Error refreshing H3 pyramid for column {column_name}: {error}", level=Qgis.Critical)
+        return False
+
+
+def build_h3_pyramid_scaffold(
+    gpkg_path: str, base_h3_resolution: Optional[int], clip_to_boundary: bool = False
+) -> bool:
+    """Build every H3 pyramid level's geometry scaffold, with no score columns yet.
+
+    The scaffold (h3_index + geometry per level) only depends on the base
+    grid's h3_index values - not on any particular indicator's score
+    column - so there is no reason to wait until an indicator actually
+    runs before building it. Call this once, right after the base grid is
+    written during study area creation (see
+    StudyAreaProcessingTask.run()), so every level table already exists by
+    the time a user opens an indicator's properties dialog or a workflow
+    finishes. refresh_h3_pyramid_column() then only has to add/populate one
+    REAL column per level - plain SQL, fast - instead of also constructing
+    geometry for potentially tens of thousands of cells on that first call.
+
+    Idempotent: _ensure_h3_level_table_scaffold() skips any level table
+    that already has rows, so calling this again (e.g. from
+    refresh_h3_pyramid_column() for the first real column) is cheap.
+
+    Args:
+        gpkg_path: Path to the GeoPackage containing study_area_grid.
+        base_h3_resolution: The analysis grid's native H3 resolution.
+        clip_to_boundary: If True, edge cells at every level are clipped to
+            study_area_clip_polygons - see
+            geest.core.grid_type_utils.get_h3_clip_to_boundary.
+
+    Returns:
+        True on success, False on failure.
+    """
+    if not os.path.exists(gpkg_path):
+        log_message(f"GeoPackage not found: {gpkg_path}", level=Qgis.Warning)
+        return False
+
+    if base_h3_resolution is None:
+        log_message(
+            "Cannot build H3 pyramid scaffold: no H3 resolution configured for this project", level=Qgis.Warning
+        )
+        return False
+
+    try:
+        import h3
+    except ImportError:
+        log_message(
+            "H3 library not available. Install with: pip install h3",
+            level=Qgis.Warning,
+        )
+        return False
+
+    resolutions = compute_h3_level_resolutions(base_h3_resolution)
+
+    try:
+        ds = _open_gpkg_for_write(gpkg_path)
+        if not ds:
+            log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
+            return False
+
+        grid_layer = ds.GetLayerByName("study_area_grid")
+        if not grid_layer:
+            log_message("study_area_grid layer not found", level=Qgis.Critical)
+            ds = None
+            return False
+
+        srs = grid_layer.GetSpatialRef()
+        target_epsg = _epsg_from_srs(srs)
+        boundary_geom = _load_clip_boundary_geom(ds) if clip_to_boundary else None
+
+        source_table = "study_area_grid"
+        for resolution in resolutions[1:]:
+            table_name = _ensure_h3_level_table_scaffold(
+                ds, h3, resolution, source_table, srs, target_epsg, boundary_geom
+            )
+            if not table_name:
+                ds = None
+                return False
+            source_table = table_name
+
+        ds = None
+        return True
+
+    except Exception as error:
+        log_message(f"Error building H3 pyramid scaffold: {error}", level=Qgis.Critical)
         return False
 
 

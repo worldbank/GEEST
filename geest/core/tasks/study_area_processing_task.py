@@ -1609,6 +1609,26 @@ class StudyAreaProcessingTask(QgsTask):
             #    self-healing it in place if anything is amiss.
             self._verify_gpkg_health()
 
+            # 7) Build the pyramid's geometry scaffold now, while the grid is
+            #    already freshly written and the user is already waiting on
+            #    this task - not lazily on an indicator's first run or first
+            #    properties-dialog open. The scaffold has no score columns
+            #    yet (there are none to have, nothing has run), only
+            #    geometry, so this is grid-type-aware but column-agnostic.
+            if self.analysis_scale != "regional":
+                if self.grid_type == "h3":
+                    from geest.core.h3_pyramid_utils import build_h3_pyramid_scaffold
+
+                    if not build_h3_pyramid_scaffold(
+                        self.gpkg_path, self.h3_resolution, clip_to_boundary=self.h3_clip_to_boundary
+                    ):
+                        log_message("Failed to build H3 pyramid scaffold during study area creation", level="WARNING")
+                else:
+                    from geest.core.grid_pyramid_utils import build_pyramid_scaffold
+
+                    if not build_pyramid_scaffold(self.gpkg_path, self.cell_size_m):
+                        log_message("Failed to build pyramid scaffold during study area creation", level="WARNING")
+
         except Exception as e:
             reason, detail = self._friendly_error_message(e)
             self._set_termination_reason(reason=reason, detail=detail)

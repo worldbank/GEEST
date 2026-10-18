@@ -16,6 +16,7 @@ from osgeo import ogr, osr
 from qgis.core import QgsVectorLayer
 
 from geest.core.grid_pyramid_utils import (
+    build_pyramid_scaffold,
     compute_level_cell_sizes,
     get_exposed_levels,
     invalidate_pyramid,
@@ -85,6 +86,62 @@ class TestScaleDenominatorForCellSize(unittest.TestCase):
         base = scale_denominator_for_cell_size(100.0)
         self.assertAlmostEqual(scale_denominator_for_cell_size(400.0), base * 4)
         self.assertAlmostEqual(scale_denominator_for_cell_size(1600.0), base * 16)
+
+
+class TestBuildPyramidScaffold(unittest.TestCase):
+    """Tests for build_pyramid_scaffold() - the geometry-only, column-agnostic build.
+
+    This is what StudyAreaProcessingTask calls right after writing the base
+    grid, so every level table already exists before any indicator has
+    ever run - see the matching call site in study_area_processing_task.py.
+    """
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="test_grid_pyramid_scaffold_")
+        self.gpkg_path = os.path.join(self.temp_dir, "study_area.gpkg")
+
+    def tearDown(self):
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
+    def test_builds_every_level_table_with_no_score_columns(self):
+        _build_grid(self.gpkg_path, rows=16, cols=16)
+
+        self.assertTrue(build_pyramid_scaffold(self.gpkg_path, 100.0))
+
+        tables = _table_names(self.gpkg_path)
+        self.assertEqual(
+            tables,
+            {
+                "study_area_grid",
+                "study_area_grid_200",
+                "study_area_grid_400",
+                "study_area_grid_800",
+                "study_area_grid_1600",
+            },
+        )
+        ds = ogr.Open(self.gpkg_path, 0)
+        level_layer = ds.GetLayerByName("study_area_grid_200")
+        self.assertGreater(level_layer.GetFeatureCount(), 0)
+        layer_defn = level_layer.GetLayerDefn()
+        field_names = {layer_defn.GetFieldDefn(i).GetName().lower() for i in range(layer_defn.GetFieldCount())}
+        self.assertEqual(field_names, {"row_index", "col_index"})
+        ds = None
+
+    def test_a_later_refresh_for_a_real_column_does_not_duplicate_rows(self):
+        _build_grid(self.gpkg_path, rows=16, cols=16)
+        self.assertTrue(build_pyramid_scaffold(self.gpkg_path, 100.0))
+
+        ds = ogr.Open(self.gpkg_path, 0)
+        scaffold_count = ds.GetLayerByName("study_area_grid_200").GetFeatureCount()
+        ds = None
+
+        self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))
+
+        ds = ogr.Open(self.gpkg_path, 0)
+        after_refresh_count = ds.GetLayerByName("study_area_grid_200").GetFeatureCount()
+        ds = None
+        self.assertEqual(scaffold_count, after_refresh_count)
 
 
 class TestRefreshPyramidColumn(unittest.TestCase):

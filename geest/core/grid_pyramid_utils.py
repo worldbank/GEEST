@@ -527,6 +527,66 @@ def refresh_pyramid_column(gpkg_path: str, column_name: str, base_cell_size_m: f
         return False
 
 
+def build_pyramid_scaffold(gpkg_path: str, base_cell_size_m: float) -> bool:
+    """Build every pyramid level's geometry scaffold, with no score columns yet.
+
+    The scaffold (row_index/col_index + geometry per level) only depends on
+    the base grid's row/col indices - not on any particular indicator's
+    score column - so there is no reason to wait until an indicator
+    actually runs before building it. Call this once, right after the base
+    grid is written during study area creation (see
+    StudyAreaProcessingTask.run()), so every level table already exists by
+    the time a user opens an indicator's properties dialog or a workflow
+    finishes. refresh_pyramid_column() then only has to add/populate one
+    column per level - plain SQL, fast - instead of also constructing
+    geometry for potentially tens of thousands of cells on that first call.
+
+    Idempotent: _ensure_level_table_scaffold() skips any level table that
+    already has rows, so calling this again (e.g. from
+    refresh_pyramid_column() for the first real column) is cheap.
+
+    Args:
+        gpkg_path: Path to the GeoPackage containing study_area_grid.
+        base_cell_size_m: The analysis grid's native cell size.
+
+    Returns:
+        True on success, False on failure.
+    """
+    if not os.path.exists(gpkg_path):
+        log_message(f"GeoPackage not found: {gpkg_path}", level=Qgis.Warning)
+        return False
+
+    if not ensure_row_col_index_columns(gpkg_path, base_cell_size_m):
+        return False
+
+    level_sizes = compute_level_cell_sizes(base_cell_size_m)
+
+    try:
+        ds = _open_gpkg_for_write(gpkg_path)
+        if not ds:
+            log_message(f"Could not open GeoPackage: {gpkg_path}", level=Qgis.Critical)
+            return False
+
+        grid_layer = ds.GetLayerByName("study_area_grid")
+        if not grid_layer:
+            log_message("study_area_grid layer not found", level=Qgis.Critical)
+            ds = None
+            return False
+        srs = grid_layer.GetSpatialRef()
+
+        source_table = "study_area_grid"
+        for level_cs in level_sizes[1:]:
+            table_name = _ensure_level_table_scaffold(ds, level_cs, source_table, srs)
+            source_table = table_name
+
+        ds = None
+        return True
+
+    except Exception as error:
+        log_message(f"Error building pyramid scaffold: {error}", level=Qgis.Critical)
+        return False
+
+
 def get_exposed_levels(gpkg_path: str, column_name: str, base_cell_size_m: float) -> List[Tuple[float, Optional[str]]]:
     """Return every built pyramid level, finest first, for map visualization.
 

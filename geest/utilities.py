@@ -648,6 +648,9 @@ def linear_interpolation(
     return result
 
 
+_detached_processes = []  # noqa: E305 - keeps Popen objects alive; see open_with_system_handler()
+
+
 def open_with_system_handler(path: str) -> None:
     """Open a file or folder with the default system application, detached.
 
@@ -657,6 +660,14 @@ def open_with_system_handler(path: str) -> None:
     the viewer window, and force-closing the viewer then takes QGIS down
     with it.
 
+    The Popen object is deliberately kept referenced in
+    _detached_processes rather than discarded - letting it go out of scope
+    immediately makes it eligible for garbage collection while the
+    detached viewer (e.g. a PDF reader) is often still open, and
+    Popen.__del__ emits a ResourceWarning ("subprocess is still running")
+    in that case. The process is still fully detached (start_new_session)
+    and never waited on; this only avoids the premature-GC warning.
+
     Args:
         path (str): File or directory to open.
     """
@@ -665,12 +676,14 @@ def open_with_system_handler(path: str) -> None:
             os.startfile(path)  # nosec B606
             return
         opener = "open" if platform.system().lower() == "darwin" else "xdg-open"
-        subprocess.Popen(  # nosec B603 B607
+        process = subprocess.Popen(  # nosec B603 B607
             [opener, path],
             start_new_session=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
+        _detached_processes[:] = [p for p in _detached_processes if p.poll() is None]
+        _detached_processes.append(process)
     except Exception as e:
         log_message(f"Could not open '{path}' with the system handler: {e}", level=Qgis.Warning)
 

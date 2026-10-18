@@ -359,7 +359,14 @@ class TreePanel(QWidget):
             return
 
         show_layer_on_click = setting(key="show_layer_on_click", default=True)
-        if show_layer_on_click:
+        # An indicator that has never actually run has no column on
+        # study_area_grid, no raster, nothing to show - clicking it must
+        # not open the GeoPackage at all. Checked as a plain in-memory
+        # attribute lookup (matches JsonTreeItem.getStatus()'s own
+        # "Completed successfully" check) rather than querying the
+        # GeoPackage, so an unrun indicator costs nothing to click.
+        indicator_has_run = item.role != "indicator" or "Workflow Completed" in item.attribute("result", "")
+        if show_layer_on_click and indicator_has_run:
             analysis_raster_key = "result_file"
             if item.role == "dimension":
                 column_name = f"dim_{item.attribute('id').lower().replace(' ', '_').replace('-', '_')}"
@@ -2558,6 +2565,16 @@ class TreePanel(QWidget):
         else:
             column_name = None
 
+        # Building the pyramid layer group is synchronous (one QgsVectorLayer
+        # + QML style load per exposed level) and runs on the main thread for
+        # every completed item during a batch run - without this, the UI
+        # appears to stall at the same progress value for however long that
+        # takes, repeated for every indicator/factor/dimension. processEvents()
+        # forces the label to actually repaint before the blocking call starts.
+        self.status_label.setText(f"Adding {item.data(0)} to map...")
+        self.status_label.setToolTip(item.data(0))
+        QApplication.processEvents()
+
         if item.role == "analysis" and use_masked and self._get_render_strategy() == "raster":
             add_to_map(
                 item,
@@ -2857,28 +2874,49 @@ class TreePanel(QWidget):
             self.queue_manager.start_processing()
 
     def download_all_resources(self):
-        """Walk every indicator and download any missing cached resource.
+        """Walk every indicator, download missing resources, and wire up cached ones.
 
         Covers nighttime lights and environmental hazard rasters today -
         see geest.core.download_all_resources' module docstring for what's
-        not covered yet and why. Already-cached resources are left alone;
-        only missing ones are downloaded, one at a time.
+        not covered yet and why. An indicator whose resource is already
+        cached on disk but not yet set as its source (e.g. a duplicated
+        indicator, or a resource a sibling indicator already downloaded)
+        is configured immediately, with no download needed; only a
+        genuinely missing resource is actually downloaded.
         """
+        bar = getattr(self, "_message_bar", None) or iface.messageBar()
+
         if not self.working_directory:
-            self.show_message("No working directory set.", level=Qgis.Warning)
+            bar.pushMessage("Download All Resources", "No working directory set.", level=Qgis.Warning, duration=5)
             return
 
-        from geest.core.download_all_resources import DownloadAllResourcesController, collect_missing_resources
+        from geest.core.download_all_resources import (
+            DownloadAllResourcesController,
+            collect_missing_resources,
+            sync_cached_resource_attributes,
+        )
+
+        configured = sync_cached_resource_attributes(self.model.rootItem, self.working_directory)
+        if configured:
+            self.save_json_to_working_directory()
 
         missing = collect_missing_resources(self.model.rootItem, self.working_directory)
         if not missing:
-            self.show_message("All downloadable resources are already cached.", level=Qgis.Info)
+            message = (
+                f"Configured {len(configured)} indicator(s) from already-cached files. " if configured else ""
+            ) + "All downloadable resources are already cached."
+            bar.pushMessage("Download All Resources", message, level=Qgis.Info, duration=5)
             return
 
         gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         bbox_layer = QgsVectorLayer(f"{gpkg_path}|layername=study_area_bboxes", "study_area_bboxes", "ogr")
         if not bbox_layer.isValid() or bbox_layer.featureCount() == 0:
-            self.show_message("Could not load study_area_bboxes from study_area.gpkg.", level=Qgis.Warning)
+            bar.pushMessage(
+                "Download All Resources",
+                "Could not load study_area_bboxes from study_area.gpkg.",
+                level=Qgis.Warning,
+                duration=5,
+            )
             return
         extent = bbox_layer.extent()
         extent_crs_authid = bbox_layer.crs().authid()
@@ -2919,12 +2957,14 @@ class TreePanel(QWidget):
             self.project_button.setVisible(True)
             self.save_json_to_working_directory()
             summary = f"Downloaded {len(succeeded)} resource(s)."
+            if configured:
+                summary += f" Configured {len(configured)} from already-cached files."
             if failed:
                 failed_labels = ", ".join(spec.label for _item, spec in failed)
                 summary += f" {len(failed)} failed: {failed_labels}"
-                self.show_message(summary, level=Qgis.Warning)
+                bar.pushMessage("Download All Resources", summary, level=Qgis.Warning, duration=10)
             else:
-                self.show_message(summary, level=Qgis.Info)
+                bar.pushMessage("Download All Resources", summary, level=Qgis.Info, duration=5)
 
         self._download_all_resources_controller = DownloadAllResourcesController(
             items_and_specs=missing,

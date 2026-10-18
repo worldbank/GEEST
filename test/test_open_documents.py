@@ -49,6 +49,32 @@ class TestOpenWithSystemHandler(unittest.TestCase):
             with mock.patch.object(utilities.os, "name", "posix"):
                 open_with_system_handler("/tmp/report.pdf")  # nosec B108
 
+    def test_keeps_a_reference_to_the_launched_process(self):
+        """The Popen object must not be discarded immediately.
+
+        Letting it go out of scope right away makes it eligible for GC
+        while the detached viewer is often still open, which triggers a
+        spurious "subprocess is still running" ResourceWarning.
+        """
+        utilities._detached_processes.clear()
+        fake_process = mock.Mock(poll=mock.Mock(return_value=None))
+        with mock.patch.object(utilities.subprocess, "Popen", return_value=fake_process):
+            with mock.patch.object(utilities.os, "name", "posix"):
+                open_with_system_handler("/tmp/report.pdf")  # nosec B108
+        self.assertIn(fake_process, utilities._detached_processes)
+
+    def test_finished_processes_are_pruned_on_next_call(self):
+        """A process that has already exited must not linger in the list forever."""
+        utilities._detached_processes.clear()
+        finished_process = mock.Mock(poll=mock.Mock(return_value=0))
+        utilities._detached_processes.append(finished_process)
+        new_process = mock.Mock(poll=mock.Mock(return_value=None))
+        with mock.patch.object(utilities.subprocess, "Popen", return_value=new_process):
+            with mock.patch.object(utilities.os, "name", "posix"):
+                open_with_system_handler("/tmp/report.pdf")  # nosec B108
+        self.assertNotIn(finished_process, utilities._detached_processes)
+        self.assertIn(new_process, utilities._detached_processes)
+
     def test_no_blocking_open_calls_in_package(self):
         """No file may open documents with blocking subprocess.run/startfile.
 

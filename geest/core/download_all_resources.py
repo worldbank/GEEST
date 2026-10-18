@@ -4,10 +4,13 @@
 Used by TreePanel's "Download all resources" run-button option: instead of
 running the whole analysis, this walks the tree once, and for every
 indicator backed by a downloadable external resource, checks whether a
-cached copy already exists in the working directory and - if not -
-downloads it and sets it as that indicator's configured source, exactly
-as the matching in-app "Download ..." button in the indicator's own
-configuration dialog would.
+cached copy already exists in the working directory. If not, it downloads
+it and sets it as that indicator's configured source, exactly as the
+matching in-app "Download ..." button in the indicator's own configuration
+dialog would. If a cached copy already exists but the indicator's own
+source attribute doesn't point at it yet (sync_cached_resource_attributes()
+- e.g. a duplicated indicator, or a resource a sibling indicator already
+downloaded), it is wired up directly with no download needed.
 
 Currently covers nighttime lights and environmental hazard rasters - the
 two indicator types with a clean, single-widget, deterministic download
@@ -33,7 +36,7 @@ covered yet, each for a different reason:
 
 import os
 from typing import Callable, List, Optional
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 from qgis.core import Qgis, QgsRectangle, QgsTask
 
@@ -147,6 +150,51 @@ def collect_missing_resources(root_item, working_directory: str) -> List[tuple]:
         if not resource_is_cached(spec, working_directory):
             missing.append((item, spec))
     return missing
+
+
+def _attribute_already_points_at_cached_file(item, spec: ResourceSpec, working_directory: str) -> bool:
+    """Return True if item's attribute already points at spec's cached output file."""
+    current = item.attribute(spec.attribute_key)
+    if not current:
+        return False
+    return unquote(current) == resource_output_path(spec, working_directory)
+
+
+def sync_cached_resource_attributes(root_item, working_directory: str) -> List[tuple]:
+    """Wire up every indicator whose resource is already cached but not configured.
+
+    collect_missing_resources() only ever looks at indicators whose cached
+    file does not exist yet - an indicator whose file IS already cached
+    (e.g. a duplicated indicator, an attribute that got cleared, or a
+    resource a sibling indicator already downloaded) is invisible to it
+    and would otherwise stay unconfigured forever, even though the data it
+    needs is sitting right there on disk. This walks every indicator with
+    a downloadable resource spec and, for any whose attribute doesn't
+    already point at the existing cached file, sets it - no download
+    needed, nothing queued.
+
+    Args:
+        root_item: The tree's root JsonTreeItem (or any ancestor to scope
+            the walk to).
+        working_directory: The project's working directory.
+
+    Returns:
+        List of (item, ResourceSpec) tuples that were just configured.
+    """
+    configured = []
+    for item in root_item.getDescendantIndicators(include_completed=True, include_disabled=True):
+        spec = resource_spec_for_indicator(item)
+        if spec is None:
+            continue
+        if not resource_is_cached(spec, working_directory):
+            continue
+        if _attribute_already_points_at_cached_file(item, spec, working_directory):
+            continue
+        output_path = resource_output_path(spec, working_directory)
+        with item.atomicAttributeUpdate() as attrs:
+            attrs[spec.attribute_key] = quote(output_path)
+        configured.append((item, spec))
+    return configured
 
 
 class DownloadAllResourcesController:

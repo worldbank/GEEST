@@ -30,6 +30,7 @@
         ps.debugpy
         ps.psutil
         ps.h3
+        ps.defusedxml
       ];
       # QGIS 4.x is Qt6/PyQt6; QGIS 3.44 LTR is Qt5/PyQt5 — each needs the
       # matching WebEngine binding, so it is added per variant here rather
@@ -157,6 +158,7 @@
             ps.black
             ps.click # needed by black
             ps.debugpy
+            ps.defusedxml
             ps.flake8
             ps.flake8-docstrings # flake8 plugin: pulls in pydocstyle checks
             ps.gdal

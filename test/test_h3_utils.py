@@ -9,10 +9,13 @@ also covered here as a pure regression guard - it must never change.
 
 import unittest
 
+from osgeo import osr
+
 from geest.core.h3_utils import (
     get_h3_resolution_for_cell_size,
     get_h3_resolution_for_scale,
     h3_cell_area_km2,
+    transform_wgs84_to_target,
 )
 
 
@@ -82,6 +85,53 @@ class TestGetH3ResolutionForScale(unittest.TestCase):
 
     def test_unknown_scale_returns_none(self):
         self.assertIsNone(get_h3_resolution_for_scale("unknown", cell_size_m=100.0))
+
+
+class TestTransformWgs84ToTarget(unittest.TestCase):
+    """Regression guard for the GDAL axis-order bug.
+
+    Without SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER) on the
+    source EPSG:4326 spatial reference, GDAL's default authority-compliant
+    axis order silently treats TransformPoint(x, y) as (lat, lon) instead
+    of (lon, lat) - swapping every coordinate and producing wildly wrong,
+    out-of-zone results for a projected target CRS. This directly caused
+    the H3 pyramid level tables (study_area_grid_h3_res<N>) to be written
+    with corrupted geometry while the base study_area_grid table happened
+    to look fine, because its writer had an independent, compensating
+    lat/lon-unpack bug of its own (see grid_from_bbox_h3_task.py).
+    """
+
+    def _independent_reference(self, lon, lat, target_epsg):
+        """Recompute the expected answer with its own, explicitly-correct transform."""
+        source_srs = osr.SpatialReference()
+        source_srs.ImportFromEPSG(4326)
+        source_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        target_srs = osr.SpatialReference()
+        target_srs.ImportFromEPSG(target_epsg)
+        target_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        transform = osr.CoordinateTransformation(source_srs, target_srs)
+        x, y, _ = transform.TransformPoint(lon, lat)
+        return x, y
+
+    def test_matches_independently_computed_utm_coordinates(self):
+        lon, lat = -23.5, 15.5  # a point within Cabo Verde
+        target_epsg = 32626  # UTM zone 26N
+        expected_x, expected_y = self._independent_reference(lon, lat, target_epsg)
+
+        x, y = transform_wgs84_to_target(lon, lat, target_epsg)
+
+        self.assertAlmostEqual(x, expected_x, places=3)
+        self.assertAlmostEqual(y, expected_y, places=3)
+
+    def test_result_is_a_sane_utm_easting_northing_not_an_axis_swapped_value(self):
+        # A buggy (axis-swapped) transform for this point lands around
+        # x=5,122,042 / y=-3,383,379 - nowhere near a valid UTM26N
+        # easting/northing. The correct answer is a normal easting in the
+        # low hundreds-of-thousands and a northing in the low millions.
+        x, y = transform_wgs84_to_target(-23.5, 15.5, 32626)
+
+        self.assertTrue(100000 < x < 900000, f"x={x} is not a plausible UTM easting")
+        self.assertTrue(1000000 < y < 2500000, f"y={y} is not a plausible UTM northing")
 
 
 if __name__ == "__main__":

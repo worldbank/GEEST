@@ -52,6 +52,7 @@ def _ignore_patterns(directory: str, files: list) -> set:
 # These will be downloaded for multiple platforms
 VENDORED_PACKAGES = [
     "h3==4.4.2",
+    "defusedxml==0.7.1",
 ]
 # Platform tags for wheel downloads (covers most QGIS installations)
 WHEEL_PLATFORMS = [
