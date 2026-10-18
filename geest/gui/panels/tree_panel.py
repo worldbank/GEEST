@@ -1878,10 +1878,15 @@ class TreePanel(QWidget):
             from geest.core.h3_pyramid_utils import has_h3_pyramid_structure, refresh_h3_pyramid_column
 
             h3_resolution = grid_type_utils.get_h3_resolution(self.working_directory)
-            missing = [c for c in scored_columns if not has_h3_pyramid_structure(gpkg_path, c, h3_resolution)]
+            scale = self.analysis_scale()
+            missing = [
+                c
+                for c in scored_columns
+                if not has_h3_pyramid_structure(gpkg_path, c, h3_resolution, analysis_scale=scale)
+            ]
 
             def _refresh_column(column: str) -> bool:
-                return refresh_h3_pyramid_column(gpkg_path, column, h3_resolution)
+                return refresh_h3_pyramid_column(gpkg_path, column, h3_resolution, analysis_scale=scale)
 
         else:
             from geest.core.grid_pyramid_utils import has_pyramid_structure, refresh_pyramid_column
@@ -2597,7 +2602,16 @@ class TreePanel(QWidget):
                 analysis_scale=self.analysis_scale(),
             )
 
-        # Now cancel the animated icon
+        self._stop_item_spinner(item)
+
+    def _stop_item_spinner(self, item) -> None:
+        """Stop and clear the animated throbber on_workflow_started() placed on item's row.
+
+        Shared by on_workflow_completed() and download_all_resources() - any
+        caller that started the spinner via on_workflow_started() must pair
+        it with this to clear it, including the parent row's spinner for an
+        indicator.
+        """
         node_index = self.model.itemIndex(item)
 
         if not node_index.isValid():
@@ -2614,8 +2628,10 @@ class TreePanel(QWidget):
             parent_index = node_index.parent()
             parent_second_column_index = self.model.index(parent_index.row(), 1, parent_index.parent())
 
-        self.child_movie.stop()
-        self.parent_movie.stop()
+        if hasattr(self, "child_movie") and self.child_movie is not None:
+            self.child_movie.stop()
+        if hasattr(self, "parent_movie") and self.parent_movie is not None:
+            self.parent_movie.stop()
 
         second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
         self.treeView.setIndexWidget(second_column_index, None)
@@ -2876,13 +2892,16 @@ class TreePanel(QWidget):
     def download_all_resources(self):
         """Walk every indicator, download missing resources, and wire up cached ones.
 
-        Covers nighttime lights and environmental hazard rasters today -
-        see geest.core.download_all_resources' module docstring for what's
-        not covered yet and why. An indicator whose resource is already
-        cached on disk but not yet set as its source (e.g. a duplicated
+        Covers nighttime lights, environmental hazard rasters, and
+        OSM-matched buffer-point indicators today - see
+        geest.core.download_all_resources' module docstring for what's not
+        covered yet and why. An indicator whose resource is already cached
+        on disk but not yet set as its source (e.g. a duplicated
         indicator, or a resource a sibling indicator already downloaded)
         is configured immediately, with no download needed; only a
-        genuinely missing resource is actually downloaded.
+        genuinely missing resource is actually downloaded. The tree view
+        is refreshed afterward so newly-configured indicators show their
+        updated status immediately.
         """
         bar = getattr(self, "_message_bar", None) or iface.messageBar()
 
@@ -2899,6 +2918,7 @@ class TreePanel(QWidget):
         configured = sync_cached_resource_attributes(self.model.rootItem, self.working_directory)
         if configured:
             self.save_json_to_working_directory()
+            self._refresh_tree_view()
 
         missing = collect_missing_resources(self.model.rootItem, self.working_directory)
         if not missing:
@@ -2936,12 +2956,17 @@ class TreePanel(QWidget):
             self.status_label.setText(f"Downloading {spec.label}...")
             self.status_label.setToolTip(spec.label)
             self.workflow_progress_bar.setValue(0)
+            # Same animated throbber a normal single-indicator run shows on
+            # its tree row - highlights which item is downloading without
+            # touching the tree's structure/expand state.
+            self.on_workflow_started(item)
 
         def _on_item_progress(item, spec, message):
             self.status_label.setText(message[:60])
             self.status_label.setToolTip(message)
 
         def _on_item_finished(item, spec, success, message):
+            self._stop_item_spinner(item)
             self.overall_progress_bar.setValue(self.overall_progress_bar.value() + 1)
             self.workflow_progress_bar.setValue(100)
             if not success:
@@ -2956,6 +2981,7 @@ class TreePanel(QWidget):
             self.help_button.setVisible(True)
             self.project_button.setVisible(True)
             self.save_json_to_working_directory()
+            self._refresh_tree_view()
             summary = f"Downloaded {len(succeeded)} resource(s)."
             if configured:
                 summary += f" Configured {len(configured)} from already-cached files."
@@ -2977,6 +3003,23 @@ class TreePanel(QWidget):
             on_all_finished=_on_all_finished,
         )
         self._download_all_resources_controller.start()
+
+    def _refresh_tree_view(self) -> None:
+        """Repaint every item's status (e.g. "ready to run") without collapsing the tree.
+
+        Attribute changes made directly on JsonTreeItem (not through the
+        view's own edit flow) don't trigger a repaint on their own - the
+        status column is computed live from attributes each time the view
+        paints, but nothing tells it to paint again. Deliberately
+        layoutChanged, not beginResetModel()/endResetModel(): a full model
+        reset invalidates persistent indexes, which collapses every
+        expanded node and clears the current selection/scroll position -
+        needlessly disruptive here, since only item data changed, not the
+        tree's structure. layoutChanged tells the view to re-read and
+        repaint without touching expand state.
+        """
+        self.model.layoutChanged.emit()
+        self.treeView.viewport().update()
 
     def expand_all_nodes(self, index=None):
         """

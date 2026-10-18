@@ -115,6 +115,104 @@ class TestResourceSpecForIndicator(unittest.TestCase):
         spec = resource_spec_for_indicator(item)
         self.assertEqual(spec.filename, "flood_hazard")
 
+    def test_osm_matched_buffer_point_spec(self):
+        item = make_indicator(
+            {
+                "analysis_mode": "use_multi_buffer_point",
+                "analysis_scale": "local",
+                "id": "pharmacies",
+                "name": "Pharmacies",
+            }
+        )
+        spec = resource_spec_for_indicator(item)
+        self.assertIsNotNone(spec)
+        self.assertEqual(spec.kind, "vector")
+        self.assertEqual(spec.widget_key, "multi_buffer_point")
+        self.assertEqual(spec.filename, "osm_pharmacy")
+        self.assertIsNone(spec.attribute_key)
+
+    def test_osm_matched_single_buffer_point_spec(self):
+        item = make_indicator(
+            {
+                "analysis_mode": "use_single_buffer_point",
+                "analysis_scale": "national",
+                "id": "water",
+                "name": "Water Points",
+            }
+        )
+        spec = resource_spec_for_indicator(item)
+        self.assertIsNotNone(spec)
+        self.assertEqual(spec.widget_key, "single_buffer_point")
+        self.assertEqual(spec.filename, "osm_water_point")
+
+    def test_buffer_point_with_no_keyword_match_has_no_spec(self):
+        item = make_indicator(
+            {
+                "analysis_mode": "use_multi_buffer_point",
+                "analysis_scale": "local",
+                "id": "some_custom_thing",
+                "name": "Some Custom Thing",
+            }
+        )
+        self.assertIsNone(resource_spec_for_indicator(item))
+
+    def test_osm_regional_has_no_spec(self):
+        item = make_indicator(
+            {
+                "analysis_mode": "use_multi_buffer_point",
+                "analysis_scale": "regional",
+                "id": "pharmacies",
+            }
+        )
+        self.assertIsNone(resource_spec_for_indicator(item))
+
+    def _make_checked_on_indicator(self, attributes):
+        """A "Do Not Use" indicator checked on (factor_weighting > 0) in its
+        factor's aggregation dialog - status "Required and not configured",
+        per JsonTreeItem.getStatus(). Needs a real parent chain, since an
+        indicator with no parent is always "Excluded from analysis"."""
+        factor = JsonTreeItem(
+            ["Factor", "Configured", 1.0, {"id": "factor_1", "dimension_weighting": 1.0}],
+            role="factor",
+            parent=None,
+        )
+        indicator = make_indicator(attributes, parent=factor)
+        factor.appendChild(indicator)
+        return indicator
+
+    def test_do_not_use_checked_on_with_known_hazard_id_infers_environmental_hazard_spec(self):
+        item = self._make_checked_on_indicator(
+            {"analysis_mode": "Do Not Use", "analysis_scale": "national", "id": "Cyclone", "factor_weighting": 1.0}
+        )
+        self.assertEqual(item.getStatus(), "Required and not configured")
+
+        spec = resource_spec_for_indicator(item)
+
+        self.assertIsNotNone(spec)
+        self.assertEqual(spec.filename, "cyclone_hazard")
+        self.assertEqual(spec.mode_to_set, "use_environmental_hazards")
+
+    def test_do_not_use_checked_on_with_unknown_id_has_no_spec(self):
+        item = self._make_checked_on_indicator(
+            {
+                "analysis_mode": "Do Not Use",
+                "analysis_scale": "national",
+                "id": "some_custom_indicator",
+                "factor_weighting": 1.0,
+            }
+        )
+        self.assertEqual(item.getStatus(), "Required and not configured")
+
+        self.assertIsNone(resource_spec_for_indicator(item))
+
+    def test_do_not_use_not_checked_on_has_no_spec_even_with_known_hazard_id(self):
+        item = self._make_checked_on_indicator(
+            {"analysis_mode": "Do Not Use", "analysis_scale": "national", "id": "cyclone", "factor_weighting": 0.0}
+        )
+        self.assertNotEqual(item.getStatus(), "Required and not configured")
+
+        self.assertIsNone(resource_spec_for_indicator(item))
+
 
 class TestResourceIsCached(unittest.TestCase):
     def setUp(self):
@@ -149,6 +247,20 @@ class TestResourceIsCached(unittest.TestCase):
         with open(os.path.join(self.temp_dir, "study_area", "nighttime_lights_annual.tif"), "w") as f:
             f.write("not really a tif but non-empty")
         self.assertTrue(resource_is_cached(spec, self.temp_dir))
+
+    def test_vector_resource_output_path_uses_gpkg_extension(self):
+        item = make_indicator(
+            {
+                "analysis_mode": "use_multi_buffer_point",
+                "analysis_scale": "local",
+                "id": "pharmacies",
+                "name": "Pharmacies",
+            }
+        )
+        spec = resource_spec_for_indicator(item)
+        from geest.core.download_all_resources import resource_output_path
+
+        self.assertTrue(resource_output_path(spec, self.temp_dir).endswith("osm_pharmacy.gpkg"))
 
 
 class TestCollectMissingResources(unittest.TestCase):
@@ -232,6 +344,163 @@ class TestSyncCachedResourceAttributes(unittest.TestCase):
         configured = sync_cached_resource_attributes(root, self.temp_dir)
 
         self.assertEqual(configured, [])
+
+    def test_checked_on_but_disabled_hazard_indicator_is_both_wired_up_and_switched_on(self):
+        """A "Do Not Use" indicator checked on in its factor dialog whose
+        hazard data is already cached should come out "ready to run": both
+        its raster attribute AND its analysis_mode get set."""
+        factor = JsonTreeItem(
+            ["Factor", "Configured", 1.0, {"id": "factor_1", "dimension_weighting": 1.0}],
+            role="factor",
+            parent=None,
+        )
+        cyclone = make_indicator(
+            {"analysis_mode": "Do Not Use", "analysis_scale": "national", "id": "cyclone", "factor_weighting": 1.0},
+            parent=factor,
+        )
+        factor.appendChild(cyclone)
+        with open(os.path.join(self.temp_dir, "study_area", "cyclone_hazard.tif"), "w") as f:
+            f.write("cached")
+
+        configured = sync_cached_resource_attributes(factor, self.temp_dir)
+
+        self.assertEqual([item.attribute("id") for item, _spec in configured], ["cyclone"])
+        self.assertEqual(cyclone.attribute("analysis_mode"), "use_environmental_hazards")
+        from urllib.parse import unquote
+
+        self.assertEqual(
+            unquote(cyclone.attribute("environmental_hazards_raster")),
+            os.path.join(self.temp_dir, "study_area", "cyclone_hazard.tif"),
+        )
+
+    def test_already_switched_on_hazard_indicator_is_left_alone(self):
+        """Once analysis_mode has already been flipped, re-syncing must not
+        loop forever re-"configuring" an indicator that is already done."""
+        from urllib.parse import quote
+
+        factor = JsonTreeItem(
+            ["Factor", "Configured", 1.0, {"id": "factor_1", "dimension_weighting": 1.0}],
+            role="factor",
+            parent=None,
+        )
+        output_path = os.path.join(self.temp_dir, "study_area", "cyclone_hazard.tif")
+        cyclone = make_indicator(
+            {
+                "analysis_mode": "use_environmental_hazards",
+                "analysis_scale": "national",
+                "id": "cyclone",
+                "factor_weighting": 1.0,
+                "environmental_hazards_raster": quote(output_path),
+            },
+            parent=factor,
+        )
+        factor.appendChild(cyclone)
+        with open(output_path, "w") as f:
+            f.write("cached")
+
+        configured = sync_cached_resource_attributes(factor, self.temp_dir)
+
+        self.assertEqual(configured, [])
+
+
+def _write_point_gpkg(path, layer_name="pharmacy"):
+    """Create a tiny real GeoPackage with one point feature, for OSM-resource tests."""
+    from osgeo import ogr, osr
+
+    driver = ogr.GetDriverByName("GPKG")
+    ds = driver.CreateDataSource(path)
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(4326)
+    layer = ds.CreateLayer(layer_name, srs, geom_type=ogr.wkbPoint)
+    feature = ogr.Feature(layer.GetLayerDefn())
+    feature.SetGeometry(ogr.CreateGeometryFromWkt("POINT (36.8 -1.3)"))
+    layer.CreateFeature(feature)
+    feature = None
+    ds = None
+
+
+class TestVectorResourceConfiguration(unittest.TestCase):
+    """Tests for the OSM/vector-kind resource-configuration path.
+
+    Unlike raster resources (a plain file-path attribute), a vector
+    indicator's configured source is an actual QgsProject layer - these
+    tests use a real small GeoPackage and the real QgsProject singleton
+    (cleaning up afterward) rather than mocking QGIS objects, since the
+    whole point is to verify the real add-layer/read-attributes round trip.
+    """
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="test_download_all_resources_vector_")
+        os.makedirs(os.path.join(self.temp_dir, "study_area"))
+        self._added_layer_ids = []
+
+    def tearDown(self):
+        import shutil
+
+        from qgis.core import QgsProject
+
+        if self._added_layer_ids:
+            QgsProject.instance().removeMapLayers(self._added_layer_ids)
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def _make_item_and_spec(self):
+        item = make_indicator(
+            {
+                "analysis_mode": "use_multi_buffer_point",
+                "analysis_scale": "local",
+                "id": "pharmacies",
+                "name": "Pharmacies",
+            }
+        )
+        spec = resource_spec_for_indicator(item)
+        return item, spec
+
+    def test_configure_vector_resource_attributes_adds_layer_and_sets_attributes(self):
+        from geest.core.download_all_resources import _configure_vector_resource_attributes
+
+        item, spec = self._make_item_and_spec()
+        output_path = os.path.join(self.temp_dir, "study_area", "osm_pharmacy.gpkg")
+        _write_point_gpkg(output_path)
+
+        self.assertTrue(_configure_vector_resource_attributes(item, spec, output_path))
+
+        layer_id = item.attribute("multi_buffer_point_layer_id")
+        self.assertTrue(layer_id)
+        self._added_layer_ids.append(layer_id)
+
+        from qgis.core import QgsProject
+
+        self.assertIsNotNone(QgsProject.instance().mapLayer(layer_id))
+        self.assertEqual(item.attribute("multi_buffer_point_layer_name"), "osm_pharmacy")
+        self.assertIn("osm_pharmacy.gpkg", item.attribute("multi_buffer_point_layer_source"))
+        self.assertEqual(item.attribute("multi_buffer_point_layer_provider_type"), "ogr")
+
+    def test_configure_vector_resource_attributes_fails_cleanly_for_invalid_file(self):
+        from geest.core.download_all_resources import _configure_vector_resource_attributes
+
+        item, spec = self._make_item_and_spec()
+        output_path = os.path.join(self.temp_dir, "study_area", "osm_pharmacy.gpkg")
+        with open(output_path, "w") as f:
+            f.write("not a real gpkg")
+
+        self.assertFalse(_configure_vector_resource_attributes(item, spec, output_path))
+        self.assertIsNone(item.attribute("multi_buffer_point_layer_id"))
+
+    def test_sync_cached_resource_attributes_wires_up_an_already_downloaded_osm_layer(self):
+        item, spec = self._make_item_and_spec()
+        output_path = os.path.join(self.temp_dir, "study_area", "osm_pharmacy.gpkg")
+        _write_point_gpkg(output_path)
+
+        configured = sync_cached_resource_attributes(item, self.temp_dir)
+
+        self.assertEqual(len(configured), 1)
+        layer_id = item.attribute("multi_buffer_point_layer_id")
+        self._added_layer_ids.append(layer_id)
+
+        # A second sync pass must not re-configure (and must not add a
+        # second copy of the layer) - it's already wired up.
+        configured_again = sync_cached_resource_attributes(item, self.temp_dir)
+        self.assertEqual(configured_again, [])
 
 
 class _FakeTask:
@@ -339,6 +608,47 @@ class TestDownloadAllResourcesController(unittest.TestCase):
         succeeded, failed = all_finished_calls[0]
         self.assertEqual(len(succeeded), 0)
         self.assertEqual(len(failed), 1, "a single failure must only be recorded once, not once per signal")
+
+    def test_vector_resource_loads_layer_and_sets_layer_attributes(self):
+        item = make_indicator(
+            {
+                "analysis_mode": "use_multi_buffer_point",
+                "analysis_scale": "local",
+                "id": "pharmacies",
+                "name": "Pharmacies",
+            }
+        )
+        spec = resource_spec_for_indicator(item)
+        output_path = os.path.join(self.temp_dir, "study_area", "osm_pharmacy.gpkg")
+        _write_point_gpkg(output_path)
+        fake_task = _FakeTask(output_path)
+        spec.build_task = MagicMock(return_value=fake_task)
+
+        all_finished_calls = []
+        controller = DownloadAllResourcesController(
+            items_and_specs=[(item, spec)],
+            working_directory=self.temp_dir,
+            extent=None,
+            extent_crs_authid="EPSG:4326",
+            on_all_finished=lambda succeeded, failed: all_finished_calls.append((succeeded, failed)),
+        )
+        controller.start()
+        fake_task._captured(fake_task.taskCompleted)()
+
+        layer_id = item.attribute("multi_buffer_point_layer_id")
+        self.assertTrue(layer_id)
+        try:
+            from qgis.core import QgsProject
+
+            self.assertIsNotNone(QgsProject.instance().mapLayer(layer_id))
+        finally:
+            from qgis.core import QgsProject
+
+            QgsProject.instance().removeMapLayers([layer_id])
+
+        succeeded, failed = all_finished_calls[0]
+        self.assertEqual(len(succeeded), 1)
+        self.assertEqual(len(failed), 0)
 
 
 if __name__ == "__main__":

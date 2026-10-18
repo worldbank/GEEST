@@ -37,7 +37,54 @@ version per the policy above.
   H3-grid local/national projects gets the same scale-dependent
   multi-resolution pyramid as square-grid projects
   (`geest/core/h3_pyramid_utils.py`), cascading coarser H3 resolutions via
-  `h3.cell_to_parent()` MAX-aggregation instead of 2x2 quad aggregation.
+  `h3.cell_to_parent()` MIN-aggregation instead of 2x2 quad aggregation.
+- GeoE3 Options panel gained a "Grid Pyramid Visualization Options" group
+  with separate "National" and "Local" zoom-level settings (default 3
+  each), since the two scales typically want different values. Replaces
+  the previous hardcoded 4-step depth shared by both.
+- "Download all resources" now also covers OSM-backed point indicators
+  (schools, health facilities, pharmacies, grocery stores, financial
+  services, kindergartens, green spaces, water points, public transport -
+  the same keyword-matched categories the in-dialog "Download from OSM"
+  button already offered), not just nighttime lights and environmental
+  hazard rasters. Unlike those raster resources, an OSM indicator's
+  configured source is an actual QGIS project layer, not a file path - the
+  downloaded GeoPackage is loaded and added to the project, then wired up
+  via the same `{widget_key}_layer_*` attributes
+  `VectorDataSourceWidget.update_attributes()` itself writes, so the
+  properties dialog shows it correctly configured afterward. While a
+  download is in progress, its indicator's row now shows the same
+  animated throbber a normal single-indicator run already shows, and the
+  tree view is refreshed via `layoutChanged` (not a full model reset) once
+  downloads/wiring finish, so newly-configured indicators immediately show
+  their updated status without collapsing every expanded node or losing
+  the current selection/scroll position. It also now covers environmental
+  hazard indicators left at "Do Not Use" (the unconfigured default) but
+  checked on in their factor's aggregation dialog - status "Required and
+  not configured" - rather than only ones that already had a datasource
+  mode explicitly picked. If such an indicator's id matches a known
+  hazard type, downloading its data also switches its mode to
+  "Environmental Hazard" at the same time, so it comes out "ready to run"
+  instead of staying stuck on "required".
+- `pyarrow` added to the nix dev shell. A benchmark comparing GeoPackage,
+  Shapefile, FlatGeobuf and GeoParquet writes/reads found the file format
+  made almost no difference to speed - the bottleneck was GDAL/OGR's
+  per-feature Python API (`CreateFeature()`/feature iteration), not the
+  on-disk format - so rather than migrate formats, the plugin's biggest
+  bulk vector writes now try GDAL's columnar Arrow-batch API
+  (`Layer.WritePyArrow()`/`GetArrowStreamAsPyArrow()`) first, which got
+  ~2x faster writes and ~10x faster reads on the SAME GeoPackage files.
+  New `geest/core/arrow_batch_writer.py` helper: if pyarrow isn't
+  importable (not every QGIS install bundles it, though OSGeo4W's
+  Windows installer does by default), it returns `False` and every call
+  site falls straight back to its original per-feature `CreateFeature()`
+  loop - no format change, no hard dependency, same `.gpkg` files every
+  downstream reader already expects. Wired into the base grid write
+  (`UnifiedWriterThread._write_grid_batch`/`_write_geometry_batch` in
+  `study_area_processing_task.py`, the biggest cell counts - every study
+  area creation) and both pyramid scaffold builders
+  (`grid_pyramid_utils.py`/`h3_pyramid_utils.py`'s
+  `_ensure_level_table_scaffold`/`_ensure_h3_level_table_scaffold`).
 - Fixed a bug where `grid_type`/`analysis_h3_resolution` were silently
   dropped from `model.json` on the first save after study-area creation
   (`JsonTreeModel.loadJsonData()` only carried forward a fixed list of
@@ -75,6 +122,41 @@ version per the policy above.
 
 ### Fixed
 
+- **H3 pyramid level geometry was corrupted by a GDAL axis-order bug:**
+  `transform_wgs84_to_target()`/`bbox_to_wgs84()` built a WGS84<->target-CRS
+  transform without pinning an explicit axis order; GDAL 3+'s default
+  authority-compliant order for EPSG:4326 is (lat, lon), not (lon, lat), so
+  coordinates were silently swapped - every coarser pyramid level table
+  (`study_area_grid_h3_res<N>`) landed millions of metres away in the wrong
+  UTM zone/hemisphere. The base `study_area_grid` layer happened to render
+  correctly anyway, purely by coincidence: its own writer had an
+  independent, compensating lat/lon-unpack bug that cancelled the first one
+  out. Both are now fixed consistently (forcing
+  `OAMS_TRADITIONAL_GIS_ORDER`), so the base grid is correct for the right
+  reason instead of by accident.
+- H3 pyramid level tables (coarser than the base) now honor the project's
+  edge-hexagon clipping setting - previously only the base grid clipped to
+  `study_area_clip_polygons`; coarser levels always kept full, unclipped
+  parent hexagons regardless.
+- `download_all_resources()` crashed with `AttributeError` on every
+  early-exit path (no working directory, nothing to download) - it called
+  a method that was never actually defined on `TreePanel`. It also now
+  wires up any indicator whose resource file is already cached on disk but
+  not yet configured as that indicator's source (e.g. a duplicated
+  indicator, or a file a sibling indicator already downloaded) - no
+  download needed.
+- Clicking an indicator that has never run no longer opens the study area
+  GeoPackage at all (previously every click attempted a pointless pyramid
+  lookup for a column that doesn't exist yet).
+- The status label now updates before each completed item's map layer
+  group is built during a batch "Run all" - building it is synchronous and
+  previously gave no feedback of its own, so a long batch run looked
+  frozen at the same progress value for however long each item took.
+- `defusedxml` is now a properly-provisioned dependency instead of
+  silently falling back to `xml.etree.ElementTree` with a warning on every
+  plugin load.
+- Fixed a benign `ResourceWarning` ("subprocess is still running") from
+  the detached report-viewer process on every report open.
 - **Windows crash running a whole dimension (#447, #448):** every indicator's
   workflow opened its own `AreaIterator` (three fresh `QgsVectorLayer` reads)
   against `study_area.gpkg` while `grid_column_utils` concurrently wrote to
@@ -194,6 +276,14 @@ version per the policy above.
 
 ### Changed
 
+- Grid pyramid aggregation (both the square-grid and H3 engines) switched
+  from MAX to MIN: a coarse cell now shows the worst score among its
+  children, not the best, so zooming out never hides a poor result behind
+  a better neighbor.
+- Pyramid geometry scaffolds (square-grid and H3) now build eagerly, right
+  after the base grid is written during study area creation - not lazily
+  on an indicator's first run or first properties-dialog open. Only the
+  score column itself (plain SQL) is still built lazily per indicator.
 - Grid-first workflows (`ContextualIndexScoreWorkflow`, `AggregationWorkflowBase`
   - index scores, factor/dimension/analysis aggregation) wrote their value
   to `study_area_grid` with one whole-table SQL `UPDATE` per area, even

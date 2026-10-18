@@ -56,9 +56,99 @@ class TestDownloadAllResourcesEarlyExits(unittest.TestCase):
         TreePanel.download_all_resources(self.panel)
 
         self.panel.save_json_to_working_directory.assert_called_once()
+        self.panel._refresh_tree_view.assert_called_once()
         self.panel._message_bar.pushMessage.assert_called_once()
         args, _kwargs = self.panel._message_bar.pushMessage.call_args
         self.assertIn("Configured 1 indicator(s)", args[1])
+
+    @patch("geest.core.download_all_resources.sync_cached_resource_attributes", return_value=[])
+    @patch("geest.core.download_all_resources.collect_missing_resources", return_value=[])
+    def test_nothing_configured_does_not_refresh_the_tree(self, _mock_collect, _mock_sync):
+        self.panel.working_directory = "/tmp/does-not-need-to-exist-for-this-path"  # nosec B108
+
+        TreePanel.download_all_resources(self.panel)
+
+        self.panel._refresh_tree_view.assert_not_called()
+
+
+class TestRefreshTreeView(unittest.TestCase):
+    """Tests for TreePanel._refresh_tree_view().
+
+    Must use layoutChanged, never beginResetModel()/endResetModel() - a
+    full model reset collapses every expanded tree node and clears the
+    selection/scroll position, which is exactly what must NOT happen while
+    a batch download is highlighting items one at a time.
+    """
+
+    def test_emits_layout_changed_and_repaints_without_resetting_the_model(self):
+        panel = MagicMock()
+
+        TreePanel._refresh_tree_view(panel)
+
+        panel.model.layoutChanged.emit.assert_called_once()
+        panel.model.beginResetModel.assert_not_called()
+        panel.model.endResetModel.assert_not_called()
+        panel.treeView.viewport.return_value.update.assert_called_once()
+
+
+class TestDownloadAllResourcesSpinner(unittest.TestCase):
+    """Tests that download_all_resources() highlights each item while it downloads.
+
+    Reuses the same animated-throbber mechanism (on_workflow_started() /
+    _stop_item_spinner()) a normal single-indicator run already shows on
+    its tree row, instead of leaving the tree showing no per-item feedback
+    during a batch download.
+    """
+
+    def setUp(self):
+        self.panel = MagicMock()
+        self.panel._message_bar = MagicMock()
+        self.panel.working_directory = "/tmp/does-not-need-to-exist-for-this-path"  # nosec B108
+
+        self.item = MagicMock()
+        self.spec = MagicMock()
+        self.spec.label = "Fire (Environmental Hazard)"
+
+        self.sync_patch = patch("geest.core.download_all_resources.sync_cached_resource_attributes", return_value=[])
+        self.sync_patch.start()
+        self.collect_patch = patch(
+            "geest.core.download_all_resources.collect_missing_resources",
+            return_value=[(self.item, self.spec)],
+        )
+        self.collect_patch.start()
+
+        self.captured = {}
+
+        def fake_controller(*args, **kwargs):
+            self.captured.update(kwargs)
+            return MagicMock()
+
+        self.controller_patch = patch(
+            "geest.core.download_all_resources.DownloadAllResourcesController", side_effect=fake_controller
+        )
+        self.controller_patch.start()
+
+        bbox_layer = MagicMock()
+        bbox_layer.isValid.return_value = True
+        bbox_layer.featureCount.return_value = 1
+        self.vector_layer_patch = patch("geest.gui.panels.tree_panel.QgsVectorLayer", return_value=bbox_layer)
+        self.vector_layer_patch.start()
+
+    def tearDown(self):
+        self.sync_patch.stop()
+        self.collect_patch.stop()
+        self.controller_patch.stop()
+        self.vector_layer_patch.stop()
+
+    def test_item_started_shows_the_spinner_and_item_finished_clears_it(self):
+        TreePanel.download_all_resources(self.panel)
+
+        self.captured["on_item_started"](self.item, self.spec)
+        self.panel.on_workflow_started.assert_called_once_with(self.item)
+        self.panel._stop_item_spinner.assert_not_called()
+
+        self.captured["on_item_finished"](self.item, self.spec, True, "/tmp/fire_hazard.tif")  # nosec B108
+        self.panel._stop_item_spinner.assert_called_once_with(self.item)
 
 
 if __name__ == "__main__":

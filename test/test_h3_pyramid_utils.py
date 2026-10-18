@@ -11,6 +11,7 @@ import os
 import shutil
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from osgeo import ogr, osr
 
@@ -20,6 +21,7 @@ from geest.core.h3_pyramid_utils import (
     compute_h3_level_resolutions,
     get_exposed_h3_levels,
     h3_effective_cell_size_m,
+    h3_pyramid_steps,
     has_h3_pyramid_structure,
     refresh_h3_pyramid_column,
 )
@@ -36,7 +38,7 @@ def _build_h3_grid(gpkg_path, h3_resolution=9, score_fields=(), bbox_wgs84=(36.8
         gpkg_path: Destination path for the study_area.gpkg fixture.
         h3_resolution: H3 resolution to generate cells at.
         score_fields: REAL (scored) column names to add and populate, each
-            cell getting a distinct value (its 0-based index) so MAX
+            cell getting a distinct value (its 0-based index) so MIN
             aggregation across a coarser cell's children is distinguishable.
         bbox_wgs84: (min_lon, min_lat, max_lon, max_lat), kept small so the
             generated cell count stays low and tests run fast.
@@ -290,14 +292,58 @@ class TestH3PyramidEdgeClipping(unittest.TestCase):
         ds = None
 
 
+class TestH3PyramidStepsSetting(unittest.TestCase):
+    """Tests for h3_pyramid_steps() and its effect on get_exposed_h3_levels().
+
+    National and local are tuned independently - a scale of anything other
+    than "local" (including "national") reads the national key.
+    """
+
+    def test_defaults_to_three_when_unset(self):
+        with patch("geest.core.h3_pyramid_utils.setting", side_effect=lambda key, default=None: default):
+            self.assertEqual(h3_pyramid_steps("national"), 3)
+            self.assertEqual(h3_pyramid_steps("local"), 3)
+
+    def test_reads_the_national_key_for_national_scale(self):
+        def fake_setting(key, default=None):
+            return {"h3_pyramid_steps_national": 5, "h3_pyramid_steps_local": 2}.get(key, default)
+
+        with patch("geest.core.h3_pyramid_utils.setting", side_effect=fake_setting):
+            self.assertEqual(h3_pyramid_steps("national"), 5)
+
+    def test_reads_the_local_key_for_local_scale(self):
+        def fake_setting(key, default=None):
+            return {"h3_pyramid_steps_national": 5, "h3_pyramid_steps_local": 2}.get(key, default)
+
+        with patch("geest.core.h3_pyramid_utils.setting", side_effect=fake_setting):
+            self.assertEqual(h3_pyramid_steps("local"), 2)
+
+    def test_unrecognised_scale_falls_back_to_national(self):
+        def fake_setting(key, default=None):
+            return {"h3_pyramid_steps_national": 5, "h3_pyramid_steps_local": 2}.get(key, default)
+
+        with patch("geest.core.h3_pyramid_utils.setting", side_effect=fake_setting):
+            self.assertEqual(h3_pyramid_steps("something_else"), 5)
+
+    def test_get_exposed_h3_levels_honours_the_scale_specific_step_count(self):
+        def fake_setting(key, default=None):
+            return {"h3_pyramid_steps_national": 1, "h3_pyramid_steps_local": 3}.get(key, default)
+
+        with patch("geest.core.h3_pyramid_utils.setting", side_effect=fake_setting):
+            national_levels = get_exposed_h3_levels("unused.gpkg", "jobs", 9, analysis_scale="national")
+            local_levels = get_exposed_h3_levels("unused.gpkg", "jobs", 9, analysis_scale="local")
+        self.assertEqual([res for res, _table in national_levels], [9, 8])
+        self.assertEqual([res for res, _table in local_levels], [9, 8, 7, 6])
+
+
 class TestComputeH3LevelResolutions(unittest.TestCase):
     """Tests for compute_h3_level_resolutions()."""
 
     def test_steps_down_by_one_each_level(self):
-        self.assertEqual(compute_h3_level_resolutions(9), [9, 8, 7, 6, 5])
+        self.assertEqual(compute_h3_level_resolutions(9), [9, 8, 7, 6])
 
     def test_clamps_at_zero(self):
-        self.assertEqual(compute_h3_level_resolutions(2), [2, 1, 0, 0, 0])
+        self.assertEqual(compute_h3_level_resolutions(2), [2, 1, 0, 0])
 
     def test_custom_step_count(self):
         self.assertEqual(compute_h3_level_resolutions(9, steps=2), [9, 8, 7])
@@ -339,7 +385,6 @@ class TestBuildH3PyramidScaffold(unittest.TestCase):
             "study_area_grid_h3_res8",
             "study_area_grid_h3_res7",
             "study_area_grid_h3_res6",
-            "study_area_grid_h3_res5",
         ):
             ds = ogr.Open(self.gpkg_path, 0)
             level_layer = ds.GetLayerByName(table_name)
@@ -433,7 +478,7 @@ class TestH3PyramidEndToEnd(unittest.TestCase):
     def test_refresh_missing_gpkg_fails_cleanly(self):
         self.assertFalse(refresh_h3_pyramid_column(os.path.join(self.temp_dir, "nope.gpkg"), "jobs", 9))
 
-    def test_aggregated_value_is_max_of_children(self):
+    def test_aggregated_value_is_min_of_children(self):
         import h3
 
         n_cells = _build_h3_grid(self.gpkg_path, h3_resolution=9, score_fields=("jobs",))
@@ -441,8 +486,9 @@ class TestH3PyramidEndToEnd(unittest.TestCase):
 
         self.assertTrue(refresh_h3_pyramid_column(self.gpkg_path, "jobs", 9))
 
-        # Independently recompute the expected MAX-per-parent at resolution 8
-        # straight from the base grid, then compare against what got built.
+        # Independently recompute the expected MIN-per-parent at resolution 8
+        # straight from the base grid, then compare against what got built -
+        # a coarse cell shows its worst (most conservative) child score.
         ds = ogr.Open(self.gpkg_path, 0)
         base_layer = ds.GetLayerByName("study_area_grid")
         expected = {}
@@ -451,7 +497,7 @@ class TestH3PyramidEndToEnd(unittest.TestCase):
             value = feature.GetField("jobs")
             if value is None:
                 continue
-            expected[parent] = max(expected.get(parent, value), value)
+            expected[parent] = min(expected.get(parent, value), value)
 
         level_layer = ds.GetLayerByName("study_area_grid_h3_res8")
         self.assertIsNotNone(level_layer, "Expected level table study_area_grid_h3_res8 to exist.")
@@ -512,14 +558,13 @@ class TestGetExposedH3Levels(unittest.TestCase):
         # point building optimized scale-dependent levels and hiding most
         # of them from the actual scale-dependent visualization.
         levels = get_exposed_h3_levels("unused.gpkg", "jobs", 9)
-        self.assertEqual([res for res, _table in levels], [9, 8, 7, 6, 5])
+        self.assertEqual([res for res, _table in levels], [9, 8, 7, 6])
         self.assertEqual(
             [table for _res, table in levels][1:],
             [
                 "study_area_grid_h3_res8",
                 "study_area_grid_h3_res7",
                 "study_area_grid_h3_res6",
-                "study_area_grid_h3_res5",
             ],
         )
 

@@ -12,6 +12,8 @@ import unittest
 from osgeo import osr
 
 from geest.core.h3_utils import (
+    _get_cached_transform,
+    bbox_to_wgs84,
     get_h3_resolution_for_cell_size,
     get_h3_resolution_for_scale,
     h3_cell_area_km2,
@@ -132,6 +134,44 @@ class TestTransformWgs84ToTarget(unittest.TestCase):
 
         self.assertTrue(100000 < x < 900000, f"x={x} is not a plausible UTM easting")
         self.assertTrue(1000000 < y < 2500000, f"y={y} is not a plausible UTM northing")
+
+
+class TestCachedTransform(unittest.TestCase):
+    """_get_cached_transform() backs both bbox_to_wgs84() and
+    transform_wgs84_to_target() - building a fresh osr.CoordinateTransformation
+    per call measured ~20x slower than reusing one, which matters since
+    both are called once per grid cell during generation."""
+
+    def test_same_epsg_pair_returns_the_identical_cached_object(self):
+        first = _get_cached_transform(4326, 32626)
+        second = _get_cached_transform(4326, 32626)
+
+        self.assertIs(first, second)
+
+    def test_different_epsg_pairs_get_independent_transforms(self):
+        to_utm26 = _get_cached_transform(4326, 32626)
+        to_utm27 = _get_cached_transform(4326, 32627)
+
+        self.assertIsNot(to_utm26, to_utm27)
+
+    def test_reused_transform_still_produces_correct_coordinates(self):
+        # Call twice (hitting the cache the second time) and confirm the
+        # cached transform wasn't left in some consumed/invalid state.
+        first_x, first_y = transform_wgs84_to_target(-23.5, 15.5, 32626)
+        second_x, second_y = transform_wgs84_to_target(-23.5, 15.5, 32626)
+
+        self.assertEqual(first_x, second_x)
+        self.assertEqual(first_y, second_y)
+
+    def test_bbox_to_wgs84_round_trips_through_transform_wgs84_to_target(self):
+        target_epsg = 32626
+        lon, lat = -23.5, 15.5
+        x, y = transform_wgs84_to_target(lon, lat, target_epsg)
+
+        wgs84_xmin, wgs84_xmax, wgs84_ymin, wgs84_ymax = bbox_to_wgs84(x - 1, x + 1, y - 1, y + 1, target_epsg)
+
+        self.assertTrue(wgs84_xmin < lon < wgs84_xmax)
+        self.assertTrue(wgs84_ymin < lat < wgs84_ymax)
 
 
 if __name__ == "__main__":

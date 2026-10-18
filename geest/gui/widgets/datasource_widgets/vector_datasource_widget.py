@@ -30,7 +30,7 @@ from qgis.PyQt.QtWidgets import (
     QToolButton,
 )
 
-from geest.core.osm_downloaders import OSMDownloadType
+from geest.core.osm_downloaders import OSM_DOWNLOAD_TOOLTIPS, resolve_point_osm_download_type
 from geest.core.tasks.osm_downloader_task import OSMDownloaderTask
 from geest.utilities import log_message, resources_path
 
@@ -90,145 +90,14 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                 item_name = self.attributes.get("name", "").lower()
                 indicator_text = self.attributes.get("indicator", "").lower()
 
-                if (
-                    "public" in item_id
-                    or "transport" in item_id
-                    or "public" in item_name
-                    or "transport" in item_name
-                    or "public" in indicator_text
-                    or "transport" in indicator_text
-                ):
+                self.osm_download_type = resolve_point_osm_download_type(item_id, item_name, indicator_text)
+                if self.osm_download_type is not None:
                     self.should_add_osm_widget = True
-                    self.osm_download_type = OSMDownloadType.PUBLIC_TRANSPORT
-                    self.osm_tooltip = "Download public transport data from OpenStreetMap"
+                    self.osm_tooltip = OSM_DOWNLOAD_TOOLTIPS[self.osm_download_type]
                     log_message(
-                        f"OSM widget (PUBLIC_TRANSPORT) will be added for indicator: {item_id}", level=Qgis.Info
+                        f"OSM widget ({self.osm_download_type.name}) will be added for indicator: {item_id}",
+                        level=Qgis.Info,
                     )
-
-                elif (
-                    "education" in item_id
-                    or "school" in item_id
-                    or "training" in item_id
-                    or "education" in item_name
-                    or "school" in item_name
-                    or "training" in item_name
-                    or "education" in indicator_text
-                    or "school" in indicator_text
-                    or "training" in indicator_text
-                ):
-                    self.should_add_osm_widget = True
-                    self.osm_download_type = OSMDownloadType.EDUCATION
-                    self.osm_tooltip = "Download education facilities from OpenStreetMap"
-                    log_message(f"OSM widget (EDUCATION) will be added for indicator: {item_id}", level=Qgis.Info)
-
-                elif (
-                    "financial" in item_id
-                    or "bank" in item_id
-                    or "finance" in item_id
-                    or "financial" in item_name
-                    or "bank" in item_name
-                    or "finance" in item_name
-                    or "financial" in indicator_text
-                    or "bank" in indicator_text
-                    or "finance" in indicator_text
-                ):
-                    self.should_add_osm_widget = True
-                    self.osm_download_type = OSMDownloadType.FINANCIAL
-                    self.osm_tooltip = "Download financial services from OpenStreetMap"
-                    log_message(f"OSM widget (FINANCIAL) will be added for indicator: {item_id}", level=Qgis.Info)
-
-                elif (
-                    "kindergarten" in item_id
-                    or "childcare" in item_id
-                    or "kindergarten" in item_name
-                    or "childcare" in item_name
-                    or "kindergarten" in indicator_text
-                    or "childcare" in indicator_text
-                ):
-                    self.should_add_osm_widget = True
-                    self.osm_download_type = OSMDownloadType.KINDERGARTEN
-                    self.osm_tooltip = "Download kindergarten and childcare facilities from OpenStreetMap"
-                    log_message(f"OSM widget (KINDERGARTEN) will be added for indicator: {item_id}", level=Qgis.Info)
-
-                elif (
-                    "primary" in item_id
-                    or "school" in item_id
-                    or "primary" in item_name
-                    or "school" in item_name
-                    or "primary" in indicator_text
-                    or "school" in indicator_text
-                ):
-                    self.should_add_osm_widget = True
-                    self.osm_download_type = OSMDownloadType.PRIMARY_SCHOOL
-                    self.osm_tooltip = "Download primary schools from OpenStreetMap"
-                    log_message(f"OSM widget (PRIMARY_SCHOOL) will be added for indicator: {item_id}", level=Qgis.Info)
-
-                elif (
-                    "pharmacy" in item_id
-                    or "pharmacies" in item_id
-                    or "pharmacy" in item_name
-                    or "pharmacies" in item_name
-                    or "pharmacy" in indicator_text
-                    or "pharmacies" in indicator_text
-                ):
-                    self.should_add_osm_widget = True
-                    self.osm_download_type = OSMDownloadType.PHARMACY
-                    self.osm_tooltip = "Download pharmacies from OpenStreetMap"
-                    log_message(f"OSM widget (PHARMACY) will be added for indicator: {item_id}", level=Qgis.Info)
-
-                elif (
-                    "grocery" in item_id
-                    or "groceries" in item_id
-                    or "market" in item_id
-                    or "grocery" in item_name
-                    or "groceries" in item_name
-                    or "market" in item_name
-                    or "grocery" in indicator_text
-                    or "groceries" in indicator_text
-                    or "market" in indicator_text
-                ):
-                    self.should_add_osm_widget = True
-                    self.osm_download_type = OSMDownloadType.GROCERY
-                    self.osm_tooltip = "Download grocery stores and markets from OpenStreetMap"
-                    log_message(f"OSM widget (GROCERY) will be added for indicator: {item_id}", level=Qgis.Info)
-
-                elif (
-                    "green" in item_id
-                    or "park" in item_id
-                    or "garden" in item_id
-                    or "green" in item_name
-                    or "park" in item_name
-                    or "garden" in item_name
-                    or "green" in indicator_text
-                    or "park" in indicator_text
-                    or "garden" in indicator_text
-                ):
-                    self.should_add_osm_widget = True
-                    self.osm_download_type = OSMDownloadType.GREEN_SPACE
-                    self.osm_tooltip = "Download green spaces and parks from OpenStreetMap"
-                    log_message(f"OSM widget (GREEN_SPACE) will be added for indicator: {item_id}", level=Qgis.Info)
-
-                elif (
-                    "hospital" in item_id
-                    or "clinic" in item_id
-                    or "health" in item_id
-                    or "hospital" in item_name
-                    or "clinic" in item_name
-                    or "health" in item_name
-                    or "hospital" in indicator_text
-                    or "clinic" in indicator_text
-                    or "health" in indicator_text
-                ):
-                    self.should_add_osm_widget = True
-                    self.osm_download_type = OSMDownloadType.HEALTH_FACILITY
-                    self.osm_tooltip = "Download hospitals and clinics from OpenStreetMap"
-                    log_message(f"OSM widget (HEALTH_FACILITY) will be added for indicator: {item_id}", level=Qgis.Info)
-
-                elif "water" in item_id or "water" in item_name or "water" in indicator_text:
-                    self.should_add_osm_widget = True
-                    self.osm_download_type = OSMDownloadType.WATER_POINT
-                    self.osm_tooltip = "Download water points and water infrastructure from OpenStreetMap"
-                    log_message(f"OSM widget (WATER_POINT) will be added for indicator: {item_id}", level=Qgis.Info)
 
             self.layer_combo = QgsMapLayerComboBox()
             self.layer_combo.setAllowEmptyLayer(True)

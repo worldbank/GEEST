@@ -228,7 +228,7 @@ class TestRefreshPyramidColumn(unittest.TestCase):
             )
         ds = None
 
-    def test_refresh_builds_correct_max_scores(self):
+    def test_refresh_builds_correct_min_scores(self):
         _build_grid(self.gpkg_path, rows=16, cols=16)
         self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))
         self.assertTrue(is_pyramid_fresh(self.gpkg_path, "score"))
@@ -241,29 +241,29 @@ class TestRefreshPyramidColumn(unittest.TestCase):
         # Base level still goes through study_area_grid itself.
         self.assertIsNone(tables_by_size[100.0])
 
-        # Mid level (400m) takes the max over a 4x4 block of base cells -> 16 rows total.
+        # Mid level (400m) takes the min over a 4x4 block of base cells -> 16 rows total.
         mid_layer = self._level_layer(400.0, tables_by_size[400.0])
         self.assertTrue(mid_layer.isValid())
         self.assertEqual(mid_layer.featureCount(), 16)
         values_by_cell = {(f["row_index"], f["col_index"]): f["score"] for f in mid_layer.getFeatures()}
-        # Block (0,0) covers base rows/cols 0-3; max of row+col over that block.
-        expected = max(r + c for r in range(4) for c in range(4))
+        # Block (0,0) covers base rows/cols 0-3; min of row+col over that block.
+        expected = min(r + c for r in range(4) for c in range(4))
         self.assertAlmostEqual(values_by_cell[(0, 0)], expected)
 
         # Coarse level (1600m) collapses the whole 16x16 grid to one row.
         coarse_layer = self._level_layer(1600.0, tables_by_size[1600.0])
         self.assertTrue(coarse_layer.isValid())
         self.assertEqual(coarse_layer.featureCount(), 1)
-        overall_expected = max(r + c for r in range(16) for c in range(16))
+        overall_expected = min(r + c for r in range(16) for c in range(16))
         self.assertAlmostEqual(next(coarse_layer.getFeatures())["score"], overall_expected)
 
-    def test_partial_children_max_ignores_null(self):
+    def test_partial_children_min_ignores_null(self):
         # A 2x2 hole (4 NULL base cells) inside a 4x4 block that feeds one
-        # 400m cell: that cell must take the max of only the 12 remaining
+        # 400m cell: that cell must take the min of only the 12 remaining
         # children, not treat the hole as zero or propagate NULL. The hole
-        # covers the block's highest-value corner, so the max necessarily
+        # covers the block's lowest-value corner, so the min necessarily
         # shifts if (and only if) NULLs are correctly excluded.
-        _build_grid(self.gpkg_path, rows=16, cols=16, hole={(3, 3), (3, 2), (2, 3), (2, 2)})
+        _build_grid(self.gpkg_path, rows=16, cols=16, hole={(0, 0), (0, 1), (1, 0), (1, 1)})
         self.assertTrue(refresh_pyramid_column(self.gpkg_path, "score", 100.0))
 
         levels = get_exposed_levels(self.gpkg_path, "score", 100.0)
@@ -271,8 +271,8 @@ class TestRefreshPyramidColumn(unittest.TestCase):
         mid_layer = self._level_layer(400.0, tables_by_size[400.0])
         values_by_cell = {(f["row_index"], f["col_index"]): f["score"] for f in mid_layer.getFeatures()}
 
-        remaining = [r + c for r in range(4) for c in range(4) if (r, c) not in {(3, 3), (3, 2), (2, 3), (2, 2)}]
-        self.assertAlmostEqual(values_by_cell[(0, 0)], max(remaining))
+        remaining = [r + c for r in range(4) for c in range(4) if (r, c) not in {(0, 0), (0, 1), (1, 0), (1, 1)}]
+        self.assertAlmostEqual(values_by_cell[(0, 0)], min(remaining))
 
     def test_rebuild_reverts_stale_cells_to_null_not_deleted(self):
         # When children become entirely NULL since the last build, the
@@ -397,7 +397,7 @@ class TestRefreshPyramidColumn(unittest.TestCase):
         levels = get_exposed_levels(self.gpkg_path, "score", 100.0)
         mid_layer = self._level_layer(400.0, dict(levels)[400.0])
         self.assertEqual(mid_layer.featureCount(), 1)
-        self.assertAlmostEqual(next(mid_layer.getFeatures())["score"], 40.0)  # max of all 4, both areas
+        self.assertAlmostEqual(next(mid_layer.getFeatures())["score"], 10.0)  # min of all 4, both areas
 
 
 if __name__ == "__main__":

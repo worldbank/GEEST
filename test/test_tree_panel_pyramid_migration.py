@@ -294,7 +294,9 @@ class TestPromptBuildMissingPyramids(unittest.TestCase):
             result = captured["build_fn"](fake_task)
             self.assertEqual(result["succeeded"], ["jobs"])
             self.assertEqual(result["failed"], [])
-            fake_module.refresh_h3_pyramid_column.assert_called_once_with(self.gpkg_path, "jobs", 9)
+            fake_module.refresh_h3_pyramid_column.assert_called_once_with(
+                self.gpkg_path, "jobs", 9, analysis_scale="national"
+            )
 
         # on_finished must not raise even without a real iface in this test env.
         captured["on_finished"](None, result)
@@ -307,7 +309,9 @@ class TestPromptBuildMissingPyramids(unittest.TestCase):
 
         with _fake_h3_pyramid_utils(has_structure=True) as fake_module:
             TreePanel.prompt_build_missing_pyramids(self.panel)
-            fake_module.has_h3_pyramid_structure.assert_called_once_with(self.gpkg_path, "jobs", 9)
+            fake_module.has_h3_pyramid_structure.assert_called_once_with(
+                self.gpkg_path, "jobs", 9, analysis_scale="national"
+            )
 
         mock_messagebox.question.assert_not_called()
 

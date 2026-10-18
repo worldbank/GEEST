@@ -32,6 +32,7 @@ from qgis.PyQt.QtCore import (
 )
 
 from geest.core.algorithms import GHSLDownloader, GHSLProcessor
+from geest.core.arrow_batch_writer import log_arrow_batch_fallback, write_features_arrow_batch
 from geest.core.grid_column_utils import add_model_columns_to_grid
 from geest.core.h3_utils import estimate_h3_cells_for_area, get_h3_resolution_for_scale, h3_cell_area_km2
 from geest.core.settings import setting
@@ -514,6 +515,25 @@ class UnifiedWriterThread(QThread):
         """
         layer = self._get_layer("study_area_grid")
         feat_defn = layer.GetLayerDefn()
+        has_h3_fields = feat_defn.GetFieldIndex("h3_index") >= 0
+
+        wrote_via_arrow = False
+        try:
+            field_values = {
+                "grid_id": [op.data["grid_id"] for op in operations],
+                "area_name": [op.data["area_name"] for op in operations],
+            }
+            if has_h3_fields:
+                field_values["h3_index"] = [op.data.get("h3_index") or None for op in operations]
+                field_values["h3_resolution"] = [op.data.get("h3_resolution") or None for op in operations]
+            geometries = [op.data["geometry"] for op in operations]
+            wrote_via_arrow = write_features_arrow_batch(layer, field_values, geometries)
+        except Exception as error:
+            log_arrow_batch_fallback("UnifiedWriter._write_grid_batch", error)
+
+        if wrote_via_arrow:
+            log_message(f"UnifiedWriter: Wrote {len(operations)} grid cells (Arrow batch)")
+            return
 
         layer.StartTransaction()
         try:
@@ -563,6 +583,30 @@ class UnifiedWriterThread(QThread):
         for layer_name, layer_ops in by_layer.items():
             layer = self._get_layer(layer_name)
             feat_defn = layer.GetLayerDefn()
+
+            wrote_via_arrow = False
+            try:
+                extra_keys = set()
+                for op in layer_ops:
+                    extra_keys.update(op.data.get("extra_fields", {}).keys())
+                # Only fields that actually exist on this layer's schema can
+                # be written via Arrow - unlike SetField(), which silently
+                # no-ops on an unknown field name.
+                extra_keys = {key for key in extra_keys if feat_defn.GetFieldIndex(key) >= 0}
+
+                field_values = {}
+                if feat_defn.GetFieldIndex("area_name") >= 0:
+                    field_values["area_name"] = [op.data["area_name"] for op in layer_ops]
+                for key in extra_keys:
+                    field_values[key] = [op.data.get("extra_fields", {}).get(key) for op in layer_ops]
+                geometries = [op.data["geometry"] for op in layer_ops]
+                wrote_via_arrow = write_features_arrow_batch(layer, field_values, geometries)
+            except Exception as error:
+                log_arrow_batch_fallback(f"UnifiedWriter._write_geometry_batch[{layer_name}]", error)
+
+            if wrote_via_arrow:
+                log_message(f"UnifiedWriter: Wrote {len(layer_ops)} geometries to {layer_name} (Arrow batch)")
+                continue
 
             layer.StartTransaction()
             try:
@@ -1620,7 +1664,10 @@ class StudyAreaProcessingTask(QgsTask):
                     from geest.core.h3_pyramid_utils import build_h3_pyramid_scaffold
 
                     if not build_h3_pyramid_scaffold(
-                        self.gpkg_path, self.h3_resolution, clip_to_boundary=self.h3_clip_to_boundary
+                        self.gpkg_path,
+                        self.h3_resolution,
+                        clip_to_boundary=self.h3_clip_to_boundary,
+                        analysis_scale=self.analysis_scale,
                     ):
                         log_message("Failed to build H3 pyramid scaffold during study area creation", level="WARNING")
                 else:

@@ -9,9 +9,10 @@ with the same score columns added lazily as needed - never one table per
 (level, column); with dozens of indicators/factors/dimensions that would
 mean hundreds of tiny tables instead of a handful of wide ones.
 
-Each level's cell is the max of the 4 cells (2x2 block) in the level
-immediately below it (never diluting a high score by averaging it with
-lower neighbours as you zoom out); cell size doubles per level. Only
+Each level's cell is the min of the 4 cells (2x2 block) in the level
+immediately below it - a coarse cell shows its worst (most conservative)
+child score, never masking a poor score by averaging it with better
+neighbours as you zoom out; cell size doubles per level. Only
 local/national (square-grid) analyses are supported - regional (H3 hex)
 analyses keep using add_grid_layer_to_map().
 """
@@ -23,6 +24,7 @@ from typing import List, Optional, Tuple
 from osgeo import ogr
 from qgis.core import Qgis
 
+from geest.core.arrow_batch_writer import log_arrow_batch_fallback, write_features_arrow_batch
 from geest.core.grid_column_utils import (
     _execute_sql_with_retry,
     _open_gpkg_for_write,
@@ -242,22 +244,40 @@ def _ensure_level_table_scaffold(ds, level_cs: float, source_table: str, srs) ->
         ds.ReleaseResultSet(result)
 
     layer_defn = layer.GetLayerDefn()
-    layer.StartTransaction()
-    try:
-        for row_index, col_index in pairs:
-            xmin, ymin = col_index * level_cs, row_index * level_cs
-            xmax, ymax = xmin + level_cs, ymin + level_cs
-            wkt = f"POLYGON(({xmin} {ymin},{xmax} {ymin},{xmax} {ymax},{xmin} {ymax},{xmin} {ymin}))"
-            feature = ogr.Feature(layer_defn)
-            feature.SetField("row_index", row_index)
-            feature.SetField("col_index", col_index)
-            feature.SetGeometry(ogr.CreateGeometryFromWkt(wkt))
-            layer.CreateFeature(feature)
-            feature = None
-        layer.CommitTransaction()
-    except Exception:
-        layer.RollbackTransaction()
-        raise
+
+    wrote_via_arrow = False
+    if pairs:
+        try:
+            row_indexes, col_indexes = (list(values) for values in zip(*pairs))
+            geometries = []
+            for row_index, col_index in pairs:
+                xmin, ymin = col_index * level_cs, row_index * level_cs
+                xmax, ymax = xmin + level_cs, ymin + level_cs
+                wkt = f"POLYGON(({xmin} {ymin},{xmax} {ymin},{xmax} {ymax},{xmin} {ymax},{xmin} {ymin}))"
+                geometries.append(ogr.CreateGeometryFromWkt(wkt))
+            wrote_via_arrow = write_features_arrow_batch(
+                layer, {"row_index": row_indexes, "col_index": col_indexes}, geometries
+            )
+        except Exception as error:
+            log_arrow_batch_fallback(f"grid_pyramid_utils._ensure_level_table_scaffold[{table_name}]", error)
+
+    if not wrote_via_arrow and pairs:
+        layer.StartTransaction()
+        try:
+            for row_index, col_index in pairs:
+                xmin, ymin = col_index * level_cs, row_index * level_cs
+                xmax, ymax = xmin + level_cs, ymin + level_cs
+                wkt = f"POLYGON(({xmin} {ymin},{xmax} {ymin},{xmax} {ymax},{xmin} {ymax},{xmin} {ymin}))"
+                feature = ogr.Feature(layer_defn)
+                feature.SetField("row_index", row_index)
+                feature.SetField("col_index", col_index)
+                feature.SetGeometry(ogr.CreateGeometryFromWkt(wkt))
+                layer.CreateFeature(feature)
+                feature = None
+            layer.CommitTransaction()
+        except Exception:
+            layer.RollbackTransaction()
+            raise
 
     _execute_sql_with_retry(
         ds,
@@ -425,7 +445,7 @@ def refresh_pyramid_column(gpkg_path: str, column_name: str, base_cell_size_m: f
     Idempotent and safe to call repeatedly: every level's column is fully
     recomputed (never incrementally patched), so a cell whose children
     became entirely NULL since the last build correctly reverts to NULL
-    (a correlated-subquery MAX over zero matching rows is NULL) instead of
+    (a correlated-subquery MIN over zero matching rows is NULL) instead of
     lingering with a stale value.
 
     Args:
@@ -465,7 +485,7 @@ def refresh_pyramid_column(gpkg_path: str, column_name: str, base_cell_size_m: f
         # not silently build a plausible pyramid from garbage: SQLite's
         # double-quoted-identifier fallback reinterprets an unknown
         # "colname" as the string literal 'colname' rather than raising, so
-        # MAX("colname") would otherwise evaluate to that literal string
+        # MIN("colname") would otherwise evaluate to that literal string
         # for every row instead of erroring.
         grid_defn = grid_layer.GetLayerDefn()
         grid_fields = {grid_defn.GetFieldDefn(i).GetName().lower() for i in range(grid_defn.GetFieldCount())}
@@ -495,7 +515,7 @@ def refresh_pyramid_column(gpkg_path: str, column_name: str, base_cell_size_m: f
             update_sql = (
                 f"UPDATE {table_name} "  # nosec B608
                 f'SET "{sanitized}" = ('
-                f'SELECT MAX(b."{sanitized}") FROM {source_table} AS b '
+                f'SELECT MIN(b."{sanitized}") FROM {source_table} AS b '
                 f"INDEXED BY idx_{source_table}_rowcol "
                 f"WHERE b.row_index >= {table_name}.row_index * 2 "
                 f"AND b.row_index <= {table_name}.row_index * 2 + 1 "

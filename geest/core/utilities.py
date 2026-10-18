@@ -434,7 +434,13 @@ def add_pyramid_layer_to_map(
         h3_resolution = grid_type_utils.get_h3_resolution(working_directory)
         if not is_pyramid_fresh(gpkg_path, column_name):
             clip_to_boundary = grid_type_utils.get_h3_clip_to_boundary(working_directory)
-            if not refresh_h3_pyramid_column(gpkg_path, column_name, h3_resolution, clip_to_boundary=clip_to_boundary):
+            if not refresh_h3_pyramid_column(
+                gpkg_path,
+                column_name,
+                h3_resolution,
+                clip_to_boundary=clip_to_boundary,
+                analysis_scale=analysis_scale,
+            ):
                 log_message(
                     f"Failed to build H3 pyramid for column '{column_name}'.",
                     tag="GeoE3",
@@ -443,7 +449,7 @@ def add_pyramid_layer_to_map(
                 return
 
         # Finest first: [(h3_resolution, table_or_None), ...].
-        levels = get_exposed_h3_levels(gpkg_path, column_name, h3_resolution)
+        levels = get_exposed_h3_levels(gpkg_path, column_name, h3_resolution, analysis_scale=analysis_scale)
         scales = [scale_denominator_for_cell_size(h3_effective_cell_size_m(res)) for res, _table in levels]
         level_suffixes = [f"res {res}" for res, _table in levels]
     else:

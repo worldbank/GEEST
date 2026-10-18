@@ -8,12 +8,48 @@ H3 Resolution Reference:
 - Resolution 6: ~3.2km edge, ~36 km² area (Regional scale)
 """
 
+import threading
 from typing import List, Optional, Tuple
 
 from osgeo import ogr, osr
 from qgis.core import Qgis
 
 from geest.utilities import log_message
+
+# osr.CoordinateTransformation construction (SpatialReference setup +
+# PROJ pipeline resolution) costs ~20x more than reusing an existing one -
+# bbox_to_wgs84()/transform_wgs84_to_target() are called once per grid
+# cell (H3 and square grids alike), so building a fresh transform on every
+# call is a measured, significant chunk of total grid generation time.
+# Thread-local, not a shared global: GDAL/PROJ transformation objects are
+# not guaranteed safe for concurrent use from multiple threads at once,
+# and grid generation already runs several of these calls in parallel via
+# QThreadPool (see study_area_processing_task.py's ChunkRunnable).
+_transform_cache_local = threading.local()
+
+
+def _get_cached_transform(source_epsg: int, target_epsg: int) -> osr.CoordinateTransformation:
+    """Return a thread-local, cached CoordinateTransformation for this EPSG pair."""
+    cache = getattr(_transform_cache_local, "cache", None)
+    if cache is None:
+        cache = {}
+        _transform_cache_local.cache = cache
+
+    key = (source_epsg, target_epsg)
+    transform = cache.get(key)
+    if transform is None:
+        source_srs = osr.SpatialReference()
+        source_srs.ImportFromEPSG(source_epsg)
+        source_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+        target_srs = osr.SpatialReference()
+        target_srs.ImportFromEPSG(target_epsg)
+        target_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+        transform = osr.CoordinateTransformation(source_srs, target_srs)
+        cache[key] = transform
+    return transform
+
 
 # Fallback average H3 cell areas in km^2 (approximate)
 H3_CELL_AREA_KM2 = {
@@ -168,15 +204,7 @@ def bbox_to_wgs84(
     Returns:
         Tuple of (xmin, xmax, ymin, ymax) in WGS84
     """
-    source_srs = osr.SpatialReference()
-    source_srs.ImportFromEPSG(source_epsg)
-    source_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-    target_srs = osr.SpatialReference()
-    target_srs.ImportFromEPSG(4326)
-    target_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-    transform = osr.CoordinateTransformation(source_srs, target_srs)
+    transform = _get_cached_transform(source_epsg, 4326)
 
     # Transform all four corners
     points = [
@@ -214,15 +242,7 @@ def transform_wgs84_to_target(
     Returns:
         Tuple of (x, y) in target CRS
     """
-    source_srs = osr.SpatialReference()
-    source_srs.ImportFromEPSG(4326)
-    source_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-    target_srs = osr.SpatialReference()
-    target_srs.ImportFromEPSG(target_epsg)
-    target_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-    transform = osr.CoordinateTransformation(source_srs, target_srs)
+    transform = _get_cached_transform(4326, target_epsg)
     tx, ty, _ = transform.TransformPoint(x, y)
     return tx, ty
 

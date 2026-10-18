@@ -116,6 +116,13 @@ class GeoE3Settings(FORM_CLASS, QgsOptionsPageWidget):
         filter_study_areas_by_ghsl = bool(setting(key="filter_study_areas_by_ghsl", default=True))
         self.filter_study_areas_by_ghsl.setChecked(filter_study_areas_by_ghsl)
 
+        # H3 pyramid depth setting
+        h3_pyramid_steps_national = int(setting(key="h3_pyramid_steps_national", default=3))
+        self.h3_pyramid_steps_national.setValue(h3_pyramid_steps_national)
+
+        h3_pyramid_steps_local = int(setting(key="h3_pyramid_steps_local", default=3))
+        self.h3_pyramid_steps_local.setValue(h3_pyramid_steps_local)
+
     def apply(self):
         """Process the animation sequence.
 
@@ -148,6 +155,8 @@ class GeoE3Settings(FORM_CLASS, QgsOptionsPageWidget):
         set_setting(key="ookla_use_local_cache", value=self.ookla_use_local_cache.isChecked())
         set_setting(key="ookla_local_cache_dir", value=self.ookla_cache_dir.text())
         set_setting(key="filter_study_areas_by_ghsl", value=self.filter_study_areas_by_ghsl.isChecked())
+        set_setting(key="h3_pyramid_steps_national", value=self.h3_pyramid_steps_national.value())
+        set_setting(key="h3_pyramid_steps_local", value=self.h3_pyramid_steps_local.value())
 
     def _select_ookla_cache_dir(self):
         """Select local cache directory for Ookla parquet files."""

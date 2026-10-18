@@ -13,7 +13,8 @@ H3's hierarchy has no exact "2x2 quad aggregation" like a square grid: each
 cell's parent (one coarser resolution step) has on average ~7 children, not
 4. So instead of doubling cell size per level, each pyramid level here is
 one H3 resolution step coarser than the one below it, with a cell's value
-the MAX of every finer cell whose h3.cell_to_parent() resolves to it.
+the MIN of every finer cell whose h3.cell_to_parent() resolves to it - a
+coarse cell shows its worst (most conservative) child score, not its best.
 
 Exactly like grid_pyramid_utils, each level is a WIDE table
 (study_area_grid_h3_res<N>) mirroring study_area_grid - one row per coarse
@@ -31,6 +32,7 @@ from typing import List, Optional, Tuple
 from osgeo import ogr
 from qgis.core import Qgis
 
+from geest.core.arrow_batch_writer import log_arrow_batch_fallback, write_features_arrow_batch
 from geest.core.grid_column_utils import (
     _execute_sql_with_retry,
     _open_gpkg_for_write,
@@ -40,11 +42,35 @@ from geest.core.grid_column_utils import (
 )
 from geest.core.grid_pyramid_utils import PYRAMID_META_TABLE, _ensure_meta_table
 from geest.core.h3_utils import h3_cell_area_km2, transform_wgs84_to_target
+from geest.core.settings import setting
 from geest.utilities import log_message
 
-H3_PYRAMID_RESOLUTION_STEPS = 4  # base -> -1 -> -2 -> -3 -> -4 resolution steps, every level exposed
+H3_PYRAMID_RESOLUTION_STEPS = 3  # base -> -1 -> -2 -> -3 resolution steps, default; see h3_pyramid_steps() below
 H3_PYRAMID_TABLE_PREFIX = "study_area_grid_h3_res"  # study_area_grid_h3_res5, ...
 H3_LEVEL_BATCH_SIZE = 500
+
+
+def h3_pyramid_steps(analysis_scale: str) -> int:
+    """Return the configured number of H3 resolution steps the pyramid builds below base.
+
+    National and local projects are tuned separately (GeoE3 Options > Grid
+    Pyramid Visualization Options), since they typically pick very
+    different base H3 resolutions and so want a different number of
+    coarser zoom levels. Read fresh from QGIS settings on every call
+    rather than cached, so a user change takes effect on the next build
+    without requiring a restart. Regional analyses never call into this
+    module at all (no pyramid is built for them), so any scale other than
+    "local" is treated as "national".
+
+    Args:
+        analysis_scale: "local" or "national" (anything else falls back
+            to the national setting).
+
+    Returns:
+        The configured step count, or H3_PYRAMID_RESOLUTION_STEPS if unset.
+    """
+    key = "h3_pyramid_steps_local" if analysis_scale == "local" else "h3_pyramid_steps_national"
+    return int(setting(key=key, default=H3_PYRAMID_RESOLUTION_STEPS))
 
 
 def compute_h3_level_resolutions(base_h3_resolution: int, steps: int = H3_PYRAMID_RESOLUTION_STEPS) -> List[int]:
@@ -98,7 +124,9 @@ def _epsg_from_srs(srs) -> Optional[int]:
         return None
 
 
-def has_h3_pyramid_structure(gpkg_path: str, column_name: str, base_h3_resolution: Optional[int]) -> bool:
+def has_h3_pyramid_structure(
+    gpkg_path: str, column_name: str, base_h3_resolution: Optional[int], analysis_scale: str = "national"
+) -> bool:
     """Return True if column_name has ever been built into the H3 pyramid.
 
     Mirrors grid_pyramid_utils.has_pyramid_structure(): unlike
@@ -112,6 +140,8 @@ def has_h3_pyramid_structure(gpkg_path: str, column_name: str, base_h3_resolutio
         base_h3_resolution: The analysis grid's native H3 resolution, or
             None (e.g. a corrupt/incomplete model.json), in which case this
             always returns False.
+        analysis_scale: "local" or "national" - picks which pyramid-depth
+            setting to check against (see h3_pyramid_steps()).
 
     Returns:
         True if the first coarser level table already has this column.
@@ -119,7 +149,7 @@ def has_h3_pyramid_structure(gpkg_path: str, column_name: str, base_h3_resolutio
     if not os.path.exists(gpkg_path) or base_h3_resolution is None:
         return False
     sanitized = _sanitize_column_name(column_name)
-    resolutions = compute_h3_level_resolutions(base_h3_resolution)
+    resolutions = compute_h3_level_resolutions(base_h3_resolution, steps=h3_pyramid_steps(analysis_scale))
     table_name = _h3_level_table_name(resolutions[1])
     try:
         ds = ogr.Open(gpkg_path, 0)
@@ -250,35 +280,55 @@ def _ensure_h3_level_table_scaffold(
             log_message(f"Could not resolve H3 parent for {child_index}: {error}", level=Qgis.Warning)
 
     layer_defn = layer.GetLayerDefn()
-    layer.StartTransaction()
-    try:
-        for parent_cell in parent_cells:
-            boundary = h3_module.cell_to_boundary(parent_cell)  # [(lat, lon), ...]
-            ring = ogr.Geometry(ogr.wkbLinearRing)
-            for lat, lon in boundary:
-                if target_epsg is not None and target_epsg != 4326:
-                    x, y = transform_wgs84_to_target(lon, lat, target_epsg)
-                else:
-                    x, y = lon, lat
-                ring.AddPoint(x, y)
-            ring.CloseRings()
-            polygon_geometry = ogr.Geometry(ogr.wkbPolygon)
-            polygon_geometry.AddGeometry(ring)
 
-            if boundary_geom is not None:
-                polygon_geometry = _clip_to_boundary(polygon_geometry, boundary_geom)
+    def _parent_cell_polygon(parent_cell):
+        boundary = h3_module.cell_to_boundary(parent_cell)  # [(lat, lon), ...]
+        ring = ogr.Geometry(ogr.wkbLinearRing)
+        for lat, lon in boundary:
+            if target_epsg is not None and target_epsg != 4326:
+                x, y = transform_wgs84_to_target(lon, lat, target_epsg)
+            else:
+                x, y = lon, lat
+            ring.AddPoint(x, y)
+        ring.CloseRings()
+        polygon_geometry = ogr.Geometry(ogr.wkbPolygon)
+        polygon_geometry.AddGeometry(ring)
+        if boundary_geom is not None:
+            polygon_geometry = _clip_to_boundary(polygon_geometry, boundary_geom)
+        return polygon_geometry
+
+    wrote_via_arrow = False
+    if parent_cells:
+        try:
+            h3_indexes = []
+            geometries = []
+            for parent_cell in parent_cells:
+                polygon_geometry = _parent_cell_polygon(parent_cell)
+                if polygon_geometry is None:
+                    continue
+                h3_indexes.append(parent_cell)
+                geometries.append(polygon_geometry)
+            wrote_via_arrow = write_features_arrow_batch(layer, {"h3_index": h3_indexes}, geometries)
+        except Exception as error:
+            log_arrow_batch_fallback(f"h3_pyramid_utils._ensure_h3_level_table_scaffold[{table_name}]", error)
+
+    if not wrote_via_arrow and parent_cells:
+        layer.StartTransaction()
+        try:
+            for parent_cell in parent_cells:
+                polygon_geometry = _parent_cell_polygon(parent_cell)
                 if polygon_geometry is None:
                     continue
 
-            feature = ogr.Feature(layer_defn)
-            feature.SetField("h3_index", parent_cell)
-            feature.SetGeometry(polygon_geometry)
-            layer.CreateFeature(feature)
-            feature = None
-        layer.CommitTransaction()
-    except Exception:
-        layer.RollbackTransaction()
-        raise
+                feature = ogr.Feature(layer_defn)
+                feature.SetField("h3_index", parent_cell)
+                feature.SetGeometry(polygon_geometry)
+                layer.CreateFeature(feature)
+                feature = None
+            layer.CommitTransaction()
+        except Exception:
+            layer.RollbackTransaction()
+            raise
 
     _execute_sql_with_retry(
         ds,
@@ -364,7 +414,7 @@ def _refresh_h3_level_column_values(
             except Exception as error:
                 log_message(f"Could not resolve H3 parent for {child_index}: {error}", level=Qgis.Warning)
                 continue
-            if parent_cell not in aggregated or value > aggregated[parent_cell]:
+            if parent_cell not in aggregated or value < aggregated[parent_cell]:
                 aggregated[parent_cell] = value
         ds.ReleaseResultSet(result)
 
@@ -386,7 +436,11 @@ def _refresh_h3_level_column_values(
 
 
 def refresh_h3_pyramid_column(
-    gpkg_path: str, column_name: str, base_h3_resolution: Optional[int], clip_to_boundary: bool = False
+    gpkg_path: str,
+    column_name: str,
+    base_h3_resolution: Optional[int],
+    clip_to_boundary: bool = False,
+    analysis_scale: str = "national",
 ) -> bool:
     """(Re)populate one column across every H3 pyramid level table, cascading from the base grid.
 
@@ -403,6 +457,8 @@ def refresh_h3_pyramid_column(
             geest.core.grid_type_utils.get_h3_clip_to_boundary. Only
             meaningful the first time a level table is scaffolded; an
             already-built level table is never retroactively re-clipped.
+        analysis_scale: "local" or "national" - picks which pyramid-depth
+            setting to build down to (see h3_pyramid_steps()).
 
     Returns:
         True on success, False on failure.
@@ -424,7 +480,7 @@ def refresh_h3_pyramid_column(
         )
         return False
 
-    resolutions = compute_h3_level_resolutions(base_h3_resolution)
+    resolutions = compute_h3_level_resolutions(base_h3_resolution, steps=h3_pyramid_steps(analysis_scale))
 
     try:
         sanitized = _sanitize_column_name(column_name)
@@ -500,7 +556,10 @@ def refresh_h3_pyramid_column(
 
 
 def build_h3_pyramid_scaffold(
-    gpkg_path: str, base_h3_resolution: Optional[int], clip_to_boundary: bool = False
+    gpkg_path: str,
+    base_h3_resolution: Optional[int],
+    clip_to_boundary: bool = False,
+    analysis_scale: str = "national",
 ) -> bool:
     """Build every H3 pyramid level's geometry scaffold, with no score columns yet.
 
@@ -525,6 +584,8 @@ def build_h3_pyramid_scaffold(
         clip_to_boundary: If True, edge cells at every level are clipped to
             study_area_clip_polygons - see
             geest.core.grid_type_utils.get_h3_clip_to_boundary.
+        analysis_scale: "local" or "national" - picks which pyramid-depth
+            setting to build down to (see h3_pyramid_steps()).
 
     Returns:
         True on success, False on failure.
@@ -548,7 +609,7 @@ def build_h3_pyramid_scaffold(
         )
         return False
 
-    resolutions = compute_h3_level_resolutions(base_h3_resolution)
+    resolutions = compute_h3_level_resolutions(base_h3_resolution, steps=h3_pyramid_steps(analysis_scale))
 
     try:
         ds = _open_gpkg_for_write(gpkg_path)
@@ -585,7 +646,7 @@ def build_h3_pyramid_scaffold(
 
 
 def get_exposed_h3_levels(
-    gpkg_path: str, column_name: str, base_h3_resolution: Optional[int]
+    gpkg_path: str, column_name: str, base_h3_resolution: Optional[int], analysis_scale: str = "national"
 ) -> List[Tuple[int, Optional[str]]]:
     """Return every built H3 pyramid level, finest first, for map visualization.
 
@@ -600,6 +661,8 @@ def get_exposed_h3_levels(
         column_name: The study_area_grid score column (same as above).
         base_h3_resolution: The analysis grid's native H3 resolution, or
             None, in which case this returns an empty list.
+        analysis_scale: "local" or "national" - picks which pyramid-depth
+            setting to expose (see h3_pyramid_steps()).
 
     Returns:
         List of (h3_resolution, table_name) tuples. table_name is None for
@@ -611,7 +674,7 @@ def get_exposed_h3_levels(
     if base_h3_resolution is None:
         return []
 
-    resolutions = compute_h3_level_resolutions(base_h3_resolution)
+    resolutions = compute_h3_level_resolutions(base_h3_resolution, steps=h3_pyramid_steps(analysis_scale))
     levels: List[Tuple[int, Optional[str]]] = [(resolutions[0], None)]
     seen_resolutions = {resolutions[0]}
     for resolution in resolutions[1:]:

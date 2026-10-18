@@ -15,5 +15,5 @@ from .osm_active_transport_downloader import OSMActiveTransportDownloader
 from .osm_public_transport_downloader import OSMPublicTransportDownloader
 from .osm_education_downloader import OSMEducationDownloader
 from .osm_financial_downloader import OSMFinancialDownloader
-from .osm_download_type import OSMDownloadType
+from .osm_download_type import OSM_DOWNLOAD_TOOLTIPS, OSMDownloadType, resolve_point_osm_download_type
 from .osm_downloader_factory import OSMDownloaderFactory
