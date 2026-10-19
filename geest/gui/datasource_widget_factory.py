@@ -16,7 +16,7 @@ from geest.gui.widgets.datasource_widgets import (
     EnvironmentalHazardsRasterDataSourceWidget,
     EPLEXDataSourceWidget,
     FixedValueDataSourceWidget,
-    RasterDataSourceWidget,
+    NTLDownloadRasterDataSourceWidget,
     S2SDataSourceWidget,
     S2SEducationDataSourceWidget,
     S2SEnvironmentalHazardsRasterDataSourceWidget,
@@ -100,11 +100,10 @@ class DataSourceWidgetFactory:
                 analysis_scale = attributes.get("analysis_scale")
                 if analysis_scale == "regional":
                     return S2SNTLRasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
-                return RasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
+                return NTLDownloadRasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_environmental_hazards" and value == 1:
                 analysis_scale = attributes.get("analysis_scale")
-                is_flood = str(attributes.get("id", "")).strip().lower() == "flood"
-                if analysis_scale == "regional" or is_flood:
+                if analysis_scale == "regional":
                     return S2SEnvironmentalHazardsRasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
                 return EnvironmentalHazardsRasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_street_lights" and value == 1:

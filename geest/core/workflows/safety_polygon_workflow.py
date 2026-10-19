@@ -64,6 +64,16 @@ class SafetyPolygonWorkflow(WorkflowBase):
                 )
                 raise WorkflowNotConfiguredError("No safety polygon layer configured for this indicator")
         self.features_layer = QgsVectorLayer(layer_path, "features_layer", "ogr")
+        if not self.features_layer.isValid():
+            log_message(
+                f"Safety polygon layer is not valid: {layer_path}",
+                tag="GeoE3",
+                level=Qgis.Critical,
+            )
+            raise WorkflowNotConfiguredError(
+                f"The polygon layer for this indicator could not be opened ({layer_path}). "
+                "Re-select the data source in the indicator's settings."
+            )
         self.selected_field = self.attributes.get("classify_safety_polygon_into_classes_selected_field", "")
         # This is a dict with keys being unique values from the selected field
         # and values from the aggregation dialog configuration table

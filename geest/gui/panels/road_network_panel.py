@@ -334,7 +334,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         if road_layer:
             self.road_network_layer_path_changed.emit(road_layer.source())
         else:
-            self.road_network_layer_path_changed.emit(None)
+            self.road_network_layer_path_changed.emit("")
 
     def _update_next_button_state(self):
         """Enable or disable next button based on road layer validity."""
@@ -628,6 +628,21 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             )
             return None
 
+    def _warn_road_network_broken(self, message: str) -> None:
+        """Log and surface a user-visible warning about a broken road network reference.
+
+        Args:
+            message: Description of what is wrong with the stored layer.
+        """
+        log_message(message, level=Qgis.Warning)
+        if self._message_bar:
+            self._message_bar.pushMessage(
+                "GEOE3",
+                f"{message} Please select or download a road network layer again.",
+                level=Qgis.Warning,
+                duration=10,
+            )
+
     def restore_layer_from_path(self, layer_path):
         """Restore layer selection from saved path in model.json.
 
@@ -660,10 +675,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
 
         # Case 2: Layer not in QGIS - need to load from disk
         if not os.path.exists(base_path):
-            log_message(
-                f"Cannot restore road network layer - file not found: {base_path}",
-                level=Qgis.Warning,
-            )
+            self._warn_road_network_broken(f"Road network layer file not found: {base_path}")
             # Clear the path from model since file doesn't exist
             self.road_network_layer_path_changed.emit("")
             return
@@ -673,10 +685,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         layer_name = os.path.splitext(os.path.basename(base_path))[0]
         layer = QgsVectorLayer(layer_path, layer_name, "ogr")
         if not layer.isValid():
-            log_message(
-                f"Cannot restore road network layer - invalid: {layer_path}",
-                level=Qgis.Warning,
-            )
+            self._warn_road_network_broken(f"Road network layer could not be loaded: {layer_path}")
             # Clear the path from model since layer is invalid
             self.road_network_layer_path_changed.emit("")
             return

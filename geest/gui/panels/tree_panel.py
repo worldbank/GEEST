@@ -264,6 +264,11 @@ class TreePanel(QWidget):
         run_incomplete_action.triggered.connect(self.run_incomplete)
         prepare_analysis_menu.addAction(run_incomplete_action)
 
+        # Add "Download all resources" action
+        download_all_resources_action = QAction("Download all resources", self)
+        download_all_resources_action.triggered.connect(self.download_all_resources)
+        prepare_analysis_menu.addAction(download_all_resources_action)
+
         # Set the menu on the tool button
         self.prepare_analysis_button.setMenu(prepare_analysis_menu)
 
@@ -691,23 +696,45 @@ class TreePanel(QWidget):
             QSettings().setValue("geoe3/pie_data", "")
             self.working_directory_changed(working_directory)
 
-    @pyqtSlot()
+    @pyqtSlot(str)
     def set_road_network_layer_path(self, network_layer_path):
         """⚙️ Set road network layer path.
 
+        Validates the layer before storing it. An empty/None path clears the
+        previously stored value instead of being silently ignored, so a
+        broken reference detected by the Road Network panel (e.g. the file
+        was deleted outside GeoE3) doesn't linger forever in model.json.
+
         Args:
-            network_layer_path: Network layer path.
+            network_layer_path: Network layer path, or empty/None to clear it.
         """
+        analysis_item = self.model.rootItem.child(0)
         if network_layer_path:
+            base_path = network_layer_path.split("|")[0] if "|" in network_layer_path else network_layer_path
+            if not os.path.exists(base_path):
+                self.show_validation_error(
+                    "Road Network Issue",
+                    f"Road network layer file not found: {base_path}. "
+                    "Please select or download a road network layer again.",
+                )
+                log_message(
+                    f"Refusing to set road_network_layer_path - file not found: {base_path}",
+                    level=Qgis.Warning,
+                )
+                return
             log_message(f"Setting road_network_layer_path in model to {network_layer_path}")
-            analysis_item = self.model.rootItem.child(0)
             try:
                 analysis_item.setAttribute("road_network_layer_path", network_layer_path)
                 self.save_json_to_working_directory()
             except Exception as e:
                 log_message(f"Error setting road network path: {str(e)}", level=Qgis.Critical)
         else:
-            log_message("No road network layer path provided.")
+            log_message("Clearing road_network_layer_path in model (no layer selected).")
+            try:
+                analysis_item.setAttribute("road_network_layer_path", "")
+                self.save_json_to_working_directory()
+            except Exception as e:
+                log_message(f"Error clearing road network path: {str(e)}", level=Qgis.Critical)
 
     def qgis_project_path(self) -> Optional[str]:
         """Get the associated QGIS project path from the analysis item.
@@ -2362,7 +2389,16 @@ class TreePanel(QWidget):
         else:
             add_grid_layer_to_map(item, column_name, self.working_directory)
 
-        # Now cancel the animated icon
+        self._stop_item_spinner(item)
+
+    def _stop_item_spinner(self, item) -> None:
+        """Stop and clear the animated throbber on_workflow_started() placed on item's row.
+
+        Shared by on_workflow_completed() and download_all_resources() - any
+        caller that started the spinner via on_workflow_started() must pair
+        it with this to clear it, including the parent row's spinner for an
+        indicator.
+        """
         node_index = self.model.itemIndex(item)
 
         if not node_index.isValid():
@@ -2379,8 +2415,10 @@ class TreePanel(QWidget):
             parent_index = node_index.parent()
             parent_second_column_index = self.model.index(parent_index.row(), 1, parent_index.parent())
 
-        self.child_movie.stop()
-        self.parent_movie.stop()
+        if hasattr(self, "child_movie") and self.child_movie is not None:
+            self.child_movie.stop()
+        if hasattr(self, "parent_movie") and self.parent_movie is not None:
+            self.parent_movie.stop()
 
         second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
         self.treeView.setIndexWidget(second_column_index, None)
@@ -2389,6 +2427,138 @@ class TreePanel(QWidget):
 
         # Emit dataChanged to refresh the decoration
         self.model.dataChanged.emit(second_column_index, second_column_index)
+
+    def download_all_resources(self):
+        """Walk every indicator, download missing resources, and wire up cached ones.
+
+        Covers nighttime lights, environmental hazard rasters, and
+        OSM-matched buffer-point indicators today - see
+        geest.core.download_all_resources' module docstring for what's not
+        covered yet and why. An indicator whose resource is already cached
+        on disk but not yet set as its source (e.g. a duplicated
+        indicator, or a resource a sibling indicator already downloaded)
+        is configured immediately, with no download needed; only a
+        genuinely missing resource is actually downloaded. The tree view
+        is refreshed afterward so newly-configured indicators show their
+        updated status immediately.
+        """
+        bar = getattr(self, "_message_bar", None) or iface.messageBar()
+
+        if not self.working_directory:
+            bar.pushMessage("Download All Resources", "No working directory set.", level=Qgis.Warning, duration=5)
+            return
+
+        from geest.core.download_all_resources import (
+            DownloadAllResourcesController,
+            collect_missing_resources,
+            sync_cached_resource_attributes,
+        )
+
+        configured = sync_cached_resource_attributes(self.model.rootItem, self.working_directory)
+        if configured:
+            self.save_json_to_working_directory()
+            self._refresh_tree_view()
+
+        missing = collect_missing_resources(self.model.rootItem, self.working_directory)
+        if not missing:
+            message = (
+                f"Configured {len(configured)} indicator(s) from already-cached files. " if configured else ""
+            ) + "All downloadable resources are already cached."
+            bar.pushMessage("Download All Resources", message, level=Qgis.Info, duration=5)
+            return
+
+        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+        bbox_layer = QgsVectorLayer(f"{gpkg_path}|layername=study_area_bboxes", "study_area_bboxes", "ogr")
+        if not bbox_layer.isValid() or bbox_layer.featureCount() == 0:
+            bar.pushMessage(
+                "Download All Resources",
+                "Could not load study_area_bboxes from study_area.gpkg.",
+                level=Qgis.Warning,
+                duration=5,
+            )
+            return
+        extent = bbox_layer.extent()
+        extent_crs_authid = bbox_layer.crs().authid()
+
+        self.overall_progress_bar.setVisible(True)
+        self.workflow_progress_bar.setVisible(True)
+        self.status_label.setVisible(True)
+        self.status_label.setText("Starting downloads...")
+        self.prepare_analysis_button.setVisible(False)
+        self.help_button.setVisible(False)
+        self.project_button.setVisible(False)
+        self.overall_progress_bar.setValue(0)
+        self.overall_progress_bar.setMaximum(len(missing))
+        self.workflow_progress_bar.setValue(0)
+
+        def _on_item_started(item, spec):
+            self.status_label.setText(f"Downloading {spec.label}...")
+            self.status_label.setToolTip(spec.label)
+            self.workflow_progress_bar.setValue(0)
+            # Same animated throbber a normal single-indicator run shows on
+            # its tree row - highlights which item is downloading without
+            # touching the tree's structure/expand state.
+            self.on_workflow_started(item)
+
+        def _on_item_progress(item, spec, message):
+            self.status_label.setText(message[:60])
+            self.status_label.setToolTip(message)
+
+        def _on_item_finished(item, spec, success, message):
+            self._stop_item_spinner(item)
+            self.overall_progress_bar.setValue(self.overall_progress_bar.value() + 1)
+            self.workflow_progress_bar.setValue(100)
+            if not success:
+                log_message(f"Download failed for {spec.label}: {message}", tag="GeoE3", level=Qgis.Warning)
+
+        def _on_all_finished(succeeded, failed):
+            self.overall_progress_bar.setVisible(False)
+            self.workflow_progress_bar.setVisible(False)
+            self.status_label.setVisible(False)
+            self.status_label.setText("")
+            self.prepare_analysis_button.setVisible(True)
+            self.help_button.setVisible(True)
+            self.project_button.setVisible(True)
+            self.save_json_to_working_directory()
+            self._refresh_tree_view()
+            summary = f"Downloaded {len(succeeded)} resource(s)."
+            if configured:
+                summary += f" Configured {len(configured)} from already-cached files."
+            if failed:
+                failed_labels = ", ".join(spec.label for _item, spec in failed)
+                summary += f" {len(failed)} failed: {failed_labels}"
+                bar.pushMessage("Download All Resources", summary, level=Qgis.Warning, duration=10)
+            else:
+                bar.pushMessage("Download All Resources", summary, level=Qgis.Info, duration=5)
+
+        self._download_all_resources_controller = DownloadAllResourcesController(
+            items_and_specs=missing,
+            working_directory=self.working_directory,
+            extent=extent,
+            extent_crs_authid=extent_crs_authid,
+            on_item_started=_on_item_started,
+            on_item_progress=_on_item_progress,
+            on_item_finished=_on_item_finished,
+            on_all_finished=_on_all_finished,
+        )
+        self._download_all_resources_controller.start()
+
+    def _refresh_tree_view(self) -> None:
+        """Repaint every item's status (e.g. "ready to run") without collapsing the tree.
+
+        Attribute changes made directly on JsonTreeItem (not through the
+        view's own edit flow) don't trigger a repaint on their own - the
+        status column is computed live from attributes each time the view
+        paints, but nothing tells it to paint again. Deliberately
+        layoutChanged, not beginResetModel()/endResetModel(): a full model
+        reset invalidates persistent indexes, which collapses every
+        expanded node and clears the current selection/scroll position -
+        needlessly disruptive here, since only item data changed, not the
+        tree's structure. layoutChanged tells the view to re-read and
+        repaint without touching expand state.
+        """
+        self.model.layoutChanged.emit()
+        self.treeView.viewport().update()
 
     def calculate_analysis_insights(self, item: JsonTreeItem):
         """Calculate insights for the analysis.

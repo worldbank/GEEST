@@ -77,6 +77,16 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
                 )
                 raise WorkflowNotConfiguredError("No polygon layer configured for this indicator")
         self.features_layer = QgsVectorLayer(layer_path, "features_layer", "ogr")
+        if not self.features_layer.isValid():
+            log_message(
+                f"Classified polygon layer is not valid: {layer_path}",
+                tag="GeoE3",
+                level=Qgis.Critical,
+            )
+            raise WorkflowNotConfiguredError(
+                f"The polygon layer for this indicator could not be opened ({layer_path}). "
+                "Re-select the data source in the indicator's settings."
+            )
         self.selected_field = self.attributes.get("classify_polygon_into_classes_selected_field", "")
         self.workflow_name = "classified_polygon"
         # Grid-first mode: write results to grid columns first, then rasterize

@@ -30,6 +30,7 @@
         ps.debugpy
         ps.psutil
         ps.h3
+        ps.pyarrow
       ];
       # QGIS 4.x is Qt6/PyQt6; QGIS 3.44 LTR is Qt5/PyQt5 — each needs the
       # matching WebEngine binding, so it is added per variant here rather
@@ -174,6 +175,7 @@
             ps.pip
             ps.pre-commit-hooks # provides end-of-file-fixer, trailing-whitespace-fixer, check-yaml, check-json CLIs
             ps.psutil
+            ps.pyarrow # GDAL/OGR bulk Arrow-batch writes (Layer.WriteArrowBatch/GetArrowStream)
             ps.pydocstyle
             ps.python-docx # SRS written directly into the Word template
             ps.pytest
