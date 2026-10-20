@@ -7,6 +7,7 @@ This module contains functionality for ghsl downloader.
 
 import os
 import zipfile
+from typing import Optional
 
 from qgis.core import (
     Qgis,
@@ -57,7 +58,7 @@ class GHSLDownloader:
         filename: str = "",  # will also set the layer name in the gpkg
         use_cache: bool = False,
         delete_existing: bool = True,
-        feedback: QgsFeedback = None,
+        feedback: Optional[QgsFeedback] = None,
     ):
         """
         Initializes the GHSLDownloader with the specified parameters.

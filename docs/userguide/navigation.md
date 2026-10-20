@@ -109,7 +109,7 @@ Option 2: **Create a New Project**:
     alt="New GeoE3 Project"
     style="width:45%;"
     title="Click to enlarge"
-    onclick="window.open(this.src, '_blank')">  
+    onclick="window.open(this.src, '_blank')">
 </p>
 > - Now the process of splitting the area into grids has started, and a progress bar is displayed in the interface. Once completed, a report titled **Study Area Report** will open automatically. This report, along with all grid-splitting outputs, is saved in the project directory under the `/study_area` folder. This report summarizes the processing time and provides an explanation of each generated output, including: study area bounding boxes, polygons, grid cells and processing chunks.
 
@@ -136,7 +136,7 @@ Option 2: **Create a New Project**:
     style="width:45%;"
     title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
-  
+
 </p>
 
 ### Processing Data Interface

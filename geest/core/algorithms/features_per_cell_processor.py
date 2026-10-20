@@ -9,6 +9,8 @@ Performance optimizations:
 - Reduces logging overhead in inner loops
 """
 
+from typing import Optional
+
 from qgis import processing  # noqa: F401
 from qgis.core import (
     Qgis,
@@ -36,7 +38,7 @@ def select_grid_cells_and_count_features(
     grid_layer: QgsVectorLayer,
     features_layer: QgsVectorLayer,
     output_path: str,
-    feedback: QgsFeedback = None,
+    feedback: Optional[QgsFeedback] = None,
 ) -> QgsVectorLayer:
     """
     Select grid cells that intersect with features, count the number of intersecting features for each cell,
@@ -226,7 +228,7 @@ def select_grid_cells_and_count_features(
             del grid_feature_counts
 
 
-def assign_values_to_grid(grid_layer: QgsVectorLayer, feedback: QgsFeedback = None) -> QgsVectorLayer:
+def assign_values_to_grid(grid_layer: QgsVectorLayer, feedback: Optional[QgsFeedback] = None) -> QgsVectorLayer:
     """
     Assign values to grid cells based on the number of intersecting features.
 
@@ -311,7 +313,7 @@ def select_grid_cells_and_assign_transport_score(
     grid_layer: QgsVectorLayer,
     features_layer: QgsVectorLayer,
     output_path: str,
-    feedback: QgsFeedback = None,
+    feedback: Optional[QgsFeedback] = None,
     analysis_scale: str = None,
 ) -> QgsVectorLayer:
     """
@@ -518,7 +520,10 @@ def select_grid_cells_and_assign_transport_score(
                 grid_most_beneficial_road_scores[grid_id] = road_score
                 grid_most_beneficial_road_types[grid_id] = road_type
         counter += 1
-        feedback.setProgress((counter / feature_count) * 100.0)  # We just use nominal intervals for progress updates
+        if feedback:
+            feedback.setProgress(
+                (counter / feature_count) * 100.0
+            )  # We just use nominal intervals for progress updates
 
     # Summary statistics
     total_cells = len(grid_most_beneficial_road_scores)

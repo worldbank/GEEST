@@ -256,7 +256,16 @@
               ps.pyqt6-webengine
             ])
           }"
-          export PYTHONPATH="$pythonWithPackages/lib/python*/site-packages:${qgisWithExtras}/share/qgis/python:$PYTHONPATH"
+          export PYTHONPATH="$pythonWithPackages/${pkgs.python3.sitePackages}:${qgisWithExtras}/share/qgis/python:$PYTHONPATH"
+
+          # qgis.PyQt re-exports PyQt6 via `from PyQt6.QtCore import *`, and
+          # pyright refuses to populate a module's symbol table from a
+          # wildcard import of a third-party library — so every name only
+          # reachable through qgis.PyQt (QVariant, pyqtSignal, ...) reads as
+          # an unknown import symbol. Regenerate the typings/ override stubs
+          # every shell entry so they track whichever QGIS/PyQt build is on
+          # PYTHONPATH above (see scripts/generate_pyqt_typestubs.py).
+          python3 "$PWD/scripts/generate_pyqt_typestubs.py"
 
           # Banner + full lifecycle command reference (logic lives in the
           # dotfile, not inline here — see scripts/dev-help.sh).
