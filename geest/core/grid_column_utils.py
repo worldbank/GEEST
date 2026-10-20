@@ -1031,7 +1031,7 @@ def count_features_per_grid_cell(
     gpkg_path: str,
     column_name: str,
     features_layer: QgsVectorLayer,
-    feedback: QgsFeedback = None,
+    feedback: Optional[QgsFeedback] = None,
 ) -> int:
     """Count features intersecting each grid cell and assign scores.
 
@@ -1602,7 +1602,7 @@ def write_buffer_values_to_grid(
     buffer_layer: QgsVectorLayer,
     value_field: str = "value",
     aggregation_method: str = "MAX",
-    feedback: QgsFeedback = None,
+    feedback: Optional[QgsFeedback] = None,
 ) -> int:
     """Write buffer polygon scores to intersecting grid cells.
 
@@ -1817,7 +1817,7 @@ def write_percentage_scores_to_grid(
     column_name: str,
     buffer_layer: QgsVectorLayer,
     percentage_scores: Dict[int, int],
-    feedback: QgsFeedback = None,
+    feedback: Optional[QgsFeedback] = None,
 ) -> int:
     """Score grid cells by % of hexagon area covered by dissolved POI buffers.
 

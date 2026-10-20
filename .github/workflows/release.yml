@@ -30,9 +30,6 @@ jobs:
       - name: Install plugin dependencies
         run: pip install -r requirements-dev.txt
 
-      - name: Bundle dependencies
-        run: python admin.py bundle-deps --packages "h3==4.4.2"
-
       - name: Get experimental info
         id: get-experimental
         run: |

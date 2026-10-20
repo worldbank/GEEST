@@ -23,6 +23,67 @@ version per the policy above.
 
 ### Added
 
+- `admin.py generate-zip` now bundles `h3` into the release zip by
+  default (`VENDORED_PACKAGES = ["h3==4.4.2"]`), wired automatically into
+  `build()` rather than requiring a separate manual `bundle-deps` step
+  beforehand - the previous default (`VENDORED_PACKAGES = []`, with CI
+  passing `--packages "h3==4.4.2"` as an override) meant a plain local
+  `generate-zip` silently shipped a plugin that would fail to import h3
+  wherever the end user's own QGIS Python doesn't already have it.
+  `.github/workflows/release.yml`'s now-redundant explicit "Bundle
+  dependencies" step was removed.
+  Also fixed two real gaps found while verifying this: `WHEEL_PLATFORMS`
+  never requested a `cp313` wheel for Windows/macOS at all (only Linux
+  had it - any Windows/macOS user on QGIS 4.x, which ships Python 3.13,
+  would have hit an ImportError), and macOS Intel/ARM wheels were
+  silently clobbering each other at extraction time (h3 publishes no
+  universal2 wheel, and macOS wheel filenames don't encode architecture
+  the way manylinux's do, so both unpack to the identical path) - every
+  bundled macOS `.so` was actually arm64 only despite Intel also being
+  requested. `WHEEL_PLATFORMS` now targets cp312/cp313 only
+  (Linux/Windows/macOS-arm64), dropping cp311/cp314 and Intel macOS -
+  this was also necessary to fit under the plugin zip's 15MB hard limit
+  on QGIS's plugin repository infrastructure (see below), which a
+  correctly-complete bundle would otherwise have exceeded.
+- `generate-zip` now refuses to produce a zip over 15MB (`MAX_ZIP_SIZE_MB`),
+  QGIS's plugin repository hard limit, and always prints a small ASCII
+  dashboard breaking the zip's compressed size down by top-level plugin
+  area (`extlibs`, `core`, `gui`, `resources`, ...) with a bar chart, so
+  it's obvious at a glance what's actually driving the size - not just
+  the final pass/fail total.
+- `bundle_deps()` now strips build-time-only files after extracting each
+  wheel (Cython `.pyx`/`.pxd` source, C headers, static libs, CMake
+  config) - never needed to just `import h3` at runtime, pure dead
+  weight in every release before now.
+- `admin.py`'s packaging excludes a short list of dev-only files that were
+  previously swept into every release zip for no runtime benefit
+  (`EXCLUDE_FILES`): `generate_model.py`/`geoe3.ods` (the
+  spreadsheet-to-`model.json` tooling invoked only by
+  `scripts/import-ods-to-model.sh`, never imported by the plugin itself),
+  `geoe3_styling.xlsx` (a design reference, not loaded by any code),
+  `ghs-mod-2023-tile-scheme.qmd` (a QGIS-authored metadata sidecar for the
+  GHSL tile scheme layer, not read back - the plugin only ever loads the
+  sibling `.parquet`/`.gpkg`), and `insights.model3` (an unused QGIS
+  Processing model with no code reference).
+- `analysis_summary_report_template.qpt`'s two picture items were
+  embedding base64 copies of `geest/resources/images/geoe3-bg.png` and
+  `geest/resources/geoe3-banner.png` (QGIS's own "Embedded" picture
+  save mode) - byte-for-byte duplicates (confirmed via SHA256) of files
+  the plugin already ships separately, inflating the template from ~20KB
+  to ~3.9MB for no reason. The template's `file=` attributes now hold
+  placeholder tokens (`PLUGIN_RESOURCE:...`) that
+  `BaseReport.load_template()` (`geest/core/reports/base_report.py`)
+  substitutes for the real resolved resource path before parsing, so the
+  template file itself never needs to hardcode an absolute,
+  install-location-specific path.
+- The four largest shipped background PNGs
+  (`geoe3-bg.png`, `geoe3-page-header-bg.png`, `geoe3-page-footer-bg.png`,
+  `geoe3-page-no-bg.png`) are flat-colour illustration with a subtle
+  grain texture, not photographic content, so they compress far better
+  as a restricted 256-colour palette than as 8-bit-per-channel truecolor
+  - re-saved as 256-colour palette PNGs (same filenames/format, no code
+  changes needed) for a combined 3.75MB -> 1.14MB (~70% smaller), with
+  RMSE under 0.7% against the originals (visually indistinguishable).
 - Safety Perception's nighttime lights indicator can now download its own
   raster directly in-app at local/national scale (worldbank/GeoE3#452),
   following the same button/`QgsTask` pattern as the existing S2S

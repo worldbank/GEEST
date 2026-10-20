@@ -7,6 +7,7 @@ This module contains functionality for ghsl downloader task.
 import datetime
 import os
 import traceback
+from typing import Optional
 
 from qgis.core import (
     QgsCoordinateReferenceSystem,
@@ -44,7 +45,7 @@ class GHSLDownloaderTask(QgsTask):
         filename,
         use_cache=True,
         delete_existing=True,
-        feedback: QgsFeedback = None,
+        feedback: Optional[QgsFeedback] = None,
         extent_mollweide: QgsRectangle = None,
     ):
         """

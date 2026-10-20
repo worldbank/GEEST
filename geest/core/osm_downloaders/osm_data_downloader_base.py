@@ -65,7 +65,7 @@ class OSMDataDownloaderBase(ABC):
         filename: str = None,  # will also set the layer name in the gpkg
         use_cache: bool = False,
         delete_gpkg: bool = True,
-        feedback: QgsFeedback = None,
+        feedback: Optional[QgsFeedback] = None,
     ):
         """Initialize the OSMDataDownloaderBase class.
 
@@ -303,7 +303,8 @@ class OSMDataDownloaderBase(ABC):
         """
         total_start = time.perf_counter()
 
-        self.feedback.setProgress(20)
+        if self.feedback:
+            self.feedback.setProgress(20)
 
         # Open input OSM XML data source
         osm_driver = ogr.GetDriverByName("OSM")
@@ -336,14 +337,16 @@ class OSMDataDownloaderBase(ABC):
         if output_data_source is None:
             raise RuntimeError(f"Failed to create or open GeoPackage: {self.output_path}")
 
-        self.feedback.setProgress(40)
+        if self.feedback:
+            self.feedback.setProgress(40)
 
         # Perform layer copy with reprojection if specified
         output_layer = output_data_source.CopyLayer(lines_layer, working_layer)
         if output_layer is None:
             raise RuntimeError("Failed to copy lines layer to GeoPackage.")
 
-        self.feedback.setProgress(60)
+        if self.feedback:
+            self.feedback.setProgress(60)
 
         # Cleanup data sources
         osm_data_source = None
@@ -376,7 +379,8 @@ class OSMDataDownloaderBase(ABC):
 
         reprojected_layer = result["OUTPUT"]
 
-        self.feedback.setProgress(100)
+        if self.feedback:
+            self.feedback.setProgress(100)
 
         total_end = time.perf_counter()
         log_message(f"Reprojection complete")  # noqa E231

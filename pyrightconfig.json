@@ -1,6 +1,6 @@
 {
   "include": [
-    "geoe3",
+    "geest",
     "test"
   ],
   "exclude": [
@@ -12,8 +12,9 @@
     ".vscode-extensions"
   ],
   "extraPaths": [
-    "geoe3/extlibs"
+    "geest/extlibs"
   ],
+  "stubPath": "typings",
   "pythonVersion": "3.11",
   "typeCheckingMode": "basic",
   "reportMissingImports": true,

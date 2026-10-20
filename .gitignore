@@ -38,6 +38,9 @@ venv/
 ENV/
 .env.*
 
+# Generated pyright override stubs for qgis.PyQt (scripts/generate_pyqt_typestubs.py)
+/typings/
+
 # PyInstaller
 *.manifest
 *.spec

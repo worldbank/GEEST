@@ -25,6 +25,26 @@ TEST_FILES = ["test", "test_suite.py", "docker-compose.yml", "scripts"]
 # Patterns to exclude from build and zip
 EXCLUDE_DIRS = {"__pycache__", ".git", ".pytest_cache", "__pypackages__"}
 EXCLUDE_EXTENSIONS = {".pyc", ".pyo", ".xcf"}
+# Specific dev-only files that have no business in the shipped plugin -
+# never imported/opened by any runtime code (confirmed by grepping the
+# whole geest/ tree before adding each one here), so excluding them is
+# pure size reduction with zero behaviour change. Matched by exact
+# filename, not full path - each name is already distinctive enough
+# that this can't collide with an unrelated file elsewhere in the tree.
+EXCLUDE_FILES = {
+    # scripts/import-ods-to-model.sh's dev-time spreadsheet-to-model.json
+    # tooling - regenerates geest/resources/model.json, never run by the
+    # plugin itself once installed.
+    "generate_model.py",
+    "geoe3.ods",
+    # Design reference, not loaded by any code.
+    "geoe3_styling.xlsx",
+    # QGIS auto-generates this metadata sidecar when a layer is added to
+    # a project during authoring - not read back by the plugin.
+    "ghs-mod-2023-tile-scheme.qmd",
+    # Unused QGIS Processing model - no code loads it.
+    "insights.model3",
+}
 
 
 def _ignore_patterns(directory: str, files: list) -> set:
@@ -42,35 +62,67 @@ def _ignore_patterns(directory: str, files: list) -> set:
         # Ignore excluded directories
         if f in EXCLUDE_DIRS:
             ignored.add(f)
+        # Ignore specific dev-only files regardless of extension
+        elif f in EXCLUDE_FILES:
+            ignored.add(f)
         # Ignore files with excluded extensions
         elif any(f.endswith(ext) for ext in EXCLUDE_EXTENSIONS):
             ignored.add(f)
     return ignored
 
 
-# Vendored dependencies to bundle with the plugin
-# These will be downloaded for multiple platforms
+# Vendored dependencies to bundle with the plugin by default - pinned to
+# match requirements-dev.txt's h3==4.4.2 exactly, so the dev env and the
+# shipped plugin always carry the identical version. bundle_deps() is
+# wired into build()/generate_zip(), so this is bundled automatically,
+# not as a separate manual step - see WHEEL_PLATFORMS below for which
+# platforms/Python versions get a compiled wheel; the plugin zip has a
+# hard 15MB size limit on QGIS's plugin infrastructure (see
+# MAX_ZIP_SIZE_MB and the size-check in generate_zip()), so this list is
+# deliberately NOT "every package someone might find useful" - it is
+# "packages a real indicator/workflow unconditionally needs that aren't
+# already in every QGIS Python" (pyarrow, by contrast, is NOT vendored:
+# see geest/core/arrow_batch_writer.py's module docstring - it degrades
+# gracefully when absent, and OSGeo4W's Windows QGIS already bundles it).
 VENDORED_PACKAGES = [
-    # "h3",  # Removed to reduce bundle size - users can install separately if needed
+    "h3==4.4.2",
 ]
-# Platform tags for wheel downloads (covers most QGIS installations)
+# Platform tags for wheel downloads. Deliberately narrow, not "every
+# platform/Python combo PyPI has a wheel for" - the 15MB zip limit forced
+# a choice (see the "Python versions"/"macOS arch" decision in this
+# project's own history):
+# - cp312/cp313 only: covers QGIS 3.34 LTR's recent OSGeo4W builds (3.12)
+#   and QGIS 4.x (this project's own flake/docker tests run 3.13).
+#   cp311 (older QGIS) and cp314 (not yet adopted by any QGIS release)
+#   were dropped specifically to fit under the size limit.
+# - macOS: arm64 (Apple Silicon) only. h3 publishes no universal2 (fat)
+#   wheel, and macOS wheels don't encode architecture in the compiled
+#   .so's filename the way manylinux wheels do - so an Intel wheel and an
+#   ARM wheel for the same Python version extract to the IDENTICAL path
+#   and silently clobber each other. Requesting both is not "extra
+#   coverage", it's a bug that silently drops whichever extracts first.
+#   Apple Silicon has shipped on every new Mac since 2020.
 WHEEL_PLATFORMS = [
     # Linux
-    ("manylinux2014_x86_64", "cp311", "linux"),
     ("manylinux2014_x86_64", "cp312", "linux"),
     ("manylinux2014_x86_64", "cp313", "linux"),
-    ("manylinux2014_x86_64", "cp314", "linux"),
-    # macOS
-    ("macosx_10_9_x86_64", "cp311", "macos-intel"),
-    ("macosx_10_9_x86_64", "cp312", "macos-intel"),
-    ("macosx_11_0_arm64", "cp311", "macos-arm"),
+    # macOS (Apple Silicon only - see comment above)
     ("macosx_11_0_arm64", "cp312", "macos-arm"),
-    ("macosx_11_0_arm64", "cp314", "macos-arm"),
+    ("macosx_11_0_arm64", "cp313", "macos-arm"),
     # Windows
-    ("win_amd64", "cp311", "windows"),
     ("win_amd64", "cp312", "windows"),
-    ("win_amd64", "cp314", "windows"),
+    ("win_amd64", "cp313", "windows"),
 ]
+# Hard limit on QGIS's plugin repository infrastructure - generate_zip()
+# refuses to produce a zip over this size.
+MAX_ZIP_SIZE_MB = 15
+# File patterns/directories inside a bundled wheel that are build-time-only
+# (Cython source, C headers, static libs, CMake config) - never needed to
+# just `import <package>` at runtime, so bundle_deps() strips them after
+# extraction rather than shipping dead weight in every release.
+EXTLIBS_BUILD_ARTIFACT_EXTENSIONS = {".pxd", ".pyx", ".h", ".a", ".lib", ".cmake"}
+EXTLIBS_BUILD_ARTIFACT_DIRS = {"lib", "lib64", "include"}
+EXTLIBS_BUILD_ARTIFACT_FILENAMES = {"CMakeLists.txt"}
 app = typer.Typer()
 
 
@@ -219,7 +271,80 @@ def generate_zip(
     ) as fh:
         _add_to_zip(build_dir, fh, arc_path_base=build_dir.parent)
     typer.echo(f"zip generated at {str(zip_path)!r} " f"on {dt.datetime.now().strftime('%Y-%m-%d %H:%M')}")
+
+    total_compressed = _print_zip_size_dashboard(zip_path)
+    max_bytes = MAX_ZIP_SIZE_MB * 1024 * 1024
+    if total_compressed > max_bytes:
+        typer.echo(
+            f"\n✗ zip is {total_compressed / 1024 / 1024:.2f} MB, over the "
+            f"{MAX_ZIP_SIZE_MB} MB hard limit on QGIS's plugin infrastructure. "
+            "Trim VENDORED_PACKAGES/WHEEL_PLATFORMS in admin.py or geest/resources before releasing."
+        )
+        raise typer.Exit(code=1)
+
     return zip_path
+
+
+def _print_zip_size_dashboard(zip_path: Path) -> int:
+    """Print a small ASCII breakdown of a zip's size by top-level plugin area.
+
+    Groups every entry by the directory immediately under the plugin
+    root (geest/extlibs, geest/core, geest/gui, ...; loose files directly
+    under the root are grouped as "(root)"), sorted largest-compressed
+    first, with a simple bar scaled to the biggest category - so it's
+    obvious at a glance what's actually driving the zip toward the 15MB
+    limit, not just the final total.
+
+    Args:
+        zip_path: Path to the generated plugin zip.
+
+    Returns:
+        Total compressed size of the zip, in bytes.
+    """
+    buckets: typing.Dict[str, typing.Dict[str, int]] = {}
+    with zipfile.ZipFile(zip_path) as zf:
+        for info in zf.infolist():
+            parts = Path(info.filename).parts
+            category = parts[1] if len(parts) > 2 else "(root)"
+            bucket = buckets.setdefault(category, {"compressed": 0, "uncompressed": 0, "files": 0})
+            bucket["compressed"] += info.compress_size
+            bucket["uncompressed"] += info.file_size
+            bucket["files"] += 1
+
+    total_compressed = sum(b["compressed"] for b in buckets.values())
+    total_uncompressed = sum(b["uncompressed"] for b in buckets.values())
+    total_files = sum(b["files"] for b in buckets.values())
+    max_compressed = max((b["compressed"] for b in buckets.values()), default=1) or 1
+
+    bar_width = 30
+    inner_width = 68
+    rows = sorted(buckets.items(), key=lambda kv: kv[1]["compressed"], reverse=True)
+
+    def _row(content: str) -> str:
+        # Defensively truncate rather than let an over-long line blow out
+        # the box's right border - every piece here is already sized to
+        # fit, but a very long category name or triple-digit MB value
+        # should degrade gracefully, not misalign the whole box.
+        return f"│ {content[: inner_width - 2]:<{inner_width - 2}} │"
+
+    lines = ["", "┌─ Plugin zip size breakdown " + "─" * (inner_width - 28) + "┐"]
+    for category, sizes in rows:
+        filled = int(bar_width * sizes["compressed"] / max_compressed)
+        bar = "█" * filled + "░" * (bar_width - filled)
+        compressed_mb = sizes["compressed"] / 1024 / 1024
+        lines.append(_row(f"{category:<12} {bar} {compressed_mb:>6.2f} MB ({sizes['files']:>4} files)"))
+    lines.append("├" + "─" * inner_width + "┤")
+
+    max_bytes = MAX_ZIP_SIZE_MB * 1024 * 1024
+    status = "within limit" if total_compressed <= max_bytes else "OVER LIMIT"
+    mark = "✓" if total_compressed <= max_bytes else "✗"
+    lines.append(_row(f"TOTAL: {total_compressed / 1024 / 1024:.2f} MB / {MAX_ZIP_SIZE_MB} MB limit  {mark} {status}"))
+    lines.append(_row(f"({total_uncompressed / 1024 / 1024:.2f} MB uncompressed, {total_files} files)"))
+    lines.append("└" + "─" * inner_width + "┘")
+
+    typer.echo("\n".join(lines))
+
+    return total_compressed
 
 
 @app.command()
@@ -228,6 +353,7 @@ def build(
     output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build" / SRC_NAME,
     clean: bool = True,
     tests: bool = False,
+    skip_bundle_deps: bool = False,
 ) -> Path:
     """Build plugin directory for use in QGIS application.
 
@@ -236,10 +362,15 @@ def build(
         output_directory: Build output directory where plugin files will be saved.
         clean: Whether current build directory files should be removed before writing.
         tests: Flag to indicate whether to include test related files.
+        skip_bundle_deps: Skip the automatic VENDORED_PACKAGES bundle-deps
+            check below (e.g. for a fast local iteration loop that doesn't
+            touch network) - never set this for a real release build.
 
     Returns:
         Build directory path.
     """
+    if not skip_bundle_deps:
+        _bundle_deps_if_needed(context=context)
     if clean:
         shutil.rmtree(str(output_directory), ignore_errors=True)
     output_directory.mkdir(parents=True, exist_ok=True)
@@ -678,6 +809,93 @@ def _get_latest_releases(
     return latest_stable, latest_experimental
 
 
+def _bundle_deps_if_needed(context: typing.Optional[typer.Context] = None) -> None:
+    """Call bundle_deps() for VENDORED_PACKAGES, unless every package is already bundled.
+
+    build()'s automatic hook so a plain `generate-zip` always ships
+    VENDORED_PACKAGES without a separate manual step - but skips the
+    network round-trip entirely once extlibs/ already has the current
+    pinned version(s), so repeat local builds stay fast.
+
+    Args:
+        context: Application context.
+    """
+    output_directory = LOCAL_ROOT_DIR / SRC_NAME / "extlibs"
+    missing = []
+    for pkg_spec in VENDORED_PACKAGES:
+        name, _, version = pkg_spec.partition("==")
+        marker = output_directory / (f"{name}-{version}.dist-info" if version else f"{name}-")
+        if version:
+            if not marker.exists():
+                missing.append(pkg_spec)
+        elif not list(output_directory.glob(f"{name}-*.dist-info")):
+            missing.append(pkg_spec)
+
+    if not missing:
+        _log(f"extlibs already has {VENDORED_PACKAGES} bundled - skipping bundle-deps", context=context)
+        return
+
+    _log(f"Bundling missing vendored dependencies: {missing}", context=context)
+    bundle_deps(context, output_directory=output_directory, packages=None)
+
+
+def _clean_extlibs_dir(extlibs_directory: Path, context: typing.Optional[typer.Context] = None) -> None:
+    """Remove every previously-bundled dependency from extlibs_directory, in place.
+
+    Shared by clean_extlibs() and bundle_deps() (which cleans before every
+    re-bundle, so switching VENDORED_PACKAGES/WHEEL_PLATFORMS - or just
+    re-running after a package version bump - can never leave stale files
+    from a previous run's different platform/Python matrix behind).
+
+    Args:
+        extlibs_directory: Path to extlibs directory.
+        context: Application context.
+    """
+    if not extlibs_directory.exists():
+        return
+    for item in extlibs_directory.iterdir():
+        if item.name in (".gitkeep", "_wheels"):
+            continue
+        if item.is_dir():
+            shutil.rmtree(item)
+            _log(f"Removed {item.name}", context=context)
+        elif item.is_file():
+            item.unlink()
+            _log(f"Removed {item.name}", context=context)
+
+
+def _strip_extlibs_build_artifacts(output_directory: Path, context: typing.Optional[typer.Context] = None) -> None:
+    """Delete build-time-only files a wheel ships but runtime import never needs.
+
+    Cython .pyx/.pxd source, C headers, static libs (.a/.lib), and CMake
+    config exist so OTHER packages can compile against a library's C API -
+    irrelevant to a QGIS plugin that only ever does `import h3` at
+    runtime. Stripping them is pure size reduction with zero behaviour
+    change (see EXTLIBS_BUILD_ARTIFACT_EXTENSIONS/_DIRS/_FILENAMES).
+
+    Args:
+        output_directory: The extlibs directory just extracted into.
+        context: Application context.
+    """
+    removed_bytes = 0
+    for dir_name in EXTLIBS_BUILD_ARTIFACT_DIRS:
+        target = output_directory / dir_name
+        if target.is_dir():
+            removed_bytes += sum(f.stat().st_size for f in target.rglob("*") if f.is_file())
+            shutil.rmtree(target)
+            _log(f"  Stripped build-only directory: {dir_name}/", context=context)
+
+    for path in output_directory.rglob("*"):
+        if not path.is_file():
+            continue
+        if path.suffix in EXTLIBS_BUILD_ARTIFACT_EXTENSIONS or path.name in EXTLIBS_BUILD_ARTIFACT_FILENAMES:
+            removed_bytes += path.stat().st_size
+            path.unlink()
+
+    if removed_bytes:
+        _log(f"  Stripped {removed_bytes / 1024:.0f} KB of build-only artifacts", context=context)
+
+
 @app.command()
 def bundle_deps(
     context: typer.Context,
@@ -688,7 +906,10 @@ def bundle_deps(
 
     This downloads wheels for the packages listed in VENDORED_PACKAGES
     for multiple platforms (Linux, macOS, Windows) and Python versions,
-    then extracts them into the extlibs directory.
+    then extracts them into the extlibs directory. Cleans any
+    previously-bundled content first, and strips build-time-only files
+    (Cython source, C headers, static libs) after extracting - see
+    _clean_extlibs_dir()/_strip_extlibs_build_artifacts().
 
     Args:
         context: Application context.
@@ -699,6 +920,7 @@ def bundle_deps(
         output_directory = LOCAL_ROOT_DIR / SRC_NAME / "extlibs"
 
     output_directory.mkdir(parents=True, exist_ok=True)
+    _clean_extlibs_dir(output_directory, context=context)
 
     # Use provided packages or default
     pkgs_to_bundle = packages.split(",") if packages else VENDORED_PACKAGES
@@ -745,6 +967,9 @@ def bundle_deps(
                 # Extract everything (including .dist-info for metadata)
                 whl.extractall(output_directory)
 
+        _log("\nStripping build-only artifacts...", context=context)
+        _strip_extlibs_build_artifacts(output_directory, context=context)
+
         _log(f"\nDependencies bundled to {output_directory}", context=context)
 
         # List what was extracted
@@ -776,15 +1001,7 @@ def clean_extlibs(
         _log("extlibs directory does not exist", context=context)
         return
 
-    for item in extlibs_directory.iterdir():
-        if item.name in (".gitkeep", "_wheels"):
-            continue
-        if item.is_dir():
-            shutil.rmtree(item)
-            _log(f"Removed {item.name}", context=context)
-        elif item.is_file():
-            item.unlink()
-            _log(f"Removed {item.name}", context=context)
+    _clean_extlibs_dir(extlibs_directory, context=context)
 
     _log("extlibs cleaned", context=context)
 
