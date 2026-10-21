@@ -30,6 +30,7 @@
         ps.debugpy
         ps.psutil
         ps.h3
+        ps.pyarrow
       ];
       # QGIS 4.x is Qt6/PyQt6; QGIS 3.44 LTR is Qt5/PyQt5 — each needs the
       # matching WebEngine binding, so it is added per variant here rather
@@ -118,7 +119,6 @@
           pkgs.glow # terminal markdown viewer
           pkgs.gource # Software version control visualization
           pkgs.gum # UX for TUIs
-          pkgs.isort
           pkgs.jq
           pkgs.kdePackages.kcachegrind
           pkgs.luaPackages.luacheck
@@ -159,9 +159,11 @@
             ps.click # needed by black
             ps.debugpy
             ps.flake8
+            ps.flake8-docstrings # flake8 plugin: pulls in pydocstyle checks
             ps.gdal
             ps.h3
             ps.httpx
+            ps.isort
             ps.jsonschema
             ps.matplotlib
             ps.mypy
@@ -171,7 +173,10 @@
             ps.paver
             ps.pillow # SRS cover compositing and image sizing
             ps.pip
+            ps.pre-commit-hooks # provides end-of-file-fixer, trailing-whitespace-fixer, check-yaml, check-json CLIs
             ps.psutil
+            ps.pyarrow # GDAL/OGR bulk Arrow-batch writes (Layer.WriteArrowBatch/GetArrowStream)
+            ps.pydocstyle
             ps.python-docx # SRS written directly into the Word template
             ps.pytest
             ps.pytest-qt
@@ -239,11 +244,11 @@
               echo "No requirements-dev.txt found, skipping pip install."
             fi
 
-            #echo "Setting up and running pre-commit hooks..."
-            #echo "-------------------------------------"
-            #pre-commit clean > /dev/null
-            #pre-commit install --install-hooks > /dev/null
-            #pre-commit run --all-files || true
+            # Reinstall the git hook every shell entry: its shebang bakes in
+            # nix store paths (bash, pre-commit) that go stale whenever the
+            # pinned nixpkgs revision changes. Run `scripts/checks.sh` for a
+            # full `--all-files` pass — that's too slow to run on every entry.
+            pre-commit install --install-hooks > /dev/null
 
           # Add PyQt and QGIS to python path for neovim
           pythonWithPackages="${
@@ -251,38 +256,20 @@
               ps.pyqt6-webengine
             ])
           }"
-          export PYTHONPATH="$pythonWithPackages/lib/python*/site-packages:${qgisWithExtras}/share/qgis/python:$PYTHONPATH"
-            # Colors and styling
-            CYAN='\033[38;2;83;161;203m'
-            GREEN='\033[92m'
-            RED='\033[91m'
-            RESET='\033[0m'
-            ORANGE='\033[38;2;237;177;72m'
-            GRAY='\033[90m'
-            # Clear screen and show welcome banner
-            clear
-            echo -e "$RESET$ORANGE"
-            chafa geoe3/resources/geoe3-banner.png --size=30x80 --colors=256 | sed 's/^/                  /'
-            # Quick tips with icons
-            echo -e "$RESET$ORANGE \n__________________________________________________________________\n"
-            echo -e "        🌈 Your Dev Environment is prepared."
-            echo -e ""
-            echo -e "Quick Commands:$RESET"
-            echo -e "   $GRAY▶$RESET  $CYAN./scripts/vscode.sh$RESET  - VSCode preconfigured for python dev"
-            echo -e "   $GRAY▶$RESET  $CYAN./scripts/checks.sh$RESET  - Run pre-commit checks"
-            echo -e "   $GRAY▶$RESET  $CYAN./scripts/clean.sh$RESET  - Cleanup dev dolder o "
-            echo -e "   $GRAY▶$RESET  $CYAN nix flake show$RESET    - Show available configurations"
-            echo -e "   $GRAY▶$RESET  $CYAN nix flake check$RESET   - Run all checks"
-            echo -e "$RESET$ORANGE \n__________________________________________________________________\n"
-            echo "To run QGIS with your profile, use one of these commands:"
-            echo -e "$RESET$ORANGE \n__________________________________________________________________\n"
-            echo ""
-            echo "  scripts/start_qgis.sh"
-            echo "  scripts/start_qgis_ltr.sh"
-            echo "  scripts/start_qgis_master.sh"
-            echo ""
-            echo -e "   $GRAY▶$RESET  $CYAN source .nvim-setup.sh$RESET - Configure nvim with QGIS libraries"
-            echo -e "   $GRAY▶$RESET  $CYAN vim filename.py$RESET      - Start nvim (aliased) with LSP"
+          export PYTHONPATH="$pythonWithPackages/${pkgs.python3.sitePackages}:${qgisWithExtras}/share/qgis/python:$PYTHONPATH"
+
+          # qgis.PyQt re-exports PyQt6 via `from PyQt6.QtCore import *`, and
+          # pyright refuses to populate a module's symbol table from a
+          # wildcard import of a third-party library — so every name only
+          # reachable through qgis.PyQt (QVariant, pyqtSignal, ...) reads as
+          # an unknown import symbol. Regenerate the typings/ override stubs
+          # every shell entry so they track whichever QGIS/PyQt build is on
+          # PYTHONPATH above (see scripts/generate_pyqt_typestubs.py).
+          python3 "$PWD/scripts/generate_pyqt_typestubs.py"
+
+          # Banner + full lifecycle command reference (logic lives in the
+          # dotfile, not inline here — see scripts/dev-help.sh).
+          bash "$PWD/scripts/dev-help.sh"
         '';
       };
     };

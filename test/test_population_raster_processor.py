@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
+import tempfile
 import unittest
 
 from qgis.core import QgsProcessingContext, QgsProject
 from utilities_for_testing import prepare_fixtures
 
 from geest.core.algorithms import PopulationRasterProcessingTask
+from geest.core.algorithms.wee_by_population_score_processor import WEEByPopulationScoreProcessingTask
 
 
 class TestPopulationRasterProcessingTask(unittest.TestCase):
@@ -68,6 +70,31 @@ class TestPopulationRasterProcessingTask(unittest.TestCase):
             task.global_max,
             "Global min should be less than global max.",
         )
+
+    def test_missing_population_raster_fails(self):
+        """A missing input raster must fail instead of silently succeeding."""
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            task = PopulationRasterProcessingTask(
+                population_raster_path="/does/not/exist.tif",
+                study_area_gpkg_path=self.gpkg_path,
+                working_directory=temporary_directory,
+                cell_size_m=100,
+            )
+
+            self.assertFalse(task.run())
+
+    def test_missing_population_score_output_fails(self):
+        """A missing population-score VRT must make processing fail."""
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            task = WEEByPopulationScoreProcessingTask(
+                study_area_gpkg_path=self.gpkg_path,
+                working_directory=temporary_directory,
+            )
+            task.output_rasters = ["output.tif"]
+            task.calculate_score = lambda: None
+            task.generate_vrt = lambda: None
+
+            self.assertFalse(task.run())
 
 
 if __name__ == "__main__":

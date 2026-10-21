@@ -218,6 +218,12 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         self.use_grid_first = True
         # Track if we've cleared the column (only do once, not per area)
         self._column_cleared = False
+        # Road network load + CRS reprojection is expensive and area-independent
+        # - cache it once instead of reopening/reprojecting the whole network
+        # from scratch for every area (up to 27x for a country, times every
+        # indicator in the WTP dimension).
+        self._cached_road_network_layer = None
+        self._road_network_load_failed = False
 
     def _process_features_for_area(
         self,
@@ -481,6 +487,88 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
         return buffered_layer
 
+    def _get_cached_road_network_layer(self, area_index: int) -> Optional[QgsVectorLayer]:
+        """Load and (if needed) reproject the road network once, then reuse it.
+
+        The network itself and its CRS don't change between areas, so
+        loading the file and running a full-layer reprojection fresh for
+        every area (up to 27x per indicator, times every indicator in the
+        dimension) was pure waste. This loads/reprojects once on first use
+        and caches the result; a failed load is also cached so later areas
+        don't keep retrying a network that's already known to be broken.
+
+        Args:
+            area_index: Current area index, used only for log messages.
+
+        Returns:
+            The (possibly reprojected) road network layer, or None on failure.
+        """
+        if self._cached_road_network_layer is not None:
+            return self._cached_road_network_layer
+        if self._road_network_load_failed:
+            return None
+
+        road_network_layer = QgsVectorLayer(self.road_network_layer_path, "network", "ogr")
+        if not road_network_layer.isValid():
+            log_message(
+                f"Road network layer could not be loaded from '{self.road_network_layer_path}'. "
+                "If this was a temporary layer (e.g. from QuickOSM), it no longer exists in this session. "
+                "Please reload it in QGIS or replace it with a file-based layer (GeoPackage or shapefile) "
+                "in the Road Network panel.",
+                tag="GeoE3",
+                level=Qgis.Critical,
+            )
+            self._road_network_load_failed = True
+            raise Exception(
+                "Road network layer could not be loaded. "
+                "If you used a temporary or QuickOSM layer in a previous session, it no longer exists. "
+                "Please reload it in QGIS or replace it with a saved file in the Road Network panel."
+            )
+
+        road_crs = road_network_layer.crs()
+        log_message(
+            f"Area {area_index}: Road network CRS: {road_crs.authid()}, Target CRS: {self.target_crs.authid()}",
+            level=Qgis.Info,
+        )
+        if road_crs != self.target_crs:
+            log_message(
+                f"Road network CRS mismatch detected. Auto-reprojecting from "
+                f"{road_crs.authid()} to {self.target_crs.authid()} (once, cached for all areas)",
+                level=Qgis.Info,
+            )
+            try:
+                reproject_result = processing.run(
+                    "native:reprojectlayer",
+                    {
+                        "INPUT": road_network_layer,
+                        "TARGET_CRS": self.target_crs,
+                        "OUTPUT": "memory:",
+                    },
+                    context=self.context,
+                )
+                road_network_layer = reproject_result["OUTPUT"]
+                if not road_network_layer.isValid():
+                    log_message(
+                        f"ERROR: Failed to reproject road network for area {area_index}",
+                        level=Qgis.Critical,
+                    )
+                    self._road_network_load_failed = True
+                    return None
+                log_message(
+                    f"Successfully reprojected road network to {self.target_crs.authid()}",
+                    level=Qgis.Info,
+                )
+            except Exception as e:
+                log_message(
+                    f"ERROR: Exception during road network reprojection for area {area_index}: {e}",
+                    level=Qgis.Critical,
+                )
+                self._road_network_load_failed = True
+                return None
+
+        self._cached_road_network_layer = road_network_layer
+        return road_network_layer
+
     def _clip_network_to_area(
         self,
         clip_geometry: QgsGeometry,
@@ -501,61 +589,9 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         if os.path.exists(clipped_network_path):
             os.remove(clipped_network_path)
         try:
-            road_network_layer = QgsVectorLayer(self.road_network_layer_path, "network", "ogr")
-            if not road_network_layer.isValid():
-                log_message(
-                    f"Road network layer could not be loaded from '{self.road_network_layer_path}'. "
-                    "If this was a temporary layer (e.g. from QuickOSM), it no longer exists in this session. "
-                    "Please reload it in QGIS or replace it with a file-based layer (GeoPackage or shapefile) "
-                    "in the Road Network panel.",
-                    tag="GeoE3",
-                    level=Qgis.Critical,
-                )
-                raise Exception(
-                    "Road network layer could not be loaded. "
-                    "If you used a temporary or QuickOSM layer in a previous session, it no longer exists. "
-                    "Please reload it in QGIS or replace it with a saved file in the Road Network panel."
-                )
-            road_crs = road_network_layer.crs()
-            log_message(
-                f"Area {area_index}: Road network CRS: {road_crs.authid()}, Target CRS: {self.target_crs.authid()}",
-                level=Qgis.Info,
-            )
-            # Auto-reproject road network if CRS mismatch detected
-            if road_crs != self.target_crs:
-                log_message(
-                    f"Road network CRS mismatch detected. Auto-reprojecting from "
-                    f"{road_crs.authid()} to {self.target_crs.authid()}",
-                    level=Qgis.Info,
-                )
-                # Reproject to target CRS in memory (consistent with check_and_reproject_layer behavior)
-                try:
-                    reproject_result = processing.run(
-                        "native:reprojectlayer",
-                        {
-                            "INPUT": road_network_layer,
-                            "TARGET_CRS": self.target_crs,
-                            "OUTPUT": "memory:",
-                        },
-                        context=self.context,
-                    )
-                    road_network_layer = reproject_result["OUTPUT"]
-                    if not road_network_layer.isValid():
-                        log_message(
-                            f"ERROR: Failed to reproject road network for area {area_index}",
-                            level=Qgis.Critical,
-                        )
-                        return None
-                    log_message(
-                        f"Successfully reprojected road network to {self.target_crs.authid()}",
-                        level=Qgis.Info,
-                    )
-                except Exception as e:
-                    log_message(
-                        f"ERROR: Exception during road network reprojection for area {area_index}: {e}",
-                        level=Qgis.Critical,
-                    )
-                    return None
+            road_network_layer = self._get_cached_road_network_layer(area_index)
+            if road_network_layer is None:
+                return None
             log_message(
                 f"Clipping road network to area {area_index} with {buffer_distance}m buffer",
                 level=Qgis.Info,

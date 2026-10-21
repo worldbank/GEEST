@@ -16,6 +16,9 @@ from .environmental_hazards_raster_datasource_widget import (  # noqa F401
     EnvironmentalHazardsRasterDataSourceWidget,
 )
 from .fixed_value_datasource_widget import FixedValueDataSourceWidget  # noqa F401
+from .ntl_download_raster_datasource_widget import (  # noqa F401
+    NTLDownloadRasterDataSourceWidget,
+)
 from .raster_datasource_widget import RasterDataSourceWidget  # noqa F401
 from .s2s_datasource_widget import S2SDataSourceWidget  # noqa F401
 from .s2s_environmental_hazards_raster_datasource_widget import (  # noqa F401

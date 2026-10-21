@@ -12,8 +12,8 @@ See the LICENSE file in the project root for more information.
 
 import os
 
-from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import Qgis, QgsMessageLog, QgsTask
+from qgis.PyQt.QtCore import pyqtSignal
 
 
 class GeoE3Task(QgsTask):

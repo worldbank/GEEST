@@ -17,6 +17,8 @@ from qgis.core import Qgis, QgsFeedback, QgsGeometry, QgsProcessingContext
 from geest.core import JsonTreeItem
 from geest.core.constants import DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS
 from geest.core.grid_column_utils import (
+    _execute_sql_with_retry,
+    _open_gpkg_for_write,
     clear_grid_column,
     rasterize_grid_column,
     write_joined_values_to_grid,
@@ -162,7 +164,7 @@ class S2SUrbanRuralShareWorkflow(WorkflowBase):
 
         self.progressChanged.emit(60.0)
 
-        ds = ogr.Open(self.gpkg_path, 1)
+        ds = _open_gpkg_for_write(self.gpkg_path)
         if not ds:
             raise RuntimeError(f"Could not open GeoPackage for urban/rural share update: {self.gpkg_path}")
 
@@ -208,7 +210,7 @@ class S2SUrbanRuralShareWorkflow(WorkflowBase):
                 )
 
             sql = f"UPDATE study_area_grid SET {target} = {score_expr} WHERE {where_area}"  # nosec B608
-            ds.ExecuteSQL(sql, dialect="SQLite")
+            _execute_sql_with_retry(ds, sql, dialect="SQLite")
         finally:
             ds = None
 

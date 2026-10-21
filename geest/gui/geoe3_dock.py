@@ -250,9 +250,14 @@ class GeoE3Dock(QDockWidget):
             )
             # We are only interested in storing the network layer path
             # (and not the cycle path) as it is used for the native
-            # network analysis algorithms internally
+            # network analysis algorithms internally.
+            # Connect directly to the emitted path (not a re-fetch via
+            # road_network_layer_path()) - restore_layer_from_path() emits ""
+            # to clear a stale/missing reference, and re-fetching would read
+            # back whatever is still selected in the combo instead of that
+            # empty-string clear signal.
             self.road_network_widget.road_network_layer_path_changed.connect(
-                lambda: self.tree_widget.set_road_network_layer_path(self.road_network_widget.road_network_layer_path())
+                self.tree_widget.set_road_network_layer_path
             )
             self.open_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked

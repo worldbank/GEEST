@@ -8,12 +8,47 @@ H3 Resolution Reference:
 - Resolution 6: ~3.2km edge, ~36 km² area (Regional scale)
 """
 
+import threading
 from typing import List, Optional, Tuple
 
 from osgeo import ogr, osr
 from qgis.core import Qgis
 
 from geest.utilities import log_message
+
+# osr.CoordinateTransformation construction (SpatialReference setup +
+# PROJ pipeline resolution) costs ~20x more than reusing an existing one -
+# bbox_to_wgs84()/transform_wgs84_to_target() are called once per grid
+# cell (H3 and square grids alike), so building a fresh transform on every
+# call is a measured, significant chunk of total grid generation time.
+# Thread-local, not a shared global: GDAL/PROJ transformation objects are
+# not guaranteed safe for concurrent use from multiple threads at once,
+# and grid generation already runs several of these calls in parallel via
+# QThreadPool (see study_area_processing_task.py's ChunkRunnable).
+_transform_cache_local = threading.local()
+
+
+def _get_cached_transform(source_epsg: int, target_epsg: int) -> osr.CoordinateTransformation:
+    """Return a thread-local, cached CoordinateTransformation for this EPSG pair."""
+    cache = getattr(_transform_cache_local, "cache", None)
+    if cache is None:
+        cache = {}
+        _transform_cache_local.cache = cache
+
+    key = (source_epsg, target_epsg)
+    transform = cache.get(key)
+    if transform is None:
+        source_srs = osr.SpatialReference()
+        source_srs.ImportFromEPSG(source_epsg)
+        source_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+        target_srs = osr.SpatialReference()
+        target_srs.ImportFromEPSG(target_epsg)
+        target_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+        transform = osr.CoordinateTransformation(source_srs, target_srs)
+        cache[key] = transform
+    return transform
 
 
 # Fallback average H3 cell areas in km^2 (approximate)
@@ -37,17 +72,23 @@ H3_CELL_AREA_KM2 = {
 }
 
 
-def get_h3_resolution_for_scale(analysis_scale: str) -> Optional[int]:
+def get_h3_resolution_for_scale(analysis_scale: str, cell_size_m: Optional[float] = None) -> Optional[int]:
     """Get H3 resolution for a given analysis scale.
 
     Args:
         analysis_scale: The analysis scale ("regional", "national", or "local")
+        cell_size_m: Optional target cell size in metres, used only for
+            "local"/"national" scales that have opted into an H3 grid.
+            Ignored for "regional", which always returns resolution 6.
 
     Returns:
-        H3 resolution integer (6 for regional), or None if not applicable
+        H3 resolution integer (6 for regional; derived from cell_size_m for
+        local/national when provided), or None if not applicable.
     """
     if analysis_scale == "regional":
         return 6
+    if analysis_scale in ("local", "national") and cell_size_m is not None:
+        return get_h3_resolution_for_cell_size(cell_size_m)
     return None
 
 
@@ -69,6 +110,25 @@ def h3_cell_area_km2(h3_resolution: int) -> float:
         return float(h3.average_hexagon_area(h3_resolution, unit="km^2"))
     except Exception:
         return H3_CELL_AREA_KM2[h3_resolution]
+
+
+def get_h3_resolution_for_cell_size(cell_size_m: float) -> int:
+    """Pick the H3 resolution whose average cell area best matches a target cell size.
+
+    Area (not edge length) is the right equivalence metric: it is what
+    directly determines cell density/count, which is what a square-grid
+    cell_size_m is really standing in for here.
+
+    Args:
+        cell_size_m: Target (square) cell size in metres, e.g. an analysis
+            grid's base cell size.
+
+    Returns:
+        H3 resolution (0-15) whose average hexagon area is closest to
+        (cell_size_m / 1000)**2 square kilometres.
+    """
+    target_area_km2 = (cell_size_m / 1000.0) ** 2
+    return min(range(16), key=lambda r: abs(h3_cell_area_km2(r) - target_area_km2))
 
 
 def estimate_h3_cells_for_area(area_km2: float, h3_resolution: int) -> int:
@@ -144,13 +204,7 @@ def bbox_to_wgs84(
     Returns:
         Tuple of (xmin, xmax, ymin, ymax) in WGS84
     """
-    source_srs = osr.SpatialReference()
-    source_srs.ImportFromEPSG(source_epsg)
-
-    target_srs = osr.SpatialReference()
-    target_srs.ImportFromEPSG(4326)
-
-    transform = osr.CoordinateTransformation(source_srs, target_srs)
+    transform = _get_cached_transform(source_epsg, 4326)
 
     # Transform all four corners
     points = [
@@ -162,7 +216,7 @@ def bbox_to_wgs84(
 
     wgs84_points = []
     for px, py in points:
-        lat, lon, _ = transform.TransformPoint(px, py)
+        lon, lat, _ = transform.TransformPoint(px, py)
         wgs84_points.append((lon, lat))
 
     wgs84_xmin = min(p[0] for p in wgs84_points)
@@ -188,13 +242,7 @@ def transform_wgs84_to_target(
     Returns:
         Tuple of (x, y) in target CRS
     """
-    source_srs = osr.SpatialReference()
-    source_srs.ImportFromEPSG(4326)
-
-    target_srs = osr.SpatialReference()
-    target_srs.ImportFromEPSG(target_epsg)
-
-    transform = osr.CoordinateTransformation(source_srs, target_srs)
+    transform = _get_cached_transform(4326, target_epsg)
     tx, ty, _ = transform.TransformPoint(x, y)
     return tx, ty
 

@@ -35,7 +35,19 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor, QFont
 from qgis.PyQt.QtXml import QDomDocument
 
-from geest.utilities import log_message
+from geest.utilities import log_message, resources_path
+
+# analysis_summary_report_template.qpt's two picture items used to embed
+# these same two images as base64 (QGIS's own "Embedded" picture mode) -
+# byte-identical duplicates of files the plugin already ships separately,
+# inflating the template from ~20KB to ~4MB for nothing. Stripped down to
+# these placeholders (see the .qpt's "file=" attributes); load_template()
+# below substitutes the real resolved path at load time, so the template
+# itself never has to hardcode an absolute, install-location-specific path.
+_TEMPLATE_RESOURCE_PLACEHOLDERS = {
+    "PLUGIN_RESOURCE:images/geoe3-bg.png": lambda: resources_path("resources", "images", "geoe3-bg.png"),
+    "PLUGIN_RESOURCE:geoe3-banner.png": lambda: resources_path("resources", "geoe3-banner.png"),
+}
 
 # ---------------------------------------------------------------------------
 # Report design system — a clean, flat palette appropriate for a World Bank
@@ -178,6 +190,16 @@ class BaseReport:
                 template_content = template_file.read()
         except IOError:
             raise FileNotFoundError(f"Template file '{self.template_path}' not found or cannot be read.")
+
+        # See _TEMPLATE_RESOURCE_PLACEHOLDERS - substitute each picture
+        # item's placeholder for this install's actual resolved path
+        # before parsing, rather than embedding a base64 copy (duplicate
+        # data) or an install-location-specific absolute path (not
+        # portable) in the template file itself.
+        for placeholder, resolve_path in _TEMPLATE_RESOURCE_PLACEHOLDERS.items():
+            if placeholder in template_content:
+                resolved = resolve_path().replace("\\", "/")
+                template_content = template_content.replace(f'file="{placeholder}"', f'file="{resolved}"')
 
         document = QDomDocument()
         if not document.setContent(template_content):

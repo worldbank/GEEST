@@ -27,7 +27,7 @@ import subprocess  # nosec B404
 import tempfile
 from datetime import datetime
 
-from osgeo import ogr, osr
+from osgeo import gdal, ogr, osr
 from qgis.core import (
     Qgis,
     QgsLayerTreeGroup,
@@ -483,6 +483,44 @@ def log_message(message: str, level: int = Qgis.Info, tag: str = "GeoE3", force:
         logging.critical(full_message)
     else:
         logging.debug(full_message)
+
+
+_SQLITE_SAFETY_OPTION_KEYS = ("OGR_SQLITE_JOURNAL", "OGR_SQLITE_SYNCHRONOUS", "SQLITE_USE_OGR_VFS")
+
+
+def apply_sqlite_write_safety_options() -> dict:
+    """Configure safer SQLite options for GeoPackage access and return the prior values.
+
+    These GDAL config options are process-wide, so callers must snapshot the
+    return value and pass it to :func:`restore_sqlite_write_safety_options`
+    once their GeoPackage access is done.
+
+    Returns:
+        dict: The previous value of each option, for restoration.
+    """
+    previous = {key: gdal.GetConfigOption(key) for key in _SQLITE_SAFETY_OPTION_KEYS}
+
+    gdal.SetConfigOption("OGR_SQLITE_JOURNAL", "WAL")
+    gdal.SetConfigOption("OGR_SQLITE_SYNCHRONOUS", "NORMAL")
+    # SQLITE_USE_OGR_VFS must stay OFF: the OGR VSI layer does not implement
+    # SQLite file locking, so with it enabled, concurrent connections to the
+    # same GeoPackage (e.g. a workflow's AreaIterator reads interleaved with
+    # grid_column_utils writes, especially across several indicators run
+    # back-to-back in one dimension) can interleave page writes unprotected
+    # and corrupt the GeoPackage or hand back a stale/freed dataset handle -
+    # seen in the field as a Windows access violation inside getFeatures().
+    gdal.SetConfigOption("SQLITE_USE_OGR_VFS", "NO")
+    return previous
+
+
+def restore_sqlite_write_safety_options(previous: dict) -> None:
+    """Restore GDAL SQLite options captured by :func:`apply_sqlite_write_safety_options`.
+
+    Args:
+        previous: The dict returned by apply_sqlite_write_safety_options.
+    """
+    for key, value in previous.items():
+        gdal.SetConfigOption(key, value)
 
 
 def geoe3_layer_ids():

@@ -74,6 +74,14 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         self.workflow_name = "contextual_index_score"
         # Grid-first mode: write results to grid columns first, then rasterize
         self.use_grid_first = True
+        # Areas with no matching study_area_grid cells (e.g. slivers too small
+        # to receive a grid cell) fall back to a neutral/zero raster instead
+        # of aborting the whole workflow.
+        self.supports_empty_features_fallback = True
+        # write_uniform_value_to_grid has no area_name filter - it writes the
+        # same constant value to the whole study_area_grid table in one SQL
+        # UPDATE. Running it again for every area is redundant; do it once.
+        self._grid_value_written = False
 
     def _process_features_for_area(
         self,
@@ -83,7 +91,7 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         area_features: QgsVectorLayer,
         index: int,
         area_name: Optional[str] = None,
-    ) -> str:
+    ) -> Optional[str]:
         """
         Executes the actual workflow logic for a single area.
 
@@ -143,16 +151,17 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         current_bbox: QgsGeometry,
         index: int,
         area_name: str,
-    ) -> str:
+    ) -> Optional[str]:
         """Grid-first processing - writes to grid column, then rasterizes."""
         self.progressChanged.emit(20.0)
-        log_message(f"Writing contextual index score {self.index_score} to grid column {self.layer_id}")
-
-        write_uniform_value_to_grid(
-            gpkg_path=self.gpkg_path,
-            column_name=self.layer_id,
-            value=self.index_score,
-        )
+        if not self._grid_value_written:
+            log_message(f"Writing contextual index score {self.index_score} to grid column {self.layer_id}")
+            write_uniform_value_to_grid(
+                gpkg_path=self.gpkg_path,
+                column_name=self.layer_id,
+                value=self.index_score,
+            )
+            self._grid_value_written = True
 
         self.progressChanged.emit(50.0)
 
@@ -165,7 +174,7 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
         rect = current_bbox.boundingBox()
         extent = (rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
 
-        rasterize_grid_column(
+        success = rasterize_grid_column(
             gpkg_path=self.gpkg_path,
             column_name=self.layer_id,
             output_raster_path=output_path,
@@ -174,6 +183,13 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
             nodata=-9999.0,
             area_name=area_name,
         )
+        if not success:
+            log_message(
+                f"No grid cells to rasterize for {self.layer_id} in area {area_name}; "
+                "falling back to a neutral raster output.",
+                level=Qgis.Warning,
+            )
+            return None
 
         self.progressChanged.emit(100.0)
         log_message(f"Rasterized grid column to {output_path}")

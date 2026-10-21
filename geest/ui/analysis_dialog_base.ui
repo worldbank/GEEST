@@ -74,8 +74,8 @@ padding: 4px;</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QWidget" name="geoe3_container" native="true">
+          <item row="1" column="0">
+           <widget class="QWidget" name="geoe3_container" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
