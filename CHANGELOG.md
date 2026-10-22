@@ -23,6 +23,22 @@ version per the policy above.
 
 ### Added
 
+- Indicator/factor configuration dialogs' value-range|index-score mapping
+  tables (the reference table shown while picking an analysis mode, e.g.
+  Contextual Index Score, Street Lights, Multi/Single Buffer, Safety
+  Raster, ACLED CSV, OSM Transport highway/cycleway classification) now
+  show a "Legend" column with a solid colour swatch for each row, matching
+  the same 5-class colour ramp (`#d7191c`→`#2c7bb6`) every result
+  map/raster already uses (`resources/qml/indicator.qml`/`factor.qml`), so
+  a user can see at a glance which map colour a given score corresponds to
+  without cross-referencing the separate map legend. New shared
+  `geest.core.constants.SCORE_LEGEND_COLORS` and
+  `legend_cell_html()`/`legend_color_for_score()` helpers in
+  `base_configuration_widget.py`, reused by every affected widget rather
+  than hand-rolling the colour lookup per table. Left out: Safety
+  Polygon's classification table (user-editable 0-100 values, not a
+  read-only 1-5 score reference) and the plain Index Score widget (has no
+  mapping table at all).
 - `admin.py generate-zip` now bundles `h3` into the release zip by
   default (`VENDORED_PACKAGES = ["h3==4.4.2"]`), wired automatically into
   `build()` rather than requiring a separate manual `bundle-deps` step

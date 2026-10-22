@@ -24,7 +24,7 @@ from qgis.PyQt.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QRadioButton
 from geest.core.workflows.mappings import NIGHTTIME_LIGHTS_SAFETY
 from geest.utilities import log_message
 
-from .base_configuration_widget import BaseConfigurationWidget
+from .base_configuration_widget import BaseConfigurationWidget, legend_cell_html
 
 
 class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
@@ -86,11 +86,11 @@ class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
         data_source = NIGHTTIME_LIGHTS_SAFETY.get("data_source", "Nighttime Lights")
         if mode == "noaa":
             rows = [
-                "<tr><td>1</td><td>Very Low</td><td>0 - 0.5</td><td>No / very faint light</td></tr>",
-                "<tr><td>2</td><td>Low</td><td>0.5 - 1</td><td>Low illumination</td></tr>",
-                "<tr><td>3</td><td>Moderate</td><td>1 - 5</td><td>Moderate illumination</td></tr>",
-                "<tr><td>4</td><td>High</td><td>5 - 50</td><td>High illumination</td></tr>",
-                "<tr><td>5</td><td>Very High</td><td>&gt; 50</td><td>Intense illumination</td></tr>",
+                f"<tr><td>1</td><td>Very Low</td><td>0 - 0.5</td><td>No / very faint light</td>{legend_cell_html(1)}</tr>",
+                f"<tr><td>2</td><td>Low</td><td>0.5 - 1</td><td>Low illumination</td>{legend_cell_html(2)}</tr>",
+                f"<tr><td>3</td><td>Moderate</td><td>1 - 5</td><td>Moderate illumination</td>{legend_cell_html(3)}</tr>",
+                f"<tr><td>4</td><td>High</td><td>5 - 50</td><td>High illumination</td>{legend_cell_html(4)}</tr>",
+                f"<tr><td>5</td><td>Very High</td><td>&gt; 50</td><td>Intense illumination</td>{legend_cell_html(5)}</tr>",
             ]
             intro = "NOAA thresholds produce 5 classes (scores 1-5)."
             example_note = "Fixed value ranges from the NASA Black Marble user guide."
@@ -106,7 +106,10 @@ class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
                 label = entry.get("label", "")
                 value_range = entry.get("range", "")
                 example = entry.get("example", "")
-                rows.append(f"<tr><td>{score}</td><td>{label}</td><td>{value_range}</td><td>{example}</td></tr>")
+                rows.append(
+                    f"<tr><td>{score}</td><td>{label}</td><td>{value_range}</td><td>{example}</td>"
+                    f"{legend_cell_html(score)}</tr>"
+                )
             intro = "Jenks Natural Breaks produces 6 classes (scores 0-5)."
             example_note = NIGHTTIME_LIGHTS_SAFETY.get("example_note", "")
             note = NIGHTTIME_LIGHTS_SAFETY.get("note", "")
@@ -120,6 +123,7 @@ class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
                 <th>Description</th>
                 <th>NTL Value Range</th>
                 <th>Example</th>
+                <th>Legend</th>
             </tr>
             {''.join(rows)}
         </table>
