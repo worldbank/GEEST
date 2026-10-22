@@ -13,7 +13,7 @@ from qgis.PyQt.QtWidgets import QHBoxLayout, QLabel, QSpinBox
 from geest.core.workflows.mappings import MAPPING_REGISTRY
 from geest.utilities import log_message
 
-from .base_configuration_widget import BaseConfigurationWidget
+from .base_configuration_widget import BaseConfigurationWidget, legend_cell_html
 
 
 class SingleBufferConfigurationWidget(BaseConfigurationWidget):
@@ -54,7 +54,7 @@ class SingleBufferConfigurationWidget(BaseConfigurationWidget):
                 <p><b>{factor_name} ({analysis_scale.title()} Scale)</b></p>
                 <p><b>Buffer Distance:</b> {buffer_distance}m</p>
                 <table border='1' cellpadding='4' cellspacing='0'>
-                    <tr><th>Coverage Percentage</th><th>Score</th></tr>
+                    <tr><th>Coverage Percentage</th><th>Score</th><th>Legend</th></tr>
                 """
 
                 # Build percentage ranges (same logic as multi_buffer_configuration_widget)
@@ -73,7 +73,7 @@ class SingleBufferConfigurationWidget(BaseConfigurationWidget):
                             pct_range = f"0.01% - {min_pct:.2f}%"
                         else:
                             pct_range = f"{prev_pct + 0.01:.2f}% - {min_pct:.2f}%"
-                    html += f"<tr><td>{pct_range}</td><td>{score}</td></tr>"
+                    html += f"<tr><td>{pct_range}</td><td>{score}</td>{legend_cell_html(score)}</tr>"
                     prev_pct = min_pct
 
                 html += "</table>"
@@ -86,9 +86,9 @@ class SingleBufferConfigurationWidget(BaseConfigurationWidget):
                 html = f"""
                 <p><b>{factor_name} ({analysis_scale.title()} Scale)</b></p>
                 <table border='1' cellpadding='4' cellspacing='0'>
-                    <tr><th>Distance Range (m)</th><th>Score</th></tr>
-                    <tr><td>≤ {buffer_distance}</td><td>{inside_score}</td></tr>
-                    <tr><td>&gt; {buffer_distance}</td><td>{outside_score}</td></tr>
+                    <tr><th>Distance Range (m)</th><th>Score</th><th>Legend</th></tr>
+                    <tr><td>≤ {buffer_distance}</td><td>{inside_score}</td>{legend_cell_html(inside_score)}</tr>
+                    <tr><td>&gt; {buffer_distance}</td><td>{outside_score}</td>{legend_cell_html(outside_score)}</tr>
                 </table>
                 <p><i>Note: You can override this default below</i></p>
                 """

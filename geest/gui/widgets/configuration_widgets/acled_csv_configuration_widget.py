@@ -13,7 +13,7 @@ from qgis.PyQt.QtWidgets import QLabel, QWidget
 from geest.core.workflows.mappings import MAPPING_REGISTRY
 from geest.utilities import log_message
 
-from .base_configuration_widget import BaseConfigurationWidget
+from .base_configuration_widget import BaseConfigurationWidget, legend_cell_html
 
 
 class AcledCsvConfigurationWidget(BaseConfigurationWidget):
@@ -72,9 +72,9 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
             # Generate the HTML table for the event scores
             event_scores_html = ""
             event_scores_html += "<table border='1' cellpadding='4' cellspacing='0'>"
-            event_scores_html += "<tr><th>event type</th><th>score</th></tr>"
+            event_scores_html += "<tr><th>event type</th><th>score</th><th>Legend</th></tr>"
             for event, score in event_scores.items():
-                event_scores_html += f"<tr><td>{event}</td><td>{score}</td></tr>"
+                event_scores_html += f"<tr><td>{event}</td><td>{score}</td>{legend_cell_html(score)}</tr>"
             event_scores_html += "</table>"
 
             combined_table_html = f"""

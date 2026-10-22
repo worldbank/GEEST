@@ -5,12 +5,49 @@ This module contains functionality for base configuration widget.
 """
 
 from abc import abstractmethod
+from typing import Optional, Union
 
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QRadioButton, QSizePolicy, QVBoxLayout, QWidget
 
+from geest.core.constants import SCORE_LEGEND_COLORS
 from geest.utilities import log_message
+
+
+def legend_color_for_score(score: Union[int, float, str]) -> Optional[str]:
+    """Return the hex colour for a 0-5 index score, or None if unmapped.
+
+    Matches the discrete 5-class ramp every result map/raster uses (see
+    SCORE_LEGEND_COLORS) - the same colour a user sees on the map for a
+    cell scoring this value.
+    """
+    try:
+        score_int = int(round(float(score)))
+    except (TypeError, ValueError):
+        return None
+    return SCORE_LEGEND_COLORS.get(max(0, min(5, score_int)))
+
+
+def legend_cell_html(score: Union[int, float, str]) -> str:
+    """A `<td>` showing a solid colour swatch for a value-range|score table row.
+
+    For use in the HTML mapping tables the configuration widgets render
+    (indicator/factor properties dialogs), so a user can see at a glance
+    which map colour a given row's score corresponds to, without having
+    to cross-reference the separate map legend.
+    """
+    color = legend_color_for_score(score)
+    if color is None:
+        return "<td></td>"
+    return f'<td style="background-color:{color};">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>'
+
+
+def legend_table_item_color(score: Union[int, float, str]) -> Optional[QColor]:
+    """QColor for a QTableWidgetItem's background - see legend_cell_html()."""
+    color = legend_color_for_score(score)
+    return QColor(color) if color else None
 
 
 class BaseConfigurationWidget(QWidget):

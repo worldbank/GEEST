@@ -16,7 +16,7 @@ from geest.core.settings import setting
 from geest.core.workflows.mappings import MAPPING_REGISTRY
 from geest.utilities import log_message
 
-from .base_configuration_widget import BaseConfigurationWidget
+from .base_configuration_widget import BaseConfigurationWidget, legend_cell_html
 
 
 class MultiBufferConfigurationWidget(BaseConfigurationWidget):
@@ -177,7 +177,7 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             <p><b>{factor_name} Scale</b></p>
             <p><b>Buffer Distance:</b> {buffer_distance}m</p>
             <table border='1' cellpadding='4' cellspacing='0'>
-                <tr><th>Coverage Percentage</th><th>Score</th></tr>
+                <tr><th>Coverage Percentage</th><th>Score</th><th>Legend</th></tr>
             """
 
             sorted_thresholds = sorted(percentage_scores.items())
@@ -192,7 +192,7 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
                         pct_range = f"0.01% - {min_pct:.2f}%"
                     else:
                         pct_range = f"{prev_pct + 0.01:.2f}% - {min_pct:.2f}%"
-                html += f"<tr><td>{pct_range}</td><td>{score}</td></tr>"
+                html += f"<tr><td>{pct_range}</td><td>{score}</td>{legend_cell_html(score)}</tr>"
                 prev_pct = min_pct
 
             html += "</table>"
@@ -203,7 +203,7 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             html = f"""
             <p><b>{factor_name} Scale</b></p>
             <table border='1' cellpadding='4' cellspacing='0'>
-                <tr><th>Distance Range (m)</th><th>Score</th></tr>
+                <tr><th>Distance Range (m)</th><th>Score</th><th>Legend</th></tr>
             """
 
             for i, score in enumerate(scores):
@@ -214,7 +214,7 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
                 else:
                     distance_range = f"> {thresholds[-1]}"
 
-                html += f"<tr><td>{distance_range}</td><td>{score}</td></tr>"
+                html += f"<tr><td>{distance_range}</td><td>{score}</td>{legend_cell_html(score)}</tr>"
 
             html += "</table>"
             if show_note:
