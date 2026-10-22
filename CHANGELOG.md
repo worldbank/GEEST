@@ -173,6 +173,28 @@ version per the policy above.
 
 ### Fixed
 
+- **Running multiple indicators concurrently (the "concurrent tasks"
+  setting) could silently lose grid writes - an indicator reported
+  "Completed" with no error, yet its own `study_area_grid` column stayed
+  NULL (or an aggregating factor/dimension read it as 0).** Confirmed
+  against a real project: three Contextual-dimension indicators started
+  within 6ms of each other (genuinely concurrent, not sequential), and only
+  one of the three actually persisted its value. Reproduced reliably with a
+  new test (`test_grid_column_concurrent_writes.py`) that fires several
+  threads at the same GeoPackage the way concurrent indicator workflows do
+  - each opens its own independent `ogr.Open(gpkg_path, 1)` connection and
+  writes a different column with a raw SQL `UPDATE`; under true
+  concurrency, most of those writes failed outright even though each one's
+  own `StartTransaction()`/`CommitTransaction()` reported success -
+  SQLite's own locking does not fully protect independent GDAL/OGR dataset
+  handles writing to the same file from different threads in the same
+  process. Fixed by funnelling every `study_area_grid` write (11 functions
+  in `grid_column_utils.py`: the uniform-value writer index-score
+  indicators use, the aggregation writer factors/dimensions use, spatial
+  joins, buffers, percentage scores, etc.) through one process-wide lock
+  (`@_serialize_grid_writes`) - only the actual database write is
+  serialized; the slow, genuinely parallelizable work (loading features,
+  generating rasters) is unaffected.
 - **Windows crash running a whole dimension (#447, #448):** every indicator's
   workflow opened its own `AreaIterator` (three fresh `QgsVectorLayer` reads)
   against `study_area.gpkg` while `grid_column_utils` concurrently wrote to
@@ -327,6 +349,58 @@ version per the policy above.
   assumption doesn't hold, see the Windows GDALClose/access-violation fix
   above). Not the root cause of the data-loss symptom described above,
   but a real gap worth closing defensively.
+- **Clearing a single indicator/factor/dimension left its on-disk outputs,
+  `study_area_grid` column, and map layer behind.** `clear_item()` only
+  reset the item's own status/result attributes - its masked rasters stayed
+  on disk, its grid column kept its last value, and its layer stayed in the
+  legend. Now also deletes the files directly inside the item's own
+  workflow directory (never recursing into child subdirectories, so
+  clearing a factor doesn't touch its indicators' outputs or vice versa),
+  blanks the item's own grid column (new `JsonTreeItem.gridColumnName()`,
+  matching the sanitisation `add_model_columns_to_grid()` used to create
+  it), and removes the item's own layer(s) from the legend/registry via a
+  new `geest.core.utilities.remove_from_map()` - which leaves the subgroup
+  holding the item's children's layers/groups completely untouched.
+- **Clearing a single-indicator factor's row cleared the indicator but left
+  the factor itself untouched** - found against a real project (Cabo
+  Verde): clearing the Contextual dimension correctly blanked
+  `dim_contextual`, but each of its three single-indicator factors kept
+  their stale "Completed" `fac_*` column/result/rasters after being
+  "cleared". Root cause: `JsonTreeModel.data()` hides a factor with exactly
+  one child indicator from the tree entirely, promoting that indicator's
+  row to display in the factor's place labeled with the factor's name - so
+  the one row a user sees and right-clicks ("Workplace Discrimination")
+  really represents two tree items (the factor and its indicator) sharing
+  a single visible row, and `index.internalPointer()` for that row returns
+  the indicator, not the factor. `clear_item()` now also clears the hidden
+  parent factor whenever the selected item is an indicator behind one
+  (recursion still stops there - a factor with multiple, independently
+  selectable children is untouched by clearing one of them, as before).
+- **Rasterized output was entirely empty for every single-area (un-
+  partitioned) project, even though the underlying `study_area_grid`
+  column held the correct values** - found via a new end-to-end test
+  driving the real clear/edit/run flow and sampling the actual raster
+  pixels, not just checking the result file existed.
+  `rasterize_grid_column()` builds a `WHERE area_name = '...'` clause, then
+  has fallback logic for projects that never populate `area_name` on their
+  grid rows at all (a single, un-partitioned area): it correctly detects
+  that case and drops the attribute filter used to compute the raster's
+  *extent*, but never dropped the same `where_clause` string handed to the
+  actual GDAL burn - which still matched zero rows, so `gdal.Rasterize()`
+  wrote nothing but its `nodata` fill value everywhere. The grid column
+  (written directly over SQL, unaffected) was always correct; only the
+  rasterized/combined-VRT output was empty. Both now derive from the same
+  decision.
+- **A plain Run (no Shift) on a dimension/factor silently kept using an
+  indicator's OLD index score after it was edited**, when that indicator
+  is hidden behind its single-child factor row and so can never be cleared
+  directly from the tree: `queue_workflow_task()`'s "skip if already
+  complete" check only looks at the item's own `result_file`, which
+  editing `index_score` alone never touched. Fixed in
+  `FixedValueDataSourceWidget.update_attributes()` - changing the value now
+  blanks the indicator's own `result`/`result_file`, so the normal
+  skip-if-already-complete check correctly recognises it needs to run
+  again, without the user needing to know to hold Shift.
 
 ### Changed
 

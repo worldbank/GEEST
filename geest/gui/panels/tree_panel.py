@@ -423,11 +423,70 @@ class TreePanel(QWidget):
         self.switch_to_next_tab.emit()
 
     def clear_item(self):
-        """Clear the outputs for a single item."""
+        """Clear the outputs for a single item (non-recursive).
+
+        Besides resetting the item's own status/result attributes, this
+        also removes its on-disk outputs (masked rasters etc.), blanks its
+        own study_area_grid column, and removes its own map layer(s) from
+        the legend/registry. Children are left completely untouched -
+        their own results, grid columns, rasters, and layers/groups stay
+        exactly as they were - matching "clear this item, then re-run it
+        trusting its already-complete children".
+
+        A factor with exactly one child indicator is hidden from the tree
+        view entirely - JsonTreeModel.data() promotes that indicator's row
+        to display in the factor's place (labeled with the factor's name),
+        so the one row the user sees and clicks really represents TWO tree
+        items sharing a single visible row. Clearing "that row" must clear
+        both, or the factor's own column/rasters/layer silently survive
+        untouched while the user believes the whole thing was cleared.
+        """
         index = self.treeView.currentIndex()
         item = index.internalPointer()
-        item.clear(recursive=False)
+
+        self._clear_single_item_outputs(item)
+
+        if item.role == "indicator":
+            parent = item.parentItem
+            if parent and parent.role == "factor" and not parent.is_visible():
+                self._clear_single_item_outputs(parent)
+
         self.save_json_to_working_directory()
+
+    def _clear_single_item_outputs(self, item):
+        """Clear one item's own outputs/attributes - see clear_item()."""
+        from geest.core.grid_column_utils import clear_grid_column
+        from geest.core.utilities import remove_from_map
+
+        # Remove only the files directly inside this item's own workflow
+        # directory - never recurse into subdirectories, which belong to
+        # this item's children (e.g. a factor's indicators).
+        if self.working_directory:
+            item_directory = os.path.join(self.working_directory, *item.getPaths())
+            if os.path.isdir(item_directory):
+                for filename in os.listdir(item_directory):
+                    file_path = os.path.join(item_directory, filename)
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        try:
+                            os.unlink(file_path)
+                        except OSError as error:
+                            log_message(
+                                f"Failed to delete {file_path}: {error}",
+                                tag="GeoE3",
+                                level=Qgis.Warning,
+                            )
+
+        # Blank this item's own study_area_grid column (not its children's).
+        if self.working_directory:
+            gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+            if os.path.exists(gpkg_path):
+                clear_grid_column(gpkg_path, item.gridColumnName())
+
+        # Remove this item's own layer(s) from the legend/registry, keeping
+        # the group that holds its children's layers (if any) intact.
+        remove_from_map(item)
+
+        item.clear(recursive=False)
 
     def clear_workflows(self):
         """

@@ -660,6 +660,23 @@ class JsonTreeItem:
             path.append(self.attribute("id", "").lower().replace(" ", "_"))
         return path
 
+    def gridColumnName(self) -> str:
+        """Return this item's own column name in study_area_grid.
+
+        Mirrors the sanitisation `add_model_columns_to_grid()` applied when
+        the column was created (space/hyphen -> underscore, 63-char GeoPackage
+        field name limit), with the role prefix (`dim_`/`fac_`) workflows use
+        for their own layer_id.
+
+        :return: The column name, e.g. "dim_contextual", "fac_workplace_discrimination".
+        """
+        raw_id = self.attribute("id", "").lower().replace(" ", "_").replace("-", "_")
+        if self.isDimension():
+            return f"dim_{raw_id}"[:63]
+        if self.isFactor():
+            return f"fac_{raw_id}"[:63]
+        return raw_id[:63]
+
     def attributes(self):
         """Return a reference to the dict of attributes for this item.
 

@@ -8,9 +8,11 @@ The module supports a grid-first architecture where workflow results are written
 directly to study_area_grid columns, then optionally rasterized using gdal_rasterize.
 """
 
+import functools
 import json
 import os
 import re
+import threading
 import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -30,6 +32,31 @@ log_message(
 SQLITE_WRITE_BUSY_TIMEOUT_MS = 10000
 SQLITE_WRITE_MAX_RETRIES = 3
 SQLITE_WRITE_RETRY_DELAY_SECONDS = 0.2
+
+# Multiple indicator/factor/dimension workflows can run truly concurrently
+# (the "concurrent_tasks" setting), each opening its own independent
+# ogr.Open(gpkg_path, 1) connection to the SAME study_area.gpkg. Reproduced
+# with test_grid_column_concurrent_writes.py: concurrent writers to
+# DIFFERENT columns of the same table reliably fail/lose data even though
+# StartTransaction()/CommitTransaction() report success - SQLite's own
+# locking does not fully protect against this across independent GDAL/OGR
+# dataset handles in the same process. Funnelling every grid write through
+# one process-wide lock eliminates true concurrent SQLite access entirely;
+# the per-call SQL itself is fast, so this does not meaningfully serialize
+# a whole indicator/factor/dimension run - the slow, genuinely
+# parallelizable work (feature loading, raster processing) is unaffected.
+_GRID_WRITE_LOCK = threading.Lock()
+
+
+def _serialize_grid_writes(func: Callable) -> Callable:
+    """Decorator: run a study_area_grid write function under _GRID_WRITE_LOCK."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        with _GRID_WRITE_LOCK:
+            return func(*args, **kwargs)
+
+    return wrapper
 
 
 def _open_gpkg_for_write(gpkg_path: str):
@@ -381,6 +408,7 @@ def add_model_columns_to_grid(gpkg_path: str, model_path: str) -> bool:
         return False
 
 
+@_serialize_grid_writes
 def write_raster_values_to_grid(
     gpkg_path: str,
     raster_path: str,
@@ -627,6 +655,7 @@ def get_grid_column_values(gpkg_path: str, column_name: str, area_name: Optional
         return []
 
 
+@_serialize_grid_writes
 def reclassify_grid_column_with_table(
     gpkg_path: str,
     column_name: str,
@@ -749,6 +778,7 @@ def _get_grid_layer_and_field_index(
     return layer, field_idx
 
 
+@_serialize_grid_writes
 def write_joined_values_to_grid(
     gpkg_path: str,
     column_name: str,
@@ -925,6 +955,7 @@ def write_joined_values_to_grid(
         return -1
 
 
+@_serialize_grid_writes
 def write_uniform_value_to_grid(
     gpkg_path: str,
     column_name: str,
@@ -988,6 +1019,7 @@ def write_uniform_value_to_grid(
         return -1
 
 
+@_serialize_grid_writes
 def clear_grid_column(gpkg_path: str, column_name: str) -> bool:
     """Set all values in a grid column to NULL.
 
@@ -1034,6 +1066,7 @@ def clear_grid_column(gpkg_path: str, column_name: str) -> bool:
         return False
 
 
+@_serialize_grid_writes
 def fill_grid_column_zero_for_area(
     gpkg_path: str,
     column_name: str,
@@ -1093,6 +1126,7 @@ def fill_grid_column_zero_for_area(
         return False
 
 
+@_serialize_grid_writes
 def count_features_per_grid_cell(
     gpkg_path: str,
     column_name: str,
@@ -1227,6 +1261,7 @@ def count_features_per_grid_cell(
         return -1
 
 
+@_serialize_grid_writes
 def write_spatial_join_to_grid(
     gpkg_path: str,
     column_name: str,
@@ -1434,6 +1469,7 @@ def write_spatial_join_to_grid(
         return -1
 
 
+@_serialize_grid_writes
 def write_aggregation_to_grid(
     gpkg_path: str,
     target_column: str,
@@ -1618,6 +1654,17 @@ def rasterize_grid_column(
                     ds = None
                     return False
                 layer.SetAttributeFilter(None)
+                # area_name isn't used on this grid at all - the WHERE clause
+                # gdal.Rasterize() actually burns with must be dropped too,
+                # not just the local filter above (used only for the extent
+                # calculation below). Leaving it set to "area_name = '...'"
+                # here matched zero rows in the real burn as well, silently
+                # producing an all-nodata raster - a real, previously
+                # undetected bug: the grid column was correct, but every
+                # single-area/un-partitioned project's rasterized output
+                # (and therefore every downstream masked/combined VRT) was
+                # empty.
+                where_clause = None
 
         # Get extent if not provided
         if extent is None:
@@ -1684,6 +1731,7 @@ def rasterize_grid_column(
         return False
 
 
+@_serialize_grid_writes
 def write_buffer_values_to_grid(
     gpkg_path: str,
     column_name: str,
@@ -1915,6 +1963,7 @@ def write_buffer_values_to_grid(
         return -1
 
 
+@_serialize_grid_writes
 def write_percentage_scores_to_grid(
     gpkg_path: str,
     column_name: str,

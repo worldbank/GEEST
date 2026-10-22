@@ -85,6 +85,25 @@ class TestJsonTreeItem(unittest.TestCase):
         self.assertIsNotNone(factor.getIcon())
         self.assertIsNotNone(indicator.getIcon())
 
+    def test_grid_column_name(self):
+        """gridColumnName() must match the sanitisation add_model_columns_to_grid()
+        applies when the column is first created: spaces and hyphens both
+        become underscores, with the dim_/fac_ role prefix workflows use
+        for their own layer_id (indicators keep the bare, unprefixed id)."""
+        data = [
+            "Workplace Discrimination",
+            "Configured",
+            1.0,
+            {"id": "Workplace-Discrimination Risk"},
+        ]
+        dimension = JsonTreeItem(data, role="dimension")
+        factor = JsonTreeItem(data, role="factor")
+        indicator = JsonTreeItem(data, role="indicator")
+
+        self.assertEqual(dimension.gridColumnName(), "dim_workplace_discrimination_risk")
+        self.assertEqual(factor.gridColumnName(), "fac_workplace_discrimination_risk")
+        self.assertEqual(indicator.gridColumnName(), "workplace_discrimination_risk")
+
     def test_fonts(self):
         """Test getFont method for different roles."""
         dimension = JsonTreeItem(self.test_data, role="dimension")
