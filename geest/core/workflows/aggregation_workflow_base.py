@@ -281,11 +281,17 @@ class AggregationWorkflowBase(WorkflowBase):
         if self.guids is None:
             raise ValueError("No GUIDs provided for aggregation")
 
+        log_message(
+            f"DIAG_AGG: {self.layer_id} aggregating {len(self.guids)} guid(s)",
+            tag="GeoE3",
+            level=Qgis.Info,
+        )
         for guid in self.guids:
             item = self.item.getItemByGuid(guid)
-            status = item.getStatus() == "Completed successfully"
+            raw_status = item.getStatus()
+            status = raw_status == "Completed successfully"
             mode = item.attributes().get("analysis_mode", "Do Not Use") == "Do Not Use"
-            excluded = item.getStatus() == "Excluded from analysis"
+            excluded = raw_status == "Excluded from analysis"
             disabled = not item.is_enabled()
             raw_id = item.attribute("id").lower().replace(" ", "_").replace("-", "_")
             # Add prefix based on item role to match column naming
@@ -296,6 +302,14 @@ class AggregationWorkflowBase(WorkflowBase):
                 item_id = f"fac_{raw_id}"
             else:
                 item_id = raw_id  # indicators keep raw ID
+            log_message(
+                f"DIAG_AGG:   child '{item_id}' role={item_role!r} raw_status={raw_status!r} "
+                f"status_ok={status} mode_do_not_use={mode} excluded={excluded} disabled={disabled} "
+                f"analysis_mode={item.attributes().get('analysis_mode', '')!r} "
+                f"result={item.attribute('result', '')!r} result_file_set={bool(item.attribute('result_file', ''))}",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
 
             if not status and not mode and not excluded and not disabled:
                 raise ValueError(
@@ -393,6 +407,12 @@ class AggregationWorkflowBase(WorkflowBase):
 
         if updated_count >= 0:
             self._grid_aggregated = True
+            # The column was just cleared and fully recomputed for every row
+            # above - tell _apply_grid_column_zero_fallback() (triggered
+            # later for any area with zero matching grid cells, e.g. a
+            # sliver) not to issue its own "clear once" UPDATE with no WHERE
+            # clause, which would wipe the aggregation just written.
+            self._grid_column_cleared = True
             log_message(
                 f"Grid aggregation completed: updated {updated_count} cells for {self.layer_id}",
                 tag="GeoE3",

@@ -342,6 +342,14 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             log_message(f"Clearing column {self.layer_id} before processing")
             clear_grid_column(self.gpkg_path, self.layer_id)
             self._column_cleared = True
+            # Keep the base class's own "has this column been cleared" flag
+            # in sync: _apply_grid_column_zero_fallback() (triggered later
+            # for any area with no input features, which is common and
+            # unrelated to this flag) checks self._grid_column_cleared, not
+            # self._column_cleared - leaving them out of sync meant that
+            # fallback still issued its own clear-the-whole-column UPDATE,
+            # wiping out every area already written above.
+            self._grid_column_cleared = True
 
         self.progressChanged.emit(5.0)
 

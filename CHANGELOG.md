@@ -289,6 +289,44 @@ version per the policy above.
   instead of failing the whole run. It now sets that flag like the other
   grid-first workflows, so one gridless sliver no longer blocks the
   factor/dimension/analysis score for the other 26 areas.
+- **The `supports_empty_features_fallback` safety net above had a second,
+  much more damaging side effect: it could silently wipe an indicator's,
+  factor's or dimension's entire `study_area_grid` column back to NULL
+  after a real, successful write** - seen as values present in the log
+  ("Executing: UPDATE study_area_grid SET workplace_index = 2") and gone
+  moments later ("Clearing column: UPDATE study_area_grid SET
+  workplace_index = NULL"), with every downstream indicator/factor/
+  dimension layer rendering as empty/red. `_apply_grid_column_zero_fallback()`
+  fires for *any* area with zero matching grid cells or zero input
+  features (not just slivers - an area simply having no OSM points/hazard
+  polygons/etc. for this particular indicator is routine), and the first
+  time it runs per workflow instance it unconditionally issued
+  `UPDATE study_area_grid SET col = NULL` with no `WHERE` clause - every
+  row, every area. Nine grid-first workflows each tracked their own
+  separate "have I cleared this column yet" flag (`_column_cleared` on
+  `PointPerCellWorkflow`/`PolygonPerCellWorkflow`/`PolylinePerCellWorkflow`/
+  `SinglePointBufferWorkflow`/`MultiBufferDistancesNativeWorkflow`;
+  `_grid_value_written`/`_grid_aggregated` on
+  `ContextualIndexScoreWorkflow`/`IndexScoreWorkflow`/
+  `AggregationWorkflowBase`) that was never synchronised with the base
+  class's own `_grid_column_cleared` flag the fallback actually checks -
+  so whichever area first had no features/cells (commonly *after* several
+  other areas had already written real data) triggered the fallback's
+  clear regardless of whether the column had, in fact, already been fully
+  and correctly written. All nine now set `self._grid_column_cleared =
+  True` immediately after their own successful write, so the fallback
+  correctly limits itself to filling in the one empty area instead of
+  wiping every other area's result.
+- Every grid-write function in `grid_column_utils.py` now wraps its SQL
+  `UPDATE`(s) in an explicit `StartTransaction()`/`CommitTransaction()`
+  pair, checking the commit's return code and raising loudly if it fails,
+  instead of relying on an unchecked `PRAGMA wal_checkpoint` + dataset
+  close to persist the write (`gpkg_doctor.checkpoint_dataset()` swallows
+  all exceptions by design, on the assumption that `GDALClose()` would
+  still flush on its own - this codebase has already hit cases where that
+  assumption doesn't hold, see the Windows GDALClose/access-violation fix
+  above). Not the root cause of the data-loss symptom described above,
+  but a real gap worth closing defensively.
 
 ### Changed
 

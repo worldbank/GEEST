@@ -162,6 +162,12 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
                 value=self.index_score,
             )
             self._grid_value_written = True
+            # The whole column was just set in one UPDATE covering every row -
+            # tell _apply_grid_column_zero_fallback() (triggered later for any
+            # area with zero matching grid cells, e.g. a sliver) not to issue
+            # its own "clear once" UPDATE study_area_grid SET col = NULL with
+            # no WHERE clause, which would wipe every area's value just written.
+            self._grid_column_cleared = True
 
         self.progressChanged.emit(50.0)
 
