@@ -219,6 +219,11 @@ class SpreadsheetToJsonParser:
                 "use_polygon_per_cell": (
                     row["Use Polygon per Cell"] if not pd.isna(row["Use Polygon per Cell"]) else ""
                 ),
+                "use_s2s_urban_rural_share": (
+                    row["Use S2S Urban Rural Share"]
+                    if "Use S2S Urban Rural Share" in row.index and not pd.isna(row["Use S2S Urban Rural Share"])
+                    else 0
+                ),
                 "use_polyline_per_cell": (
                     row["Use Polyline per Cell"] if not pd.isna(row["Use Polyline per Cell"]) else ""
                 ),

@@ -266,12 +266,12 @@ def h3_cell_to_polygon_wkt(h3_index: str, target_epsg: int) -> str:
         )
         return ""
 
-    # Get H3 boundary in WGS84 (lat/lon)
+    # Get H3 boundary in WGS84 - h3-py returns (lat, lng) pairs
     boundary = h3.cell_to_boundary(h3_index)
 
     # Transform each point to target CRS
     transformed_points = []
-    for lon, lat in boundary:
+    for lat, lon in boundary:
         tx, ty = transform_wgs84_to_target(lon, lat, target_epsg)
         transformed_points.append((tx, ty))
 

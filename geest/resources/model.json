@@ -631,7 +631,8 @@
                             "use_classify_polygon_into_classes": 1,
                             "use_classify_safety_polygon_into_classes": 0,
                             "use_csv_to_point_layer": 0,
-                            "use_polygon_per_cell": 1,
+                            "use_polygon_per_cell": 0,
+                            "use_s2s_urban_rural_share": 1,
                             "s2s_fields": [
                                 "ghs_11_pop",
                                 "ghs_12_pop",

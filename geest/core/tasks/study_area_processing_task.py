@@ -997,6 +997,10 @@ class StudyAreaProcessingTask(QgsTask):
         self.src_epsg = None
         if self.src_spatial_ref:
             self.src_epsg = self.src_spatial_ref.GetAuthorityCode(None)
+        log_message(
+            f"DIAG: dissolved/source layer '{self.input_vector_path}' spatial ref: "
+            f"{self.src_spatial_ref.ExportToWkt() if self.src_spatial_ref else 'MISSING (GetSpatialRef() returned None)'}"
+        )
 
         layer_extent = self.source_layer.GetExtent()
         xmin, xmax, ymin, ymax = layer_extent
@@ -1981,8 +1985,13 @@ class StudyAreaProcessingTask(QgsTask):
 
         # If needed, transform the geometry to target CRS
         # (Only if we have the coordinate transform)
+        log_message(
+            f"DIAG: {normalized_name} geom envelope BEFORE transform: {geom.GetEnvelope()}, "
+            f"coord_transform is {'SET' if self.coord_transform else 'NONE (transform will be SKIPPED)'}"
+        )
         if self.coord_transform:
             geom.Transform(self.coord_transform)
+        log_message(f"DIAG: {normalized_name} geom envelope AFTER transform: {geom.GetEnvelope()}")
 
         # Check GHSL intersection
         intersects_ghsl = self.check_ghsl_intersection(geom)

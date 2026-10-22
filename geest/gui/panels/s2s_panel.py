@@ -322,6 +322,11 @@ class S2SPanel(FORM_CLASS, QWidget):
                         )
 
                     if regional and int(indicator.get("use_polygon_per_cell", 0)) == 1:
+                        if indicator_id.lower() == "education":
+                            # Education urban/rural share reads the S2S
+                            # demographics layer; no separate download.
+                            continue
+
                         fields = indicator.get("s2s_fields", [])
                         if isinstance(fields, str):
                             fields = [token.strip() for token in fields.split(",") if token.strip()]
@@ -329,9 +334,6 @@ class S2SPanel(FORM_CLASS, QWidget):
                             fields = [str(token).strip() for token in fields if str(token).strip()]
                         else:
                             fields = []
-
-                        if not fields and indicator_id.lower() == "education":
-                            fields = list(DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS)
 
                         unique_fields = []
                         for field in fields:
@@ -344,8 +346,6 @@ class S2SPanel(FORM_CLASS, QWidget):
 
                         sanitized_id = indicator_id.lower().replace(" ", "_").replace("-", "_")
                         filename = f"s2s_polygon_per_cell_{sanitized_id}"
-                        if indicator_id.lower() == "education":
-                            filename = "s2s_education"
                         jobs.append(
                             {
                                 "type": "polygon_per_cell",
@@ -372,11 +372,15 @@ class S2SPanel(FORM_CLASS, QWidget):
             )
 
         if regional:
+            demographics_fields = [DEFAULT_S2S_POPULATION_FIELD]
+            for field in DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS:
+                if field not in demographics_fields:
+                    demographics_fields.append(field)
             jobs.append(
                 {
                     "type": "demographics",
                     "indicator_ids": [],
-                    "fields": [DEFAULT_S2S_POPULATION_FIELD],
+                    "fields": demographics_fields,
                     "filename": "s2s_demographics",
                     "metadata": {"s2s_population_field": DEFAULT_S2S_POPULATION_FIELD},
                 }

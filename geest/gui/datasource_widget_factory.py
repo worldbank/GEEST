@@ -18,9 +18,9 @@ from geest.gui.widgets.datasource_widgets import (
     FixedValueDataSourceWidget,
     NTLDownloadRasterDataSourceWidget,
     S2SDataSourceWidget,
-    S2SEducationDataSourceWidget,
     S2SEnvironmentalHazardsRasterDataSourceWidget,
     S2SNTLRasterDataSourceWidget,
+    UrbanRuralShareDataSourceWidget,
     VectorAndFieldDataSourceWidget,
     VectorDataSourceWidget,
 )
@@ -78,10 +78,10 @@ class DataSourceWidgetFactory:
             if widget_key == "use_polygon_per_cell" and value == 1:
                 analysis_scale = attributes.get("analysis_scale")
                 if analysis_scale == "regional":
-                    if str(attributes.get("id", "")).strip().lower() == "education":
-                        return S2SEducationDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
                     return S2SDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
+            if widget_key == "use_s2s_urban_rural_share" and value == 1:
+                return UrbanRuralShareDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_polyline_per_cell" and value == 1:
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_osm_transport_polyline_per_cell" and value == 1:

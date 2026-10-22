@@ -126,12 +126,12 @@ class GridFromBboxH3Task(QgsTask):
             if self.feedback and self.feedback.isCanceled():
                 break
 
-            # Get H3 boundary in WGS84
+            # Get H3 boundary in WGS84 - h3-py returns (lat, lng) pairs
             boundary = h3.cell_to_boundary(h3_index)
 
             # Transform boundary coordinates to target CRS
             transformed_coords = []
-            for lon, lat in boundary:
+            for lat, lon in boundary:
                 tx, ty = transform_wgs84_to_target(lon, lat, self.target_epsg)
                 transformed_coords.append((tx, ty))
 

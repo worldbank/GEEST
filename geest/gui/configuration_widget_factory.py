@@ -25,6 +25,7 @@ from geest.gui.widgets.configuration_widgets import (
     SafetyRasterConfigurationWidget,
     SingleBufferConfigurationWidget,
     StreetLightsConfigurationWidget,
+    UrbanRuralShareConfigurationWidget,
 )
 from geest.utilities import log_message
 
@@ -95,6 +96,8 @@ class ConfigurationWidgetFactory:
                 return SafetyPolygonConfigurationWidget(analysis_mode=key, attributes=attributes)
             elif key == "use_nighttime_lights" and value == 1:
                 return SafetyRasterConfigurationWidget(analysis_mode=key, attributes=attributes)
+            elif key == "use_s2s_urban_rural_share" and value == 1:
+                return UrbanRuralShareConfigurationWidget(analysis_mode=key, attributes=attributes)
             elif key == "use_environmental_hazards" and value == 1:
                 return RasterReclassificationConfigurationWidget(analysis_mode=key, attributes=attributes)
             elif key == "use_street_lights" and value == 1:

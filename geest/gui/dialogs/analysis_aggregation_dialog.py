@@ -43,7 +43,10 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from geest.core import S2STaskGate
-from geest.core.constants import DEFAULT_S2S_POPULATION_FIELD
+from geest.core.constants import (
+    DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS,
+    DEFAULT_S2S_POPULATION_FIELD,
+)
 from geest.core.settings import setting
 from geest.core.tasks import S2SDownloaderTask
 from geest.gui.widgets import CustomBannerLabel
@@ -377,9 +380,13 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self._s2s_error_handled = False
 
         s2s_field = self.tree_item.attribute("population_s2s_field", "") or DEFAULT_S2S_POPULATION_FIELD
+        demographics_fields = [s2s_field]
+        for field in DEFAULT_S2S_EDUCATION_URBANIZATION_FIELDS:
+            if field not in demographics_fields:
+                demographics_fields.append(field)
         self.s2s_demographics_task = S2SDownloaderTask(
             aoi=aoi_feature,
-            fields=[s2s_field],
+            fields=demographics_fields,
             working_dir=working_dir,
             filename="s2s_demographics",
             spatial_join_method="centroid",
