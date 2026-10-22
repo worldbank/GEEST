@@ -71,7 +71,7 @@ tomli==2.3.0
 typer==0.4.0
 typing_extensions==4.15.0
 urllib3==2.8.0
-virtualenv==20.36.1
+virtualenv==21.7.13
 watchdog==5.0.2
 wheel==0.46.2
 zipp==3.23.0
