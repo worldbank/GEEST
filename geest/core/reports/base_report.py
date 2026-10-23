@@ -619,6 +619,43 @@ class BaseReport:
         _flat_fill(shape, color)
         self.layout.addLayoutItem(shape)
 
+    def _draw_sparkline(
+        self,
+        values: list,
+        colors: list,
+        x: float,
+        y: float,
+        w: float,
+        h: float,
+        page: int,
+        gap: float = 0.6,
+    ) -> None:
+        """Draw a tiny bar chart: one flat-filled bar per value, bottom-
+        aligned, height proportional to the tallest bar in the set.
+
+        Args:
+            values: Bar heights (e.g. value counts) - any non-negative numbers.
+            colors: One QColor per bar, same length and order as values.
+            x, y: Top-left position of the whole chart, in mm.
+            w, h: Total chart size in mm.
+            page: Page number to draw on.
+            gap: Horizontal gap between bars, in mm.
+        """
+        n = len(values)
+        if n == 0:
+            return
+        peak = max(values)
+        if peak <= 0:
+            return
+        bar_w = (w - (n - 1) * gap) / n
+        for index, (value, color) in enumerate(zip(values, colors)):
+            if value <= 0:
+                continue
+            bar_h = h * (value / peak)
+            bar_x = x + index * (bar_w + gap)
+            bar_y = y + (h - bar_h)
+            self._rect(bar_x, bar_y, bar_w, bar_h, color, page)
+
     def _label(
         self,
         text: str,

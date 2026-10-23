@@ -23,6 +23,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor
 
+from geest.core.constants import SCORE_LEGEND_COLORS
 from geest.utilities import log_message, resources_path
 
 from .base_report import CHARCOAL, CONTENT_W, CYAN, GREY, HEADER_H, MARGIN, MIST, NAVY, RULE, BaseReport, _flat_fill
@@ -373,6 +374,46 @@ class AnalysisReport(BaseReport):
             self._add_minimap_grid(minimaps, current_page, top=52 + main_h + 12)
         return True
 
+    def _raster_score_histogram(self, layer: QgsRasterLayer) -> list:
+        """Count a 0-5 classified result raster's cells per integer score 1-5.
+
+        Score 0 (masked/excluded cells) is dropped: it is typically the
+        overwhelming majority of cells outside the populated/opportunity
+        area, and including it would flatten the 1-5 distribution the
+        sparkline exists to show.
+
+        Args:
+            layer: A loaded 0-5 classified score raster.
+
+        Returns:
+            list: Five counts, for scores 1, 2, 3, 4, 5 in order.
+        """
+        from osgeo import gdal
+
+        try:
+            dataset = gdal.Open(layer.source())
+        except RuntimeError:
+            dataset = None
+        if dataset is None:
+            return [0, 0, 0, 0, 0]
+        band = dataset.GetRasterBand(1)
+        # Bucket i (0..5) covers [i-0.5, i+0.5) so each bucket catches
+        # exactly one integer score; bucket 0 (score 0) is dropped below.
+        histogram = band.GetHistogram(-0.5, 5.5, 6, include_out_of_range=0, approx_ok=1)
+        dataset = None
+        return histogram[1:]
+
+    def _draw_minimap_sparkline(self, layer: QgsRasterLayer, x: float, y: float, w: float, h: float, page: int):
+        """Draw a 5-bar score-distribution sparkline beneath a minimap cell.
+
+        Coloured with the same 5-class ramp (SCORE_LEGEND_COLORS) every
+        result map in this report already uses, so the bars read as "more
+        of this colour" rather than needing a separate legend.
+        """
+        counts = self._raster_score_histogram(layer)
+        colors = [QColor(SCORE_LEGEND_COLORS[score]) for score in range(1, 6)]
+        self._draw_sparkline(counts, colors, x, y, w, h, page)
+
     def _add_minimap_grid(
         self,
         minimaps: list,
@@ -381,10 +422,14 @@ class AnalysisReport(BaseReport):
         columns: int = 4,
         bottom: float = 280.0,
     ) -> None:
-        """Lay out (caption, layer) tuples as a captioned minimap grid."""
+        """Lay out (caption, layer) tuples as a captioned minimap grid, each
+        followed by a small sparkline of its score distribution (1-5,
+        excluding 0 - see _raster_score_histogram())."""
         gap = 5.0
         cell_w = (180.0 - (columns - 1) * gap) / columns
-        cell_h = cell_w + 7  # square map face + caption strip
+        map_and_caption_h = cell_w + 7  # square map face + caption strip
+        sparkline_h = 8.0
+        cell_h = map_and_caption_h + sparkline_h
         max_rows = max(1, int((bottom - top + gap) // (cell_h + gap)))
         capacity = max_rows * columns
         if len(minimaps) > capacity:
@@ -395,15 +440,25 @@ class AnalysisReport(BaseReport):
             minimaps = minimaps[:capacity]
         for index, (caption, layer) in enumerate(minimaps):
             row, col = divmod(index, columns)
+            x = 15 + col * (cell_w + gap)
+            y = top + row * (cell_h + gap)
             self.make_minimap(
                 caption=caption,
                 layers=self._map_layers(layer),
                 crs=layer.crs(),
                 current_page=current_page,
-                x=15 + col * (cell_w + gap),
-                y=top + row * (cell_h + gap),
+                x=x,
+                y=y,
                 w=cell_w,
-                h=cell_h,
+                h=map_and_caption_h,
+            )
+            self._draw_minimap_sparkline(
+                layer=layer,
+                x=x,
+                y=y + map_and_caption_h,
+                w=cell_w,
+                h=sparkline_h,
+                page=current_page,
             )
 
     def _has_used_indicators(self, factor: dict) -> bool:

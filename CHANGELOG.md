@@ -23,6 +23,15 @@ version per the policy above.
 
 ### Added
 
+- Each minimap in the analysis report (dimension/factor/indicator grids)
+  now shows a small 5-bar sparkline beneath it, giving the distribution of
+  that layer's scored cell values (1-5) coloured with the same
+  `SCORE_LEGEND_COLORS` ramp every result map already uses. Score 0
+  (masked/excluded cells) is excluded from the count - it's typically the
+  overwhelming majority of cells outside the populated/opportunity area,
+  and including it would flatten the 1-5 distribution the sparkline
+  exists to show. New generic `BaseReport._draw_sparkline()` primitive and
+  `AnalysisReport._raster_score_histogram()`/`_draw_minimap_sparkline()`.
 - Indicator/factor configuration dialogs' value-range|index-score mapping
   tables (the reference table shown while picking an analysis mode, e.g.
   Contextual Index Score, Street Lights, Multi/Single Buffer, Safety
