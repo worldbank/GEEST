@@ -104,6 +104,42 @@ class TestJsonTreeItem(unittest.TestCase):
         self.assertEqual(factor.gridColumnName(), "fac_workplace_discrimination_risk")
         self.assertEqual(indicator.gridColumnName(), "workplace_discrimination_risk")
 
+    def test_invalidate_ancestors_clears_every_ancestor_up_to_the_root(self):
+        """A factor/dimension aggregate is only as fresh as the children it
+        was computed from - if a child indicator is re-run afterwards,
+        every ancestor's cached result is stale even though it may still
+        show "Completed successfully" (worldbank/GeoE3 field report,
+        2026-10-23: a factor aggregated hours before its own child
+        indicator was re-run stayed stuck at a stale value forever)."""
+        dimension = JsonTreeItem(
+            ["Dimension", "Configured", 1.0, {"id": "dim", "result": "dimension_aggregation Workflow Completed"}],
+            role="dimension",
+        )
+        factor = JsonTreeItem(
+            ["Factor", "Configured", 1.0, {"id": "fac", "result": "factor_aggregation Workflow Completed"}],
+            role="factor",
+            parent=dimension,
+        )
+        indicator = JsonTreeItem(
+            ["Indicator", "Configured", 1.0, {"id": "ind", "result": "multi_buffer_point Workflow Completed"}],
+            role="indicator",
+            parent=factor,
+        )
+        dimension.appendChild(factor)
+        factor.appendChild(indicator)
+
+        indicator.invalidateAncestors()
+
+        self.assertEqual(factor.attribute("result"), "")
+        self.assertEqual(dimension.attribute("result"), "")
+        # The indicator's own, freshly-computed result must be untouched -
+        # only ANCESTORS are invalidated, never the item that just ran.
+        self.assertEqual(indicator.attribute("result"), "multi_buffer_point Workflow Completed")
+
+    def test_invalidate_ancestors_on_a_root_item_is_a_safe_no_op(self):
+        root = JsonTreeItem(["Analysis", "Configured", 1.0, {"id": "analysis"}], role="analysis")
+        root.invalidateAncestors()  # must not raise - no parent to invalidate
+
     def test_fonts(self):
         """Test getFont method for different roles."""
         dimension = JsonTreeItem(self.test_data, role="dimension")

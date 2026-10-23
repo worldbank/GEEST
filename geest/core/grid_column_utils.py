@@ -205,6 +205,18 @@ def _ensure_column_exists(gpkg_path: str, column_name: str) -> bool:
         True if the column exists (or was created), False on failure.
     """
     sanitized = _sanitize_column_name(column_name)
+    if not sanitized:
+        # A blank column name reached here means some caller derived it
+        # from an item with an empty/missing "id" attribute - creating it
+        # anyway would silently add a permanent, unnamed, all-NULL column
+        # to study_area_grid (found in the wild: worldbank/GeoE3 field
+        # report, 2026-10-23). Refuse loudly instead.
+        log_message(
+            f"Refusing to create a grid column with a blank name (original column_name={column_name!r})",
+            tag="GeoE3",
+            level=Qgis.Critical,
+        )
+        return False
     for attempt in range(SQLITE_WRITE_MAX_RETRIES):
         ds = _open_gpkg_for_write(gpkg_path)
         if not ds:
@@ -310,15 +322,24 @@ def get_aggregate_column_names() -> List[str]:
     Returns:
         List of column names for aggregate scores (WEE score, WEE by population, etc.)
     """
+    # contextual_score/accessibility_score/place_characterization_score were
+    # reserved here from the very first commit that introduced this list
+    # (02895113, "WIP Vectorising grid results") alongside wee_score/
+    # wee_by_population - which DID get real aggregation workflows wired up
+    # and were later renamed to geoe3/geoe3_by_population. The three
+    # dimension-level "_score" columns never did (confirmed: `git log -S
+    # contextual_score` across the whole history finds them only in this
+    # reservation list, never as a write target anywhere) - superseded by
+    # dim_contextual/dim_accessibility/dim_place_characterization instead,
+    # with the leftover reservation never cleaned up. Every study area
+    # created since has been silently carrying 3 permanently-empty columns
+    # for a feature that was abandoned before it shipped.
     return [
         "geoe3",
         "geoe3_by_population",  # GeoE3 × Population bivariate score (1-15)
         "geoe3_masked",  # GeoE3 score masked by opportunities/GHSL
         "geoe3_by_population_masked",  # GeoE3 by population masked by opportunities
         "opportunities_mask",  # Binary mask for job opportunities
-        "contextual_score",
-        "accessibility_score",
-        "place_characterization_score",
     ]
 
 
@@ -391,6 +412,19 @@ def add_model_columns_to_grid(gpkg_path: str, model_path: str) -> bool:
         failed_columns = []
         for col_name in column_names:
             sanitized_name = col_name.replace(" ", "_").replace("-", "_")[:63]
+
+            if not sanitized_name:
+                # A blank column name here means some model.json entry had
+                # an empty/missing "id" - creating it anyway would silently
+                # add a permanent, unnamed, all-NULL column to
+                # study_area_grid (found in the wild: worldbank/GeoE3 field
+                # report, 2026-10-23). Skip it loudly instead.
+                log_message(
+                    f"Skipping blank column name derived from {col_name!r} in model.json",
+                    tag="GeoE3",
+                    level=Qgis.Critical,
+                )
+                continue
 
             if sanitized_name.lower() in existing_fields:
                 continue

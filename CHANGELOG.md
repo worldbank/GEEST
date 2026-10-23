@@ -189,6 +189,24 @@ version per the policy above.
 
 ### Fixed
 
+- **Re-running or clearing a single indicator left its factor, dimension, and
+  analysis still showing a stale "Completed successfully" with the old
+  aggregate value.** Nothing ever told an ancestor its cached aggregate was
+  computed from a now-changed child. `JsonTreeItem.invalidateAncestors()`
+  clears every ancestor's `result`/`result_file` on a successful workflow
+  run and when an item is cleared via "Clear Item", so the tree honestly
+  falls back to "Configured, not run" until the aggregate is recomputed.
+- **`study_area_grid` could silently gain a permanent, unnamed, all-NULL
+  column.** An item with an empty/missing `id` attribute reached the grid
+  column creation code with a blank column name. `_ensure_column_exists()`
+  and `add_model_columns_to_grid()` now refuse to create a blank-named
+  column.
+- **Three dead aggregate columns (`contextual_score`, `accessibility_score`,
+  `place_characterization_score`) were added to every study area's grid.**
+  Confirmed via git history that these were reserved alongside
+  `wee_score`/`wee_by_population` (since renamed to `geoe3`/
+  `geoe3_by_population`) but never implemented - removed from
+  `get_aggregate_column_names()`.
 - **Logging never reached `~/GEOE3.log`.** A module-level diagnostic
   banner in `grid_column_utils.py` could fire before `geest/__init__.py`'s
   own `logging.basicConfig()` call, implicitly self-configuring the root
