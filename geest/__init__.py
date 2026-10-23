@@ -84,6 +84,16 @@ logging.basicConfig(
     filemode="a",  # Append mode
     format="%(asctime)s [%(levelname)s] %(message)s",
     level=logging.DEBUG,
+    # basicConfig() is a no-op if the root logger already has handlers -
+    # and it already does by this point: the .core/.gui/.gui.overlays/
+    # .utilities imports above transitively load grid_column_utils.py,
+    # whose module-level log_message() banner call (if verbose_mode is
+    # on) is the first logging.info/warning() call in the process,
+    # implicitly self-configuring the root logger with the bare
+    # stderr "lastResort" handler before we get here. force=True tears
+    # down whatever got attached first and guarantees our file handler
+    # wins, regardless of import order.
+    force=True,
 )
 # Suppress PyQt uic module debug spam (push/pop widget, setting property, etc.)
 logging.getLogger("PyQt5.uic").setLevel(logging.WARNING)

@@ -23,6 +23,22 @@ version per the policy above.
 
 ### Added
 
+- Indicator/factor configuration dialogs' value-range|index-score mapping
+  tables (the reference table shown while picking an analysis mode, e.g.
+  Contextual Index Score, Street Lights, Multi/Single Buffer, Safety
+  Raster, ACLED CSV, OSM Transport highway/cycleway classification) now
+  show a "Legend" column with a solid colour swatch for each row, matching
+  the same 5-class colour ramp (`#d7191c`→`#2c7bb6`) every result
+  map/raster already uses (`resources/qml/indicator.qml`/`factor.qml`), so
+  a user can see at a glance which map colour a given score corresponds to
+  without cross-referencing the separate map legend. New shared
+  `geest.core.constants.SCORE_LEGEND_COLORS` and
+  `legend_cell_html()`/`legend_color_for_score()` helpers in
+  `base_configuration_widget.py`, reused by every affected widget rather
+  than hand-rolling the colour lookup per table. Left out: Safety
+  Polygon's classification table (user-editable 0-100 values, not a
+  read-only 1-5 score reference) and the plain Index Score widget (has no
+  mapping table at all).
 - `admin.py generate-zip` now bundles `h3` into the release zip by
   default (`VENDORED_PACKAGES = ["h3==4.4.2"]`), wired automatically into
   `build()` rather than requiring a separate manual `bundle-deps` step
@@ -173,6 +189,30 @@ version per the policy above.
 
 ### Fixed
 
+- **Re-running or clearing a single indicator left its factor, dimension, and
+  analysis still showing a stale "Completed successfully" with the old
+  aggregate value.** Nothing ever told an ancestor its cached aggregate was
+  computed from a now-changed child. `JsonTreeItem.invalidateAncestors()`
+  clears every ancestor's `result`/`result_file` on a successful workflow
+  run and when an item is cleared via "Clear Item", so the tree honestly
+  falls back to "Configured, not run" until the aggregate is recomputed.
+- **`study_area_grid` could silently gain a permanent, unnamed, all-NULL
+  column.** An item with an empty/missing `id` attribute reached the grid
+  column creation code with a blank column name. `_ensure_column_exists()`
+  and `add_model_columns_to_grid()` now refuse to create a blank-named
+  column.
+- **Three dead aggregate columns (`contextual_score`, `accessibility_score`,
+  `place_characterization_score`) were added to every study area's grid.**
+  Confirmed via git history that these were reserved alongside
+  `wee_score`/`wee_by_population` (since renamed to `geoe3`/
+  `geoe3_by_population`) but never implemented - removed from
+  `get_aggregate_column_names()`.
+- **Logging never reached `~/GEOE3.log`.** A module-level diagnostic
+  banner in `grid_column_utils.py` could fire before `geest/__init__.py`'s
+  own `logging.basicConfig()` call, implicitly self-configuring the root
+  logger first and making our call a silent no-op (console showed the
+  bare `WARNING:root:...` fallback format instead). `basicConfig()` now
+  passes `force=True` so our file handler always wins.
 - **Analysis-level processing required a population raster even though it's
   optional.** Leaving it unset errored with "Select a valid population
   raster before running the analysis" and aborted the whole analysis

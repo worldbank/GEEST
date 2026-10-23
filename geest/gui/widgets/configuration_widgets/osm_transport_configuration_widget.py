@@ -6,7 +6,7 @@ from qgis.PyQt.QtWidgets import QLabel
 from geest.core.workflows.mappings import CYCLEWAY_CLASSIFICATION, HIGHWAY_CLASSIFICATION
 from geest.utilities import log_message
 
-from .base_configuration_widget import BaseConfigurationWidget
+from .base_configuration_widget import BaseConfigurationWidget, legend_cell_html
 
 
 #
@@ -61,11 +61,11 @@ class OsmTransportConfigurationWidget(BaseConfigurationWidget):
                     for col in columns:
                         if row_index < len(col):
                             key, value = col[row_index]
-                            row_cells.append(f"<td>{key}</td><td>{value}</td>")
+                            row_cells.append(f"<td>{key}</td><td>{value}</td>{legend_cell_html(value)}")
                         else:
-                            row_cells.append("<td></td><td></td>")
+                            row_cells.append("<td></td><td></td><td></td>")
                     rows.append(f"<tr>{''.join(row_cells)}</tr>")
-                header = "".join("<th>Type</th><th>Score</th>" for _ in columns)
+                header = "".join("<th>Type</th><th>Score</th><th>Legend</th>" for _ in columns)
                 return f"<tr>{header}</tr>\n" + "\n".join(rows)
 
             highway_items = sorted(HIGHWAY_CLASSIFICATION.items(), key=lambda item: (item[1], item[0]))

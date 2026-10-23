@@ -6,7 +6,7 @@ from qgis.PyQt.QtWidgets import QLabel
 from geest.core.workflows.contextual_index_score_mappings import score_mapping
 from geest.utilities import log_message
 
-from .base_configuration_widget import BaseConfigurationWidget
+from .base_configuration_widget import BaseConfigurationWidget, legend_cell_html
 
 
 class ContextualIndexScoreConfigurationWidget(BaseConfigurationWidget):
@@ -37,6 +37,7 @@ class ContextualIndexScoreConfigurationWidget(BaseConfigurationWidget):
                 <tr>
                     <th>Value Range</th>
                     <th>Index Score</th>
+                    <th>Legend</th>
                 </tr>
             """
             for value_range, index_score in score_mapping.items():
@@ -44,6 +45,7 @@ class ContextualIndexScoreConfigurationWidget(BaseConfigurationWidget):
                 <tr>
                     <td>{value_range}+</td>
                     <td>{index_score}</td>
+                    {legend_cell_html(index_score)}
                 </tr>
                 """
             mapping_table_html += "</table>"

@@ -446,10 +446,23 @@ class TreePanel(QWidget):
 
         self._clear_single_item_outputs(item)
 
+        # Normally the cascade starts at item's own parent, since only
+        # item itself was fully cleared. In the fused-row case the factor
+        # was ALSO just fully cleared above (own outputs deleted, result
+        # set to "Not Run") - start the cascade one level higher so that
+        # doesn't get overwritten by the lighter invalidation below.
+        invalidation_start = item
         if item.role == "indicator":
             parent = item.parentItem
             if parent and parent.role == "factor" and not parent.is_visible():
                 self._clear_single_item_outputs(parent)
+                invalidation_start = parent
+
+        # Every ancestor's cached aggregate was computed including this
+        # item's now-deleted result, so it's stale too - same reasoning as
+        # on_workflow_completed(), just triggered by the user clearing an
+        # item rather than re-running one.
+        invalidation_start.invalidateAncestors()
 
         self.save_json_to_working_directory()
 
@@ -2413,6 +2426,18 @@ class TreePanel(QWidget):
         self.overall_progress_bar.setValue(self.overall_progress_bar.value() + 1)
         self.overall_progress_bar.setMaximum(self.items_to_run - 1)
         self.workflow_progress_bar.setValue(0)
+
+        # Every ancestor's cached aggregate was computed from this item's
+        # PREVIOUS result - now stale, even though it may still show
+        # "Completed successfully" (worldbank/GeoE3 field report,
+        # 2026-10-23: a factor aggregated hours before its own child
+        # indicator was re-run stayed stuck at a stale value forever,
+        # since nothing ever told it to re-run). Only on a genuine
+        # success - a failed run leaves the item's own prior data/result
+        # untouched, so ancestors aren't actually any staler than before.
+        if success:
+            item.invalidateAncestors()
+
         self.save_json_to_working_directory()
 
         # For the analysis item run the post-processing insights first, so

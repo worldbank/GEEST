@@ -677,6 +677,27 @@ class JsonTreeItem:
             return f"fac_{raw_id}"[:63]
         return raw_id[:63]
 
+    def invalidateAncestors(self) -> None:
+        """Mark every ancestor (parent, grandparent, ...) as needing a re-run.
+
+        A factor/dimension/analysis aggregate is only ever as fresh as the
+        children it was computed from - if a child indicator is re-run
+        afterwards, every ancestor's cached result is now stale even
+        though it still reports "Completed successfully". Clearing
+        result/result_file makes getStatus() fall through to "Configured,
+        not run" instead, so the tree honestly reflects that the aggregate
+        needs recomputing (worldbank/GeoE3 field report, 2026-10-23: a
+        factor aggregated once, hours before its own child indicator was
+        re-run, stayed stuck showing a stale "Completed successfully" with
+        0 as its score forever, since nothing ever invalidated it).
+        """
+        ancestor = self.parentItem
+        while ancestor is not None:
+            with ancestor.atomicAttributeUpdate() as attrs:
+                attrs["result"] = ""
+                attrs["result_file"] = ""
+            ancestor = ancestor.parentItem
+
     def attributes(self):
         """Return a reference to the dict of attributes for this item.
 

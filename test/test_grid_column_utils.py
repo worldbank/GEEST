@@ -5,10 +5,14 @@ import os
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
 from osgeo import ogr
 
 from geest.core.grid_column_utils import (
+    _ensure_column_exists,
+    add_model_columns_to_grid,
+    get_aggregate_column_names,
     populated_area_names,
     rasterize_grid_column,
     write_aggregation_to_grid,
@@ -722,6 +726,113 @@ class TestPopulatedAreaNames(unittest.TestCase):
         ogr.GetDriverByName("GPKG").CreateDataSource(self.gpkg_path)
 
         self.assertIsNone(populated_area_names(self.gpkg_path))
+
+
+class TestEnsureColumnExistsRefusesBlankNames(unittest.TestCase):
+    """A blank/whitespace column name must never reach ogr.CreateField().
+
+    Regression test: worldbank/GeoE3 field report, 2026-10-23 - an item
+    with an empty/missing "id" attribute reached here and silently added a
+    permanent, unnamed, all-NULL column to study_area_grid.
+    """
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="test_ensure_column_exists_")
+        self.gpkg_path = os.path.join(self.temp_dir, "study_area.gpkg")
+        driver = ogr.GetDriverByName("GPKG")
+        dataset = driver.CreateDataSource(self.gpkg_path)
+        dataset.CreateLayer("study_area_grid", geom_type=ogr.wkbPolygon)
+        dataset = None
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def _field_names(self):
+        dataset = ogr.Open(self.gpkg_path)
+        layer = dataset.GetLayerByName("study_area_grid")
+        layer_defn = layer.GetLayerDefn()
+        names = [layer_defn.GetFieldDefn(i).GetName() for i in range(layer_defn.GetFieldCount())]
+        dataset = None
+        return names
+
+    def test_empty_name_is_refused(self):
+        self.assertFalse(_ensure_column_exists(self.gpkg_path, ""))
+        self.assertEqual(self._field_names(), [])
+
+    def test_valid_name_still_creates_the_column(self):
+        self.assertTrue(_ensure_column_exists(self.gpkg_path, "some_indicator"))
+        self.assertEqual(self._field_names(), ["some_indicator"])
+
+
+class TestAddModelColumnsToGridSkipsBlankNames(unittest.TestCase):
+    """A blank entry in the model-derived column list must be skipped, not created.
+
+    get_all_column_names() is already guarded against emitting a blank
+    name from a real model.json (extract_model_ids() only appends
+    truthy ids), so this patches it directly to exercise
+    add_model_columns_to_grid()'s own defensive skip as a safety net.
+    """
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="test_add_model_columns_blank_")
+        self.gpkg_path = os.path.join(self.temp_dir, "study_area.gpkg")
+        self.model_path = os.path.join(self.temp_dir, "model.json")
+        driver = ogr.GetDriverByName("GPKG")
+        dataset = driver.CreateDataSource(self.gpkg_path)
+        dataset.CreateLayer("study_area_grid", geom_type=ogr.wkbPolygon)
+        dataset = None
+        with open(self.model_path, "w", encoding="utf-8") as f:
+            f.write("{}")
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def _field_names(self):
+        dataset = ogr.Open(self.gpkg_path)
+        layer = dataset.GetLayerByName("study_area_grid")
+        layer_defn = layer.GetLayerDefn()
+        names = [layer_defn.GetFieldDefn(i).GetName() for i in range(layer_defn.GetFieldCount())]
+        dataset = None
+        return names
+
+    def test_blank_entry_is_skipped_but_valid_entries_are_still_added(self):
+        with mock.patch(
+            "geest.core.grid_column_utils.get_all_column_names",
+            return_value=["some_indicator", ""],
+        ):
+            self.assertTrue(add_model_columns_to_grid(self.gpkg_path, self.model_path))
+
+        self.assertEqual(self._field_names(), ["some_indicator"])
+
+
+class TestGetAggregateColumnNamesExcludesDeadColumns(unittest.TestCase):
+    """contextual_score/accessibility_score/place_characterization_score were
+    reserved but never implemented (confirmed via git history) - they must
+    not appear in the aggregate column list, and must not silently
+    reappear if someone re-adds them without checking.
+    """
+
+    def test_dead_score_columns_are_absent(self):
+        names = get_aggregate_column_names()
+
+        for dead_name in (
+            "contextual_score",
+            "accessibility_score",
+            "place_characterization_score",
+        ):
+            self.assertNotIn(dead_name, names)
+
+    def test_real_aggregate_columns_are_still_present(self):
+        names = get_aggregate_column_names()
+
+        for real_name in (
+            "geoe3",
+            "geoe3_by_population",
+            "geoe3_masked",
+            "geoe3_by_population_masked",
+            "opportunities_mask",
+        ):
+            self.assertIn(real_name, names)
 
 
 if __name__ == "__main__":
