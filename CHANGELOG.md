@@ -210,6 +210,10 @@ version per the policy above.
 
 ### Fixed
 
+- **`scripts/start_qgis.sh`/`start_qgis_ltr.sh` logged to `~/GEOE3.log`,**
+  away from wherever validation tests are actually run from. Logs now
+  write to `GEOE3.log` in the project folder instead, so they can be
+  tailed from the same place (`tail -f GEOE3.log`).
 - **Re-running or clearing a single indicator left its factor, dimension, and
   analysis still showing a stale "Completed successfully" with the old
   aggregate value.** Nothing ever told an ancestor its cached aggregate was
