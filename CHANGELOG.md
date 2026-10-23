@@ -173,6 +173,12 @@ version per the policy above.
 
 ### Fixed
 
+- **Logging never reached `~/GEOE3.log`.** A module-level diagnostic
+  banner in `grid_column_utils.py` could fire before `geest/__init__.py`'s
+  own `logging.basicConfig()` call, implicitly self-configuring the root
+  logger first and making our call a silent no-op (console showed the
+  bare `WARNING:root:...` fallback format instead). `basicConfig()` now
+  passes `force=True` so our file handler always wins.
 - **Analysis-level processing required a population raster even though it's
   optional.** Leaving it unset errored with "Select a valid population
   raster before running the analysis" and aborted the whole analysis
