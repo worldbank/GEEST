@@ -60,6 +60,30 @@ class TestRasterScoreHistogram(unittest.TestCase):
 
         self.assertEqual(counts, [3, 0, 0, 0, 0])
 
+    def test_fractional_values_match_the_qml_discrete_boundaries(self):
+        """Regression: a prior scheme centred bins on each integer (e.g.
+        [2.5, 3.5) for score "3"), disagreeing with the map's own
+        right-inclusive QML boundaries (0,1],(1,2],(2,3],(3,4],(4,5] - a
+        raster of mostly 3.3-3.99 values painted entirely green on the
+        map but showed up as a yellow "3" bar on the sparkline.
+        """
+        self._make_raster([3.3, 3.5, 3.8, 3.99])
+        layer = QgsRasterLayer(self.raster_path, "test")
+
+        counts = AnalysisReport._raster_score_histogram(None, layer)
+
+        self.assertEqual(counts, [0, 0, 0, 4, 0])
+
+    def test_value_exactly_at_a_boundary_belongs_to_the_lower_class(self):
+        """QGIS's DISCRETE shader is right-inclusive: value == 3.0 belongs
+        to the (2,3] "yellow" class, not (3,4] "green"."""
+        self._make_raster([3.0])
+        layer = QgsRasterLayer(self.raster_path, "test")
+
+        counts = AnalysisReport._raster_score_histogram(None, layer)
+
+        self.assertEqual(counts, [0, 0, 1, 0, 0])
+
     def test_unreadable_layer_returns_five_zero_counts(self):
         layer = MagicMock()
         layer.source.return_value = os.path.join(self.temp_dir, "does_not_exist.tif")

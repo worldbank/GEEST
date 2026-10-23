@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 from typing import Dict, List, Optional
 
+import numpy
 from qgis.core import (
     QgsFillSymbol,
     QgsLayout,
@@ -375,18 +376,24 @@ class AnalysisReport(BaseReport):
         return True
 
     def _raster_score_histogram(self, layer: QgsRasterLayer) -> list:
-        """Count a 0-5 classified result raster's cells per integer score 1-5.
+        """Count a 0-5 scored result raster's cells per QGIS's own 5-class
+        DISCRETE colour-ramp boundaries (see resources/qml/analysis.qml):
+        (0,1], (1,2], (2,3], (3,4], (4,5] - matching the colours actually
+        painted on the map exactly, rather than an independently-invented
+        bucketing scheme (a prior version centred buckets on each integer,
+        e.g. [2.5, 3.5) for score 3, which silently disagreed with the
+        map's own right-inclusive class boundaries near every edge value).
 
-        Score 0 (masked/excluded cells) is dropped: it is typically the
-        overwhelming majority of cells outside the populated/opportunity
-        area, and including it would flatten the 1-5 distribution the
-        sparkline exists to show.
+        Exact 0 (and nodata) is dropped before bucketing: a large share of
+        cells carry a literal 0 (outside the populated/opportunity area,
+        not a genuine "very low" score), and counting it would flatten the
+        1-5 distribution the sparkline exists to show.
 
         Args:
             layer: A loaded 0-5 classified score raster.
 
         Returns:
-            list: Five counts, for scores 1, 2, 3, 4, 5 in order.
+            list: Five counts, one per QML class, in (0,1] .. (4,5] order.
         """
         from osgeo import gdal
 
@@ -397,11 +404,23 @@ class AnalysisReport(BaseReport):
         if dataset is None:
             return [0, 0, 0, 0, 0]
         band = dataset.GetRasterBand(1)
-        # Bucket i (0..5) covers [i-0.5, i+0.5) so each bucket catches
-        # exactly one integer score; bucket 0 (score 0) is dropped below.
-        histogram = band.GetHistogram(-0.5, 5.5, 6, include_out_of_range=0, approx_ok=1)
+        array = band.ReadAsArray()
+        nodata = band.GetNoDataValue()
         dataset = None
-        return histogram[1:]
+        if array is None:
+            return [0, 0, 0, 0, 0]
+
+        values = array.astype(float).ravel()
+        valid = values > 0  # drops exact 0 and any negative nodata sentinel
+        if nodata is not None:
+            valid &= ~numpy.isclose(values, nodata)
+        values = values[valid]
+
+        # right=True => bins[i-1] < value <= bins[i], matching the QML's
+        # own right-inclusive class boundaries; index 5 (value > 5) is
+        # out of range and dropped by only counting indices 0-4.
+        class_index = numpy.digitize(values, bins=[1, 2, 3, 4, 5], right=True)
+        return [int(numpy.count_nonzero(class_index == i)) for i in range(5)]
 
     def _draw_minimap_sparkline(self, layer: QgsRasterLayer, x: float, y: float, w: float, h: float, page: int):
         """Draw a 5-bar score-distribution sparkline beneath a minimap cell.
