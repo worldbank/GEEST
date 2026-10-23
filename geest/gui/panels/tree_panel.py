@@ -2644,6 +2644,8 @@ class TreePanel(QWidget):
         analysis_scale = item.attribute("analysis_scale", "national")
         s2s_pop_path = item.attribute("population_s2s_output_path", None)
         population_source = item.attribute("population_source", "raster")
+        population_data = item.attribute("population_layer_source", None)
+        population_path = str(population_data or "").split("|")[0]
 
         use_s2s = (
             analysis_scale == "regional"
@@ -2651,8 +2653,21 @@ class TreePanel(QWidget):
             and s2s_pop_path
             and os.path.exists(s2s_pop_path)
         )
+        use_population_raster = bool(population_path) and os.path.exists(population_path)
+        compute_population_score = use_s2s or use_population_raster
 
-        if use_s2s:
+        # GeoE3 x Population Score is optional - only compute it when the
+        # user has actually configured a population input (raster or S2S
+        # demographics) in the analysis weightings dialog, same as the
+        # opportunities mask below.
+        if not compute_population_score:
+            log_message(
+                "No population raster or S2S demographics configured - skipping GeoE3 x Population "
+                "Score (optional).",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
+        elif use_s2s:
             s2s_field = item.attribute("population_s2s_field", "") or DEFAULT_S2S_POPULATION_FIELD
             log_message(
                 f"Using S2S demographics for population processing: {s2s_field}",
@@ -2668,11 +2683,6 @@ class TreePanel(QWidget):
             )
             population_processor.run()
         else:
-            population_data = item.attribute("population_layer_source", None)
-            population_path = str(population_data or "").split("|")[0]
-            if not population_path or not os.path.exists(population_path):
-                self.on_processing_error("Select a valid population raster before running the analysis.")
-                return False
             population_processor = PopulationRasterProcessingTask(
                 population_raster_path=population_path,
                 working_directory=self.working_directory,
@@ -2684,24 +2694,26 @@ class TreePanel(QWidget):
             if not population_processor.run():
                 self.on_processing_error("Population raster processing failed. Check the QGIS log for details.")
                 return False
-        geoe3_processor = WEEByPopulationScoreProcessingTask(
-            study_area_gpkg_path=gpkg_path,
-            working_directory=self.working_directory,
-            force_clear=True,
-        )
-        if not geoe3_processor.run():
-            self.on_processing_error("GeoE3 by population processing failed. Check the QGIS log for details.")
-            return False
-        # Shamelessly hard coded for now, needs to move to the geoe3 processor class
-        output = os.path.join(
-            self.working_directory,
-            "geoe3_by_population_score",
-            "geoe3_by_population_score.vrt",
-        )
-        if not os.path.exists(output):
-            self.on_processing_error("GeoE3 by population processing did not create an output raster.")
-            return False
-        item.setAttribute("geoe3_by_population", output)
+
+        if compute_population_score:
+            geoe3_processor = WEEByPopulationScoreProcessingTask(
+                study_area_gpkg_path=gpkg_path,
+                working_directory=self.working_directory,
+                force_clear=True,
+            )
+            if not geoe3_processor.run():
+                self.on_processing_error("GeoE3 by population processing failed. Check the QGIS log for details.")
+                return False
+            # Shamelessly hard coded for now, needs to move to the geoe3 processor class
+            output = os.path.join(
+                self.working_directory,
+                "geoe3_by_population_score",
+                "geoe3_by_population_score.vrt",
+            )
+            if not os.path.exists(output):
+                self.on_processing_error("GeoE3 by population processing did not create an output raster.")
+                return False
+            item.setAttribute("geoe3_by_population", output)
 
         # Prepare the polygon mask data if provided
         # The mask (job opportunities / GHSL) is optional - only run the
@@ -2734,13 +2746,14 @@ class TreePanel(QWidget):
                 )
                 mask_processor.run()
 
-                mask_processor = OpportunitiesByWeeScorePopulationProcessingTask(
-                    item=item,
-                    study_area_gpkg_path=gpkg_path,
-                    working_directory=self.working_directory,
-                    force_clear=False,
-                )
-                mask_processor.run()
+                if compute_population_score:
+                    mask_processor = OpportunitiesByWeeScorePopulationProcessingTask(
+                        item=item,
+                        study_area_gpkg_path=gpkg_path,
+                        working_directory=self.working_directory,
+                        force_clear=False,
+                    )
+                    mask_processor.run()
             except Exception as e:
                 log_message(
                     f"Failed to run opportunities mask pipeline: {e}",

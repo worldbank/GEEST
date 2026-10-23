@@ -173,6 +173,12 @@ version per the policy above.
 
 ### Fixed
 
+- **Analysis-level processing required a population raster even though it's
+  optional.** Leaving it unset errored with "Select a valid population
+  raster before running the analysis" and aborted the whole analysis
+  post-processing step. The GeoE3 x Population Score is now skipped
+  (like the opportunities mask already was) when no population raster or
+  S2S demographics are configured, and everything else still runs.
 - **GHSL-filtered (unpopulated) areas were reprocessed on every single run.**
   Study area creation already skips grid generation for an area with no
   GHSL settlements, but `AreaIterator` never checked for that - every
