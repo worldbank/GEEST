@@ -23,6 +23,27 @@ version per the policy above.
 
 ### Added
 
+- Every map in the analysis report - the large main map (inset into its
+  own bottom-right corner over a translucent backing panel) and every
+  minimap (dimension/factor/indicator grids, plus the GeoE3 score/
+  GHSL-masked/by-population products) - now shows a small score-
+  distribution sparkline, read directly from that layer's own
+  `study_area_grid` column in the GeoPackage - the same values every
+  result raster was rasterised from. Plain 0-5 products use a 5-bar
+  likert chart matching `resources/qml/analysis.qml`'s DISCRETE boundaries
+  `(0,1],(1,2],...` and colours (`SCORE_LEGEND_COLORS`); the "by
+  population" bivariate product uses its own 15-bar chart matching
+  `geoe3_by_population_score.qml`'s exact-value palette
+  (`GEOE3_BY_POPULATION_COLORS`) instead, rather than being misread
+  through the wrong 5-class scale. Score 0 (masked/excluded cells) is
+  excluded from every count - it's typically the overwhelming majority of
+  cells outside the populated/opportunity area, and including it would
+  flatten the distribution the sparkline exists to show. Products on no
+  usable scale (the binary opportunities mask) are skipped rather than
+  shown with a meaningless chart. New generic `BaseReport._draw_sparkline()`
+  primitive and `AnalysisReport._grid_column_score_histogram()`/
+  `_grid_column_palette_histogram()`/`_draw_sparkline_for_column()`/
+  `_draw_main_map_sparkline()`.
 - Indicator/factor configuration dialogs' value-range|index-score mapping
   tables (the reference table shown while picking an analysis mode, e.g.
   Contextual Index Score, Street Lights, Multi/Single Buffer, Safety
