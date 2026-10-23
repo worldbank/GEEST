@@ -23,15 +23,22 @@ version per the policy above.
 
 ### Added
 
-- Each minimap in the analysis report (dimension/factor/indicator grids)
-  now shows a small 5-bar sparkline beneath it, giving the distribution of
-  that layer's scored cell values (1-5) coloured with the same
-  `SCORE_LEGEND_COLORS` ramp every result map already uses. Score 0
-  (masked/excluded cells) is excluded from the count - it's typically the
-  overwhelming majority of cells outside the populated/opportunity area,
-  and including it would flatten the 1-5 distribution the sparkline
-  exists to show. New generic `BaseReport._draw_sparkline()` primitive and
-  `AnalysisReport._raster_score_histogram()`/`_draw_minimap_sparkline()`.
+- Each minimap in the analysis report (dimension/factor/indicator grids,
+  plus the plain GeoE3 score/GHSL-masked products) now shows a small 5-bar
+  sparkline beneath it, giving the distribution of that layer's own
+  `study_area_grid` column values (1-5), read directly from the
+  GeoPackage - the same values every result raster was rasterised from -
+  coloured with the same 5-class ramp (`SCORE_LEGEND_COLORS`, matching
+  `resources/qml/analysis.qml`'s DISCRETE boundaries `(0,1],(1,2],...`)
+  every result map already uses. Score 0 (masked/excluded cells) is
+  excluded from the count - it's typically the overwhelming majority of
+  cells outside the populated/opportunity area, and including it would
+  flatten the 1-5 distribution the sparkline exists to show. Products not
+  on that plain 0-5 scale (the "by population" bivariate score, which
+  uses its own 1-15 palette, and the binary opportunities mask) are
+  skipped rather than shown with a meaningless chart. New generic
+  `BaseReport._draw_sparkline()` primitive and
+  `AnalysisReport._grid_column_score_histogram()`/`_draw_minimap_sparkline()`.
 - Indicator/factor configuration dialogs' value-range|index-score mapping
   tables (the reference table shown while picking an analysis mode, e.g.
   Contextual Index Score, Street Lights, Multi/Single Buffer, Safety

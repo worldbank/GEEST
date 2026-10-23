@@ -5,6 +5,7 @@ This module contains functionality for analysis report.
 """
 
 import json
+import os
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -86,6 +87,11 @@ class AnalysisReport(BaseReport):
         self.report_name = report_name
         self.model_path = model_path
         self.working_directory = working_directory
+        # Source of truth for _grid_column_score_histogram()'s sparklines -
+        # the same GeoPackage every result raster was rasterised FROM.
+        self.grid_gpkg_path = (
+            os.path.join(working_directory, "study_area", "study_area.gpkg") if working_directory else None
+        )
         self.temp_layers = []  # Track layers added to project for cleanup
         self.study_area_layer = None  # Will hold the study area outline layer
 
@@ -128,10 +134,8 @@ class AnalysisReport(BaseReport):
         """
         Load the study area outline layer from the GeoPackage.
         """
-        import os
-
-        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
-        if not os.path.exists(gpkg_path):
+        gpkg_path = self.grid_gpkg_path
+        if not gpkg_path or not os.path.exists(gpkg_path):
             log_message(f"Study area GeoPackage not found at {gpkg_path}")
             return
 
@@ -340,8 +344,10 @@ class AnalysisReport(BaseReport):
             description_key: Key for the page description in self.page_descriptions.
             layer_uri: Path to the raster layer file.
             current_page: The current page number.
-            minimaps: Optional list of (caption, QgsRasterLayer) tuples laid
-                out as a grid beneath the main map.
+            minimaps: Optional list of (caption, QgsRasterLayer, grid_column)
+                tuples laid out as a grid beneath the main map. grid_column
+                is the study_area_grid column backing that layer, or None
+                if it isn't on the plain 0-5 scale the sparkline shows.
 
         Returns:
             bool: True if the page was added, False otherwise.
@@ -375,61 +381,87 @@ class AnalysisReport(BaseReport):
             self._add_minimap_grid(minimaps, current_page, top=52 + main_h + 12)
         return True
 
-    def _raster_score_histogram(self, layer: QgsRasterLayer) -> list:
-        """Count a 0-5 scored result raster's cells per QGIS's own 5-class
+    @staticmethod
+    def _grid_column_name(role: str, item_id: str) -> str:
+        """Mirror JsonTreeItem.gridColumnName()'s sanitisation for report
+        code that only has the model dict (not a JsonTreeItem) to work
+        from: lower-case, space/hyphen -> underscore, 63-char GeoPackage
+        field name limit, with the dim_/fac_ role prefix workflows use.
+        """
+        raw_id = (item_id or "").lower().replace(" ", "_").replace("-", "_")
+        if role == "dimension":
+            return f"dim_{raw_id}"[:63]
+        if role == "factor":
+            return f"fac_{raw_id}"[:63]
+        return raw_id[:63]
+
+    def _grid_column_score_histogram(self, column_name: str) -> list:
+        """Count study_area_grid's own column values per QGIS's 5-class
         DISCRETE colour-ramp boundaries (see resources/qml/analysis.qml):
         (0,1], (1,2], (2,3], (3,4], (4,5] - matching the colours actually
-        painted on the map exactly, rather than an independently-invented
-        bucketing scheme (a prior version centred buckets on each integer,
-        e.g. [2.5, 3.5) for score 3, which silently disagreed with the
-        map's own right-inclusive class boundaries near every edge value).
+        painted on the map exactly.
 
-        Exact 0 (and nodata) is dropped before bucketing: a large share of
-        cells carry a literal 0 (outside the populated/opportunity area,
-        not a genuine "very low" score), and counting it would flatten the
-        1-5 distribution the sparkline exists to show.
+        Reads the GeoPackage column directly rather than re-deriving the
+        distribution from the rasterised output: a product's rasterised
+        file can use a completely different colour scheme than the plain
+        0-5 scale (e.g. the "by population" bivariate product uses a
+        1-15 palette - see geoe3_by_population_score.qml), and even for a
+        0-5 product the raster is a resampled render of the same
+        underlying grid values, not the authoritative source of them.
+        _add_minimap_grid() only calls this for columns confirmed to be
+        on the plain 0-5 scale.
+
+        Exact 0/NULL is dropped before bucketing: a large share of cells
+        carry a literal 0 (outside the populated/opportunity area, not a
+        genuine "very low" score), and counting it would flatten the 1-5
+        distribution the sparkline exists to show.
 
         Args:
-            layer: A loaded 0-5 classified score raster.
+            column_name: study_area_grid column to read.
 
         Returns:
             list: Five counts, one per QML class, in (0,1] .. (4,5] order.
         """
-        from osgeo import gdal
+        import sqlite3
+
+        from geest.core.grid_column_utils import _quote_sql_identifier
+
+        if not self.grid_gpkg_path or not os.path.exists(self.grid_gpkg_path):
+            return [0, 0, 0, 0, 0]
+        try:
+            quoted_column = _quote_sql_identifier(column_name)
+        except ValueError as error:
+            log_message(f"Refusing to read grid column for sparkline: {error}", tag="GeoE3")
+            return [0, 0, 0, 0, 0]
 
         try:
-            dataset = gdal.Open(layer.source())
-        except RuntimeError:
-            dataset = None
-        if dataset is None:
-            return [0, 0, 0, 0, 0]
-        band = dataset.GetRasterBand(1)
-        array = band.ReadAsArray()
-        nodata = band.GetNoDataValue()
-        dataset = None
-        if array is None:
+            connection = sqlite3.connect(self.grid_gpkg_path)
+            try:
+                rows = connection.execute(
+                    f"SELECT {quoted_column} FROM study_area_grid "  # nosec B608
+                    f"WHERE {quoted_column} IS NOT NULL AND {quoted_column} > 0"
+                ).fetchall()
+            finally:
+                connection.close()
+        except sqlite3.Error as error:
+            log_message(f"Could not read grid column '{column_name}' for sparkline: {error}", tag="GeoE3")
             return [0, 0, 0, 0, 0]
 
-        values = array.astype(float).ravel()
-        valid = values > 0  # drops exact 0 and any negative nodata sentinel
-        if nodata is not None:
-            valid &= ~numpy.isclose(values, nodata)
-        values = values[valid]
-
+        values = numpy.array([row[0] for row in rows], dtype=float)
         # right=True => bins[i-1] < value <= bins[i], matching the QML's
         # own right-inclusive class boundaries; index 5 (value > 5) is
         # out of range and dropped by only counting indices 0-4.
         class_index = numpy.digitize(values, bins=[1, 2, 3, 4, 5], right=True)
         return [int(numpy.count_nonzero(class_index == i)) for i in range(5)]
 
-    def _draw_minimap_sparkline(self, layer: QgsRasterLayer, x: float, y: float, w: float, h: float, page: int):
+    def _draw_minimap_sparkline(self, column_name: str, x: float, y: float, w: float, h: float, page: int):
         """Draw a 5-bar score-distribution sparkline beneath a minimap cell.
 
         Coloured with the same 5-class ramp (SCORE_LEGEND_COLORS) every
         result map in this report already uses, so the bars read as "more
         of this colour" rather than needing a separate legend.
         """
-        counts = self._raster_score_histogram(layer)
+        counts = self._grid_column_score_histogram(column_name)
         colors = [QColor(SCORE_LEGEND_COLORS[score]) for score in range(1, 6)]
         self._draw_sparkline(counts, colors, x, y, w, h, page)
 
@@ -441,14 +473,20 @@ class AnalysisReport(BaseReport):
         columns: int = 4,
         bottom: float = 280.0,
     ) -> None:
-        """Lay out (caption, layer) tuples as a captioned minimap grid, each
-        followed by a small sparkline of its score distribution (1-5,
-        excluding 0 - see _raster_score_histogram())."""
+        """Lay out (caption, layer, grid_column) tuples as a captioned
+        minimap grid. Each is followed by a small sparkline of its score
+        distribution (1-5, excluding 0 - see _grid_column_score_histogram())
+        when grid_column is set - some products (e.g. the "by population"
+        bivariate score, or the binary opportunities mask) aren't on the
+        plain 0-5 scale this sparkline shows, and pass grid_column=None to
+        skip it rather than render a meaningless chart.
+        """
         gap = 5.0
         cell_w = (180.0 - (columns - 1) * gap) / columns
-        map_and_caption_h = cell_w + 7  # square map face + caption strip
+        caption_h = cell_w + 7  # square map face + caption strip
         sparkline_h = 8.0
-        cell_h = map_and_caption_h + sparkline_h
+        has_any_sparkline = any(grid_column for _caption, _layer, grid_column in minimaps)
+        cell_h = caption_h + sparkline_h if has_any_sparkline else caption_h
         max_rows = max(1, int((bottom - top + gap) // (cell_h + gap)))
         capacity = max_rows * columns
         if len(minimaps) > capacity:
@@ -457,7 +495,7 @@ class AnalysisReport(BaseReport):
                 tag="GeoE3",
             )
             minimaps = minimaps[:capacity]
-        for index, (caption, layer) in enumerate(minimaps):
+        for index, (caption, layer, grid_column) in enumerate(minimaps):
             row, col = divmod(index, columns)
             x = 15 + col * (cell_w + gap)
             y = top + row * (cell_h + gap)
@@ -469,16 +507,17 @@ class AnalysisReport(BaseReport):
                 x=x,
                 y=y,
                 w=cell_w,
-                h=map_and_caption_h,
+                h=caption_h,
             )
-            self._draw_minimap_sparkline(
-                layer=layer,
-                x=x,
-                y=y + map_and_caption_h,
-                w=cell_w,
-                h=sparkline_h,
-                page=current_page,
-            )
+            if grid_column:
+                self._draw_minimap_sparkline(
+                    column_name=grid_column,
+                    x=x,
+                    y=y + caption_h,
+                    w=cell_w,
+                    h=sparkline_h,
+                    page=current_page,
+                )
 
     def _has_used_indicators(self, factor: dict) -> bool:
         """Check if a factor has any indicators that are not 'Do Not Use'.
@@ -526,23 +565,32 @@ class AnalysisReport(BaseReport):
             "dimension and any derived analysis products shown below."
         )
         main_uri = model.get("geoe3_score_ghsl_masked_result_file") or model.get("result_file")
+        # grid_column is None for products not on the plain 0-5 scale the
+        # sparkline shows: "by population" is a 1-15 bivariate score (see
+        # geoe3_by_population_score.qml), opportunities mask is binary, and
+        # the "x opportunities" products are a combination of two columns
+        # with no single grid column of their own.
         product_keys = [
-            ("result_file", "GeoE3 score"),
-            ("geoe3_score_ghsl_masked_result_file", "GHSL masked"),
-            ("geoe3_by_population", "By population"),
-            ("geoe3_score_by_population_ghsl_masked_result_file", "By population (GHSL)"),
-            ("opportunities_mask_result_file", "Opportunities mask"),
-            ("geoe3_by_opportunities_mask_result_file", "Score × opportunities"),
-            ("geoe3_by_population_by_opportunities_mask_result_file", "Population × opportunities"),
+            ("result_file", "GeoE3 score", "geoe3"),
+            ("geoe3_score_ghsl_masked_result_file", "GHSL masked", "geoe3_masked"),
+            ("geoe3_by_population", "By population", None),
+            ("geoe3_score_by_population_ghsl_masked_result_file", "By population (GHSL)", None),
+            ("opportunities_mask_result_file", "Opportunities mask", None),
+            ("geoe3_by_opportunities_mask_result_file", "Score × opportunities", None),
+            ("geoe3_by_population_by_opportunities_mask_result_file", "Population × opportunities", None),
         ]
         dimension_minimaps = [
-            (dimension.get("name", ""), self._load_raster(dimension.get("result_file"), dimension.get("name", "")))
+            (
+                dimension.get("name", ""),
+                self._load_raster(dimension.get("result_file"), dimension.get("name", "")),
+                self._grid_column_name("dimension", dimension.get("id", "")),
+            )
             for dimension in model.get("dimensions", [])
             if self._has_used_factors(dimension)
         ]
         product_minimaps = [
-            (label, self._load_raster(model.get(key), label))
-            for key, label in product_keys
+            (label, self._load_raster(model.get(key), label), grid_column)
+            for key, label, grid_column in product_keys
             if model.get(key) and model.get(key) != main_uri
         ]
         if self._add_map_page(
@@ -572,7 +620,11 @@ class AnalysisReport(BaseReport):
             # main map, so skip it.
             factor_minimaps = (
                 [
-                    (factor.get("name", ""), self._load_raster(factor.get("result_file"), factor.get("name", "")))
+                    (
+                        factor.get("name", ""),
+                        self._load_raster(factor.get("result_file"), factor.get("name", "")),
+                        self._grid_column_name("factor", factor.get("id", "")),
+                    )
                     for factor in used_factors
                 ]
                 if len(used_factors) > 1
@@ -605,6 +657,7 @@ class AnalysisReport(BaseReport):
                         (
                             indicator.get("indicator", ""),
                             self._load_raster(indicator.get("result_file"), indicator.get("indicator", "")),
+                            self._grid_column_name("indicator", indicator.get("id", "")),
                         )
                         for indicator in used_indicators
                     ]
