@@ -610,13 +610,15 @@ class BaseReport:
         text_format.setColor(color)
         return text_format
 
-    def _rect(self, x: float, y: float, w: float, h: float, color: QColor, page: int) -> None:
+    def _rect(self, x: float, y: float, w: float, h: float, color: QColor, page: int, opacity: float = 1.0) -> None:
         """Add a flat rectangle to the layout."""
         shape = QgsLayoutItemShape(self.layout)
         shape.setShapeType(QgsLayoutItemShape.Rectangle)
         shape.attemptMove(QgsLayoutPoint(x, y, QgsUnitTypes.LayoutUnit.LayoutMillimeters), page=page)
         shape.setFixedSize(QgsLayoutSize(w, h, QgsUnitTypes.LayoutUnit.LayoutMillimeters))
         _flat_fill(shape, color)
+        if opacity != 1.0:
+            shape.setItemOpacity(opacity)
         self.layout.addLayoutItem(shape)
 
     def _draw_sparkline(

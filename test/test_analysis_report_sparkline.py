@@ -34,6 +34,12 @@ class TestGridColumnScoreHistogram(unittest.TestCase):
         self.gpkg_path = os.path.join(self.temp_dir, "study_area.gpkg")
         self.report = MagicMock()
         self.report.grid_gpkg_path = self.gpkg_path
+        # self.report is a MagicMock, so without this the histogram methods'
+        # internal call to self._read_grid_column_values(...) would hit an
+        # auto-mocked attribute instead of the real method under test.
+        self.report._read_grid_column_values.side_effect = lambda column_name: (
+            AnalysisReport._read_grid_column_values(self.report, column_name)
+        )
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
@@ -100,6 +106,57 @@ class TestGridColumnScoreHistogram(unittest.TestCase):
         counts = AnalysisReport._grid_column_score_histogram(self.report, "geoe3; DROP TABLE study_area_grid")
 
         self.assertEqual(counts, [0, 0, 0, 0, 0])
+
+
+class TestGridColumnPaletteHistogram(unittest.TestCase):
+    """The "by population" bivariate product (1-15, PalettedRasterRenderer
+    in geoe3_by_population_score.qml) needs EXACT-value counting, not the
+    (lower, upper] range bucketing _grid_column_score_histogram() uses.
+    """
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="test_palette_histogram_")
+        self.gpkg_path = os.path.join(self.temp_dir, "study_area.gpkg")
+        self.report = MagicMock()
+        self.report.grid_gpkg_path = self.gpkg_path
+        self.report._read_grid_column_values.side_effect = lambda column_name: (
+            AnalysisReport._read_grid_column_values(self.report, column_name)
+        )
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def _make_grid(self, column_name, values):
+        driver = ogr.GetDriverByName("GPKG")
+        dataset = driver.CreateDataSource(self.gpkg_path)
+        layer = dataset.CreateLayer("study_area_grid", geom_type=ogr.wkbPolygon)
+        layer.CreateField(ogr.FieldDefn(column_name, ogr.OFTReal))
+        layer_defn = layer.GetLayerDefn()
+        for value in values:
+            feature = ogr.Feature(layer_defn)
+            if value is not None:
+                feature.SetField(column_name, value)
+            layer.CreateFeature(feature)
+        dataset = None
+
+    def test_counts_each_exact_value_separately(self):
+        self._make_grid("geoe3_by_population", [1, 1, 7, 15, 15, 15])
+
+        counts = AnalysisReport._grid_column_palette_histogram(self.report, "geoe3_by_population", 15)
+
+        expected = [0] * 15
+        expected[0] = 2  # value 1
+        expected[6] = 1  # value 7
+        expected[14] = 3  # value 15
+        self.assertEqual(counts, expected)
+
+    def test_excludes_score_zero_from_the_returned_counts(self):
+        self._make_grid("geoe3_by_population", [0, 0, 5])
+
+        counts = AnalysisReport._grid_column_palette_histogram(self.report, "geoe3_by_population", 15)
+
+        self.assertEqual(counts[4], 1)  # value 5
+        self.assertEqual(sum(counts), 1)
 
 
 class TestDrawSparkline(unittest.TestCase):
@@ -208,16 +265,17 @@ class TestAddMinimapGridSparklineEligibility(unittest.TestCase):
         layer_a = MagicMock()
         layer_b = MagicMock()
         minimaps = [
-            ("Dimension A", layer_a, "dim_a"),
-            ("By population", layer_b, None),
+            ("Dimension A", layer_a, "dim_a", "likert"),
+            ("By population", layer_b, None, None),
         ]
 
         AnalysisReport._add_minimap_grid(self.report, minimaps, current_page=1, top=50.0)
 
         self.assertEqual(self.report.make_minimap.call_count, 2)
-        self.report._draw_minimap_sparkline.assert_called_once()
-        called_kwargs = self.report._draw_minimap_sparkline.call_args.kwargs
+        self.report._draw_sparkline_for_column.assert_called_once()
+        called_kwargs = self.report._draw_sparkline_for_column.call_args.kwargs
         self.assertEqual(called_kwargs["column_name"], "dim_a")
+        self.assertEqual(called_kwargs["palette"], "likert")
 
 
 if __name__ == "__main__":

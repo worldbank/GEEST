@@ -35,6 +35,28 @@ SCORE_LEGEND_COLORS = {
     5: "#2c7bb6",
 }
 
+# GeoE3 x Population bivariate score (1-15): enablement level x relative
+# population density. Matches resources/qml/geoe3_by_population_score.qml's
+# PalettedRasterRenderer exactly - each value is an EXACT class, not a
+# range (unlike SCORE_LEGEND_COLORS's 0-5 DISCRETE scheme).
+GEOE3_BY_POPULATION_COLORS = {
+    1: "#b11419",
+    2: "#d7191c",
+    3: "#f14247",
+    4: "#d68f47",
+    5: "#fdae61",
+    6: "#ffc688",
+    7: "#e0e09f",
+    8: "#ffffb4",
+    9: "#ffffee",
+    10: "#93bd9b",
+    11: "#bce1b8",
+    12: "#dbfbd5",
+    13: "#1d5c8d",
+    14: "#2c7bb6",
+    15: "#4ab8e0",
+}
+
 # Space2Stats defaults
 DEFAULT_S2S_NTL_FIELD = "sum_viirs_ntl_2024"
 DEFAULT_S2S_POPULATION_FIELD = "sum_pop_2024"
