@@ -374,6 +374,39 @@ def add_grid_layer_to_map(
     )
 
 
+def remove_from_map(item: "JsonTreeItem", group: str = "GeoE3") -> None:
+    """Remove this item's own map layer(s) from the legend/registry.
+
+    Only removes layers living directly in this item's own group - the
+    layers "Add to map" / "Add to map (Grid)" create there (matched by the
+    same default names those functions use). The subgroup holding this
+    item's children (if it has any) is left untouched, so clearing a
+    factor or dimension doesn't disturb its already-run children's layers
+    or groups.
+    """
+    project = QgsProject.instance()
+    root = project.layerTreeRoot()
+    geoe3_group = root.findGroup(group)
+    if geoe3_group is None:
+        return
+
+    parent_group = geoe3_group
+    for path in item.getPaths()[:-1]:
+        parent_group = parent_group.findGroup(path)
+        if parent_group is None:
+            # Nothing was ever added under this item - nothing to remove.
+            return
+
+    own_layer_names = {item.data(0), f"{item.data(0)} (Grid)"}
+    for child in list(parent_group.children()):
+        if isinstance(child, QgsLayerTreeGroup):
+            continue
+        layer = child.layer()
+        if layer is not None and layer.name() in own_layer_names:
+            log_message(f"Removing layer {layer.name()} from map", tag="GeoE3", level=Qgis.Info)
+            project.removeMapLayer(layer.id())
+
+
 def validate_network_layer(layer_path: str, expected_crs: QgsCoordinateReferenceSystem) -> tuple:
     """Validate network layer for road network analysis.
 

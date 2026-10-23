@@ -178,6 +178,11 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             )
 
         log_message(f"Updated {updated_count} grid cells with index score {self.index_score}")
+        # The column-wide UPDATE above just set every row - tell
+        # _apply_grid_column_zero_fallback() (triggered later for any area
+        # with zero matching grid cells) not to issue its own "clear once"
+        # UPDATE with no WHERE clause, which would wipe every area's value.
+        self._grid_column_cleared = True
         self.progressChanged.emit(50.0)
 
         # Step 2: Rasterize from grid column

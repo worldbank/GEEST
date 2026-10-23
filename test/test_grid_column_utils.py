@@ -9,7 +9,9 @@ import unittest
 from osgeo import ogr
 
 from geest.core.grid_column_utils import (
+    populated_area_names,
     rasterize_grid_column,
+    write_aggregation_to_grid,
     write_joined_values_to_grid,
     write_percentage_scores_to_grid,
     write_spatial_join_to_grid,
@@ -619,6 +621,107 @@ class TestWritePercentageScoresToGrid(unittest.TestCase):
         scores = self._read_scores("pct_col")
         self.assertEqual(scores.get(0), 5, "cell fully inside the buffer must score the top class")
         self.assertEqual(scores.get(1), 0, "cell far from the buffer (rejected by the bbox pre-filter) must score 0")
+
+
+class TestWriteAggregationToGrid(unittest.TestCase):
+    """Regression test: an aggregated column must be visible to a FRESH connection.
+
+    write_aggregation_to_grid() used to close its dataset with plain
+    `ds = None` - no WAL checkpoint/FlushCache beforehand, unlike every
+    other grid-write function in this module. Under WAL mode, the UPDATE
+    itself commits fine, but a later reader opening its own connection
+    (QGIS reopening the project, this test's _read_grid_values helper, a
+    real run's downstream rasterization step) can still see the pre-update
+    NULL values if the WAL was never merged into the main .gpkg file.
+    Reading back through the SAME ogr.Dataset that did the write would not
+    catch this - it has to be a separate connection, like a real caller.
+    """
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="test_grid_aggregation_")
+        self.main_gpkg = os.path.join(self.temp_dir, "study_area.gpkg")
+
+        driver = ogr.GetDriverByName("GPKG")
+        dataset = driver.CreateDataSource(self.main_gpkg)
+        layer = dataset.CreateLayer("study_area_grid", geom_type=ogr.wkbPolygon)
+        layer.CreateField(ogr.FieldDefn("indicator_a", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("indicator_b", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("fac_example", ogr.OFTReal))
+
+        layer_defn = layer.GetLayerDefn()
+        for value_a, value_b in [(2.0, 4.0), (3.0, None), (None, None)]:
+            feature = ogr.Feature(layer_defn)
+            if value_a is not None:
+                feature.SetField("indicator_a", value_a)
+            if value_b is not None:
+                feature.SetField("indicator_b", value_b)
+            layer.CreateFeature(feature)
+        dataset = None
+
+    def tearDown(self):
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
+    def _read_grid_values(self, column_name):
+        dataset = ogr.Open(self.main_gpkg, 0)
+        layer = dataset.GetLayerByName("study_area_grid")
+        values = [feature.GetField(column_name) for feature in layer]
+        dataset = None
+        return values
+
+    def test_aggregated_column_is_visible_from_a_fresh_connection(self):
+        result = write_aggregation_to_grid(
+            gpkg_path=self.main_gpkg,
+            target_column="fac_example",
+            source_columns_weights={"indicator_a": 0.5, "indicator_b": 0.5},
+        )
+
+        self.assertEqual(result, 0)
+        values = self._read_grid_values("fac_example")
+        self.assertEqual(len(values), 3)
+        self.assertTrue(all(v is not None for v in values), f"expected no NULLs, got {values}")
+        self.assertAlmostEqual(values[0], 0.5 * 2.0 + 0.5 * 4.0)
+        self.assertAlmostEqual(values[1], 0.5 * 3.0 + 0.5 * 0.0)
+        self.assertAlmostEqual(values[2], 0.0)
+
+
+class TestPopulatedAreaNames(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="test_populated_area_names_")
+        self.gpkg_path = os.path.join(self.temp_dir, "study_area.gpkg")
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def _make_grid(self, rows):
+        """rows: list of area_name values (None allowed) for one cell each."""
+        driver = ogr.GetDriverByName("GPKG")
+        dataset = driver.CreateDataSource(self.gpkg_path)
+        layer = dataset.CreateLayer("study_area_grid", geom_type=ogr.wkbPolygon)
+        layer.CreateField(ogr.FieldDefn("area_name", ogr.OFTString))
+        layer_defn = layer.GetLayerDefn()
+        for area_name in rows:
+            feature = ogr.Feature(layer_defn)
+            if area_name is not None:
+                feature.SetField("area_name", area_name)
+            layer.CreateFeature(feature)
+        dataset = None
+
+    def test_returns_only_areas_with_cells(self):
+        self._make_grid(["area_a", "area_a", "area_b"])
+
+        self.assertEqual(populated_area_names(self.gpkg_path), {"area_a", "area_b"})
+
+    def test_returns_none_when_area_name_is_entirely_null(self):
+        """A single, un-partitioned study area - callers must not filter."""
+        self._make_grid([None, None, None])
+
+        self.assertIsNone(populated_area_names(self.gpkg_path))
+
+    def test_returns_none_when_table_is_missing_entirely(self):
+        ogr.GetDriverByName("GPKG").CreateDataSource(self.gpkg_path)
+
+        self.assertIsNone(populated_area_names(self.gpkg_path))
 
 
 if __name__ == "__main__":

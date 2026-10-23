@@ -8,9 +8,11 @@ The module supports a grid-first architecture where workflow results are written
 directly to study_area_grid columns, then optionally rasterized using gdal_rasterize.
 """
 
+import functools
 import json
 import os
 import re
+import threading
 import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -19,9 +21,42 @@ from qgis.core import Qgis, QgsFeedback, QgsVectorLayer
 
 from geest.utilities import log_message
 
+log_message(
+    "DIAG_AGG: grid_column_utils loaded (explicit-transaction build - every grid write "
+    "now runs inside StartTransaction()/CommitTransaction(), checked and raised on "
+    "failure, instead of relying on an unchecked checkpoint+close to persist it)",
+    tag="GeoE3",
+    level=Qgis.Info,
+)
+
 SQLITE_WRITE_BUSY_TIMEOUT_MS = 10000
 SQLITE_WRITE_MAX_RETRIES = 3
 SQLITE_WRITE_RETRY_DELAY_SECONDS = 0.2
+
+# Multiple indicator/factor/dimension workflows can run truly concurrently
+# (the "concurrent_tasks" setting), each opening its own independent
+# ogr.Open(gpkg_path, 1) connection to the SAME study_area.gpkg. Reproduced
+# with test_grid_column_concurrent_writes.py: concurrent writers to
+# DIFFERENT columns of the same table reliably fail/lose data even though
+# StartTransaction()/CommitTransaction() report success - SQLite's own
+# locking does not fully protect against this across independent GDAL/OGR
+# dataset handles in the same process. Funnelling every grid write through
+# one process-wide lock eliminates true concurrent SQLite access entirely;
+# the per-call SQL itself is fast, so this does not meaningfully serialize
+# a whole indicator/factor/dimension run - the slow, genuinely
+# parallelizable work (feature loading, raster processing) is unaffected.
+_GRID_WRITE_LOCK = threading.Lock()
+
+
+def _serialize_grid_writes(func: Callable) -> Callable:
+    """Decorator: run a study_area_grid write function under _GRID_WRITE_LOCK."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        with _GRID_WRITE_LOCK:
+            return func(*args, **kwargs)
+
+    return wrapper
 
 
 def _open_gpkg_for_write(gpkg_path: str):
@@ -84,6 +119,41 @@ def grid_cell_count(gpkg_path: str) -> int:
         return -1
 
 
+def populated_area_names(gpkg_path: str) -> Optional[set]:
+    """Return the set of area_name values with at least one study_area_grid
+    cell, or None if area-level partitioning isn't used on this grid at all.
+
+    A single, un-partitioned study area legitimately leaves every row's
+    area_name NULL - that must never be read as "zero areas are populated"
+    (same ambiguity rasterize_grid_column() already guards against via its
+    own area_partitioning_in_use check).
+
+    Used by AreaIterator to skip areas with no grid cells (e.g. GHSL-filtered
+    or genuinely too-small-for-one-cell slivers) before any per-area
+    workflow pipeline runs on them, rather than letting every indicator
+    rediscover and skip the same empty area on every single run.
+    """
+    import sqlite3
+
+    try:
+        connection = sqlite3.connect(gpkg_path)
+        try:
+            partitioned = connection.execute(
+                "SELECT COUNT(*) FROM study_area_grid WHERE area_name IS NOT NULL"
+            ).fetchone()[0]
+            if partitioned == 0:
+                return None
+            rows = connection.execute(
+                "SELECT DISTINCT area_name FROM study_area_grid WHERE area_name IS NOT NULL"
+            ).fetchall()
+            return {row[0] for row in rows}
+        finally:
+            connection.close()
+    except sqlite3.Error as error:
+        log_message(f"Could not determine populated area names: {error}", level=Qgis.Warning)
+        return None
+
+
 def _checkpoint_wal(ds) -> None:
     """Force a WAL checkpoint on a GeoPackage dataset before closing.
 
@@ -99,6 +169,25 @@ def _checkpoint_wal(ds) -> None:
     from geest.core.gpkg_doctor import checkpoint_dataset
 
     checkpoint_dataset(ds)
+
+
+def _commit_or_raise(ds, context: str) -> None:
+    """Commit ds's active transaction, raising loudly if the commit itself fails.
+
+    _checkpoint_wal()/FlushCache() are best-effort and swallow errors on the
+    assumption that GDALClose() on dataset destruction will still flush the
+    write - but GDALClose() failing is a real, observed failure mode in this
+    codebase (surfaces as an ignored "Error occurred in GDALClose()"
+    exception during garbage collection, invisible to any log). An explicit
+    StartTransaction()/CommitTransaction() pair is the one part of this
+    sequence that reports failure synchronously, so every write in this
+    module must go through one: if CommitTransaction() doesn't return
+    OGRERR_NONE, the write is genuinely lost and callers must be told, not
+    have it silently absorbed into a "success" return code.
+    """
+    err = ds.CommitTransaction()
+    if err != ogr.OGRERR_NONE:
+        raise RuntimeError(f"{context}: CommitTransaction failed (OGRERR {err}) - write was not persisted")
 
 
 def _ensure_column_exists(gpkg_path: str, column_name: str) -> bool:
@@ -354,6 +443,7 @@ def add_model_columns_to_grid(gpkg_path: str, model_path: str) -> bool:
         return False
 
 
+@_serialize_grid_writes
 def write_raster_values_to_grid(
     gpkg_path: str,
     raster_path: str,
@@ -463,25 +553,32 @@ def write_raster_values_to_grid(
         batch_size = 500
         fids = list(fid_values.keys())
 
-        for batch_start in range(0, len(fids), batch_size):
-            batch_fids = fids[batch_start : batch_start + batch_size]
+        ds.StartTransaction()
+        try:
+            for batch_start in range(0, len(fids), batch_size):
+                batch_fids = fids[batch_start : batch_start + batch_size]
 
-            # Build CASE statement for this batch
-            case_parts = []
-            for fid in batch_fids:
-                value = fid_values[fid]
-                case_parts.append(f"WHEN fid = {fid} THEN {value}")
+                # Build CASE statement for this batch
+                case_parts = []
+                for fid in batch_fids:
+                    value = fid_values[fid]
+                    case_parts.append(f"WHEN fid = {fid} THEN {value}")
 
-            if case_parts:
-                fid_list = ",".join(str(f) for f in batch_fids)
-                sql = (
-                    f"UPDATE study_area_grid "  # nosec B608
-                    f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
-                    f"WHERE fid IN ({fid_list})"
-                )
-                _execute_sql_with_retry(ds, sql)
-                updated_count += len(batch_fids)
-
+                if case_parts:
+                    fid_list = ",".join(str(f) for f in batch_fids)
+                    sql = (
+                        f"UPDATE study_area_grid "  # nosec B608
+                        f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
+                        f"WHERE fid IN ({fid_list})"
+                    )
+                    _execute_sql_with_retry(ds, sql)
+                    updated_count += len(batch_fids)
+        except Exception:
+            ds.RollbackTransaction()
+            raise
+        _commit_or_raise(ds, "write_raster_values_to_grid")
+        _checkpoint_wal(ds)
+        ds.FlushCache()
         ds = None
         raster_ds = None
 
@@ -593,6 +690,7 @@ def get_grid_column_values(gpkg_path: str, column_name: str, area_name: Optional
         return []
 
 
+@_serialize_grid_writes
 def reclassify_grid_column_with_table(
     gpkg_path: str,
     column_name: str,
@@ -715,6 +813,7 @@ def _get_grid_layer_and_field_index(
     return layer, field_idx
 
 
+@_serialize_grid_writes
 def write_joined_values_to_grid(
     gpkg_path: str,
     column_name: str,
@@ -837,7 +936,6 @@ def write_joined_values_to_grid(
             clear_sql = f"UPDATE study_area_grid SET {target_col_sql} = NULL"  # nosec B608
             if area_name:
                 clear_sql += f" WHERE area_name = {_quote_sql_literal(area_name)}"
-            _execute_sql_with_retry(ds, clear_sql, dialect="SQLite")  # nosec B608
 
             update_sql = (
                 f"UPDATE study_area_grid AS g "  # nosec B608
@@ -852,7 +950,14 @@ def write_joined_values_to_grid(
                 f"WHERE s.{source_key_sql} = g.{target_key_sql}"
                 f") {area_predicate}"
             )
-            _execute_sql_with_retry(ds, update_sql, dialect="SQLite")  # nosec B608
+            ds.StartTransaction()
+            try:
+                _execute_sql_with_retry(ds, clear_sql, dialect="SQLite")  # nosec B608
+                _execute_sql_with_retry(ds, update_sql, dialect="SQLite")  # nosec B608
+            except Exception:
+                ds.RollbackTransaction()
+                raise
+            _commit_or_raise(ds, "write_joined_values_to_grid")
 
             count_sql = (
                 f"SELECT COUNT(*) AS matched_count "  # nosec B608
@@ -870,6 +975,8 @@ def write_joined_values_to_grid(
                 ds.ReleaseResultSet(count_result)
         finally:
             _execute_sql_with_retry(ds, "DETACH DATABASE src", dialect="SQLite")
+            _checkpoint_wal(ds)
+            ds.FlushCache()
             ds = None
 
         log_message(
@@ -883,6 +990,7 @@ def write_joined_values_to_grid(
         return -1
 
 
+@_serialize_grid_writes
 def write_uniform_value_to_grid(
     gpkg_path: str,
     column_name: str,
@@ -928,7 +1036,15 @@ def write_uniform_value_to_grid(
         # Simple SQL UPDATE - no area_name filter, update ALL cells
         sql = f'UPDATE study_area_grid SET "{sanitized_column}" = {value}'  # nosec B608
         log_message(f"Executing: {sql}")
-        _execute_sql_with_retry(ds, sql)  # nosec B608
+        ds.StartTransaction()
+        try:
+            _execute_sql_with_retry(ds, sql)  # nosec B608
+        except Exception:
+            ds.RollbackTransaction()
+            raise
+        _commit_or_raise(ds, "write_uniform_value_to_grid")
+        _checkpoint_wal(ds)
+        ds.FlushCache()
         ds = None
 
         return 0
@@ -938,6 +1054,7 @@ def write_uniform_value_to_grid(
         return -1
 
 
+@_serialize_grid_writes
 def clear_grid_column(gpkg_path: str, column_name: str) -> bool:
     """Set all values in a grid column to NULL.
 
@@ -967,7 +1084,15 @@ def clear_grid_column(gpkg_path: str, column_name: str) -> bool:
 
         sql = f'UPDATE study_area_grid SET "{sanitized_column}" = NULL'  # nosec B608
         log_message(f"Clearing column: {sql}")
-        _execute_sql_with_retry(ds, sql)  # nosec B608
+        ds.StartTransaction()
+        try:
+            _execute_sql_with_retry(ds, sql)  # nosec B608
+        except Exception:
+            ds.RollbackTransaction()
+            raise
+        _commit_or_raise(ds, "clear_grid_column")
+        _checkpoint_wal(ds)
+        ds.FlushCache()
         ds = None
         return True
 
@@ -976,6 +1101,7 @@ def clear_grid_column(gpkg_path: str, column_name: str) -> bool:
         return False
 
 
+@_serialize_grid_writes
 def fill_grid_column_zero_for_area(
     gpkg_path: str,
     column_name: str,
@@ -1012,7 +1138,15 @@ def fill_grid_column_zero_for_area(
             f'UPDATE study_area_grid SET "{sanitized_column}" = 0 '  # nosec B608
             f"WHERE area_name = '{area_name}' AND \"{sanitized_column}\" IS NULL"
         )
-        _execute_sql_with_retry(ds, sql)
+        ds.StartTransaction()
+        try:
+            _execute_sql_with_retry(ds, sql)
+        except Exception:
+            ds.RollbackTransaction()
+            raise
+        _commit_or_raise(ds, "fill_grid_column_zero_for_area")
+        _checkpoint_wal(ds)
+        ds.FlushCache()
         ds = None
         log_message(
             f"Set score 0 for NULL cells in column {sanitized_column} for area {area_name}",
@@ -1027,6 +1161,7 @@ def fill_grid_column_zero_for_area(
         return False
 
 
+@_serialize_grid_writes
 def count_features_per_grid_cell(
     gpkg_path: str,
     column_name: str,
@@ -1106,30 +1241,37 @@ def count_features_per_grid_cell(
         batch_size = 500
         fids = list(grid_feature_counts.keys())
 
-        for batch_start in range(0, len(fids), batch_size):
-            batch_fids = fids[batch_start : batch_start + batch_size]
+        ds.StartTransaction()
+        try:
+            for batch_start in range(0, len(fids), batch_size):
+                batch_fids = fids[batch_start : batch_start + batch_size]
 
-            # Build CASE statement for this batch
-            case_parts = []
-            for fid in batch_fids:
-                count = grid_feature_counts[fid]
-                score = 3 if count == 1 else 5
-                case_parts.append(f"WHEN fid = {fid} THEN {score}")
+                # Build CASE statement for this batch
+                case_parts = []
+                for fid in batch_fids:
+                    count = grid_feature_counts[fid]
+                    score = 3 if count == 1 else 5
+                    case_parts.append(f"WHEN fid = {fid} THEN {score}")
 
-            if case_parts:
-                fid_list = ",".join(str(f) for f in batch_fids)
-                sql = (
-                    f"UPDATE study_area_grid "  # nosec B608
-                    f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
-                    f"WHERE fid IN ({fid_list})"
-                )
-                _execute_sql_with_retry(ds, sql)
-                updated_count += len(batch_fids)
+                if case_parts:
+                    fid_list = ",".join(str(f) for f in batch_fids)
+                    sql = (
+                        f"UPDATE study_area_grid "  # nosec B608
+                        f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
+                        f"WHERE fid IN ({fid_list})"
+                    )
+                    _execute_sql_with_retry(ds, sql)
+                    updated_count += len(batch_fids)
 
-            if feedback:
-                progress = 50 + (batch_start / len(fids)) * 50
-                feedback.setProgress(progress)
-
+                if feedback:
+                    progress = 50 + (batch_start / len(fids)) * 50
+                    feedback.setProgress(progress)
+        except Exception:
+            ds.RollbackTransaction()
+            raise
+        _commit_or_raise(ds, "count_features_per_grid_cell")
+        _checkpoint_wal(ds)
+        ds.FlushCache()
         ds = None
         log_message(f"Updated {updated_count} grid cells with feature counts")
 
@@ -1154,6 +1296,7 @@ def count_features_per_grid_cell(
         return -1
 
 
+@_serialize_grid_writes
 def write_spatial_join_to_grid(
     gpkg_path: str,
     column_name: str,
@@ -1332,18 +1475,25 @@ def write_spatial_join_to_grid(
         batch_size = 500
         fids = list(grid_scores.keys())
 
-        for batch_start in range(0, len(fids), batch_size):
-            batch_fids = fids[batch_start : batch_start + batch_size]
-            case_parts = [f"WHEN fid = {fid} THEN {grid_scores[fid]}" for fid in batch_fids]
-            fid_list = ",".join(str(f) for f in batch_fids)
-            sql = (
-                f"UPDATE study_area_grid "  # nosec B608
-                f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
-                f"WHERE fid IN ({fid_list})"
-            )
-            _execute_sql_with_retry(ds, sql)
-            updated_count += len(batch_fids)
-
+        ds.StartTransaction()
+        try:
+            for batch_start in range(0, len(fids), batch_size):
+                batch_fids = fids[batch_start : batch_start + batch_size]
+                case_parts = [f"WHEN fid = {fid} THEN {grid_scores[fid]}" for fid in batch_fids]
+                fid_list = ",".join(str(f) for f in batch_fids)
+                sql = (
+                    f"UPDATE study_area_grid "  # nosec B608
+                    f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
+                    f"WHERE fid IN ({fid_list})"
+                )
+                _execute_sql_with_retry(ds, sql)
+                updated_count += len(batch_fids)
+        except Exception:
+            ds.RollbackTransaction()
+            raise
+        _commit_or_raise(ds, "write_spatial_join_to_grid")
+        _checkpoint_wal(ds)
+        ds.FlushCache()
         ds = None
 
         log_message(f"Updated {updated_count} grid cells via spatial join for column {sanitized_column}")
@@ -1354,6 +1504,7 @@ def write_spatial_join_to_grid(
         return -1
 
 
+@_serialize_grid_writes
 def write_aggregation_to_grid(
     gpkg_path: str,
     target_column: str,
@@ -1439,7 +1590,15 @@ def write_aggregation_to_grid(
         # Build and execute SQL UPDATE
         sql = f'UPDATE study_area_grid SET "{sanitized_target}" = ({expression})'  # nosec B608
         log_message(f"Executing aggregation SQL: {sql[:200]}...")
-        _execute_sql_with_retry(ds, sql)  # nosec B608
+        ds.StartTransaction()
+        try:
+            _execute_sql_with_retry(ds, sql)  # nosec B608
+        except Exception:
+            ds.RollbackTransaction()
+            raise
+        _commit_or_raise(ds, "write_aggregation_to_grid")
+        _checkpoint_wal(ds)
+        ds.FlushCache()
         ds = None
 
         log_message(f"Aggregated {len(source_columns_weights)} columns into {sanitized_target}")
@@ -1530,6 +1689,17 @@ def rasterize_grid_column(
                     ds = None
                     return False
                 layer.SetAttributeFilter(None)
+                # area_name isn't used on this grid at all - the WHERE clause
+                # gdal.Rasterize() actually burns with must be dropped too,
+                # not just the local filter above (used only for the extent
+                # calculation below). Leaving it set to "area_name = '...'"
+                # here matched zero rows in the real burn as well, silently
+                # producing an all-nodata raster - a real, previously
+                # undetected bug: the grid column was correct, but every
+                # single-area/un-partitioned project's rasterized output
+                # (and therefore every downstream masked/combined VRT) was
+                # empty.
+                where_clause = None
 
         # Get extent if not provided
         if extent is None:
@@ -1596,6 +1766,7 @@ def rasterize_grid_column(
         return False
 
 
+@_serialize_grid_writes
 def write_buffer_values_to_grid(
     gpkg_path: str,
     column_name: str,
@@ -1765,29 +1936,36 @@ def write_buffer_values_to_grid(
         batch_size = 500
         fids = list(grid_scores.keys())
 
-        for batch_start in range(0, len(fids), batch_size):
-            batch_fids = fids[batch_start : batch_start + batch_size]
+        ds.StartTransaction()
+        try:
+            for batch_start in range(0, len(fids), batch_size):
+                batch_fids = fids[batch_start : batch_start + batch_size]
 
-            # Build CASE statement for this batch
-            case_parts = []
-            for fid in batch_fids:
-                score = grid_scores[fid]
-                case_parts.append(f"WHEN fid = {fid} THEN {score}")
+                # Build CASE statement for this batch
+                case_parts = []
+                for fid in batch_fids:
+                    score = grid_scores[fid]
+                    case_parts.append(f"WHEN fid = {fid} THEN {score}")
 
-            if case_parts:
-                fid_list = ",".join(str(f) for f in batch_fids)
-                sql = (
-                    f"UPDATE study_area_grid "  # nosec B608
-                    f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
-                    f"WHERE fid IN ({fid_list})"
-                )
-                _execute_sql_with_retry(ds, sql)
-                updated_count += len(batch_fids)
+                if case_parts:
+                    fid_list = ",".join(str(f) for f in batch_fids)
+                    sql = (
+                        f"UPDATE study_area_grid "  # nosec B608
+                        f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
+                        f"WHERE fid IN ({fid_list})"
+                    )
+                    _execute_sql_with_retry(ds, sql)
+                    updated_count += len(batch_fids)
 
-            if feedback:
-                progress = 50 + (batch_start / max(len(fids), 1)) * 50
-                feedback.setProgress(progress)
-
+                if feedback:
+                    progress = 50 + (batch_start / max(len(fids), 1)) * 50
+                    feedback.setProgress(progress)
+        except Exception:
+            ds.RollbackTransaction()
+            raise
+        _commit_or_raise(ds, "write_buffer_values_to_grid")
+        _checkpoint_wal(ds)
+        ds.FlushCache()
         ds = None
         log_message(f"Updated {updated_count} grid cells with buffer scores")
 
@@ -1801,7 +1979,15 @@ def write_buffer_values_to_grid(
                 f'SET "{sanitized_column}" = 0 '
                 f'WHERE "{sanitized_column}" IS NULL'
             )
-            _execute_sql_with_retry(ds, sql)
+            ds.StartTransaction()
+            try:
+                _execute_sql_with_retry(ds, sql)
+            except Exception:
+                ds.RollbackTransaction()
+                raise
+            _commit_or_raise(ds, "write_buffer_values_to_grid (zero-fill)")
+            _checkpoint_wal(ds)
+            ds.FlushCache()
             ds = None
             log_message(f"Set score 0 for cells outside all buffers in column {sanitized_column}")
 
@@ -1812,6 +1998,7 @@ def write_buffer_values_to_grid(
         return -1
 
 
+@_serialize_grid_writes
 def write_percentage_scores_to_grid(
     gpkg_path: str,
     column_name: str,
@@ -1961,28 +2148,35 @@ def write_percentage_scores_to_grid(
         batch_size = 500
         fids = list(grid_scores.keys())
 
-        for batch_start in range(0, len(fids), batch_size):
-            batch_fids = fids[batch_start : batch_start + batch_size]
+        ds.StartTransaction()
+        try:
+            for batch_start in range(0, len(fids), batch_size):
+                batch_fids = fids[batch_start : batch_start + batch_size]
 
-            case_parts = []
-            for fid in batch_fids:
-                score = grid_scores[fid]
-                case_parts.append(f"WHEN fid = {fid} THEN {score}")
+                case_parts = []
+                for fid in batch_fids:
+                    score = grid_scores[fid]
+                    case_parts.append(f"WHEN fid = {fid} THEN {score}")
 
-            if case_parts:
-                fid_list = ",".join(str(f) for f in batch_fids)
-                sql = (
-                    f"UPDATE study_area_grid "  # nosec B608
-                    f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
-                    f"WHERE fid IN ({fid_list})"
-                )
-                _execute_sql_with_retry(ds, sql)
-                updated_count += len(batch_fids)
+                if case_parts:
+                    fid_list = ",".join(str(f) for f in batch_fids)
+                    sql = (
+                        f"UPDATE study_area_grid "  # nosec B608
+                        f'SET "{sanitized_column}" = CASE {" ".join(case_parts)} END '
+                        f"WHERE fid IN ({fid_list})"
+                    )
+                    _execute_sql_with_retry(ds, sql)
+                    updated_count += len(batch_fids)
 
-            if feedback:
-                progress = 80 + (batch_start / max(len(fids), 1)) * 20
-                feedback.setProgress(progress)
-
+                if feedback:
+                    progress = 80 + (batch_start / max(len(fids), 1)) * 20
+                    feedback.setProgress(progress)
+        except Exception:
+            ds.RollbackTransaction()
+            raise
+        _commit_or_raise(ds, "write_percentage_scores_to_grid")
+        _checkpoint_wal(ds)
+        ds.FlushCache()
         ds = None
         log_message(f"Updated {updated_count} grid cells with percentage-based scores")
 
@@ -1993,7 +2187,15 @@ def write_percentage_scores_to_grid(
                 f'SET "{sanitized_column}" = 0 '
                 f'WHERE "{sanitized_column}" IS NULL'
             )
-            _execute_sql_with_retry(ds, sql)
+            ds.StartTransaction()
+            try:
+                _execute_sql_with_retry(ds, sql)
+            except Exception:
+                ds.RollbackTransaction()
+                raise
+            _commit_or_raise(ds, "write_percentage_scores_to_grid (zero-fill)")
+            _checkpoint_wal(ds)
+            ds.FlushCache()
             ds = None
             log_message(f"Set score 0 for cells outside all buffers in column {sanitized_column}")
 

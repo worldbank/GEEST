@@ -79,4 +79,14 @@ class FixedValueDataSourceWidget(BaseDataSourceWidget):
         """
         # Collect data for the raster layerfactorlayer_data_weighting
         value = self.spin_box.value()
+        previous_value = self.attributes.get("index_score", 0)
         self.attributes["index_score"] = value
+        if value != previous_value:
+            # This indicator is often hidden behind its single-child factor
+            # row and can't be cleared directly from the tree - without
+            # this, its "Completed successfully" status/result_file is left
+            # untouched, so queue_workflow_task()'s run_only_incomplete skip
+            # (a plain Run, no Shift) silently keeps using the OLD score's
+            # grid value instead of picking up this edit.
+            self.attributes["result"] = "Not Run"
+            self.attributes["result_file"] = ""

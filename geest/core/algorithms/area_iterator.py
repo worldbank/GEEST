@@ -9,6 +9,7 @@ from typing import Iterator, Tuple
 
 from qgis.core import Qgis, QgsFeatureRequest, QgsGeometry, QgsVectorLayer
 
+from geest.core.grid_column_utils import populated_area_names
 from geest.utilities import log_message
 
 
@@ -99,8 +100,24 @@ class AreaIterator:
             )
             raise ValueError("Failed to load 'study_area_bboxes' layer from the GeoPackage.")
 
+        # Areas with zero study_area_grid cells (GHSL-filtered at study area
+        # creation time, or a genuine sliver too small for one cell) have
+        # nothing for any workflow to process - every indicator used to
+        # rediscover this independently, on every single run, after running
+        # its full per-area pipeline (raster subset, mask, neutral fallback,
+        # rasterize attempt) only to find there was nothing to write.
+        # Skipping them here, once, means they're never iterated at all.
+        self._populated_area_names = populated_area_names(gpkg_path)
+
         # Get the total number of polygon features for progress calculation
-        self.total_features: int = self.polygon_layer.featureCount()
+        # (filtered to populated areas only, so progress reaches 100% against
+        # the areas actually yielded, not the raw unfiltered feature count).
+        if self._populated_area_names is None:
+            self.total_features: int = self.polygon_layer.featureCount()
+        else:
+            self.total_features = sum(
+                1 for feature in self.polygon_layer.getFeatures() if feature["area_name"] in self._populated_area_names
+            )
 
     def __enter__(self):
         """
@@ -190,7 +207,8 @@ class AreaIterator:
             feature_areas.sort(key=lambda x: x[1])
 
             # Now iterate in sorted order, fetching features one at a time
-            for index, (fid, _area) in enumerate(feature_areas):
+            yielded_count = 0
+            for fid, _area in feature_areas:
                 # Fetch the polygon feature by ID
                 request = QgsFeatureRequest().setFilterFid(fid)
                 polygon_feature = next(self.polygon_layer.getFeatures(request), None)
@@ -200,6 +218,15 @@ class AreaIterator:
                 # Get the area_name from the polygon feature for matching
                 # This is more reliable than FID matching
                 area_name = polygon_feature["area_name"]
+
+                if self._populated_area_names is not None and area_name not in self._populated_area_names:
+                    log_message(
+                        f"Skipping area '{area_name}' - no study_area_grid cells (GHSL-filtered or a "
+                        "sliver too small for one cell); nothing for any workflow to process here.",
+                        tag="GeoE3",
+                        level=Qgis.Info,
+                    )
+                    continue
 
                 # Query clip_polygon and bbox by area_name instead of FID
                 # This ensures correct matching even when feature IDs don't align
@@ -211,8 +238,9 @@ class AreaIterator:
 
                 # Require bbox_feature but allow clip_feature to be missing
                 if bbox_feature:
+                    yielded_count += 1
                     # Calculate the progress as the percentage of features processed
-                    progress_percent: float = ((index + 1) / self.total_features) * 100
+                    progress_percent: float = (yielded_count / self.total_features) * 100
 
                     # Use clip_feature geometry if available, otherwise fall back to polygon geometry
                     clip_geom = clip_feature.geometry() if clip_feature else polygon_feature.geometry()

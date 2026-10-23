@@ -423,11 +423,70 @@ class TreePanel(QWidget):
         self.switch_to_next_tab.emit()
 
     def clear_item(self):
-        """Clear the outputs for a single item."""
+        """Clear the outputs for a single item (non-recursive).
+
+        Besides resetting the item's own status/result attributes, this
+        also removes its on-disk outputs (masked rasters etc.), blanks its
+        own study_area_grid column, and removes its own map layer(s) from
+        the legend/registry. Children are left completely untouched -
+        their own results, grid columns, rasters, and layers/groups stay
+        exactly as they were - matching "clear this item, then re-run it
+        trusting its already-complete children".
+
+        A factor with exactly one child indicator is hidden from the tree
+        view entirely - JsonTreeModel.data() promotes that indicator's row
+        to display in the factor's place (labeled with the factor's name),
+        so the one row the user sees and clicks really represents TWO tree
+        items sharing a single visible row. Clearing "that row" must clear
+        both, or the factor's own column/rasters/layer silently survive
+        untouched while the user believes the whole thing was cleared.
+        """
         index = self.treeView.currentIndex()
         item = index.internalPointer()
-        item.clear(recursive=False)
+
+        self._clear_single_item_outputs(item)
+
+        if item.role == "indicator":
+            parent = item.parentItem
+            if parent and parent.role == "factor" and not parent.is_visible():
+                self._clear_single_item_outputs(parent)
+
         self.save_json_to_working_directory()
+
+    def _clear_single_item_outputs(self, item):
+        """Clear one item's own outputs/attributes - see clear_item()."""
+        from geest.core.grid_column_utils import clear_grid_column
+        from geest.core.utilities import remove_from_map
+
+        # Remove only the files directly inside this item's own workflow
+        # directory - never recurse into subdirectories, which belong to
+        # this item's children (e.g. a factor's indicators).
+        if self.working_directory:
+            item_directory = os.path.join(self.working_directory, *item.getPaths())
+            if os.path.isdir(item_directory):
+                for filename in os.listdir(item_directory):
+                    file_path = os.path.join(item_directory, filename)
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        try:
+                            os.unlink(file_path)
+                        except OSError as error:
+                            log_message(
+                                f"Failed to delete {file_path}: {error}",
+                                tag="GeoE3",
+                                level=Qgis.Warning,
+                            )
+
+        # Blank this item's own study_area_grid column (not its children's).
+        if self.working_directory:
+            gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+            if os.path.exists(gpkg_path):
+                clear_grid_column(gpkg_path, item.gridColumnName())
+
+        # Remove this item's own layer(s) from the legend/registry, keeping
+        # the group that holds its children's layers (if any) intact.
+        remove_from_map(item)
+
+        item.clear(recursive=False)
 
     def clear_workflows(self):
         """
@@ -2585,6 +2644,8 @@ class TreePanel(QWidget):
         analysis_scale = item.attribute("analysis_scale", "national")
         s2s_pop_path = item.attribute("population_s2s_output_path", None)
         population_source = item.attribute("population_source", "raster")
+        population_data = item.attribute("population_layer_source", None)
+        population_path = str(population_data or "").split("|")[0]
 
         use_s2s = (
             analysis_scale == "regional"
@@ -2592,8 +2653,21 @@ class TreePanel(QWidget):
             and s2s_pop_path
             and os.path.exists(s2s_pop_path)
         )
+        use_population_raster = bool(population_path) and os.path.exists(population_path)
+        compute_population_score = use_s2s or use_population_raster
 
-        if use_s2s:
+        # GeoE3 x Population Score is optional - only compute it when the
+        # user has actually configured a population input (raster or S2S
+        # demographics) in the analysis weightings dialog, same as the
+        # opportunities mask below.
+        if not compute_population_score:
+            log_message(
+                "No population raster or S2S demographics configured - skipping GeoE3 x Population "
+                "Score (optional).",
+                tag="GeoE3",
+                level=Qgis.Info,
+            )
+        elif use_s2s:
             s2s_field = item.attribute("population_s2s_field", "") or DEFAULT_S2S_POPULATION_FIELD
             log_message(
                 f"Using S2S demographics for population processing: {s2s_field}",
@@ -2609,11 +2683,6 @@ class TreePanel(QWidget):
             )
             population_processor.run()
         else:
-            population_data = item.attribute("population_layer_source", None)
-            population_path = str(population_data or "").split("|")[0]
-            if not population_path or not os.path.exists(population_path):
-                self.on_processing_error("Select a valid population raster before running the analysis.")
-                return False
             population_processor = PopulationRasterProcessingTask(
                 population_raster_path=population_path,
                 working_directory=self.working_directory,
@@ -2625,24 +2694,26 @@ class TreePanel(QWidget):
             if not population_processor.run():
                 self.on_processing_error("Population raster processing failed. Check the QGIS log for details.")
                 return False
-        geoe3_processor = WEEByPopulationScoreProcessingTask(
-            study_area_gpkg_path=gpkg_path,
-            working_directory=self.working_directory,
-            force_clear=True,
-        )
-        if not geoe3_processor.run():
-            self.on_processing_error("GeoE3 by population processing failed. Check the QGIS log for details.")
-            return False
-        # Shamelessly hard coded for now, needs to move to the geoe3 processor class
-        output = os.path.join(
-            self.working_directory,
-            "geoe3_by_population_score",
-            "geoe3_by_population_score.vrt",
-        )
-        if not os.path.exists(output):
-            self.on_processing_error("GeoE3 by population processing did not create an output raster.")
-            return False
-        item.setAttribute("geoe3_by_population", output)
+
+        if compute_population_score:
+            geoe3_processor = WEEByPopulationScoreProcessingTask(
+                study_area_gpkg_path=gpkg_path,
+                working_directory=self.working_directory,
+                force_clear=True,
+            )
+            if not geoe3_processor.run():
+                self.on_processing_error("GeoE3 by population processing failed. Check the QGIS log for details.")
+                return False
+            # Shamelessly hard coded for now, needs to move to the geoe3 processor class
+            output = os.path.join(
+                self.working_directory,
+                "geoe3_by_population_score",
+                "geoe3_by_population_score.vrt",
+            )
+            if not os.path.exists(output):
+                self.on_processing_error("GeoE3 by population processing did not create an output raster.")
+                return False
+            item.setAttribute("geoe3_by_population", output)
 
         # Prepare the polygon mask data if provided
         # The mask (job opportunities / GHSL) is optional - only run the
@@ -2675,13 +2746,14 @@ class TreePanel(QWidget):
                 )
                 mask_processor.run()
 
-                mask_processor = OpportunitiesByWeeScorePopulationProcessingTask(
-                    item=item,
-                    study_area_gpkg_path=gpkg_path,
-                    working_directory=self.working_directory,
-                    force_clear=False,
-                )
-                mask_processor.run()
+                if compute_population_score:
+                    mask_processor = OpportunitiesByWeeScorePopulationProcessingTask(
+                        item=item,
+                        study_area_gpkg_path=gpkg_path,
+                        working_directory=self.working_directory,
+                        force_clear=False,
+                    )
+                    mask_processor.run()
             except Exception as e:
                 log_message(
                     f"Failed to run opportunities mask pipeline: {e}",
