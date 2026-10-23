@@ -9,6 +9,7 @@ import unittest
 from osgeo import ogr
 
 from geest.core.grid_column_utils import (
+    populated_area_names,
     rasterize_grid_column,
     write_aggregation_to_grid,
     write_joined_values_to_grid,
@@ -682,6 +683,45 @@ class TestWriteAggregationToGrid(unittest.TestCase):
         self.assertAlmostEqual(values[0], 0.5 * 2.0 + 0.5 * 4.0)
         self.assertAlmostEqual(values[1], 0.5 * 3.0 + 0.5 * 0.0)
         self.assertAlmostEqual(values[2], 0.0)
+
+
+class TestPopulatedAreaNames(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="test_populated_area_names_")
+        self.gpkg_path = os.path.join(self.temp_dir, "study_area.gpkg")
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def _make_grid(self, rows):
+        """rows: list of area_name values (None allowed) for one cell each."""
+        driver = ogr.GetDriverByName("GPKG")
+        dataset = driver.CreateDataSource(self.gpkg_path)
+        layer = dataset.CreateLayer("study_area_grid", geom_type=ogr.wkbPolygon)
+        layer.CreateField(ogr.FieldDefn("area_name", ogr.OFTString))
+        layer_defn = layer.GetLayerDefn()
+        for area_name in rows:
+            feature = ogr.Feature(layer_defn)
+            if area_name is not None:
+                feature.SetField("area_name", area_name)
+            layer.CreateFeature(feature)
+        dataset = None
+
+    def test_returns_only_areas_with_cells(self):
+        self._make_grid(["area_a", "area_a", "area_b"])
+
+        self.assertEqual(populated_area_names(self.gpkg_path), {"area_a", "area_b"})
+
+    def test_returns_none_when_area_name_is_entirely_null(self):
+        """A single, un-partitioned study area - callers must not filter."""
+        self._make_grid([None, None, None])
+
+        self.assertIsNone(populated_area_names(self.gpkg_path))
+
+    def test_returns_none_when_table_is_missing_entirely(self):
+        ogr.GetDriverByName("GPKG").CreateDataSource(self.gpkg_path)
+
+        self.assertIsNone(populated_area_names(self.gpkg_path))
 
 
 if __name__ == "__main__":

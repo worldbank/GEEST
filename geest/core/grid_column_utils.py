@@ -119,6 +119,41 @@ def grid_cell_count(gpkg_path: str) -> int:
         return -1
 
 
+def populated_area_names(gpkg_path: str) -> Optional[set]:
+    """Return the set of area_name values with at least one study_area_grid
+    cell, or None if area-level partitioning isn't used on this grid at all.
+
+    A single, un-partitioned study area legitimately leaves every row's
+    area_name NULL - that must never be read as "zero areas are populated"
+    (same ambiguity rasterize_grid_column() already guards against via its
+    own area_partitioning_in_use check).
+
+    Used by AreaIterator to skip areas with no grid cells (e.g. GHSL-filtered
+    or genuinely too-small-for-one-cell slivers) before any per-area
+    workflow pipeline runs on them, rather than letting every indicator
+    rediscover and skip the same empty area on every single run.
+    """
+    import sqlite3
+
+    try:
+        connection = sqlite3.connect(gpkg_path)
+        try:
+            partitioned = connection.execute(
+                "SELECT COUNT(*) FROM study_area_grid WHERE area_name IS NOT NULL"
+            ).fetchone()[0]
+            if partitioned == 0:
+                return None
+            rows = connection.execute(
+                "SELECT DISTINCT area_name FROM study_area_grid WHERE area_name IS NOT NULL"
+            ).fetchall()
+            return {row[0] for row in rows}
+        finally:
+            connection.close()
+    except sqlite3.Error as error:
+        log_message(f"Could not determine populated area names: {error}", level=Qgis.Warning)
+        return None
+
+
 def _checkpoint_wal(ds) -> None:
     """Force a WAL checkpoint on a GeoPackage dataset before closing.
 

@@ -173,6 +173,13 @@ version per the policy above.
 
 ### Fixed
 
+- **GHSL-filtered (unpopulated) areas were reprocessed on every single run.**
+  Study area creation already skips grid generation for an area with no
+  GHSL settlements, but `AreaIterator` never checked for that - every
+  indicator workflow ran its full per-area pipeline on these areas anyway,
+  every run, only to find nothing to write. `AreaIterator` now skips any
+  area with zero `study_area_grid` cells up front, determined directly
+  from the grid itself so it works immediately on existing projects too.
 - **Running multiple indicators concurrently (the "concurrent tasks"
   setting) could silently lose grid writes - an indicator reported
   "Completed" with no error, yet its own `study_area_grid` column stayed
