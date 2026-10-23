@@ -21,6 +21,20 @@ __revision__ = "$Format:%H$"
 APPLICATION_NAME = "GeoE3"
 GDAL_OUTPUT_DATA_TYPE = 6  # Float32
 
+# The five discrete score classes every result map/raster uses (see
+# resources/qml/indicator.qml, resources/qml/factor.qml), 0-1 Very Low
+# Enablement through 4-5 Highly Enabling. The QML's DISCRETE classifier
+# buckets by upper bound, so a raw score of 0 falls in the same "<=1"
+# bucket - and colour - as 1.
+SCORE_LEGEND_COLORS = {
+    0: "#d7191c",
+    1: "#d7191c",
+    2: "#fdae61",
+    3: "#ffffbf",
+    4: "#bce1b8",
+    5: "#2c7bb6",
+}
+
 # Space2Stats defaults
 DEFAULT_S2S_NTL_FIELD = "sum_viirs_ntl_2024"
 DEFAULT_S2S_POPULATION_FIELD = "sum_pop_2024"

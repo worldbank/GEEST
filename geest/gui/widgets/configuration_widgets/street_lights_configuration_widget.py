@@ -24,7 +24,7 @@ from qgis.PyQt.QtWidgets import QLabel
 from geest.core.workflows.mappings import MAPPING_REGISTRY
 from geest.utilities import log_message
 
-from .base_configuration_widget import BaseConfigurationWidget
+from .base_configuration_widget import BaseConfigurationWidget, legend_cell_html
 
 
 class StreetLightsConfigurationWidget(BaseConfigurationWidget):
@@ -72,18 +72,22 @@ class StreetLightsConfigurationWidget(BaseConfigurationWidget):
                         range_label = "0%"
                     else:
                         range_label = f"{min_pct}-{next_min - 1}%"
-                    rows.append(f"<tr><td>{range_label}</td><td>{score}</td></tr>")
+                    rows.append(f"<tr><td>{range_label}</td><td>{score}</td>{legend_cell_html(score)}</tr>")
             elif scores:
                 inside_score = scores.get("intersects_buffer", 0)
                 outside_score = scores.get("no_intersection", 0)
-                rows.append(f"<tr><td>≤ {buffer_label}</td><td>{inside_score}</td></tr>")
-                rows.append(f"<tr><td>&gt; {buffer_label}</td><td>{outside_score}</td></tr>")
+                rows.append(
+                    f"<tr><td>≤ {buffer_label}</td><td>{inside_score}</td>{legend_cell_html(inside_score)}</tr>"
+                )
+                rows.append(
+                    f"<tr><td>&gt; {buffer_label}</td><td>{outside_score}</td>{legend_cell_html(outside_score)}</tr>"
+                )
 
             html = f"""
             <p><b>{factor_name} ({analysis_scale.title()} Scale)</b></p>
             <p>Buffer: {buffer_label} ({scoring_method})</p>
             <table border='1' cellpadding='4' cellspacing='0'>
-                <tr><th>Range</th><th>Score</th></tr>
+                <tr><th>Range</th><th>Score</th><th>Legend</th></tr>
                 {''.join(rows)}
             </table>
             """
