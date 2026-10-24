@@ -249,8 +249,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         """
         if self.use_grid_first:
             return self._process_grid_first(
-                current_area=current_area,
-                clip_area=clip_area,
                 current_bbox=current_bbox,
                 area_features=area_features,
                 index=index,
@@ -294,7 +292,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         )
         isochrones_gpkg = self.create_isochrones(
             point_layer=area_features,
-            clip_geometry=current_area,
             area_index=index,
         )
         if not isochrones_gpkg:
@@ -329,8 +326,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
     def _process_grid_first(
         self,
-        current_area: QgsGeometry,
-        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
@@ -368,7 +363,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             )
             isochrones_gpkg = self.create_isochrones(
                 point_layer=area_features,
-                clip_geometry=current_area,
                 area_index=index,
             )
             if not isochrones_gpkg:
@@ -579,20 +573,44 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
     def _clip_network_to_area(
         self,
-        clip_geometry: QgsGeometry,
+        point_layer: QgsVectorLayer,
         area_index: int,
     ) -> str:
-        """Clip road network to area with buffer for spatial isolation.
+        """Clip road network to a dissolved buffer around the points being
+        analysed, not the (often much larger) surrounding study-area
+        polygon.
+
+        The isochrone/service-area computation only ever needs road network
+        within max(self.distances) of an actual point. Buffering the whole
+        area polygon instead clips (and then routes through) network that's
+        nowhere near any point whenever the points don't fill the area -
+        the common case, since most areas have only a handful of points
+        clustered in part of a much larger polygon.
 
         Args:
-            clip_geometry: Area geometry to clip to.
+            point_layer: The point features being analysed for this area.
             area_index: Area index for file naming.
 
         Returns:
             Path to clipped network GeoPackage, or None if failed.
         """
         buffer_distance = max(self.distances) if self.distances else 5000
-        buffered_geometry = clip_geometry.buffer(buffer_distance, 5)
+        point_buffers = [feature.geometry().buffer(buffer_distance, 5) for feature in point_layer.getFeatures()]
+        if not point_buffers:
+            log_message(
+                f"No point geometries to buffer for area {area_index}.",
+                level=Qgis.Warning,
+            )
+            return None
+        buffered_geometry = QgsGeometry.unaryUnion(point_buffers)
+        if buffered_geometry.isEmpty() or not buffered_geometry.isGeosValid():
+            buffered_geometry = buffered_geometry.makeValid()
+            if buffered_geometry.isEmpty() or not buffered_geometry.isGeosValid():
+                log_message(
+                    f"Dissolved point buffer for area {area_index} is invalid - cannot clip network.",
+                    level=Qgis.Warning,
+                )
+                return None
         clipped_network_path = os.path.join(self.workflow_directory, f"clipped_network_area_{area_index}.gpkg")
         if os.path.exists(clipped_network_path):
             os.remove(clipped_network_path)
@@ -648,14 +666,12 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
     def create_isochrones(
         self,
         point_layer: QgsVectorLayer,
-        clip_geometry: QgsGeometry,
         area_index: int = 0,
     ):
         """Create isochrones using batch network analysis.
 
         Args:
             point_layer: Starting point features.
-            clip_geometry: Geometry to clip network to.
             area_index: Current area index.
 
         Returns:
@@ -680,7 +696,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             return False
         isochrone_layer_path = os.path.join(self.workflow_directory, f"isochrones_area_{area_index}.gpkg")
         clipped_network_path = self._clip_network_to_area(
-            clip_geometry=clip_geometry,
+            point_layer=point_layer,
             area_index=area_index,
         )
         if not clipped_network_path:

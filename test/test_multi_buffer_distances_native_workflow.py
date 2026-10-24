@@ -117,7 +117,7 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
         re-reprojecting the source file each time. Regression for the
         performance cliff in worldbank/GeoE3#445/#448.
         """
-        from qgis.core import QgsGeometry
+        from qgis.core import QgsVectorLayer
 
         workflow = MultiBufferDistancesNativeWorkflow(
             item=self.indicator_item,
@@ -129,32 +129,85 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
         )
         self.assertIsNone(workflow._cached_road_network_layer, "cache must start empty")
 
-        # Use a geometry covering the whole network's extent so clipping succeeds.
-        network_extent_geom = QgsGeometry.fromRect(self._network_layer_extent(workflow))
+        point_layer = QgsVectorLayer(self.points_layer_path, "points", "ogr")
 
         # The clip itself succeeding isn't the point of this test (that's
         # covered by test_run); what matters is that the expensive
         # load+reproject step only happens once no matter how many areas
-        # call _clip_network_to_area afterwards.
-        workflow._clip_network_to_area(network_extent_geom, area_index=0)
+        # call _clip_network_to_area afterwards. _get_cached_road_network_layer()
+        # runs before the clip's own success/failure is known, so this holds
+        # regardless of whether the points' CRS lines up with the network's.
+        workflow._clip_network_to_area(point_layer, area_index=0)
         self.assertIsNotNone(workflow._cached_road_network_layer, "network must be cached after first use")
         cached_after_first = workflow._cached_road_network_layer
 
-        workflow._clip_network_to_area(network_extent_geom, area_index=1)
+        workflow._clip_network_to_area(point_layer, area_index=1)
         self.assertIs(
             workflow._cached_road_network_layer,
             cached_after_first,
             "the second area must reuse the same cached layer object, not reload it",
         )
 
-    @staticmethod
-    def _network_layer_extent(workflow):
-        from qgis.core import QgsVectorLayer
+    def test_clip_follows_the_points_not_a_larger_area_polygon(self):
+        """_clip_network_to_area must clip around a dissolved buffer of the
+        points actually being analysed, not the (often much larger)
+        surrounding study-area polygon - buffering the whole area clips
+        network nowhere near any point whenever points are sparse relative
+        to the area, wasting graph build and traversal time on network that
+        can never appear in the result (worldbank/GeoE3 perf review,
+        2026-10-24).
 
-        layer = QgsVectorLayer(workflow.road_network_layer_path, "network", "ogr")
-        extent = layer.extent()
-        extent.grow(1000)
-        return extent
+        Regression target: the clipped network's extent must stay within
+        the single point's own max(distances) buffer, not sprawl out to
+        cover a much larger area.
+        """
+        from qgis.core import (
+            QgsCoordinateTransform,
+            QgsFeature,
+            QgsProject,
+            QgsVectorLayer,
+        )
+
+        workflow = MultiBufferDistancesNativeWorkflow(
+            item=self.indicator_item,
+            cell_size_m=10.0,
+            analysis_scale="local",
+            feedback=self.feedback,
+            context=self.context,
+            working_directory=self.working_directory,
+        )
+        self.assertEqual(max(workflow.distances), 3000)
+
+        source_points = QgsVectorLayer(self.points_layer_path, "points", "ogr")
+        first_point_geom = next(source_points.getFeatures()).geometry()
+        transform = QgsCoordinateTransform(
+            source_points.crs(), workflow.target_crs, QgsProject.instance().transformContext()
+        )
+        first_point_geom.transform(transform)
+
+        single_point_layer = QgsVectorLayer(f"Point?crs={workflow.target_crs.authid()}", "single_point", "memory")
+        feature = QgsFeature()
+        feature.setGeometry(first_point_geom)
+        single_point_layer.dataProvider().addFeatures([feature])
+        single_point_layer.updateExtents()
+
+        clipped_path = workflow._clip_network_to_area(single_point_layer, area_index=0)
+        self.assertIsNotNone(clipped_path, "expected a successful clip around the point")
+
+        clipped_extent = QgsVectorLayer(clipped_path, "clipped", "ogr").extent()
+
+        # native:clip keeps any road segment that TOUCHES the buffer, so a
+        # segment can cross slightly outside it - allow a small tolerance
+        # rather than requiring an exact edge match.
+        expected_bound = first_point_geom.buffer(3000, 5).boundingBox()
+        expected_bound.grow(200)
+
+        self.assertTrue(
+            expected_bound.contains(clipped_extent),
+            f"clipped network extent {clipped_extent.toString()} extends beyond the "
+            f"point's own 3000m buffer {expected_bound.toString()} - looks like it clipped "
+            f"to something larger than the points (e.g. the area polygon)",
+        )
 
 
 if __name__ == "__main__":
