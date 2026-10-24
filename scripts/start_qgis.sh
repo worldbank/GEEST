@@ -15,7 +15,9 @@ case $choice in
 esac
 
 # Running on local used to skip tests that will not work in a local dev env
-GEOE3_LOG=$HOME/GEOE3.log
+# Logged into the project folder (not $HOME) so it can be tailed from the
+# same place validation tests are run, e.g. `tail -f GEOE3.log`.
+GEOE3_LOG="$(pwd)/GEOE3.log"
 GEOE3_TEST_DIR="$(pwd)/test"
 rm -f "$GEOE3_LOG"
 #nix-shell -p \
