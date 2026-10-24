@@ -118,7 +118,7 @@ class TreePanel(QWidget):
         self._item_spinners = {}  # guid -> (child_movie, parent_movie_or_None)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(0, 0, 0, 8)
         if json_file:
             # Load JSON data
             self.load_json()
@@ -228,9 +228,23 @@ class TreePanel(QWidget):
         # Expand the whole tree by default
         self.treeView.expandAll()
 
-        # Set the second and third columns to the exact width of their contents
+        # Size the status column to its contents ONCE, then freeze it. Left
+        # on ResizeToContents, this column's width tracked whatever was
+        # currently showing there - a status string one moment, a running
+        # item's spinner widget the next - so it kept shrinking and
+        # growing as items started and finished throughout a run, and that
+        # alone changed the tree view's sizeHint (independent of, and in
+        # addition to, the status_label-in-button_bar issue fixed
+        # separately) - the panel kept resizing for the run's entire
+        # duration, not just when it started. A floor of 90px keeps the
+        # spinner (scaled to one row's height, so well under that) and a
+        # short status string both comfortably on-screen even if this
+        # measurement runs before any real status text has been loaded.
         self.treeView.header().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         self.treeView.header().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.treeView.resizeColumnToContents(1)
+        self.treeView.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
+        self.treeView.header().resizeSection(1, max(self.treeView.header().sectionSize(1), 90))
 
         # Expand the first column to use the remaining space and resize with the dialog
         self.treeView.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
