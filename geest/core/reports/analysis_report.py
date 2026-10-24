@@ -673,8 +673,6 @@ class AnalysisReport(BaseReport):
                 "by_population",
             ),
             ("opportunities_mask_result_file", "Opportunities mask", None, None),
-            ("geoe3_by_opportunities_mask_result_file", "Score × opportunities", None, None),
-            ("geoe3_by_population_by_opportunities_mask_result_file", "Population × opportunities", None, None),
         ]
         dimension_minimaps = [
             (

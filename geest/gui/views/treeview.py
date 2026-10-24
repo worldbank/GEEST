@@ -86,8 +86,17 @@ class JsonTreeModel(QAbstractItemModel):
         buffer_distance_m = json_data.get("buffer_distance_m", 0.0)
         opportunities_mask_result_file = json_data.get("opportunities_mask_result_file", "")
         opportunities_mask_result = json_data.get("opportunities_mask_result", "")
-        geoe3_by_opportunities_mask_result = json_data.get("geoe3_by_opportunities_mask_result", "")
-        geoe3_by_opportunities_mask_result_file = json_data.get("geoe3_by_opportunities_mask_result_file", "")
+        # geoe3_score_ghsl_masked_result(_file) - NOT geoe3_by_opportunities_mask_result(_file),
+        # a superseded name no processor has written in a long time - is
+        # what OpportunitiesByWeeScoreProcessingTask actually sets
+        # (opportunities_by_wee_score_processor.py). Omitting these from
+        # the explicit reload whitelist meant loadJsonData() silently
+        # dropped them every time the model got rebuilt from saved JSON,
+        # even though they were correctly computed and briefly present
+        # (worldbank/GeoE3 field report, 2026-10-24: "GeoE3 x Opportunities
+        # Mask" always showed blank despite the underlying raster existing).
+        geoe3_score_ghsl_masked_result = json_data.get("geoe3_score_ghsl_masked_result", "")
+        geoe3_score_ghsl_masked_result_file = json_data.get("geoe3_score_ghsl_masked_result_file", "")
         geoe3_by_population = json_data.get("geoe3_by_population", "")
         geoe3_by_population_subnational_aggregation = json_data.get("geoe3_by_population_subnational_aggregation", "")
         geoe3_score_subnational_aggregation = json_data.get("geoe3_score_subnational_aggregation", "")
@@ -97,12 +106,12 @@ class JsonTreeModel(QAbstractItemModel):
         geoe3_score_by_population_ghsl_masked_subnational_aggregation = json_data.get(
             "geoe3_score_by_population_ghsl_masked_subnational_aggregation", ""
         )
-        geoe3_by_population_by_opportunities_mask_result_file = json_data.get(
-            "geoe3_by_population_by_opportunities_mask_result_file", ""
+        # Same rename as geoe3_score_ghsl_masked_result above, for the
+        # population-score variant (OpportunitiesByWeeScorePopulationProcessingTask).
+        geoe3_score_by_population_ghsl_masked_result_file = json_data.get(
+            "geoe3_score_by_population_ghsl_masked_result_file", ""
         )
-        geoe3_by_population_by_opportunities_mask_result = json_data.get(
-            "geoe3_by_population_by_opportunities_mask_result", ""
-        )
+        geoe3_score_by_population_ghsl_masked_result = json_data.get("geoe3_score_by_population_ghsl_masked_result", "")
         qgis_project_path = json_data.get("qgis_project_path", "")
         population_s2s_output_path = json_data.get("population_s2s_output_path") or ""
         population_s2s_field = json_data.get("population_s2s_field") or DEFAULT_S2S_POPULATION_FIELD
@@ -126,15 +135,15 @@ class JsonTreeModel(QAbstractItemModel):
             "buffer_distance_m": buffer_distance_m,
             "opportunities_mask_result_file": opportunities_mask_result_file,
             "opportunities_mask_result": opportunities_mask_result,
-            "geoe3_by_opportunities_mask_result": geoe3_by_opportunities_mask_result,
-            "geoe3_by_opportunities_mask_result_file": geoe3_by_opportunities_mask_result_file,
+            "geoe3_score_ghsl_masked_result": geoe3_score_ghsl_masked_result,
+            "geoe3_score_ghsl_masked_result_file": geoe3_score_ghsl_masked_result_file,
             "geoe3_by_population": geoe3_by_population,
             "geoe3_by_population_subnational_aggregation": geoe3_by_population_subnational_aggregation,
             "geoe3_score_subnational_aggregation": geoe3_score_subnational_aggregation,
             "geoe3_score_ghsl_masked_subnational_aggregation": geoe3_score_ghsl_masked_subnational_aggregation,
             "geoe3_score_by_population_ghsl_masked_subnational_aggregation": geoe3_score_by_population_ghsl_masked_subnational_aggregation,
-            "geoe3_by_population_by_opportunities_mask_result_file": geoe3_by_population_by_opportunities_mask_result_file,
-            "geoe3_by_population_by_opportunities_mask_result": geoe3_by_population_by_opportunities_mask_result,
+            "geoe3_score_by_population_ghsl_masked_result_file": geoe3_score_by_population_ghsl_masked_result_file,
+            "geoe3_score_by_population_ghsl_masked_result": geoe3_score_by_population_ghsl_masked_result,
             "qgis_project_path": qgis_project_path,
             "population_s2s_output_path": population_s2s_output_path,
             "population_s2s_field": population_s2s_field,

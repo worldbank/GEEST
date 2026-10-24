@@ -210,6 +210,20 @@ version per the policy above.
 
 ### Fixed
 
+- **"GeoE3 x Opportunities Mask" (and its by-population variant) always
+  showed blank in the tree and report, even on a fully successful run.**
+  `OpportunitiesByWeeScoreProcessingTask`/`...PopulationProcessingTask`
+  correctly compute the masked score and write
+  `geoe3_score_ghsl_masked_result(_file)` /
+  `geoe3_score_by_population_ghsl_masked_result(_file)` onto the analysis
+  item, but `JsonTreeModel.loadJsonData()` rebuilds that item's attributes
+  from an explicit, hardcoded whitelist whenever the model is reloaded
+  from saved JSON - these two keys were missing from it, so the result
+  was silently dropped on the next reload despite the underlying raster
+  being computed correctly. Added them to the whitelist, and removed two
+  report rows ("Score × opportunities", "Population × opportunities")
+  that read an older, superseded key name no processor has written in a
+  long time - they duplicated the already-correct "GHSL masked" rows.
 - **Scoring a study area's grid against network-analysis isochrones could
   take over an hour for a single, densely-populated area,** versus seconds
   for a sparser one. `write_buffer_values_to_grid()` tested every grid cell
