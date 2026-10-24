@@ -174,8 +174,21 @@ class FactorAggregationDialog(CustomBaseDialog):
         else:
             self.table.setColumnCount(6)
             self.table.setHorizontalHeaderLabels(["Input", "Indicator", "Weight 0-1", "Use", "GUID", ""])
+            # Input holds different widget types depending on analysis_mode
+            # (a small spin box for a fixed value, but a layer/file selector
+            # for others, which wants much more room than a fixed pixel
+            # width can guarantee - a Fixed column that's too narrow for its
+            # cell widget's minimum size hint gets forced wider by Qt,
+            # overflowing the table past the dialog's width and inducing
+            # horizontal scrolling). Stretch mode cannot overflow by
+            # definition, so both Input and Indicator stay Stretch and
+            # share whatever space is actually available - matching how
+            # the OSM-enabled variant of this same table already does it.
+            # Indicator still used to be pinned to a 200px Fixed width
+            # while Input took ALL the stretch space, which was the
+            # original elision complaint this fix addresses.
             self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-            self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
+            self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
             self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
             self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
             self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
@@ -194,7 +207,6 @@ class FactorAggregationDialog(CustomBaseDialog):
             self.table.setColumnWidth(4, 50)
             self.table.setColumnWidth(6, 75)
         else:
-            self.table.setColumnWidth(1, 200)
             self.table.setColumnWidth(2, 100)
             self.table.setColumnWidth(3, 50)
             self.table.setColumnWidth(5, 75)
