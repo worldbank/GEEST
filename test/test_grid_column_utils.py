@@ -233,6 +233,146 @@ class TestWriteBufferValuesToGrid(unittest.TestCase):
         self.assertIn(5.0, self._scored_cells("crs_col"))
 
 
+class TestWriteBufferValuesToGridMultiBand(unittest.TestCase):
+    """Regression tests for the band-descending MAX shortcut.
+
+    write_buffer_values_to_grid() processes MAX-aggregated bands
+    score-descending, dropping each matched cell from consideration before
+    testing the next (lower-scoring) band - safe only because every caller
+    builds bands from increasing distance thresholds, so a farther band's
+    area is always a superset of a closer one's. These tests prove: (1)
+    the shortcut doesn't let a wide, low-scoring band overwrite a cell a
+    narrower, high-scoring band already claimed, and (2) MIN/AVG - which
+    need every intersecting band, not just the best one - still consider
+    bands this shortcut would otherwise skip.
+    """
+
+    ORIGIN_X = 700000.0
+    ORIGIN_Y = 1516000.0
+    CELL = 1000.0
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="test_grid_buffer_multiband_")
+        self.main_gpkg = os.path.join(self.temp_dir, "study_area.gpkg")
+        driver = ogr.GetDriverByName("GPKG")
+        dataset = driver.CreateDataSource(self.main_gpkg)
+        from osgeo import osr
+
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(32620)
+        layer = dataset.CreateLayer("study_area_grid", srs, geom_type=ogr.wkbPolygon)
+        layer_defn = layer.GetLayerDefn()
+        # A 2x2 grid: cell (0, 0) is the near band's only target; the far
+        # band covers all four cells.
+        for row in range(2):
+            for col in range(2):
+                x0 = self.ORIGIN_X + col * self.CELL
+                y0 = self.ORIGIN_Y + row * self.CELL
+                ring = ogr.Geometry(ogr.wkbLinearRing)
+                for px, py in [
+                    (x0, y0),
+                    (x0 + self.CELL, y0),
+                    (x0 + self.CELL, y0 + self.CELL),
+                    (x0, y0 + self.CELL),
+                    (x0, y0),
+                ]:
+                    ring.AddPoint(px, py)
+                polygon = ogr.Geometry(ogr.wkbPolygon)
+                polygon.AddGeometry(ring)
+                feature = ogr.Feature(layer_defn)
+                feature.SetGeometry(polygon)
+                layer.CreateFeature(feature)
+        dataset = None
+
+    def tearDown(self):
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
+    def _scored_cells(self, column):
+        dataset = ogr.Open(self.main_gpkg, 0)
+        layer = dataset.GetLayerByName("study_area_grid")
+        values = sorted(feature.GetField(column) for feature in layer)
+        dataset = None
+        return values
+
+    def _near_and_far_bands(self):
+        """Near band covers only the interior of cell (0, 0) - inset from
+        the cell's edges so it doesn't *touch* (and thus, under GEOS/OGC
+        semantics, "intersect") the neighbouring cells it shares a
+        boundary with - scored 5; far band covers the whole 2x2 grid,
+        scored 2 - mirroring real isochrone bands, where a farther
+        distance's reachable area is a superset of a closer one's."""
+        from qgis.core import QgsFeature, QgsGeometry, QgsVectorLayer
+
+        layer = QgsVectorLayer("Polygon?crs=EPSG:32620&field=value:integer", "buffers", "memory")
+        provider = layer.dataProvider()
+
+        inset = self.CELL / 10
+        near_wkt = (
+            f"POLYGON(({self.ORIGIN_X + inset} {self.ORIGIN_Y + inset}, "
+            f"{self.ORIGIN_X + self.CELL - inset} {self.ORIGIN_Y + inset}, "
+            f"{self.ORIGIN_X + self.CELL - inset} {self.ORIGIN_Y + self.CELL - inset}, "
+            f"{self.ORIGIN_X + inset} {self.ORIGIN_Y + self.CELL - inset}, "
+            f"{self.ORIGIN_X + inset} {self.ORIGIN_Y + inset}))"
+        )
+        far_wkt = (
+            f"POLYGON(({self.ORIGIN_X} {self.ORIGIN_Y}, {self.ORIGIN_X + 2 * self.CELL} {self.ORIGIN_Y}, "
+            f"{self.ORIGIN_X + 2 * self.CELL} {self.ORIGIN_Y + 2 * self.CELL}, "
+            f"{self.ORIGIN_X} {self.ORIGIN_Y + 2 * self.CELL}, {self.ORIGIN_X} {self.ORIGIN_Y}))"
+        )
+
+        near_feature = QgsFeature(layer.fields())
+        near_feature.setAttribute("value", 5)
+        near_feature.setGeometry(QgsGeometry.fromWkt(near_wkt))
+
+        far_feature = QgsFeature(layer.fields())
+        far_feature.setAttribute("value", 2)
+        far_feature.setGeometry(QgsGeometry.fromWkt(far_wkt))
+
+        provider.addFeatures([near_feature, far_feature])
+        layer.updateExtents()
+        return layer
+
+    def test_max_keeps_the_near_bands_score_even_though_the_far_band_also_covers_it(self):
+        from geest.core.grid_column_utils import write_buffer_values_to_grid
+
+        layer = self._near_and_far_bands()
+
+        updated = write_buffer_values_to_grid(self.main_gpkg, "max_col", layer, aggregation_method="MAX")
+
+        self.assertEqual(updated, 4)
+        # Cell (0, 0) is covered by both bands - MAX must keep the near
+        # band's 5, not let the far band's 2 overwrite it once it's
+        # already been dropped from the remaining-cells set.
+        self.assertEqual(self._scored_cells("max_col"), [2.0, 2.0, 2.0, 5.0])
+
+    def test_min_still_considers_the_far_band_even_though_max_would_skip_it(self):
+        from geest.core.grid_column_utils import write_buffer_values_to_grid
+
+        layer = self._near_and_far_bands()
+
+        updated = write_buffer_values_to_grid(self.main_gpkg, "min_col", layer, aggregation_method="MIN")
+
+        self.assertEqual(updated, 4)
+        # Cell (0, 0) intersects both bands - MIN must see both scores
+        # (5 and 2) and keep the lower one, proving the far band wasn't
+        # skipped just because the near band matched first.
+        self.assertEqual(self._scored_cells("min_col"), [2.0, 2.0, 2.0, 2.0])
+
+    def test_avg_still_considers_the_far_band_even_though_max_would_skip_it(self):
+        from geest.core.grid_column_utils import write_buffer_values_to_grid
+
+        layer = self._near_and_far_bands()
+
+        updated = write_buffer_values_to_grid(self.main_gpkg, "avg_col", layer, aggregation_method="AVG")
+
+        self.assertEqual(updated, 4)
+        # Cell (0, 0) must average both intersecting bands' scores
+        # ((5 + 2) / 2 = 3.5); the other three cells see only the far
+        # band (2.0).
+        self.assertEqual(self._scored_cells("avg_col"), [2.0, 2.0, 2.0, 3.5])
+
+
 class TestRasterizeGridColumn(unittest.TestCase):
     """A sliver area with no matching study_area_grid rows must be skipped.
 

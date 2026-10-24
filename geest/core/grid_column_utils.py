@@ -1829,6 +1829,7 @@ def write_buffer_values_to_grid(
     from qgis.core import (
         QgsCoordinateTransform,
         QgsFeature,
+        QgsFeatureRequest,
         QgsGeometry,
         QgsProject,
         QgsRectangle,
@@ -1888,12 +1889,25 @@ def write_buffer_values_to_grid(
         if repaired:
             log_message(f"Repaired {repaired} invalid buffer geometries before grid scoring")
 
-        # Create spatial index over the normalised geometries
+        # Create a spatial index over the buffer geometries, and a prepared
+        # GEOS geometry engine per buffer polygon. A plain, unprepared
+        # geometry.intersects() call re-walks the full geometry from
+        # scratch every time it's called - cheap for a handful of tests,
+        # but a dissolved isochrone band from a dense point set can carry
+        # hundreds of thousands of vertices, and this same handful of band
+        # polygons gets tested against every one of potentially hundreds
+        # of thousands of grid cells. QgsGeometryEngine.prepareGeometry()
+        # builds the GEOS prepared-geometry index once so every subsequent
+        # intersects() call against it is cheap.
         buffer_index = QgsSpatialIndex()
+        buffer_engines = {}
         for fid, geometry in buffer_geoms.items():
             index_feature = QgsFeature(fid)
             index_feature.setGeometry(geometry)
             buffer_index.addFeature(index_feature)
+            engine = QgsGeometry.createGeometryEngine(geometry.constGet())
+            engine.prepareGeometry()
+            buffer_engines[fid] = engine
 
         # Collect scores per grid cell
         grid_scores = {}
@@ -1907,42 +1921,79 @@ def write_buffer_values_to_grid(
             )
             return -1
 
-        for i, grid_feature in enumerate(grid_layer.getFeatures()):
-            grid_geom = grid_feature.geometry()
-            if grid_geom.isEmpty():
-                continue
+        if aggregation_method == "MAX":
+            # Every caller builds these buffer bands from increasing
+            # distance thresholds, so they're nested by construction - a
+            # farther band's reachable area is always a superset of a
+            # closer one's. Once a cell matches the highest-scoring band
+            # still left to check, it can never score higher from any
+            # other band. Testing bands score-descending and dropping
+            # matched cells from consideration means each subsequent
+            # (lower-scoring) band is only tested against cells that
+            # haven't already found their max, instead of testing every
+            # band against every cell regardless of what already matched.
+            scored_fids = [fid for fid in buffer_geoms if buffer_scores.get(fid) is not None]
+            scored_fids.sort(key=lambda fid: float(buffer_scores[fid]), reverse=True)
+            remaining_fids = {feature.id() for feature in grid_layer.getFeatures() if not feature.geometry().isEmpty()}
+            for band_index, buffer_fid in enumerate(scored_fids):
+                if not remaining_fids:
+                    break
+                score = float(buffer_scores[buffer_fid])
+                engine = buffer_engines[buffer_fid]
+                request = QgsFeatureRequest().setFilterRect(buffer_geoms[buffer_fid].boundingBox())
+                matched_fids = []
+                for grid_feature in grid_layer.getFeatures(request):
+                    grid_fid = grid_feature.id()
+                    if grid_fid not in remaining_fids:
+                        continue
+                    grid_geom = grid_feature.geometry()
+                    if grid_geom.isEmpty():
+                        continue
+                    if engine.intersects(grid_geom.constGet()):
+                        grid_scores[grid_fid] = score
+                        matched_fids.append(grid_fid)
+                remaining_fids.difference_update(matched_fids)
+                if feedback:
+                    feedback.setProgress(((band_index + 1) / len(scored_fids)) * 50)
+        else:
+            # MIN/AVG need every intersecting band's score for a cell, so
+            # there's no early-exit shortcut here - this still benefits
+            # from the prepared engines for a cheap exact test per
+            # candidate.
+            for i, grid_feature in enumerate(grid_layer.getFeatures()):
+                grid_geom = grid_feature.geometry()
+                if grid_geom.isEmpty():
+                    continue
 
-            grid_fid = grid_feature.id()
+                grid_fid = grid_feature.id()
 
-            # Find intersecting buffer polygons
-            candidate_ids = buffer_index.intersects(grid_geom.boundingBox())
-            if not candidate_ids:
-                continue
+                # Find intersecting buffer polygons
+                candidate_ids = buffer_index.intersects(grid_geom.boundingBox())
+                if not candidate_ids:
+                    continue
 
-            # Get actual intersecting features and their scores
-            scores = []
-            for candidate_id in candidate_ids:
-                buffer_geom = buffer_geoms.get(candidate_id)
-                if buffer_geom is not None and buffer_geom.intersects(grid_geom):
-                    score = buffer_scores.get(candidate_id)
-                    if score is not None:
-                        scores.append(float(score))
+                # Get actual intersecting features and their scores
+                scores = []
+                for candidate_id in candidate_ids:
+                    engine = buffer_engines.get(candidate_id)
+                    if engine is not None and engine.intersects(grid_geom.constGet()):
+                        score = buffer_scores.get(candidate_id)
+                        if score is not None:
+                            scores.append(float(score))
 
-            # Aggregate scores
-            if scores:
-                if aggregation_method == "MAX":
-                    final_score = max(scores)
-                elif aggregation_method == "MIN":
-                    final_score = min(scores)
-                elif aggregation_method == "AVG":
-                    final_score = sum(scores) / len(scores)
-                else:
-                    final_score = max(scores)
+                # Aggregate scores
+                if scores:
+                    if aggregation_method == "MIN":
+                        final_score = min(scores)
+                    elif aggregation_method == "AVG":
+                        final_score = sum(scores) / len(scores)
+                    else:
+                        final_score = max(scores)
 
-                grid_scores[grid_fid] = final_score
+                    grid_scores[grid_fid] = final_score
 
-            if feedback and i % 1000 == 0:
-                feedback.setProgress((i / total_features) * 50)
+                if feedback and i % 1000 == 0:
+                    feedback.setProgress((i / total_features) * 50)
 
         log_message(f"Found {len(grid_scores)} grid cells with intersecting buffers")
         if not grid_scores and buffer_geoms:

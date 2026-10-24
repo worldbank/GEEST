@@ -210,6 +210,19 @@ version per the policy above.
 
 ### Fixed
 
+- **Scoring a study area's grid against network-analysis isochrones could
+  take over an hour for a single, densely-populated area,** versus seconds
+  for a sparser one. `write_buffer_values_to_grid()` tested every grid cell
+  against every distance band with a plain, unprepared
+  `QgsGeometry.intersects()` call - fine for a handful of tests, but a
+  dissolved isochrone band from thousands of points can carry hundreds of
+  thousands of vertices, and the same few band polygons get tested against
+  every one of potentially hundreds of thousands of grid cells. Each band
+  now gets a prepared `QgsGeometryEngine` (built once, reused for every
+  cell), and for `MAX` aggregation - the only mode any caller actually
+  uses - bands are tested score-descending with matched cells dropped from
+  consideration, so a cell already at its best possible score is never
+  tested against a lower-scoring band again.
 - **Re-running or clearing a single indicator left its factor, dimension, and
   analysis still showing a stale "Completed successfully" with the old
   aggregate value.** Nothing ever told an ancestor its cached aggregate was
