@@ -170,5 +170,69 @@ class TestWorkflowSpinnerHiddenSingleChildFactor(unittest.TestCase):
         return self.tree_view.indexWidget(second_column_index)
 
 
+class TestWorkflowSpinnerHiddenFactorIsTheWorkflowItemItself(unittest.TestCase):
+    """Regression test for a factor-level aggregation job: the WorkflowJob's
+    own item is the hidden single-child factor itself, not its indicator.
+
+    TestWorkflowSpinnerHiddenSingleChildFactor above covers an indicator
+    whose PARENT factor is hidden. This covers the opposite direction: a
+    factor_aggregation job's item IS the hidden factor. Before this fix,
+    on_workflow_started(hidden_factor) hit self.model.itemIndex(item)
+    invalid at the very top and bailed out with "animation not started"
+    before ever reaching any promoted-child handling - no spinner showed
+    at all for a single-indicator factor's own aggregation step
+    (worldbank/GeoE3 field report, 2026-10-24).
+    """
+
+    def setUp(self):
+        self.model = JsonTreeModel({"dimensions": []})
+        self.dimension = JsonTreeItem(
+            ["Place Characterization", "Status", 1.0, {"id": "place_characterization"}],
+            role="dimension",
+            parent=self.model.rootItem,
+        )
+        self.model.rootItem.appendChild(self.dimension)
+        self.factor = JsonTreeItem(
+            ["Education", "Status", 1.0, {"id": "fac_education"}], role="factor", parent=self.dimension
+        )
+        self.dimension.appendChild(self.factor)
+        self.factor.set_visibility(False)  # single-child factor: hidden, its indicator is promoted
+        self.indicator = JsonTreeItem(
+            ["Education", "Status", 1.0, {"id": "education"}], role="indicator", parent=self.factor
+        )
+        self.factor.appendChild(self.indicator)
+
+        self.tree_view = QTreeView()
+        self.tree_view.setModel(self.model)
+
+        self.panel = MagicMock()
+        self.panel.model = self.model
+        self.panel.treeView = self.tree_view
+        self.panel._item_spinners = {}
+
+    def test_factors_own_index_is_unresolvable(self):
+        self.assertFalse(self.model.itemIndex(self.factor).isValid())
+
+    def test_starting_a_workflow_on_the_hidden_factor_itself_animates_its_promoted_child(self):
+        TreePanel.on_workflow_started(self.panel, self.factor)
+
+        self.assertIn(self.indicator.guid, self.panel._item_spinners)
+        self.assertNotIn(self.factor.guid, self.panel._item_spinners)
+        self.assertIsNotNone(self._second_column_widget(self.indicator))
+
+    def test_stopping_a_workflow_on_the_hidden_factor_itself_clears_its_promoted_childs_spinner(self):
+        TreePanel.on_workflow_started(self.panel, self.factor)
+
+        TreePanel._stop_item_spinner(self.panel, self.factor)
+
+        self.assertNotIn(self.indicator.guid, self.panel._item_spinners)
+        self.assertIsNone(self._second_column_widget(self.indicator))
+
+    def _second_column_widget(self, item):
+        index = self.model.itemIndex(item)
+        second_column_index = self.model.index(index.row(), 1, index.parent())
+        return self.tree_view.indexWidget(second_column_index)
+
+
 if __name__ == "__main__":
     unittest.main()

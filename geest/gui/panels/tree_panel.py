@@ -2313,6 +2313,34 @@ class TreePanel(QWidget):
         """
         pass
 
+    @staticmethod
+    def _resolve_display_item(item):
+        """Return the item whose row should actually carry the spinner.
+
+        JsonTreeModel._findIndexByGuid() can resolve a visible item's own
+        index, or resolve INTO a hidden item's children, but never a
+        hidden item's own identity. A hidden item with exactly one child
+        has that child promoted to display in its place
+        (JsonTreeItem.get_effective_visible_children()), so redirect to
+        that child. This covers both an indicator whose parent factor is
+        hidden, and (worldbank/GeoE3 field report, 2026-10-24) a
+        factor-level aggregation job whose own item IS the hidden factor -
+        the latter previously hit the "index not found" bail-out below
+        before ever reaching the indicator-specific parent-row handling,
+        so no spinner showed at all for a single-indicator factor's own
+        aggregation step.
+
+        Args:
+            item: The JsonTreeItem a workflow started/stopped on.
+
+        Returns:
+            The item itself, or its promoted child if item is a hidden
+            single-child item.
+        """
+        if not item.is_visible() and len(item.childItems) == 1:
+            return item.childItems[0]
+        return item
+
     @pyqtSlot()
     def on_workflow_started(self, item):
         """
@@ -2323,6 +2351,7 @@ class TreePanel(QWidget):
             item: The workflow item that was started.
         """
         # Get the node index for the item
+        item = TreePanel._resolve_display_item(item)
         node_index = self.model.itemIndex(item)
         if not node_index.isValid():
             log_message(
@@ -2531,6 +2560,7 @@ class TreePanel(QWidget):
         it with this to clear it, including the parent row's spinner for an
         indicator.
         """
+        item = TreePanel._resolve_display_item(item)
         node_index = self.model.itemIndex(item)
 
         if not node_index.isValid():
