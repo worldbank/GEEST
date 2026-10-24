@@ -109,6 +109,13 @@ class TreePanel(QWidget):
         self.tree_view_visible = True
         self.run_only_incomplete = True  # saves time by not running models that have already been run
         self.items_to_run = 0  # Count of items that need to be run
+        # keyed by item.guid, not a single shared pair of attributes - with
+        # concurrent_tasks > 1 (or just two items' start/stop events racing),
+        # a single shared QMovie meant stopping one item's spinner could
+        # silently stop a DIFFERENT, still-running item's spinner instead,
+        # freezing it on its last rendered frame (worldbank/GeoE3 field
+        # report, 2026-10-24).
+        self._item_spinners = {}  # guid -> (child_movie, parent_movie_or_None)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -241,6 +248,20 @@ class TreePanel(QWidget):
         # Set layout
         layout.addWidget(self.treeView)
 
+        # Status row sits on its own line, spanning the full panel width -
+        # kept out of button_bar below so its text never competes with the
+        # two fixed-width progress bars for horizontal space. button_bar
+        # previously carried status_label at a fixed 200px alongside two
+        # more 200px-fixed progress bars (plus buttons that hide during a
+        # run), so the row's required minimum width jumped between "idle"
+        # and "running" states as widgets toggled visibility, which is
+        # what made the whole panel keep resizing during analysis
+        # execution (worldbank/GeoE3 field report, 2026-10-24).
+        self.status_label = QLabel("")
+        self.status_label.setStyleSheet("color: #666; font-style: italic;")
+        self.status_label.setVisible(False)
+        layout.addWidget(self.status_label)
+
         button_bar = QHBoxLayout()
 
         # Create the split tool button
@@ -274,13 +295,6 @@ class TreePanel(QWidget):
 
         # Add the button to the button bar
         button_bar.addWidget(self.prepare_analysis_button)
-
-        # Add a status label to show current operation
-        self.status_label = QLabel("")
-        self.status_label.setStyleSheet("color: #666; font-style: italic;")
-        self.status_label.setFixedWidth(200)
-        self.status_label.setVisible(False)
-        button_bar.addWidget(self.status_label)
 
         self.project_button = QPushButton("Project")
         self.project_button.clicked.connect(self.switch_to_setup_tab)
@@ -2307,29 +2321,39 @@ class TreePanel(QWidget):
         # Ensure we work with QModelIndex instead of QPersistentModelIndex
         child_index = QModelIndex(node_index)
 
-        # Get row height and prepare movies
+        # Get row height and prepare movies - kept local (not self.*) so two
+        # items' spinners can never clobber each other; see _item_spinners.
         row_height = self.treeView.rowHeight(child_index)
-        self.child_movie = QMovie(resources_path("resources", "throbber.gif"))
-        self.parent_movie = QMovie(resources_path("resources", "throbber.gif"))
+        child_movie = QMovie(resources_path("resources", "throbber.gif"))
+        parent_movie = None
 
-        # If this is an indicator, caclulate height for parent in case the indicator is hidden
+        # If this is an indicator, calculate height for parent in case the
+        # indicator is hidden (single-child factor, fused into its row).
+        # parent_index can be invalid even for a genuinely-running
+        # indicator: JsonTreeModel._findIndexByGuid() can locate a HIDDEN
+        # item's own children but never the hidden item itself, so a
+        # single-child factor's own index is always unresolvable. Guard
+        # before using it - row_height from child_index above is already
+        # correct and must not be overwritten with rowHeight() on an
+        # invalid index (0/-1), which silently scaled the child spinner
+        # itself down to an invisible size (worldbank/GeoE3 field report,
+        # 2026-10-24: neither the child nor the parent spinner showed for
+        # "Access to Public Transport", a single-indicator factor).
         if item.role == "indicator":
             parent_item = item.parent()
             parent_index = self.model.itemIndex(parent_item)
-            row_height = self.treeView.rowHeight(parent_index)
+            if parent_index.isValid():
+                row_height = self.treeView.rowHeight(parent_index)
 
-        # Scale movies
-        self.child_movie.setScaledSize(
-            self.child_movie.currentPixmap().size().scaled(row_height, row_height, Qt.AspectRatioMode.KeepAspectRatio)
-        )
-        self.parent_movie.setScaledSize(
-            self.parent_movie.currentPixmap().size().scaled(row_height, row_height, Qt.AspectRatioMode.KeepAspectRatio)
+        # Scale the child movie
+        child_movie.setScaledSize(
+            child_movie.currentPixmap().size().scaled(row_height, row_height, Qt.AspectRatioMode.KeepAspectRatio)
         )
 
         # Set animated icon for the child
         child_label = QLabel()
-        child_label.setMovie(self.child_movie)
-        self.child_movie.start()
+        child_label.setMovie(child_movie)
+        child_movie.start()
 
         # Place child animation
         second_column_index = self.model.index(child_index.row(), 1, child_index.parent())
@@ -2342,9 +2366,15 @@ class TreePanel(QWidget):
                 parent_index = self.model.itemIndex(parent_item)
                 if parent_index.isValid():
                     # Create parent animation
+                    parent_movie = QMovie(resources_path("resources", "throbber.gif"))
+                    parent_movie.setScaledSize(
+                        parent_movie.currentPixmap()
+                        .size()
+                        .scaled(row_height, row_height, Qt.AspectRatioMode.KeepAspectRatio)
+                    )
                     parent_label = QLabel()
-                    parent_label.setMovie(self.parent_movie)
-                    self.parent_movie.start()
+                    parent_label.setMovie(parent_movie)
+                    parent_movie.start()
 
                     # Get parent's second column index
                     parent_second_column_index = self.model.index(parent_index.row(), 1, parent_index.parent())
@@ -2355,6 +2385,8 @@ class TreePanel(QWidget):
 
                     # Force immediate update
                     self.treeView.viewport().update()
+
+        self._item_spinners[item.guid] = (child_movie, parent_movie)
 
     def task_progress_updated(self, progress):
         """Slot to be called when the task progress is updated.
@@ -2371,8 +2403,9 @@ class TreePanel(QWidget):
         Args:
             status: A short description of the current operation.
         """
-        # Truncate long status messages to fit the label
-        max_len = 35
+        # Truncate long status messages to fit the label - generous now
+        # that the label spans the full panel width, not a fixed 200px.
+        max_len = 120
         if len(status) > max_len:
             status = status[: max_len - 3] + "..."
         self.status_label.setText(status)
@@ -2396,8 +2429,9 @@ class TreePanel(QWidget):
             error_message: The error message from the failed workflow job.
         """
         log_message(f"Processing error: {error_message}", level=Qgis.Critical)
-        # Update the status label (truncated, full text on hover)
-        max_len = 35
+        # Update the status label (truncated, full text on hover) -
+        # generous now that the label spans the full panel width.
+        max_len = 120
         short = error_message if len(error_message) <= max_len else error_message[: max_len - 3] + "..."
         self.status_label.setText(short)
         self.status_label.setToolTip(error_message)
@@ -2499,10 +2533,15 @@ class TreePanel(QWidget):
             parent_index = node_index.parent()
             parent_second_column_index = self.model.index(parent_index.row(), 1, parent_index.parent())
 
-        if hasattr(self, "child_movie") and self.child_movie is not None:
-            self.child_movie.stop()
-        if hasattr(self, "parent_movie") and self.parent_movie is not None:
-            self.parent_movie.stop()
+        # Pop this item's OWN movies - never touch another item's, which a
+        # single shared self.child_movie/self.parent_movie pair used to do
+        # whenever two items' spinners overlapped (concurrent_tasks > 1, or
+        # just two sequential items racing).
+        child_movie, parent_movie = self._item_spinners.pop(item.guid, (None, None))
+        if child_movie is not None:
+            child_movie.stop()
+        if parent_movie is not None:
+            parent_movie.stop()
 
         second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
         self.treeView.setIndexWidget(second_column_index, None)

@@ -115,6 +115,7 @@ geest/extlibs/*
 !geest/extlibs/.gitkeep
 PROMPT.log
 log.txt
+GEOE3.log
 claude.sh
 claude.out
 srs-gitignore/

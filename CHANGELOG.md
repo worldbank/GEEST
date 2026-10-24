@@ -223,6 +223,45 @@ version per the policy above.
   uses - bands are tested score-descending with matched cells dropped from
   consideration, so a cell already at its best possible score is never
   tested against a lower-scoring band again.
+- **`scripts/start_qgis.sh`/`start_qgis_ltr.sh` logged to `~/GEOE3.log`,**
+  away from wherever validation tests are actually run from. Logs now
+  write to `GEOE3.log` in the project folder instead, so they can be
+  tailed from the same place (`tail -f GEOE3.log`).
+- **Multi-buffer network analysis clipped the road network to the whole
+  study-area polygon instead of the points actually being analysed,**
+  wasting graph-build and traversal time on network nowhere near any
+  point whenever points were sparse relative to the area (the common
+  case). `_clip_network_to_area()` now clips to a dissolved buffer around
+  the points themselves - the isochrone computation only ever needed
+  network within `max(distances)` of an actual point, so this changes
+  nothing about the result, only how much irrelevant network gets
+  clipped and traversed to produce it.
+- **The animated throbber on a running tree item could silently freeze on
+  its last frame while the item was still computing.** `self.child_movie`/
+  `self.parent_movie` were a single shared pair of attributes rather than
+  tracked per item - with two items' start/stop events overlapping
+  (`concurrent_tasks` > 1, or just two sequential items racing),
+  `_stop_item_spinner()` could stop a *different*, still-running item's
+  movie instead of the one that actually finished. Spinners are now
+  tracked per item (keyed by guid), so starting/stopping one item's
+  animation can never affect another's.
+- **No spinner ever showed at all for a single-indicator factor** (e.g.
+  "Access to Public Transport", where its one indicator is promoted to
+  display in the hidden factor's place). `JsonTreeModel._findIndexByGuid()`
+  can locate a hidden item's own *children* but never the hidden item
+  itself, so looking up the hidden parent's own index always failed.
+  `on_workflow_started()` then unconditionally used that invalid index's
+  `rowHeight()` (a degenerate 0/-1) to scale the *child's own* spinner,
+  silently shrinking it to an invisible size even though it was genuinely
+  running. The lookup is now guarded so an unresolvable parent leaves the
+  child's own (already-correct) row height untouched.
+- **The tree panel kept resizing during analysis execution.** Its status
+  label (e.g. "Processing area 16/16") sat at a fixed 200px width inside
+  the same row as the two fixed-200px progress bars and several buttons
+  that hide/show as a run starts and stops - the row's required minimum
+  width jumped between "idle" and "running" states as those widgets
+  toggled visibility. The status label now has its own row, spanning the
+  full panel width, directly above the progress-bar row.
 - **Re-running or clearing a single indicator left its factor, dimension, and
   analysis still showing a stale "Completed successfully" with the old
   aggregate value.** Nothing ever told an ancestor its cached aggregate was
